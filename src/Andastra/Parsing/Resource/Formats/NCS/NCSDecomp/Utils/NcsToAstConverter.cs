@@ -1020,6 +1020,11 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp.Utils
             int convertedCount = 0;
             int nullCount = 0;
             int actionCount = 0;
+            // DEBUG: Log the range being processed
+            if (limit > 0 && limit == instructions.Count)
+            {
+                JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: Processing range {startIdx} to {limit - 1} (inclusive), last instruction index={instructions.Count - 1}, last instruction type={instructions[instructions.Count - 1]?.InsType}");
+            }
             for (int i = startIdx; i < limit; i++)
             {
                 if (instructions[i].InsType == NCSInstructionType.ACTION)
