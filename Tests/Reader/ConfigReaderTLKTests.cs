@@ -1,18 +1,18 @@
 using System;
 using System.IO;
 using System.Linq;
-using Andastra.Formats.Config;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Mods.TLK;
-using Andastra.Formats.Reader;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Mods.TLK;
+using Andastra.Parsing.Reader;
+using Andastra.Parsing.Resource;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Reader
+namespace Andastra.Parsing.Tests.Reader
 {
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace Andastra.Formats.Tests.Reader
 
         private void CreateTestTLKFile(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(Andastra.Formats.Language.English);
+            var tlk = new TLK(Andastra.Parsing.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);
@@ -103,7 +103,7 @@ namespace Andastra.Formats.Tests.Reader
 
         private void CreateTestTLKFileInModRoot(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(Andastra.Formats.Language.English);
+            var tlk = new TLK(Andastra.Parsing.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);

@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Config;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TwoDA;
+using Andastra.Parsing;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TwoDA;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>

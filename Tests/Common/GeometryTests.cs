@@ -1,10 +1,10 @@
 using System;
 using System.Numerics;
-using Andastra.Formats;
+using Andastra.Parsing;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Common
+namespace Andastra.Parsing.Tests.Common
 {
 
     /// <summary>

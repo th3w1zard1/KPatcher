@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using Andastra.Formats;
-using Andastra.Formats.Formats.ERF;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.ERF;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Core.Save;
 
 namespace Andastra.Runtime.Content.Save
@@ -977,14 +977,14 @@ namespace Andastra.Runtime.Content.Save
             {
                 // Use dynamic to call GetTable without referencing Odyssey.Kotor
                 dynamic gameDataManager = _gameDataManager;
-                Andastra.Formats.Formats.TwoDA.TwoDA partyTable = gameDataManager.GetTable("party");
+                Andastra.Parsing.Formats.TwoDA.TwoDA partyTable = gameDataManager.GetTable("party");
                 if (partyTable != null)
                 {
                     // Search party.2da for matching ResRef
                     // Row index in party.2da corresponds to member ID
                     for (int i = 0; i < partyTable.GetHeight(); i++)
                     {
-                        Andastra.Formats.Formats.TwoDA.TwoDARow row = partyTable.GetRow(i);
+                        Andastra.Parsing.Formats.TwoDA.TwoDARow row = partyTable.GetRow(i);
                         string rowLabel = row.Label();
                         
                         // Check exact match

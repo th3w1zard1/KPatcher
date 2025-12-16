@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Andastra.Formats.Script;
-using Andastra.Formats.Installation;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Common.Script;
+using Andastra.Parsing.Installation;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Content.Interfaces;
 using Andastra.Runtime.Scripting.Interfaces;
 using Andastra.Runtime.Scripting.Types;
@@ -195,7 +195,7 @@ namespace Andastra.Runtime.Scripting.VM
             // Fallback to CSharpKOTOR Installation provider
             else if (provider is Installation installation)
             {
-                Andastra.Formats.Installation.ResourceResult result = installation.Resource(resRef, ResourceType.NCS, null, null);
+                Andastra.Parsing.Installation.ResourceResult result = installation.Resource(resRef, ResourceType.NCS, null, null);
                 if (result != null && result.Data != null)
                 {
                     ncsBytes = result.Data;

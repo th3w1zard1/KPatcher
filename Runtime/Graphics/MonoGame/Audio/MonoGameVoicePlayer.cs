@@ -6,8 +6,8 @@ using Andastra.Runtime.Core.Dialogue;
 using Andastra.Runtime.Core.Interfaces;
 using Andastra.Runtime.Core.Interfaces.Components;
 using Andastra.Runtime.Content.Interfaces;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Formats.WAV;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Formats.WAV;
 
 namespace Andastra.Runtime.MonoGame.Audio
 {

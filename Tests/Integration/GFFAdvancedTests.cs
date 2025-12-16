@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Mods.GFF;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Mods.GFF;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -39,7 +39,7 @@ Label=InnerField
 Value=123
 Path=TestStruct
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Assert
             config.PatchesGFF.Should().Contain(p => p.SaveAs == "test.gff");
@@ -86,7 +86,7 @@ Value(strref)=100
 Value(lang0)=English text
 Value(lang2)=French text
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Act
             var gff = new GFF();
@@ -124,7 +124,7 @@ Label=InnerField
 Value=42
 Path=OuterStruct
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Act
             var gff = new GFF();
@@ -161,7 +161,7 @@ Path=ChildStruct/GrandChildField
 Label=GrandChildField
 Value=99
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Act - Python test only checks path resolution
             ModificationsGFF modifications = config.PatchesGFF.First(p => p.SaveAs == "test.gff");
@@ -204,7 +204,7 @@ Label=FieldInB
 Value=77
 Path=StructA\StructB
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Act
             var gff = new GFF();
@@ -234,7 +234,7 @@ Label=SentinelField
 Value=55
 Path=\ExistingStruct
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with existing struct
             var gff = new GFF();
@@ -266,7 +266,7 @@ FieldType=Byte
 Label=RootField
 Value=88
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Act
             var gff = new GFF();
@@ -295,7 +295,7 @@ Label=
 Path=ItemList
 TypeId=0
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with list
             var gff = new GFF();
@@ -322,7 +322,7 @@ File0=test.gff
 [test.gff]
 Level1\Level2\Level3\DeepField=999
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create deeply nested structure
             var gff = new GFF();
@@ -356,7 +356,7 @@ File0=test.gff
 [test.gff]
 ItemList\0\Tag=modified_tag
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with list containing a struct
             var gff = new GFF();
@@ -388,7 +388,7 @@ File0=test.gff
 [!FieldPath]
 Path=Nested\\Field
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with nested structure
             var gff = new GFF();
@@ -435,7 +435,7 @@ Label=Field3
 Value=3
 Path=TestStruct
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with struct
             var gff = new GFF();
@@ -470,7 +470,7 @@ FieldType=Byte
 Label=NewField
 Value=42
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
 
             // Create GFF with existing field
             var gff = new GFF();

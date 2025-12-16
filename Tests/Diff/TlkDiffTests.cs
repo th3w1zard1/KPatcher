@@ -1,9 +1,9 @@
-using Andastra.Formats.Diff;
-using Andastra.Formats.Formats.TLK;
+using Andastra.Parsing.Diff;
+using Andastra.Parsing.Formats.TLK;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Diff
+namespace Andastra.Parsing.Tests.Diff
 {
 
     /// <summary>

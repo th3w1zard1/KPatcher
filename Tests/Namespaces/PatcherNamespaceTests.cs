@@ -1,8 +1,8 @@
-using Andastra.Formats.Namespaces;
+using Andastra.Parsing.Namespaces;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Namespaces
+namespace Andastra.Parsing.Tests.Namespaces
 {
 
     /// <summary>

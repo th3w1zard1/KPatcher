@@ -1,8 +1,8 @@
-using Andastra.Formats.Config;
+using Andastra.Parsing.Config;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Config
+namespace Andastra.Parsing.Tests.Config
 {
 
     /// <summary>

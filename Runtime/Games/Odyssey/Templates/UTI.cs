@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Andastra.Formats;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
 
 namespace Andastra.Runtime.Engines.Odyssey.Templates
 {
-    // Moved from Andastra.Formats.Resource.Generics.UTI to Odyssey.Engines.Odyssey.Templates
+    // Moved from Andastra.Parsing.Resource.Generics.UTI to Odyssey.Engines.Odyssey.Templates
     // This is KOTOR/Odyssey-specific GFF template structure
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/uti.py:20
     /// <summary>

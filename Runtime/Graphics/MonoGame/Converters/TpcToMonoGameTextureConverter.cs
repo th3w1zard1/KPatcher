@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Andastra.Formats.Formats.TPC;
+using Andastra.Parsing.Formats.TPC;
 using JetBrains.Annotations;
 
 namespace Andastra.Runtime.MonoGame.Converters

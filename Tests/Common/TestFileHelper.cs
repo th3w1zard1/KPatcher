@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Andastra.Formats.Tests.Common
+namespace Andastra.Parsing.Tests.Common
 {
 
     internal static class TestFileHelper

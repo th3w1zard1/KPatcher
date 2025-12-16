@@ -1,12 +1,12 @@
-using Andastra.Formats;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TLK;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TLK;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Mods
+namespace Andastra.Parsing.Tests.Mods
 {
 
     /// <summary>

@@ -35,7 +35,7 @@ namespace Andastra.Runtime.MonoGame.Graphics
                 _renderer = new Odyssey.MonoGame.Rendering.EntityModelRenderer(
                     device,
                     gameDataManager as Odyssey.Kotor.Data.GameDataManager,
-                    installation as Andastra.Formats.Installation.Installation
+                    installation as Andastra.Parsing.Installation.Installation
                 );
             }
         }

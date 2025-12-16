@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
-using Andastra.Formats;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Content.Interfaces;
 using Andastra.Runtime.Core.Entities;
 using Andastra.Runtime.Core.Enums;

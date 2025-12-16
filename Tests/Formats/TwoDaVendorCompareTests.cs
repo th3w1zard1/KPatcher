@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Andastra.Formats.Formats.TwoDA;
+using Andastra.Parsing.Formats.TwoDA;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

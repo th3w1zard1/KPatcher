@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Andastra.Formats.Script;
+using Andastra.Parsing.Common.Script;
 using Andastra.Runtime.Core.Combat;
 using Andastra.Runtime.Core.Enums;
 using Andastra.Runtime.Core.Interfaces;
@@ -835,7 +835,7 @@ namespace Andastra.Runtime.Engines.Odyssey.EngineApi
                 // Located via string references: Party member creation from template
                 // Original implementation: Creates creature from UTC template and adds to available party members
                 // Get current module from ModuleLoader
-                Andastra.Formats.Module module = moduleLoader.GetCurrentModule();
+                Andastra.Parsing.Module module = moduleLoader.GetCurrentModule();
                 if (module != null)
                 {
                     // Get spawn position (use player position or default)

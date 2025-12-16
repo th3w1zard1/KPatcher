@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Andastra.Formats;
-using Andastra.Formats.Formats.NCS;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.NCS;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
     /// <summary>
     /// Granular tests for NCS roundtrip compilation/decompilation.

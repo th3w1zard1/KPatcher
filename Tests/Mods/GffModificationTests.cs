@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.GFF;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.GFF;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Mods
+namespace Andastra.Parsing.Tests.Mods
 {
 
     /// <summary>

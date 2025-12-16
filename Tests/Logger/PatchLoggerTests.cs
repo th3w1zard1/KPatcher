@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Andastra.Formats.Logger;
+using Andastra.Parsing.Logger;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Logger
+namespace Andastra.Parsing.Tests.Logger
 {
 
     /// <summary>

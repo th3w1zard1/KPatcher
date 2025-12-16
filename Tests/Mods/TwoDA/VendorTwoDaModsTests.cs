@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TwoDA;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TwoDA;
 using Xunit;
-using TwoDAFile = Andastra.Formats.Formats.TwoDA.TwoDA;
+using TwoDAFile = Andastra.Parsing.Formats.TwoDA.TwoDA;
 
-namespace Andastra.Formats.Tests.Mods.TwoDA
+namespace Andastra.Parsing.Tests.Mods.TwoDA
 {
 
     /// <summary>

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Andastra.Runtime.Content.Interfaces;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Resource;
 
 namespace Andastra.Runtime.MonoGame.Loading
 {

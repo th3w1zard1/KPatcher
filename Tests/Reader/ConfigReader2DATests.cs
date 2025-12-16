@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Andastra.Formats.Config;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Mods.TwoDA;
-using Andastra.Formats.Reader;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Mods.TwoDA;
+using Andastra.Parsing.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Reader
+namespace Andastra.Parsing.Tests.Reader
 {
 
     /// <summary>

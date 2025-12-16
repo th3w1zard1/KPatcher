@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.TwoDA.TwoDAAuto;
+using static Andastra.Parsing.Formats.TwoDA.TwoDAAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

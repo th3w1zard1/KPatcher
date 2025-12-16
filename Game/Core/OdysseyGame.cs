@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using JetBrains.Annotations;
-using Andastra.Formats;
-using Andastra.Formats.Formats.MDL;
-using Andastra.Formats.Installation;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.MDL;
+using Andastra.Parsing.Installation;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Core.Entities;
 using Andastra.Runtime.Core.Enums;
 using Andastra.Runtime.Core.Interfaces;
@@ -1283,7 +1283,7 @@ namespace Andastra.Runtime.Game.Core
                 if (!_roomMeshes.TryGetValue(room.ModelName, out meshData))
                 {
                     // Try to load actual MDL model from module resources
-                    Andastra.Formats.Formats.MDLData.MDL mdl = null;
+                    Andastra.Parsing.Formats.MDLData.MDL mdl = null;
                     if (_session != null && _session.CurrentRuntimeModule != null)
                     {
                         mdl = LoadMDLModel(room.ModelName);
@@ -1573,7 +1573,7 @@ namespace Andastra.Runtime.Game.Core
         /// Loads an MDL model from the current module.
         /// </summary>
         [CanBeNull]
-        private Andastra.Formats.Formats.MDLData.MDL LoadMDLModel(string modelResRef)
+        private Andastra.Parsing.Formats.MDLData.MDL LoadMDLModel(string modelResRef)
         {
             if (string.IsNullOrEmpty(modelResRef) || _session == null)
             {
@@ -2335,7 +2335,7 @@ namespace Andastra.Runtime.Game.Core
                 Console.WriteLine($"[Dialogue] Available replies: {e.State.AvailableReplies.Count}");
                 for (int i = 0; i < e.State.AvailableReplies.Count; i++)
                 {
-                    Andastra.Formats.Resource.Generics.DLG.DLGReply reply = e.State.AvailableReplies[i];
+                    Andastra.Parsing.Resource.Generics.DLG.DLGReply reply = e.State.AvailableReplies[i];
                     string replyText = _session.DialogueManager.GetNodeText(reply);
                     Console.WriteLine($"  [{i}] {replyText}");
                 }
@@ -2405,7 +2405,7 @@ namespace Andastra.Runtime.Game.Core
                 float replyY = dialogueBoxY + 80; // Below dialogue text
                 for (int i = 0; i < state.AvailableReplies.Count && i < 9; i++)
                 {
-                    Andastra.Formats.Resource.Generics.DLG.DLGReply reply = state.AvailableReplies[i];
+                    Andastra.Parsing.Resource.Generics.DLG.DLGReply reply = state.AvailableReplies[i];
                     string replyText = _session.DialogueManager.GetNodeText(reply);
                     if (string.IsNullOrEmpty(replyText))
                     {

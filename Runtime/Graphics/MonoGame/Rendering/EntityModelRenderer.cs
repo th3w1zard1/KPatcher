@@ -8,9 +8,9 @@ using Andastra.Runtime.Kotor.Components;
 using Andastra.Runtime.Kotor.Systems;
 using Andastra.Runtime.Kotor.Data;
 using Andastra.Runtime.MonoGame.Converters;
-using Andastra.Formats.Formats.MDLData;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Installation;
+using Andastra.Parsing.Formats.MDLData;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Installation;
 using JetBrains.Annotations;
 
 namespace Andastra.Runtime.MonoGame.Rendering
@@ -241,14 +241,14 @@ namespace Andastra.Runtime.MonoGame.Rendering
 
             try
             {
-                Andastra.Formats.Installation.ResourceResult result = _installation.Resources.LookupResource(modelResRef, Andastra.Formats.Resources.ResourceType.MDL);
+                Andastra.Parsing.Installation.ResourceResult result = _installation.Resources.LookupResource(modelResRef, Andastra.Parsing.Resources.ResourceType.MDL);
                 if (result == null || result.Data == null)
                 {
                     return null;
                 }
 
                 // Use CSharpKOTOR MDL parser
-                return Andastra.Formats.Formats.MDL.MDLAuto.ReadMdl(result.Data);
+                return Andastra.Parsing.Formats.MDL.MDLAuto.ReadMdl(result.Data);
             }
             catch (Exception ex)
             {

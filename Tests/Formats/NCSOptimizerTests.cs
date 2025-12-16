@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Andastra.Formats;
-using Andastra.Formats.Formats.NCS;
-using Andastra.Formats.Formats.NCS.Compiler;
-using Andastra.Formats.Formats.NCS.Optimizers;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.NCS;
+using Andastra.Parsing.Formats.NCS.Compiler;
+using Andastra.Parsing.Formats.NCS.Optimizers;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

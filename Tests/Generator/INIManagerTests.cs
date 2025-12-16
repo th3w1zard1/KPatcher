@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Andastra.Formats.TSLPatcher;
+using Andastra.Parsing.TSLPatcher;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Generator
+namespace Andastra.Parsing.Tests.Generator
 {
     /// <summary>
     /// Comprehensive tests for INIManager.

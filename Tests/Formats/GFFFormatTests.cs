@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.GFF.GFFAuto;
+using static Andastra.Parsing.Formats.GFF.GFFAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

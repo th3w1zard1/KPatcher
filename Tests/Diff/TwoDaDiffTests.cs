@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Andastra.Formats.Diff;
-using Andastra.Formats.Formats.TwoDA;
+using Andastra.Parsing.Diff;
+using Andastra.Parsing.Formats.TwoDA;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Diff
+namespace Andastra.Parsing.Tests.Diff
 {
 
     /// <summary>

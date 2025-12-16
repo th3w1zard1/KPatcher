@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Resource;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.TLK.TLKAuto;
+using static Andastra.Parsing.Formats.TLK.TLKAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

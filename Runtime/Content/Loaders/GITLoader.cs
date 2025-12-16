@@ -4,9 +4,9 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Content.Interfaces;
 
 namespace Andastra.Runtime.Content.Loaders
@@ -94,7 +94,7 @@ namespace Andastra.Runtime.Content.Loaders
         /// </summary>
         public async Task<GITData> LoadAsync(string areaResRef, CancellationToken ct = default(CancellationToken))
         {
-            var id = new Andastra.Formats.Resources.ResourceIdentifier(areaResRef, Andastra.Formats.Resources.ResourceType.GIT);
+            var id = new Andastra.Parsing.Resources.ResourceIdentifier(areaResRef, Andastra.Parsing.Resources.ResourceType.GIT);
             byte[] data = await _resourceProvider.GetResourceBytesAsync(id, ct);
             if (data == null)
             {

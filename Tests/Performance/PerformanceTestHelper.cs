@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Xunit.Abstractions;
 
-namespace Andastra.Formats.Tests.Performance
+namespace Andastra.Parsing.Tests.Performance
 {
     /// <summary>
     /// Helper class for performance testing with timeout enforcement and profiling.

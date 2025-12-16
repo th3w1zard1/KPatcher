@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using Andastra.Formats.Formats.ERF;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing.Formats.ERF;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.ERF.ERFAuto;
+using static Andastra.Parsing.Formats.ERF.ERFAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

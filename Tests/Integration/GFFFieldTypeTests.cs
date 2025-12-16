@@ -1,14 +1,14 @@
 using System.Linq;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Config;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
+using Andastra.Parsing;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>

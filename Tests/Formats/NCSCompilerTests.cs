@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Script;
-using Andastra.Formats.Formats.NCS;
-using Andastra.Formats.Formats.NCS.Compiler;
-using Andastra.Formats.Formats.NCS.Compiler.NSS;
+using Andastra.Parsing;
+using Andastra.Parsing.Common.Script;
+using Andastra.Parsing.Formats.NCS;
+using Andastra.Parsing.Formats.NCS.Compiler;
+using Andastra.Parsing.Formats.NCS.Compiler.NSS;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
     /// <summary>
     /// Tests for NSS to NCS compilation.
@@ -180,7 +180,7 @@ namespace Andastra.Formats.Tests.Formats
 
             // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tests/resource/formats/test_ncs.py:227
             // Original: self.assertRaises(CompileError, self.compile, script)
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace Andastra.Formats.Tests.Formats
 
             // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tests/resource/formats/test_ncs.py:239
             // Original: self.assertRaises(CompileError, self.compile, script)
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -2116,7 +2116,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -2139,7 +2139,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -2162,7 +2162,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -2185,7 +2185,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -2396,7 +2396,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4019,7 +4019,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         /// <summary>
@@ -4079,7 +4079,7 @@ namespace Andastra.Formats.Tests.Formats
             var so3 = argVals3[0];
             
             // Extract values - use field access via reflection to completely bypass property getter
-            var valueProp = typeof(Andastra.Formats.Formats.NCS.Compiler.StackObject).GetProperty("Value");
+            var valueProp = typeof(Andastra.Parsing.Formats.NCS.Compiler.StackObject).GetProperty("Value");
             object v1 = valueProp.GetValue(so1);
             object v2 = valueProp.GetValue(so2);
             object v3 = valueProp.GetValue(so3);
@@ -4646,7 +4646,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         /// <summary>
@@ -4674,7 +4674,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         /// <summary>
@@ -4702,7 +4702,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         /// <summary>
@@ -4728,7 +4728,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4747,7 +4747,7 @@ namespace Andastra.Formats.Tests.Formats
             void test();
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4770,7 +4770,7 @@ namespace Andastra.Formats.Tests.Formats
             void test();
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4793,7 +4793,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4816,7 +4816,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -4837,7 +4837,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(script));
         }
 
         /// <summary>
@@ -5040,7 +5040,7 @@ namespace Andastra.Formats.Tests.Formats
             }
         ";
 
-            Assert.Throws<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.Throws<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         #endregion
@@ -5296,7 +5296,7 @@ namespace Andastra.Formats.Tests.Formats
         ";
 
             // Python's assertRaises catches subclasses, so MissingIncludeError (which inherits from CompileError) should be caught
-            Assert.ThrowsAny<Andastra.Formats.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
+            Assert.ThrowsAny<Andastra.Parsing.Formats.NCS.Compiler.NSS.CompileError>(() => Compile(source));
         }
 
         /// <summary>
