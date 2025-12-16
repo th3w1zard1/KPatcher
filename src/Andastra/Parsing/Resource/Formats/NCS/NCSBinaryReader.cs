@@ -371,6 +371,37 @@ namespace Andastra.Parsing.Formats.NCS
                             // MOVSP with invalid qualifier - use MOVSP as fallback but preserve original qualifier
                             instruction.InsType = NCSInstructionType.MOVSP;
                         }
+                        else if (byteCode == NCSByteCode.LEQxx || byteCode == NCSByteCode.GEQxx || 
+                                 byteCode == NCSByteCode.GTxx || byteCode == NCSByteCode.LTxx ||
+                                 byteCode == NCSByteCode.EQUALxx || byteCode == NCSByteCode.NEQUALxx)
+                        {
+                            // Comparison operators with invalid qualifiers - use IntInt variant as fallback
+                            // This preserves the instruction semantics while allowing roundtrip
+                            if (byteCode == NCSByteCode.LEQxx)
+                            {
+                                instruction.InsType = NCSInstructionType.LEQII;
+                            }
+                            else if (byteCode == NCSByteCode.GEQxx)
+                            {
+                                instruction.InsType = NCSInstructionType.GEQII;
+                            }
+                            else if (byteCode == NCSByteCode.GTxx)
+                            {
+                                instruction.InsType = NCSInstructionType.GTII;
+                            }
+                            else if (byteCode == NCSByteCode.LTxx)
+                            {
+                                instruction.InsType = NCSInstructionType.LTII;
+                            }
+                            else if (byteCode == NCSByteCode.EQUALxx)
+                            {
+                                instruction.InsType = NCSInstructionType.EQUALII;
+                            }
+                            else if (byteCode == NCSByteCode.NEQUALxx)
+                            {
+                                instruction.InsType = NCSInstructionType.NEQUALII;
+                            }
+                        }
                         else
                         {
                             // For other bytecodes, we need to handle them case by case
