@@ -366,6 +366,11 @@ namespace Andastra.Parsing.Formats.NCS
                         {
                             instruction.InsType = NCSInstructionType.LOGANDII;
                         }
+                        else if (byteCode == NCSByteCode.MOVSP)
+                        {
+                            // MOVSP with invalid qualifier - use MOVSP as fallback but preserve original qualifier
+                            instruction.InsType = NCSInstructionType.MOVSP;
+                        }
                         else
                         {
                             // For other bytecodes, we need to handle them case by case
