@@ -20,5 +20,27 @@
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Andastra.Runtime.Core.csproj" />
+    <ProjectReference Include="..\Content\Andastra.Runtime.Content.csproj" />
+    <ProjectReference Include="..\..\Formats\Andastra.Formats.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Enums\**\*.cs" />
+    <Compile Include="Backends\**\*.cs" />
+    <Compile Include="Interfaces\**\*.cs" />
+    <Compile Include="Structs\**\*.cs" />
+    <Compile Include="Rendering\**\*.cs" />
+    <Compile Include="Effects\**\*.cs" />
+    <Compile Include="PostProcessing\**\*.cs" />
+    <Compile Include="Raytracing\**\*.cs" />
+    <Compile Include="Remix\**\*.cs" />
+    <Compile Include="Upscaling\**\*.cs" />
+    <Compile Remove="MonoGame\**" />
+    <Compile Remove="Stride\**" />
+    <None Remove="MonoGame\**" />
+    <None Remove="Stride\**" />
+  </ItemGroup>
 
 </Project>
