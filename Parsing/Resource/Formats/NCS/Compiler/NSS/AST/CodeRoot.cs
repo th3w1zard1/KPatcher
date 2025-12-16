@@ -102,7 +102,7 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
                 .Concat(Objects.OfType<StructDefinition>())
                 .ToList();
             List<TopLevelObject> others = Objects.Where(obj => !included.Contains(obj) && !scriptGlobals.Contains(obj)).ToList();
-            
+
             // The external compiler (nwnnsscomp) always places the entry stub at the BEGINNING (index 0)
             // When there are globals: JSR jumps to first global, RETN, then globals, SAVEBP, then RESTOREBP, MOVSP, RETN after SAVEBP
             // When there are no globals: JSR jumps to main, RETN
@@ -131,7 +131,7 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
                 }
                 ncs.Add(NCSInstructionType.SAVEBP, new List<object>());
             }
-            
+
             // Compile functions
             foreach (TopLevelObject obj in others)
             {
@@ -159,14 +159,14 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
             {
                 NCSInstruction mainStart = FirstNonNop(FunctionMap["main"].Instruction, ncs);
                 FunctionMap["main"] = new FunctionReference(mainStart, FunctionMap["main"].Definition);
-                
+
                 // The external compiler (nwnnsscomp) always places entry stub at BEGINNING (index 0)
                 // Insert RETN first, then JSR at the same index, so JSR comes first in final order
                 NCSInstruction entryJsrTarget = hasGlobals ? (firstGlobalInstruction ?? mainStart) : mainStart;
                 ncs.Add(NCSInstructionType.RETN, new List<object>(), null, 0);
                 NCSInstruction entryJsr = ncs.Add(NCSInstructionType.JSR, new List<object>(), entryJsrTarget, 0);
                 entryJsr.Jump = entryJsrTarget;
-                
+
                 if (hasGlobals)
                 {
                     // After SAVEBP, the external compiler adds: JSR (to main), RESTOREBP, MOVSP, RETN
@@ -551,36 +551,36 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
         {
             switch (DataType.Builtin)
             {
-                case Script.DataType.Int:
+                case Common.Script.DataType.Int:
                     ncs.Add(NCSInstructionType.RSADDI, new List<object>());
                     break;
-                case Script.DataType.Float:
+                case Common.Script.DataType.Float:
                     ncs.Add(NCSInstructionType.RSADDF, new List<object>());
                     break;
-                case Script.DataType.String:
+                case Common.Script.DataType.String:
                     ncs.Add(NCSInstructionType.RSADDS, new List<object>());
                     break;
-                case Script.DataType.Object:
+                case Common.Script.DataType.Object:
                     ncs.Add(NCSInstructionType.RSADDO, new List<object>());
                     break;
-                case Script.DataType.Event:
+                case Common.Script.DataType.Event:
                     ncs.Add(NCSInstructionType.RSADDEVT, new List<object>());
                     break;
-                case Script.DataType.Effect:
+                case Common.Script.DataType.Effect:
                     ncs.Add(NCSInstructionType.RSADDEFF, new List<object>());
                     break;
-                case Script.DataType.Location:
+                case Common.Script.DataType.Location:
                     ncs.Add(NCSInstructionType.RSADDLOC, new List<object>());
                     break;
-                case Script.DataType.Talent:
+                case Common.Script.DataType.Talent:
                     ncs.Add(NCSInstructionType.RSADDTAL, new List<object>());
                     break;
-                case Script.DataType.Vector:
+                case Common.Script.DataType.Vector:
                     ncs.Add(NCSInstructionType.RSADDF, new List<object>());
                     ncs.Add(NCSInstructionType.RSADDF, new List<object>());
                     ncs.Add(NCSInstructionType.RSADDF, new List<object>());
                     break;
-                case Script.DataType.Struct:
+                case Common.Script.DataType.Struct:
                     // Can be null if struct not found
                     if (DataType.Struct != null && root.StructMap.TryGetValue(DataType.Struct, out Struct structDef))
                     {

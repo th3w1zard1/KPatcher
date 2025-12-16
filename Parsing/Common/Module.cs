@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing.Extract;
+using Andastra.Parsing.Extract.Capsule;
 using Andastra.Parsing.Formats.Capsule;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Formats.MDLData;

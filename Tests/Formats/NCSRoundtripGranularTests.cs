@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.NCS;
 using FluentAssertions;
 using Xunit;

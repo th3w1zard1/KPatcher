@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.Capsule;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
 using Andastra.Parsing.Mods;
-using Andastra.Parsing.Patcher;
+using Andastra.Parsing.TSLPatcher;
 using Andastra.Parsing.Resource;
 using Moq;
 using Xunit;

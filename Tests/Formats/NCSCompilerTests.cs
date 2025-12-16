@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Common.Script;
 using Andastra.Parsing.Formats.NCS;
 using Andastra.Parsing.Formats.NCS.Compiler;

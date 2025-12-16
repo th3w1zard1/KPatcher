@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using FluentAssertions;
 using Xunit;
 
