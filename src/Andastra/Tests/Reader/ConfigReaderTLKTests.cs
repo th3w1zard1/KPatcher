@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Config;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Logger;
@@ -91,7 +93,7 @@ namespace Andastra.Parsing.Tests.Reader
 
         private void CreateTestTLKFile(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(Andastra.Parsing.Language.English);
+            var tlk = new TLK(Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);
@@ -103,7 +105,7 @@ namespace Andastra.Parsing.Tests.Reader
 
         private void CreateTestTLKFileInModRoot(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(Andastra.Parsing.Language.English);
+            var tlk = new TLK(Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);

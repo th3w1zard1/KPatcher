@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.NCS;
 using Andastra.Parsing.Formats.NCS.NCSDecomp;
 using IOException = Andastra.Parsing.Formats.NCS.NCSDecomp.IOException;

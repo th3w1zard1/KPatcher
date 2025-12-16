@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Resource;
 using FluentAssertions;

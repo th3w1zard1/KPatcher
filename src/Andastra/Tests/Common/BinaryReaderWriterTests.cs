@@ -33,26 +33,26 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestRead()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadUInt8().Should().Be(1);
             reader1.ReadUInt16().Should().Be(2);
             reader1.ReadUInt32().Should().Be(3u);
             reader1.ReadUInt64().Should().Be(4ul);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.ReadUInt32().Should().Be(3u);
             reader1b.ReadUInt64().Should().Be(4ul);
 
-            var reader2 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data2);
+            var reader2 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data2);
             reader2.ReadString(10).Should().Be("helloworld");
 
-            var reader3 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data3);
+            var reader3 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data3);
             reader3.ReadInt8().Should().Be(-1);
             reader3.ReadInt16().Should().Be(-2);
             reader3.ReadInt32().Should().Be(-3);
             reader3.ReadInt64().Should().Be(-4);
 
-            var reader4 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data4);
+            var reader4 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data4);
             reader4.ReadSingle().Should().BeApproximately(-123.456f, 0.001f);
             reader4.ReadDouble().Should().BeApproximately(123.457, 0.001);
         }
@@ -60,15 +60,15 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestSize()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadBytes(4);
             reader1.Size.Should().Be(15);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.ReadBytes(4);
             reader1b.Size.Should().Be(12);  // Size returns size from offset
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3, size: 4);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3, size: 4);
             reader1c.ReadBytes(1);
             reader1c.Size.Should().Be(4);  // Size returns specified size
         }
@@ -76,17 +76,17 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestPosition()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadBytes(3);
             reader1.ReadBytes(3);
             reader1.Position.Should().Be(6);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.ReadBytes(1);
             reader1b.ReadBytes(2);
             reader1b.Position.Should().Be(3);  // Position is relative to offset
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1c.ReadBytes(1);
             reader1c.ReadBytes(2);
             reader1c.Position.Should().Be(3);  // Position is relative to offset
@@ -95,19 +95,19 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestSeek()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadBytes(4);
             reader1.Seek(7);
             reader1.Position.Should().Be(7);
             reader1.ReadUInt64().Should().Be(4ul);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.ReadBytes(3);
             reader1b.Seek(4);
             reader1b.Position.Should().Be(4);
             reader1b.ReadUInt32().Should().Be(4u);
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1c.ReadBytes(3);
             reader1c.Seek(2);
             reader1c.Position.Should().Be(2);
@@ -117,17 +117,17 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestSkip()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadUInt32();
             reader1.Skip(2);
             reader1.Skip(1);
             reader1.ReadUInt64().Should().Be(4ul);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.Skip(4);
             reader1b.ReadUInt64().Should().Be(4ul);
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1c.Skip(2);
             reader1c.ReadUInt16().Should().Be(0);
         }
@@ -135,17 +135,17 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestRemaining()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.ReadUInt32();
             reader1.Skip(2);
             reader1.Skip(1);
             reader1.Remaining.Should().Be(8);
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.ReadUInt32();
             reader1b.Remaining.Should().Be(8);
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3, size: 12);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3, size: 12);
             reader1c.ReadUInt16();
             reader1c.Remaining.Should().Be(10);
         }
@@ -153,15 +153,15 @@ namespace Andastra.Parsing.Tests.Common
         [Fact(Timeout = 120000)] // 2 minutes timeout
         public void TestPeek()
         {
-            var reader1 = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
+            var reader1 = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1);
             reader1.Skip(3);
             reader1.Peek(1).Should().Equal(new byte[] { 0x03 });
 
-            var reader1b = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1b = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1b.Skip(4);
             reader1b.Peek(1).Should().Equal(new byte[] { 0x04 });
 
-            var reader1c = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
+            var reader1c = Andastra.Parsing.Common.RawBinaryReader.FromBytes(_data1, offset: 3);
             reader1c.Peek(1).Should().Equal(new byte[] { 0x03 });
         }
     }
@@ -178,7 +178,7 @@ namespace Andastra.Parsing.Tests.Common
         public void TestSeekIgnoreAndTellInLittleEndianStream()
         {
             byte[] inputData = Encoding.ASCII.GetBytes("Hello, world!\0");
-            var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
+            var reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
             int expectedPos = 7;
 
             reader.Seek(5);
@@ -206,7 +206,7 @@ namespace Andastra.Parsing.Tests.Common
             ms.Write(new byte[] { 0x01, 0x02, 0x03, 0x04 }, 0, 4);  // bytes
 
             byte[] inputData = ms.ToArray();
-            var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
+            var reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
 
             byte expectedByte = 255;
             ushort expectedUint16 = 65281;
@@ -262,7 +262,7 @@ namespace Andastra.Parsing.Tests.Common
             ms.Write(new byte[] { 0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0, 8);  // double
 
             byte[] inputData = ms.ToArray();
-            var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
+            var reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(inputData);
 
             ushort expectedUint16 = 65281;
             uint expectedUint32 = 4294967042;
