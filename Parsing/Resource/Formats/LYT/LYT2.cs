@@ -44,7 +44,7 @@ namespace Andastra.Parsing.Formats.LYT
             {
                 return null;
             }
-            return Rooms.OrderBy(room => (room.Position - position).Magnitude()).First();
+            return Rooms.OrderBy(room => (room.Position - position).Length()).First();
         }
 
         public override bool Equals(object obj)

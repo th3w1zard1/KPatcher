@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.NCSDecomp.SyntaxHighlighting
 {
@@ -119,4 +120,3 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp.SyntaxHighlighting
         }
     }
 }
-

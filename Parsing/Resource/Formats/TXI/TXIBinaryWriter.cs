@@ -5,6 +5,7 @@ using System.Text;
 using System.Globalization;
 using System.Collections.Generic;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TXI
 {
@@ -125,4 +126,3 @@ namespace Andastra.Parsing.Formats.TXI
         }
     }
 }
-

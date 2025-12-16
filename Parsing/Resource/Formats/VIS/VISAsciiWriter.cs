@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.VIS;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.VIS
 {
@@ -65,4 +66,3 @@ namespace Andastra.Parsing.Formats.VIS
         }
     }
 }
-

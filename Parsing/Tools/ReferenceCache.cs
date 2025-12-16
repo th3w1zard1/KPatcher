@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Andastra.Parsing;
 using Andastra.Parsing.Extract;
+using Andastra.Parsing.Extract.Capsule;
 using Andastra.Parsing.Formats.Capsule;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Formats.SSF;
@@ -12,6 +13,7 @@ using Andastra.Parsing.Installation;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {
@@ -1221,4 +1223,3 @@ namespace Andastra.Parsing.Tools
         }
     }
 }
-

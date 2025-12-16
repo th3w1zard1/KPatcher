@@ -8,6 +8,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.NCS;
 using Andastra.Parsing.Logger;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.Compiler
 {

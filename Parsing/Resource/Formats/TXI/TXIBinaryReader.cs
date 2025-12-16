@@ -18,21 +18,21 @@ namespace Andastra.Parsing.Formats.TXI
         public TXIBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
             _txi = new TXI();
         }
 
         public TXIBinaryReader(string filepath, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
             _txi = new TXI();
         }
 
         public TXIBinaryReader(Stream source, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
             _txi = new TXI();
         }
 

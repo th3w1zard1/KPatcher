@@ -5,6 +5,7 @@ using Andastra.Parsing.Formats.MDLData;
 using Andastra.Parsing.Formats.TPC;
 using Andastra.Parsing.Formats.WAV;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {
@@ -112,4 +113,3 @@ namespace Andastra.Parsing.Tools
         }
     }
 }
-

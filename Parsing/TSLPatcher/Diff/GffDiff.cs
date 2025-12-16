@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Andastra.Parsing.Formats.GFF;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Diff
 {
@@ -267,4 +268,3 @@ namespace Andastra.Parsing.Diff
         }
     }
 }
-

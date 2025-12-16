@@ -29,7 +29,7 @@ namespace Andastra.Utility.Geometry
             set => _points[index] = value;
         }
 
-        public static Polygon2 FromPolygon3(Andastra.Parsing.Polygon3 poly3)
+        public static Polygon2 FromPolygon3(Polygon3 poly3)
         {
             Polygon2 poly2 = new Polygon2();
             foreach (Vector3 point in poly3)

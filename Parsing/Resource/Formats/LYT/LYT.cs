@@ -7,6 +7,7 @@ using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
 using Vector3 = System.Numerics.Vector3;
 using Quaternion = Andastra.Utility.Geometry.Quaternion;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Formats.LYT
 {
@@ -133,6 +134,6 @@ namespace Andastra.Parsing.Resource.Formats.LYT
         public string Room { get; set; }
         public string Door { get; set; }
         public Vector3 Position { get; set; }
-        public Andastra.Parsing.Quaternion Orientation { get; set; }
+        public Quaternion Orientation { get; set; }
     }
 }

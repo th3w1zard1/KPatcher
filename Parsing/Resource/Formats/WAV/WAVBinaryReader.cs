@@ -14,19 +14,19 @@ namespace Andastra.Parsing.Formats.WAV
         public WAVBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
         }
 
         public WAVBinaryReader(string filepath, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
         }
 
         public WAVBinaryReader(Stream source, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
         }
 
         // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/wav/io_wav.py:71-110
@@ -78,7 +78,7 @@ namespace Andastra.Parsing.Formats.WAV
         private WAV ParseRiffWave(byte[] data, WAVType wavType)
         {
             using (var ms = new MemoryStream(data))
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(ms))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(ms))
             {
                 // Read RIFF header
                 byte[] riffTag = reader.ReadBytes(4);

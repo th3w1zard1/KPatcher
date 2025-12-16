@@ -6,6 +6,7 @@ using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Mods.TLK
 {

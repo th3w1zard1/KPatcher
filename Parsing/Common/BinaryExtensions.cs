@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -170,4 +171,3 @@ namespace Andastra.Parsing.Common
         }
     }
 }
-

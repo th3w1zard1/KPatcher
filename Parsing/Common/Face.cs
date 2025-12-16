@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -100,4 +101,3 @@ namespace Andastra.Parsing.Common
         }
     }
 }
-

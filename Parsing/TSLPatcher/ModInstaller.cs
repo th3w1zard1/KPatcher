@@ -23,6 +23,7 @@ using Andastra.Parsing.Reader;
 using Andastra.Parsing.Resource;
 using IniParser.Model;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.TSLPatcher
 {
@@ -737,7 +738,7 @@ namespace Andastra.Parsing.TSLPatcher
         private static byte[] LoadResourceFile(string sourcePath)
         {
             // Python: with BinaryReader.from_auto(source) as reader: return reader.read_all()
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(sourcePath))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(sourcePath))
             {
                 return reader.ReadAll();
             }

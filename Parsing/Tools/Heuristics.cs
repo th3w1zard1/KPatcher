@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {

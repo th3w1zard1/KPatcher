@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Andastra.Parsing;
+using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -23,7 +25,7 @@ namespace Andastra.Parsing.Resource.Generics
     {
         // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/utc.py:18
         // Original: BINARY_TYPE = ResourceType.UTC
-        public static readonly Resources.ResourceType BinaryType = Resources.ResourceType.UTC;
+        public static readonly ResourceType BinaryType = ResourceType.UTC;
 
         // Internal use only, to preserve original order
         private readonly Dictionary<int, int> _originalFeatMapping = new Dictionary<int, int>();

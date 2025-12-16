@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.LIP;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.LIP
 {
@@ -72,4 +73,3 @@ namespace Andastra.Parsing.Formats.LIP
         }
     }
 }
-

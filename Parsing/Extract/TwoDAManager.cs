@@ -4,6 +4,7 @@ using System.IO;
 using Andastra.Parsing.Formats.TwoDA;
 using Andastra.Parsing.Installation;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Extract
 {
@@ -88,4 +89,3 @@ namespace Andastra.Parsing.Extract
         }
     }
 }
-

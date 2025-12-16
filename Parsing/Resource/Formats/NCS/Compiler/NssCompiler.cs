@@ -7,6 +7,7 @@ using Andastra.Parsing.Formats.NCS;
 using Andastra.Parsing.Formats.NCS.Compiler.NSS;
 using Andastra.Parsing.Formats.NCS.Optimizers;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.Compiler
 {

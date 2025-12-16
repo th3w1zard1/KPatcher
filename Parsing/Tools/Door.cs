@@ -9,6 +9,7 @@ using Andastra.Parsing.Logger;
 using Andastra.Parsing.Resource.Generics;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {
@@ -513,4 +514,3 @@ namespace Andastra.Parsing.Tools
         }
     }
 }
-

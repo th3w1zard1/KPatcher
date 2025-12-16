@@ -5,6 +5,7 @@ using System.Linq;
 using Andastra.Parsing;
 using Andastra.Parsing.Common;
 using Andastra.Parsing.Extract;
+using Andastra.Parsing.Extract.Capsule;
 using Andastra.Parsing.Formats.Capsule;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;

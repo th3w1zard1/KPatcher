@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using Andastra.Parsing;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.KEY
 {
@@ -11,24 +12,24 @@ namespace Andastra.Parsing.Formats.KEY
     public class KEYBinaryWriter : IDisposable
     {
         private readonly KEY _key;
-        private readonly RawBinaryWriter _writer;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _writer;
 
         public KEYBinaryWriter(KEY key, string filepath)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _writer = RawBinaryWriter.ToFile(filepath);
+            _writer = Andastra.Parsing.Common.RawBinaryWriter.ToFile(filepath);
         }
 
         public KEYBinaryWriter(KEY key, Stream target)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _writer = RawBinaryWriter.ToStream(target);
+            _writer = Andastra.Parsing.Common.RawBinaryWriter.ToStream(target);
         }
 
         public KEYBinaryWriter(KEY key)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _writer = RawBinaryWriter.ToByteArray();
+            _writer = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
         }
 
         public void Write(bool autoClose = true)
@@ -108,4 +109,3 @@ namespace Andastra.Parsing.Formats.KEY
         }
     }
 }
-

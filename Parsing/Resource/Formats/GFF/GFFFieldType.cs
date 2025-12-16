@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.GFF
 {
@@ -88,4 +89,3 @@ namespace Andastra.Parsing.Formats.GFF
         }
     }
 }
-

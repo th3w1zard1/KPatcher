@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Andastra.Parsing;
 using BinaryWriter = System.IO.BinaryWriter;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TLK
 {
@@ -146,4 +147,3 @@ namespace Andastra.Parsing.Formats.TLK
         }
     }
 }
-

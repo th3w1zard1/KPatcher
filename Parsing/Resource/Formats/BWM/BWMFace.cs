@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.BWM
 {
@@ -35,4 +36,3 @@ namespace Andastra.Parsing.Formats.BWM
         }
     }
 }
-

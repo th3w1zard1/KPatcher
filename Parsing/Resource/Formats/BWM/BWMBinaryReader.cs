@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.BWM;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.BWM
 {
@@ -17,19 +18,19 @@ namespace Andastra.Parsing.Formats.BWM
         public BWMBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
         }
 
         public BWMBinaryReader(string filepath, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
         }
 
         public BWMBinaryReader(Stream source, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
         }
 
         // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/bwm/io_bwm.py:84-182
@@ -149,4 +150,3 @@ namespace Andastra.Parsing.Formats.BWM
         }
     }
 }
-

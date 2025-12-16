@@ -1,4 +1,5 @@
 using System;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.MDL
 {
@@ -236,4 +237,3 @@ namespace Andastra.Parsing.Formats.MDL
         TRAIL = 0x0004
     }
 }
-

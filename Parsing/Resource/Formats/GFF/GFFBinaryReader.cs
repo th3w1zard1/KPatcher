@@ -5,6 +5,7 @@ using System.Text;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.GFF
 {
@@ -306,4 +307,3 @@ namespace Andastra.Parsing.Formats.GFF
         }
     }
 }
-

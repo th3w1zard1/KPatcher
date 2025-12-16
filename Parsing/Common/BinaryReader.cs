@@ -3,6 +3,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -854,4 +855,3 @@ namespace Andastra.Parsing.Common
         }
     }
 }
-

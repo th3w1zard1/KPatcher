@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.GFF
 {
@@ -143,4 +144,3 @@ namespace Andastra.Parsing.Formats.GFF
         }
     }
 }
-

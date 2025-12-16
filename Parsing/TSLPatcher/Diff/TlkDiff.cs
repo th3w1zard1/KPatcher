@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Andastra.Parsing.Formats.TLK;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Diff
 {
@@ -66,4 +67,3 @@ namespace Andastra.Parsing.Diff
         }
     }
 }
-

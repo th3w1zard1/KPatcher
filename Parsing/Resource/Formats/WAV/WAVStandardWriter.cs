@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.WAV;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.WAV
 {
@@ -85,4 +86,3 @@ namespace Andastra.Parsing.Formats.WAV
         }
     }
 }
-

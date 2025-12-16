@@ -16,6 +16,7 @@ using Andastra.Parsing.Resource.Generics;
 using Andastra.Parsing.Resource;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {
@@ -267,4 +268,3 @@ namespace Andastra.Parsing.Tools
         }
     }
 }
-

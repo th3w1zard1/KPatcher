@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.GFF
 {
@@ -16,11 +17,11 @@ namespace Andastra.Parsing.Formats.GFF
     public class GFFBinaryWriter
     {
         private readonly GFF _gff;
-        private readonly Andastra.Parsing.RawBinaryWriter _structWriter;
-        private readonly Andastra.Parsing.RawBinaryWriter _fieldWriter;
-        private readonly Andastra.Parsing.RawBinaryWriter _fieldDataWriter;
-        private readonly Andastra.Parsing.RawBinaryWriter _fieldIndicesWriter;
-        private readonly Andastra.Parsing.RawBinaryWriter _listIndicesWriter;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _structWriter;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _fieldWriter;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _fieldDataWriter;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _fieldIndicesWriter;
+        private readonly Andastra.Parsing.Common.RawBinaryWriter _listIndicesWriter;
         private readonly List<string> _labels = new List<string>();
         private int _structCount = 0;
         private int _fieldCount = 0;
@@ -42,11 +43,11 @@ namespace Andastra.Parsing.Formats.GFF
         public GFFBinaryWriter(GFF gff)
         {
             _gff = gff;
-            _structWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray();
-            _fieldWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray();
-            _fieldDataWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray();
-            _fieldIndicesWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray();
-            _listIndicesWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray();
+            _structWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
+            _fieldWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
+            _fieldDataWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
+            _fieldIndicesWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
+            _listIndicesWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray();
         }
 
         public byte[] Write()
@@ -69,7 +70,7 @@ namespace Andastra.Parsing.Formats.GFF
             int listIndicesCount = _listIndicesWriter.Size();
 
             // Write the file using RawBinaryWriter for consistency
-            using (var fileWriter = Andastra.Parsing.RawBinaryWriter.ToByteArray())
+            using (var fileWriter = Andastra.Parsing.Common.RawBinaryWriter.ToByteArray())
             {
                 // Write header
                 fileWriter.WriteBytes(Encoding.ASCII.GetBytes(_gff.Content.ToFourCC()));
@@ -313,4 +314,3 @@ namespace Andastra.Parsing.Formats.GFF
         }
     }
 }
-

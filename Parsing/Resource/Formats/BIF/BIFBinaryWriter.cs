@@ -4,6 +4,7 @@ using System.Text;
 using Andastra.Parsing;
 using Andastra.Utility.LZMA;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Formats.BIF
 {
@@ -126,4 +127,3 @@ namespace Andastra.Parsing.Resource.Formats.BIF
         }
     }
 }
-

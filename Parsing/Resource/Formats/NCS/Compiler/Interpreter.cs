@@ -5,6 +5,7 @@ using System.Linq;
 using Andastra.Parsing;
 using Andastra.Parsing.Common.Script;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.Compiler
 {
@@ -864,4 +865,3 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
         }
     }
 }
-
