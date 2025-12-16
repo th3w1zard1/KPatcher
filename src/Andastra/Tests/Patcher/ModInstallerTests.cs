@@ -1,16 +1,16 @@
 using System;
 using System.IO;
-using Andastra.Formats;
-using Andastra.Formats.Formats.Capsule;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods;
-using Andastra.Formats.Patcher;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.Capsule;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods;
+using Andastra.Parsing.Patcher;
+using Andastra.Parsing.Resource;
 using Moq;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Patcher
+namespace Andastra.Parsing.Tests.Patcher
 {
 
     /// <summary>

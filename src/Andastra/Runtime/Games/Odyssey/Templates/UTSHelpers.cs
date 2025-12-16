@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resources;
-using static Andastra.Formats.GameExtensions;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource;
+using static Andastra.Parsing.Common.GameExtensions;
 
 namespace Andastra.Runtime.Engines.Odyssey.Templates
 {
-    // Moved from Andastra.Formats.Resource.Generics.UTSHelpers to Odyssey.Engines.Odyssey.Templates
+    // Moved from Andastra.Parsing.Resource.Generics.UTSHelpers to Odyssey.Engines.Odyssey.Templates
     // This is KOTOR/Odyssey-specific GFF template helper functions
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/uts.py
     // Original: construct_uts and dismantle_uts functions

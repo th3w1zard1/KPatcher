@@ -1,11 +1,11 @@
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resources;
-using static Andastra.Formats.GameExtensions;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource;
+using static Andastra.Parsing.Common.GameExtensions;
 
 namespace Andastra.Runtime.Engines.Odyssey.Templates
 {
-    // Moved from Andastra.Formats.Resource.Generics.UTWHelpers to Odyssey.Engines.Odyssey.Templates
+    // Moved from Andastra.Parsing.Resource.Generics.UTWHelpers to Odyssey.Engines.Odyssey.Templates
     // This is KOTOR/Odyssey-specific GFF template helper functions
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/utw.py:110-152
     // Original: construct_utw and dismantle_utw functions

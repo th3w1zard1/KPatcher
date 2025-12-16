@@ -1,9 +1,9 @@
-using Andastra.Formats;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.GFF;
+using Andastra.Parsing;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.GFF;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Memory
+namespace Andastra.Parsing.Tests.Memory
 {
 
     /// <summary>

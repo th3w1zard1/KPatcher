@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using Andastra.Formats.Formats.RIM;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing.Formats.RIM;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.RIM.RIMAuto;
+using static Andastra.Parsing.Formats.RIM.RIMAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

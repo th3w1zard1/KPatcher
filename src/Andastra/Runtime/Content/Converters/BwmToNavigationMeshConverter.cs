@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Andastra.Formats.Formats.BWM;
+using Andastra.Parsing.Formats.BWM;
 using Andastra.Runtime.Core.Navigation;
 
 namespace Andastra.Runtime.Content.Converters

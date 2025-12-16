@@ -1,5 +1,5 @@
 using System.IO;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Resource;
 
 namespace Andastra.Runtime.Content.Interfaces
 {

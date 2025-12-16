@@ -4,26 +4,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Formats.SSF;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Resources;
-using TLKAuto = Andastra.Formats.Formats.TLK.TLKAuto;
-using TwoDAAuto = Andastra.Formats.Formats.TwoDA.TwoDAAuto;
-using GFFAuto = Andastra.Formats.Formats.GFF.GFFAuto;
-using SSFAuto = Andastra.Formats.Formats.SSF.SSFAuto;
-using Andastra.Formats.Mods;
-using Andastra.Formats.Mods.GFF;
-using Andastra.Formats.Mods.SSF;
-using Andastra.Formats.Mods.TLK;
-using Andastra.Formats.Mods.TwoDA;
-using Andastra.Formats.TSLPatcher;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Formats.SSF;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Resource;
+using TLKAuto = Andastra.Parsing.Formats.TLK.TLKAuto;
+using TwoDAAuto = Andastra.Parsing.Formats.TwoDA.TwoDAAuto;
+using GFFAuto = Andastra.Parsing.Formats.GFF.GFFAuto;
+using SSFAuto = Andastra.Parsing.Formats.SSF.SSFAuto;
+using Andastra.Parsing.Mods;
+using Andastra.Parsing.Mods.GFF;
+using Andastra.Parsing.Mods.SSF;
+using Andastra.Parsing.Mods.TLK;
+using Andastra.Parsing.Mods.TwoDA;
+using Andastra.Parsing.TSLPatcher;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Generator
+namespace Andastra.Parsing.Tests.Generator
 {
     /// <summary>
     /// Comprehensive tests for IncrementalTSLPatchDataWriter.
@@ -165,7 +165,7 @@ namespace Andastra.Formats.Tests.Generator
             // Create test SSF data
             var ssf = new SSF();
             var ssfPath = Path.Combine(_tempDir, "temp.ssf");
-            SSFAuto.WriteSsf(ssf, ssfPath, Andastra.Formats.Resources.ResourceType.SSF);
+            SSFAuto.WriteSsf(ssf, ssfPath, Andastra.Parsing.Resources.ResourceType.SSF);
             var ssfData = File.ReadAllBytes(ssfPath);
 
             // Act

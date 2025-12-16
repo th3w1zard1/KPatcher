@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Uninstall;
+using Andastra.Parsing;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Uninstall;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Uninstall
+namespace Andastra.Parsing.Tests.Uninstall
 {
 
     /// <summary>

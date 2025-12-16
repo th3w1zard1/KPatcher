@@ -1,16 +1,16 @@
 // Comprehensive tests for InstallFolderDeterminer
 // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/tslpatcher/diff/generator.py:1212-1236
 using System.Collections.Generic;
-using Andastra.Formats.Mods;
-using Andastra.Formats.Mods.GFF;
-using Andastra.Formats.Mods.SSF;
-using Andastra.Formats.Mods.TLK;
-using Andastra.Formats.Mods.TwoDA;
-using Andastra.Formats.TSLPatcher;
+using Andastra.Parsing.Mods;
+using Andastra.Parsing.Mods.GFF;
+using Andastra.Parsing.Mods.SSF;
+using Andastra.Parsing.Mods.TLK;
+using Andastra.Parsing.Mods.TwoDA;
+using Andastra.Parsing.TSLPatcher;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Generator
+namespace Andastra.Parsing.Tests.Generator
 {
     /// <summary>
     /// Comprehensive tests for InstallFolderDeterminer.

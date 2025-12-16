@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.SSF;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.SSF;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.SSF;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.SSF;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -181,7 +181,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 1=5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -201,7 +201,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 2=2DAMEMORY5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -222,7 +222,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 3=StrRef7
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();

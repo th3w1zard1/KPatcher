@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Resource;
 using Andastra.Runtime.Content.Interfaces;
 
 namespace Andastra.Runtime.Content.MDL

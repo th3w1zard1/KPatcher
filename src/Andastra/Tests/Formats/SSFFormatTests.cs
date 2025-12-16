@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using Andastra.Formats.Formats.SSF;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Formats.SSF;
+using Andastra.Parsing.Resource;
 using FluentAssertions;
 using Xunit;
-using static Andastra.Formats.Formats.SSF.SSFAuto;
+using static Andastra.Parsing.Formats.SSF.SSFAuto;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TwoDA;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TwoDA;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -711,7 +711,7 @@ AddColumn0=add_column_0
 ColumnLabel=Col3
 DefaultValue=****
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -743,7 +743,7 @@ AddColumn0=add_column_0
 ColumnLabel=Col3
 DefaultValue=X
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -776,7 +776,7 @@ ColumnLabel=Col3
 DefaultValue=****
 I0=X
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -809,7 +809,7 @@ ColumnLabel=Col3
 DefaultValue=****
 L1=2DAMEMORY5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -843,7 +843,7 @@ ColumnLabel=Col3
 DefaultValue=****
 L1=StrRef5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -879,7 +879,7 @@ I0=X
 I1=Y
 2DAMEMORY0=I0
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -915,7 +915,7 @@ I0=X
 I1=Y
 2DAMEMORY0=L1
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]

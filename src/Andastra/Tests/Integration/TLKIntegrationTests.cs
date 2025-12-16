@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TLK;
-using Andastra.Formats.Resources;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TLK;
+using Andastra.Parsing.Resource;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -237,7 +237,7 @@ StrRef1=1
             string appendTlkPath = Path.Combine(TempDir, "append.tlk");
             appendTlk.Save(appendTlkPath);
 
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");
@@ -273,7 +273,7 @@ ReplaceFile0=replace.tlk
             string replaceTlkPath = Path.Combine(TempDir, "replace.tlk");
             replaceTlk.Save(replaceTlkPath);
 
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");

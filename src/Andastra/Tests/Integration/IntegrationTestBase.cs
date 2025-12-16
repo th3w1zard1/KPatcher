@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Config;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Reader;
+using Andastra.Parsing;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Reader;
 using IniParser.Model;
 using IniParser.Parser;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace Andastra.Formats.Tests.Integration
         protected PatcherConfig SetupIniAndConfig(string iniText, string modPath = null)
         {
             // Use unified INI parser (case-sensitive for changes.ini files)
-            IniData ini = Andastra.Formats.Reader.ConfigReader.ParseIniText(iniText, caseInsensitive: false);
+            IniData ini = Andastra.Parsing.Reader.ConfigReader.ParseIniText(iniText, caseInsensitive: false);
             var config = new PatcherConfig();
             string actualModPath = modPath ?? TempDir;
 

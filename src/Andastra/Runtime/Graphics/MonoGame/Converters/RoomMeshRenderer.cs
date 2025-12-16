@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Andastra.Formats.Formats.MDL;
-using Andastra.Formats.Formats.MDLData;
+using Andastra.Parsing.Formats.MDL;
+using Andastra.Parsing.Formats.MDLData;
 using JetBrains.Annotations;
 
 namespace Andastra.Runtime.MonoGame.Converters

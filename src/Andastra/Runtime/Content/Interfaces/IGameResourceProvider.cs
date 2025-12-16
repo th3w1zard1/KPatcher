@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Resource;
 
 namespace Andastra.Runtime.Content.Interfaces
 {

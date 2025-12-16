@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Script;
-using Andastra.Formats.Formats.NCS.Compiler;
+using Andastra.Parsing;
+using Andastra.Parsing.Common.Script;
+using Andastra.Parsing.Formats.NCS.Compiler;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

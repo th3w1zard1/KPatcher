@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Threading;
-using Andastra.Formats;
-using Andastra.Formats.Script;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Resource.Generics;
+using Andastra.Parsing;
+using Andastra.Parsing.Common.Script;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Resource.Generics;
 using Andastra.Runtime.Engines.Odyssey.Templates;
-using Andastra.Formats.Resources;
-using Andastra.Formats.Formats.TwoDA;
+using Andastra.Parsing.Resource;
+using Andastra.Parsing.Formats.TwoDA;
 using Andastra.Runtime.Content.Interfaces;
 using Andastra.Runtime.Core.Actions;
 using Andastra.Runtime.Core.Audio;
@@ -2581,9 +2581,9 @@ namespace Andastra.Runtime.Engines.Odyssey.EngineApi
                         }
                     }
                     // Fallback to CSharpKOTOR Installation provider
-                    else if (ctx.ResourceProvider is Andastra.Formats.Installation.Installation installation)
+                    else if (ctx.ResourceProvider is Andastra.Parsing.Installation.Installation installation)
                     {
-                        Andastra.Formats.Installation.ResourceResult result = installation.Resource(itemTemplate, ResourceType.UTI, null, null);
+                        Andastra.Parsing.Installation.ResourceResult result = installation.Resource(itemTemplate, ResourceType.UTI, null, null);
                         if (result != null && result.Data != null)
                         {
                             using (var stream = new MemoryStream(result.Data))
@@ -5983,7 +5983,7 @@ namespace Andastra.Runtime.Engines.Odyssey.EngineApi
             {
                 if (services.ModuleLoader is Odyssey.Kotor.Game.ModuleLoader moduleLoader)
                 {
-                    Andastra.Formats.Module csharpKotorModule = moduleLoader.GetCSharpKotorModule();
+                    Andastra.Parsing.Module csharpKotorModule = moduleLoader.GetCSharpKotorModule();
                     if (csharpKotorModule == null)
                     {
                         return Variable.FromObject(ObjectInvalid);

@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.GFF;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.GFF;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -539,7 +539,7 @@ Path=List
 Label=
 TypeId=1
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var gff = new GFF();
             var gffList = new GFFList();
             gff.Root.SetList("List", gffList);
@@ -583,7 +583,7 @@ Label=
 TypeId=0
 2DAMEMORY12=ListIndex
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var gff = new GFF();
             gff.Root.SetList("List", new GFFList());
 

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Andastra.Formats.Namespaces;
-using Andastra.Formats.Reader;
+using Andastra.Parsing.Namespaces;
+using Andastra.Parsing.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Reader
+namespace Andastra.Parsing.Tests.Reader
 {
     /// <summary>
     /// Tests for NamespaceReader functionality.

@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using Andastra.Formats;
-using Andastra.Formats.Config;
-using Andastra.Formats.Formats.GFF;
-using Andastra.Formats.Mods.GFF;
-using Andastra.Formats.Reader;
+using Andastra.Parsing;
+using Andastra.Parsing.Config;
+using Andastra.Parsing.Formats.GFF;
+using Andastra.Parsing.Mods.GFF;
+using Andastra.Parsing.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Reader
+namespace Andastra.Parsing.Tests.Reader
 {
 
     /// <summary>

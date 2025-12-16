@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Andastra.Runtime.Content.Interfaces;
-using Andastra.Formats.Formats.LYT;
-using Andastra.Formats.Formats.VIS;
+using Andastra.Parsing.Formats.LYT;
+using Andastra.Parsing.Formats.VIS;
 using JetBrains.Annotations;
 
 namespace Andastra.Runtime.MonoGame.Scene

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Mods.TwoDA;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Mods.TwoDA;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Integration
+namespace Andastra.Parsing.Tests.Integration
 {
 
     /// <summary>
@@ -88,7 +88,7 @@ ColumnLabel=NewCol
 DefaultValue=default
 I1=special_value
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -127,7 +127,7 @@ ColumnLabel=NewCol
 DefaultValue=
 L1=2DAMEMORY5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -165,7 +165,7 @@ ColumnLabel=NewCol
 DefaultValue=
 L1=StrRef5
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -202,7 +202,7 @@ I0=X
 I1=Y
 2DAMEMORY0=I0
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -242,7 +242,7 @@ I0=X
 I1=Y
 2DAMEMORY0=L1
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -389,7 +389,7 @@ name=Copied
 ColumnLabel=NewCol
 DefaultValue=default
 ";
-            Andastra.Formats.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            Andastra.Parsing.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using Stride.Graphics;
 using Stride.Core.Mathematics;
-using Andastra.Formats.Formats.MDL;
-using Andastra.Formats.Formats.MDLData;
+using Andastra.Parsing.Formats.MDL;
+using Andastra.Parsing.Formats.MDLData;
 using JetBrains.Annotations;
 using Andastra.Runtime.Graphics;
 

@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using Andastra.Formats.Formats.NCS;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing.Formats.NCS;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

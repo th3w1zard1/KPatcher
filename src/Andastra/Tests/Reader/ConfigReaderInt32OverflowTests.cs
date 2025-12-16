@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Reader;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Reader;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Reader
+namespace Andastra.Parsing.Tests.Reader
 {
     /// <summary>
     /// Tests for ConfigReader Int32 overflow handling in ParseIntValue.

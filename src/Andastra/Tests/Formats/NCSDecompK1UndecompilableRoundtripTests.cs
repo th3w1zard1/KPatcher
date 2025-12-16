@@ -4,13 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Andastra.Formats.Formats.NCS.NCSDecomp;
+using Andastra.Parsing.Formats.NCS.NCSDecomp;
 using FluentAssertions;
 using Xunit;
 using IOFile = System.IO.File;
-using NcsFile = Andastra.Formats.Formats.NCS.NCSDecomp.NcsFile;
+using NcsFile = Andastra.Parsing.Formats.NCS.NCSDecomp.NcsFile;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
     /// <summary>
     /// Test NCS -> NSS -> NCS roundtrip for K1 undecompilable files.
@@ -216,7 +216,7 @@ namespace Andastra.Formats.Tests.Formats
             return null;
         }
 
-        private bool TestRoundtrip(Andastra.Formats.Formats.NCS.NCSDecomp.FileDecompiler decompiler, string originalNcsPath, string testId, string nwnnsscompPath)
+        private bool TestRoundtrip(Andastra.Parsing.Formats.NCS.NCSDecomp.FileDecompiler decompiler, string originalNcsPath, string testId, string nwnnsscompPath)
         {
             // Read original NCS bytes
             byte[] originalBytes = IOFile.ReadAllBytes(originalNcsPath);

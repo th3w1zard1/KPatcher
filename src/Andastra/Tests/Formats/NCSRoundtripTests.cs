@@ -11,16 +11,16 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Andastra.Formats;
-using Andastra.Formats.Formats.NCS;
-using Andastra.Formats.Formats.NCS.NCSDecomp;
-using IOException = Andastra.Formats.Formats.NCS.NCSDecomp.IOException;
-using NcsFile = Andastra.Formats.Formats.NCS.NCSDecomp.NcsFile;
-using Andastra.Formats.Tests.Performance;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.NCS;
+using Andastra.Parsing.Formats.NCS.NCSDecomp;
+using IOException = Andastra.Parsing.Formats.NCS.NCSDecomp.IOException;
+using NcsFile = Andastra.Parsing.Formats.NCS.NCSDecomp.NcsFile;
+using Andastra.Parsing.Tests.Performance;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
     /// <summary>
     /// Exhaustive round-trip tests for the decompiler and compiler:

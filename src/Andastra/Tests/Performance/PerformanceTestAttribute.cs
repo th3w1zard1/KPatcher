@@ -5,7 +5,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Andastra.Formats.Tests.Performance
+namespace Andastra.Parsing.Tests.Performance
 {
     /// <summary>
     /// xUnit attribute that enforces a maximum test execution time and generates profiling output.

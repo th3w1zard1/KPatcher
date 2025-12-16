@@ -8,7 +8,7 @@ using Andastra.Runtime.Core.Module;
 using Andastra.Runtime.Engines.Common;
 using Andastra.Runtime.Content.Interfaces;
 using Andastra.Runtime.Content.ResourceProviders;
-using Andastra.Formats.Installation;
+using Andastra.Parsing.Installation;
 
 namespace Andastra.Runtime.Engines.Odyssey
 {
@@ -71,7 +71,7 @@ namespace Andastra.Runtime.Engines.Odyssey
             {
                 // Load entry area if not already loaded
                 RuntimeArea entryArea = _internalLoader.LoadArea(
-                    new Andastra.Formats.Module(moduleName, _installation),
+                    new Andastra.Parsing.Module(moduleName, _installation),
                     _currentRuntimeModule.EntryArea);
                 if (entryArea != null)
                 {
@@ -98,7 +98,7 @@ namespace Andastra.Runtime.Engines.Odyssey
 
             try
             {
-                var module = new Andastra.Formats.Module(moduleName, _installation);
+                var module = new Andastra.Parsing.Module(moduleName, _installation);
                 return module.Info() != null;
             }
             catch

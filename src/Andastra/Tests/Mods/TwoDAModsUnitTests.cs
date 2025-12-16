@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TwoDA;
-using Andastra.Formats.Logger;
-using Andastra.Formats.Memory;
-using Andastra.Formats.Mods.TwoDA;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TwoDA;
+using Andastra.Parsing.Logger;
+using Andastra.Parsing.Memory;
+using Andastra.Parsing.Mods.TwoDA;
 using FluentAssertions;
 using Xunit;
-using TwoDAFile = Andastra.Formats.Formats.TwoDA.TwoDA;
+using TwoDAFile = Andastra.Parsing.Formats.TwoDA.TwoDA;
 
-namespace Andastra.Formats.Tests.Mods
+namespace Andastra.Parsing.Tests.Mods
 {
 
     /// <summary>

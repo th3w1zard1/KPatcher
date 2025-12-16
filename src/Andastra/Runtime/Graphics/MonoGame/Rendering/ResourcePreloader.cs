@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Andastra.Runtime.Content.Interfaces;
-using Andastra.Formats.Resources;
+using Andastra.Parsing.Resource;
 
 namespace Andastra.Runtime.MonoGame.Rendering
 {
@@ -215,22 +215,22 @@ namespace Andastra.Runtime.MonoGame.Rendering
             });
         }
 
-        private Andastra.Formats.Resources.ResourceType ConvertResourceType(ResourceType type)
+        private Andastra.Parsing.Resources.ResourceType ConvertResourceType(ResourceType type)
         {
             switch (type)
             {
                 case ResourceType.Texture:
-                    return Andastra.Formats.Resources.ResourceType.TPC;
+                    return Andastra.Parsing.Resources.ResourceType.TPC;
                 case ResourceType.Model:
-                    return Andastra.Formats.Resources.ResourceType.MDL;
+                    return Andastra.Parsing.Resources.ResourceType.MDL;
                 case ResourceType.Animation:
-                    return Andastra.Formats.Resources.ResourceType.MDL;
+                    return Andastra.Parsing.Resources.ResourceType.MDL;
                 case ResourceType.Sound:
-                    return Andastra.Formats.Resources.ResourceType.WAV;
+                    return Andastra.Parsing.Resources.ResourceType.WAV;
                 case ResourceType.Script:
-                    return Andastra.Formats.Resources.ResourceType.NCS;
+                    return Andastra.Parsing.Resources.ResourceType.NCS;
                 default:
-                    return Andastra.Formats.Resources.ResourceType.INVALID;
+                    return Andastra.Parsing.Resources.ResourceType.INVALID;
             }
         }
     }

@@ -1,11 +1,11 @@
 using System;
-using Andastra.Formats;
-using Andastra.Formats.Formats.TLK;
-using Andastra.Formats.Tests.Common;
+using Andastra.Parsing;
+using Andastra.Parsing.Formats.TLK;
+using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Formats
+namespace Andastra.Parsing.Tests.Formats
 {
 
     /// <summary>

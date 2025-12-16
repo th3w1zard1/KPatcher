@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Andastra.Formats.Tests.Performance
+namespace Andastra.Parsing.Tests.Performance
 {
     /// <summary>
     /// Extension methods for enforcing test timeouts in xUnit tests.

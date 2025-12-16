@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using Andastra.Runtime.Content.Interfaces;
 using Andastra.Runtime.Content.ResourceProviders;
 using Andastra.Runtime.Engines.Common;
-using Andastra.Formats.Installation;
+using Andastra.Parsing.Installation;
 
 namespace Andastra.Runtime.Engines.Odyssey
 {
