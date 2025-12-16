@@ -40,10 +40,15 @@ namespace Andastra.Runtime.Graphics.Common.Enums
         Direct3D12 = 1 << 2,
 
         /// <summary>
+        /// DirectX 9 - Legacy Windows support.
+        /// </summary>
+        Direct3D9 = 1 << 3,
+
+        /// <summary>
         /// DirectX 9 compatibility mode - For NVIDIA RTX Remix injection.
         /// Uses a DX9 wrapper layer to enable Remix path tracing.
         /// </summary>
-        Direct3D9Remix = 1 << 3,
+        Direct3D9Remix = 1 << 8,
 
         /// <summary>
         /// DirectX 10 - Windows Vista+ support.

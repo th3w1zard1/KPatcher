@@ -27,16 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Enums\**\*.cs" />
-    <Compile Include="Backends\**\*.cs" />
-    <Compile Include="Interfaces\**\*.cs" />
-    <Compile Include="Structs\**\*.cs" />
-    <Compile Include="Rendering\**\*.cs" />
-    <Compile Include="Effects\**\*.cs" />
-    <Compile Include="PostProcessing\**\*.cs" />
-    <Compile Include="Raytracing\**\*.cs" />
-    <Compile Include="Remix\**\*.cs" />
-    <Compile Include="Upscaling\**\*.cs" />
     <Compile Remove="MonoGame\**" />
     <Compile Remove="Stride\**" />
     <None Remove="MonoGame\**" />
