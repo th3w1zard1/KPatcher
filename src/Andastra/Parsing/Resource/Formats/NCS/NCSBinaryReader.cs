@@ -311,7 +311,9 @@ namespace Andastra.Parsing.Formats.NCS
 
             NCSInstruction instruction = new NCSInstruction
             {
-                Offset = instructionOffset
+                Offset = instructionOffset,
+                OriginalBytecode = byteCodeValue,
+                OriginalQualifier = qualifier
             };
 
             // Special handling for RESERVED opcode - it appears with various qualifiers
@@ -335,6 +337,7 @@ namespace Andastra.Parsing.Formats.NCS
                     if (instruction.InsType == NCSInstructionType.ACTION)
                     {
                         Console.WriteLine($"DEBUG NCSBinaryReader: Successfully parsed ACTION instruction at offset {instructionOffset}");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Successfully parsed ACTION instruction at offset {instructionOffset}");
                     }
                 }
                 catch (ArgumentException e)
@@ -351,13 +354,24 @@ namespace Andastra.Parsing.Formats.NCS
                     }
                     else
                     {
-                        string msg =
-                            $"Unknown NCS instruction type combination: " +
-                            $"bytecode=0x{byteCodeValue:X2} ({byteCode}), " +
-                            $"qualifier=0x{qualifier:X2} at offset {instructionOffset}.\n" +
-                            "  The bytecode is recognized but this qualifier combination is not supported.";
-
-                        throw new InvalidDataException(msg, e);
+                        // For roundtrip fidelity, preserve invalid qualifiers by using a fallback type
+                        // We'll use the closest matching instruction type, but preserve original bytecode/qualifier
+                        // This allows us to write back the exact same bytecode/qualifier even if it's invalid
+                        Console.WriteLine($"DEBUG NCSBinaryReader: Invalid qualifier 0x{qualifier:X2} for bytecode 0x{byteCodeValue:X2} at offset {instructionOffset}, preserving original for roundtrip");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Invalid qualifier 0x{qualifier:X2} for bytecode 0x{byteCodeValue:X2} at offset {instructionOffset}, preserving original for roundtrip");
+                        
+                        // Try to find a fallback instruction type based on bytecode alone
+                        // For LOGANDxx (0x06), use LOGANDII as fallback but preserve original qualifier
+                        if (byteCode == NCSByteCode.LOGANDxx)
+                        {
+                            instruction.InsType = NCSInstructionType.LOGANDII;
+                        }
+                        else
+                        {
+                            // For other bytecodes, we need to handle them case by case
+                            // For now, use RESERVED as a fallback to avoid crashing
+                            instruction.InsType = NCSInstructionType.RESERVED;
+                        }
                     }
                 }
             }

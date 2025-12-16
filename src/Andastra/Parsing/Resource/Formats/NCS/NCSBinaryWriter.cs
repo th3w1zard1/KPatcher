@@ -60,9 +60,27 @@ namespace Andastra.Parsing.Formats.NCS
 
         private void WriteInstruction(System.IO.BinaryWriter writer, NCSInstruction instruction)
         {
-            (NCSByteCode byteCode, byte qualifier) = instruction.InsType.GetValue();
-            writer.Write((byte)byteCode);
-            writer.Write(qualifier);
+            // For roundtrip fidelity, use original bytecode/qualifier if available
+            // This preserves invalid qualifiers that may exist in original files
+            byte byteCodeValue;
+            byte qualifierValue;
+            
+            if (instruction.OriginalBytecode.HasValue && instruction.OriginalQualifier.HasValue)
+            {
+                // Use original bytecode/qualifier to preserve exact roundtrip
+                byteCodeValue = instruction.OriginalBytecode.Value;
+                qualifierValue = instruction.OriginalQualifier.Value;
+            }
+            else
+            {
+                // Fall back to canonical values from instruction type
+                (NCSByteCode byteCode, byte qualifier) = instruction.InsType.GetValue();
+                byteCodeValue = (byte)byteCode;
+                qualifierValue = qualifier;
+            }
+            
+            writer.Write(byteCodeValue);
+            writer.Write(qualifierValue);
 
             // Handle instruction-specific arguments - order matches Python
             if (instruction.InsType == NCSInstructionType.DECxSP ||
