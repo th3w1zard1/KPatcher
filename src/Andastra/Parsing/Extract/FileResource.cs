@@ -105,7 +105,7 @@ namespace Andastra.Parsing.Extract
             {
                 if (_insideCapsule)
                 {
-                    var capsule = new Formats.Capsule.LazyCapsule(_filepath);
+                    var capsule = new Extract.Capsule.LazyCapsule(_filepath);
                     var res = capsule.GetResourceInfo(_resname, _restype);
                     if (res == null && _identifier.ToString() == Path.GetFileName(_filepath))
                     {
@@ -164,7 +164,7 @@ namespace Andastra.Parsing.Extract
                         return true;
                     }
                     // It's a capsule file that exists - verify the resource is inside it
-                    var capsule = new Formats.Capsule.LazyCapsule(_filepath);
+                    var capsule = new Extract.Capsule.LazyCapsule(_filepath);
                     return capsule.GetResourceInfo(_resname, _restype) != null;
                 }
 

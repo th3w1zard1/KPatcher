@@ -16,17 +16,17 @@ namespace Andastra.Parsing.Formats.TPC
 
         public TPCBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
         }
 
         public TPCBinaryReader(string filepath, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
         }
 
         public TPCBinaryReader(Stream source, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
         }
 
         public TPC Load(bool autoClose = true)

@@ -34,7 +34,7 @@ namespace Andastra.Parsing.Formats.LIP
             ResourceType fileFormat;
             try
             {
-                using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromAuto(source, offset))
+                using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromAuto(source, offset))
                 {
                     fileFormat = Check(reader.ReadString(4));
                 }

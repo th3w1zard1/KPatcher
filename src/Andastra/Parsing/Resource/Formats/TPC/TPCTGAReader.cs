@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TPC
 {
@@ -13,19 +14,19 @@ namespace Andastra.Parsing.Formats.TPC
 
         public TPCTGAReader(byte[] data, int offset = 0, int? size = null)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size);
             _tpc = null;
         }
 
         public TPCTGAReader(string filepath, int offset = 0, int? size = null)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size);
             _tpc = null;
         }
 
         public TPCTGAReader(Stream source, int offset = 0, int? size = null)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size);
             _tpc = null;
         }
 

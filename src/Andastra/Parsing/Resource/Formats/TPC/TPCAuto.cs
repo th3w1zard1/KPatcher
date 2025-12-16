@@ -190,15 +190,15 @@ namespace Andastra.Parsing.Formats.TPC
         {
             if (source is string filepath)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size);
             }
             if (source is byte[] bytes)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size);
             }
             if (source is Stream stream)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size);
             }
             throw new ArgumentException("Source must be string, byte[], or Stream for TPC");
         }

@@ -4,6 +4,7 @@ using Andastra.Parsing.Installation;
 using Andastra.Parsing.Resource.Generics;
 using Andastra.Parsing.Resource;
 using Andastra.Parsing.Tools;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -230,4 +231,3 @@ namespace Andastra.Parsing.Common
         }
     }
 }
-

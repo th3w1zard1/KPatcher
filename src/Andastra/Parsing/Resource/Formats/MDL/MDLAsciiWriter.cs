@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.MDLData;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.MDL
 {
@@ -53,4 +54,3 @@ namespace Andastra.Parsing.Formats.MDL
         }
     }
 }
-

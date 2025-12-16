@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Andastra.Parsing;
 using Andastra.Parsing.Logger;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {

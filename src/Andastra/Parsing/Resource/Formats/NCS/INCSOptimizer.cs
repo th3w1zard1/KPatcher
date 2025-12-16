@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS
 {
@@ -45,4 +46,3 @@ namespace Andastra.Parsing.Formats.NCS
             bool debug = false);
     }
 }
-

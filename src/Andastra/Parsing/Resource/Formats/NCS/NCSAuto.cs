@@ -13,6 +13,7 @@ using Andastra.Parsing.Formats.NCS.Optimizers;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
 using FileScriptData = Andastra.Parsing.Formats.NCS.NCSDecomp.Utils.FileScriptData;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS
 {
@@ -298,4 +299,3 @@ namespace Andastra.Parsing.Formats.NCS
         }
     }
 }
-

@@ -8,6 +8,7 @@ using Andastra.Parsing.Mods.GFF;
 using Andastra.Parsing.Mods.SSF;
 using Andastra.Parsing.Mods.TLK;
 using Andastra.Parsing.Mods.TwoDA;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.TSLPatcher
 {
@@ -151,4 +152,3 @@ namespace Andastra.Parsing.TSLPatcher
         }
     }
 }
-

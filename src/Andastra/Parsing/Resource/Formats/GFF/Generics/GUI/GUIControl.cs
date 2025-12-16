@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics.GUI
 {
@@ -207,4 +208,3 @@ namespace Andastra.Parsing.Resource.Generics.GUI
         }
     }
 }
-

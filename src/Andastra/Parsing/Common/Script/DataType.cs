@@ -1,4 +1,5 @@
 using System;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common.Script
 {
@@ -30,4 +31,3 @@ namespace Andastra.Parsing.Common.Script
         Struct
     }
 }
-

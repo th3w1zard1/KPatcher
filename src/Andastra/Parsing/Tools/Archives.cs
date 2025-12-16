@@ -10,6 +10,7 @@ using Andastra.Parsing.Formats.RIM;
 using Andastra.Parsing.Resource.Formats.BIF;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {

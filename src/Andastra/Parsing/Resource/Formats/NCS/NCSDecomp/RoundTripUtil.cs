@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Text;
 using IOException = Andastra.Parsing.Formats.NCS.NCSDecomp.IOException;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.NCSDecomp
 {
@@ -316,4 +317,3 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp
         }
     }
 }
-

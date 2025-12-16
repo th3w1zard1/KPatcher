@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.RIM
 {
@@ -76,4 +77,3 @@ namespace Andastra.Parsing.Formats.RIM
         }
     }
 }
-

@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Andastra.Parsing;
 using Andastra.Parsing.Extract;
 using Andastra.Utility.LZMA;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Extract
 {
@@ -276,4 +277,3 @@ namespace Andastra.Parsing.Extract
         }
     }
 }
-

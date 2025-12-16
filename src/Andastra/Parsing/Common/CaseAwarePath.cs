@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -461,4 +462,3 @@ namespace Andastra.Parsing.Common
         public static implicit operator string(CaseAwarePath path) => path.ToString();
     }
 }
-

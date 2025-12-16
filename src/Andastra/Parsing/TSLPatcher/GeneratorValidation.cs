@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using InstallationClass = Andastra.Parsing.Installation.Installation;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.TSLPatcher
 {
@@ -183,4 +184,3 @@ namespace Andastra.Parsing.TSLPatcher
         }
     }
 }
-

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS
 {
@@ -35,17 +36,17 @@ namespace Andastra.Parsing.Formats.NCS
 
         public NCSBinaryReader(string filepath, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
         }
 
         public NCSBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
         }
 
         public NCSBinaryReader(Stream source, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
         }
 
         /// <summary>
@@ -486,4 +487,3 @@ namespace Andastra.Parsing.Formats.NCS
         }
     }
 }
-

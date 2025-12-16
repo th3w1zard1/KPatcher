@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TLK
 {
@@ -43,7 +44,7 @@ namespace Andastra.Parsing.Formats.TLK
 
             Encoding encoding = null;
             byte[] textBytes = null;
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 uint entriesCount = reader.ReadUInt32();
@@ -93,7 +94,7 @@ namespace Andastra.Parsing.Formats.TLK
                 return ResRef.FromBlank();
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 uint entriesCount = reader.ReadUInt32();
@@ -124,7 +125,7 @@ namespace Andastra.Parsing.Formats.TLK
                 return new StringResult("", ResRef.FromBlank());
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 uint entriesCount = reader.ReadUInt32();
@@ -166,7 +167,7 @@ namespace Andastra.Parsing.Formats.TLK
                 return batch;
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(8);
                 uint languageId = reader.ReadUInt32();
@@ -209,7 +210,7 @@ namespace Andastra.Parsing.Formats.TLK
                 return 0;
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 return (int)reader.ReadUInt32();
@@ -226,7 +227,7 @@ namespace Andastra.Parsing.Formats.TLK
                 return Language.English;
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(8);
                 uint languageId = reader.ReadUInt32();

@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Andastra.Parsing.Formats.BWM
