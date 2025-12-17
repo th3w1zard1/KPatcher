@@ -152,3 +152,12 @@ test-run2.txt
 test_*/
 temp_*/
 ~dotnetcleanup-*/
+
+# Web integration build artifacts
+build/wasm/
+build/encrypted/
+src/Andastra/Web/Api/wwwroot/wasm/*.encrypted
+src/Andastra/Web/Api/wwwroot/wasm/*.key
+*.wasm.encrypted
+master.key
+*.csx

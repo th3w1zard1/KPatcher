@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  andastra-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: andastra-web
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      # Store this securely in production (e.g., secrets manager)
+      - Security__MasterSecret=${MASTER_SECRET:-}
+    volumes:
+      # Optional: Mount configuration
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Nginx reverse proxy for caching and load balancing
+  nginx:
+    image: nginx:alpine
+    container_name: andastra-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - andastra-web
+    restart: unless-stopped
+    profiles:
+      - with-nginx
+
+networks:
+  default:
+    name: andastra-network

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andastra - KOTOR Game Engine</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Andastra Game Engine</h1>
+            <p>WebAssembly-powered KOTOR Game Runtime</p>
+        </header>
+
+        <main>
+            <div id="status-container">
+                <div id="loading-indicator" class="hidden">
+                    <div class="spinner"></div>
+                    <p id="loading-message">Initializing...</p>
+                </div>
+
+                <div id="file-picker-container">
+                    <h2>Select Game Data Folder</h2>
+                    <p>Choose the folder containing your KOTOR game files (chitin.key and .bif files)</p>
+                    <button id="select-folder-btn" class="primary-button">Select Game Folder</button>
+                    <div id="file-validation" class="hidden">
+                        <ul id="validation-list"></ul>
+                    </div>
+                </div>
+
+                <div id="game-container" class="hidden">
+                    <canvas id="game-canvas"></canvas>
+                    <div id="game-controls">
+                        <button id="start-game-btn" class="primary-button">Start Game</button>
+                    </div>
+                </div>
+
+                <div id="error-container" class="hidden">
+                    <h3>Error</h3>
+                    <p id="error-message"></p>
+                    <button id="retry-btn" class="secondary-button">Retry</button>
+                </div>
+            </div>
+
+            <div id="console-container">
+                <h3>Console Output</h3>
+                <div id="console-output"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by .NET WebAssembly and Stride Engine</p>
+            <p id="version-info">Version: Loading...</p>
+        </footer>
+    </div>
+
+    <!-- Load scripts -->
+    <script src="js/crypto.js"></script>
+    <script src="js/filesystem.js"></script>
+    <script src="js/wasm-loader.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

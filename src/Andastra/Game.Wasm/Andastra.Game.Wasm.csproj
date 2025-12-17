@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>Andastra.Game.Wasm</RootNamespace>
+    <AssemblyName>Andastra.Game.Wasm</AssemblyName>
+    <Description>WebAssembly build target for Stride/Odyssey Engine with AOT compilation</Description>
+    
+    <!-- WebAssembly Specific Settings -->
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <WasmEnableSIMD>true</WasmEnableSIMD>
+    <WasmEnableExceptionHandling>false</WasmEnableExceptionHandling>
+    
+    <!-- IL Stripping and Trimming for Size Reduction -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    
+    <!-- Strip debugging and symbols -->
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    
+    <!-- Optimize for size and security -->
+    <BlazorEnableCompression>true</BlazorEnableCompression>
+    <BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
+    
+    <!-- Remove unnecessary features -->
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    
+    <!-- Ensure no reflection metadata -->
+    <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core game engine references -->
+    <ProjectReference Include="..\Runtime\Core\Andastra.Runtime.Core.csproj" />
+    <ProjectReference Include="..\Runtime\Content\Andastra.Runtime.Content.csproj" />
+    <ProjectReference Include="..\Runtime\Scripting\Andastra.Runtime.Scripting.csproj" />
+    <ProjectReference Include="..\Runtime\Games\Odyssey\Andastra.Runtime.Games.Kotor.csproj" />
+    <ProjectReference Include="..\Runtime\Graphics\Common\Andastra.Runtime.Graphics.Common.csproj" />
+    <ProjectReference Include="..\Runtime\Graphics\Stride\Andastra.Runtime.Graphics.Stride.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+  </ItemGroup>
+
+  <!-- Custom trimming configuration to preserve game code -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Andastra.Runtime.Core" />
+    <TrimmerRootAssembly Include="Andastra.Runtime.Content" />
+    <TrimmerRootAssembly Include="Andastra.Runtime.Games.Kotor" />
+  </ItemGroup>
+
+</Project>
