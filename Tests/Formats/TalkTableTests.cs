@@ -1,5 +1,6 @@
 using System;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Tests.Common;
 using FluentAssertions;
@@ -52,4 +53,3 @@ namespace Andastra.Parsing.Tests.Formats
 
     }
 }
-

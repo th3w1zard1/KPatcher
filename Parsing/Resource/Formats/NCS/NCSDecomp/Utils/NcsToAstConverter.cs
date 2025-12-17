@@ -1038,10 +1038,21 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp.Utils
                 {
                     cmdBlock.AddCmd((AST.PCmd)(object)cmd);
                     convertedCount++;
+                    // DEBUG: Log ACTION conversions, especially near the end
+                    if (instructions[i].InsType == NCSInstructionType.ACTION && (i >= limit - 5 || i == limit - 1))
+                    {
+                        JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: Successfully converted ACTION at index {i} (near end, limit={limit})");
+                    }
                 }
                 else
                 {
                     nullCount++;
+                    // CRITICAL: Log if ACTION returns null (should never happen)
+                    if (instructions[i].InsType == NCSInstructionType.ACTION)
+                    {
+                        JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: ERROR - ACTION at index {i} returned null!");
+                        Console.Error.WriteLine($"ERROR ConvertInstructionRangeToSubroutine: ACTION at index {i} returned null!");
+                    }
                     if (nullCount <= 5) // Log first 5 null conversions
                     {
                         JavaSystem.@out.Println($"DEBUG NcsToAstConverter: Instruction at index {i} ({instructions[i].InsType}) returned null");

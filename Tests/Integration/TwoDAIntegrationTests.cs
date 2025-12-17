@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.TwoDA;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
@@ -937,4 +938,3 @@ I1=Y
         #endregion
     }
 }
-

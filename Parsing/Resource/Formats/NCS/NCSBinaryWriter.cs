@@ -35,13 +35,28 @@ namespace Andastra.Parsing.Formats.NCS
             using (var writer = new System.IO.BinaryWriter(ms, Encoding.ASCII, leaveOpen: true))
             {
                 int offset = NCS_HEADER_SIZE;
+                int instructionCount = 0;
+                int minOffset = int.MaxValue;
+                int maxOffset = int.MinValue;
+                
                 foreach (NCSInstruction instruction in _ncs.Instructions)
                 {
+                    instructionCount++;
+                    if (instruction.Offset < minOffset) minOffset = instruction.Offset;
+                    if (instruction.Offset > maxOffset) maxOffset = instruction.Offset;
+                    
                     int instId = RuntimeHelpers.GetHashCode(instruction);
                     int instructionSize = DetermineSize(instruction);
                     _sizes[instId] = instructionSize;
                     _offsets[instId] = offset;
                     offset += instructionSize;
+                }
+                
+                // DEBUG: Log instruction count and offset range when writing
+                if (instructionCount > 0)
+                {
+                    Console.WriteLine($"DEBUG NCSBinaryWriter: Writing {instructionCount} instructions, offset range: {minOffset} to {maxOffset}, total size: {offset} bytes");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryWriter: Writing {instructionCount} instructions, offset range: {minOffset} to {maxOffset}, total size: {offset} bytes");
                 }
 
                 writer.Write(Encoding.ASCII.GetBytes("NCS "));

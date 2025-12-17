@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.SSF;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
@@ -186,4 +187,3 @@ namespace Andastra.Parsing.Tests.Mods
 
     }
 }
-

@@ -166,10 +166,35 @@ namespace Andastra.Parsing.Formats.NCS
                     Console.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset} (near known ACTION locations: 138, 514)");
                     Console.Error.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset} (near known ACTION locations: 138, 514)");
                 }
+                
+                // DEBUG: Log when we're near the end of the file (for k_act_com41 debugging)
+                if (offset >= 630 && offset <= 645)
+                {
+                    Console.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset}, remaining={safeEndPosition - offset} bytes until safeEndPosition={safeEndPosition}");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset}, remaining={safeEndPosition - offset} bytes until safeEndPosition={safeEndPosition}");
+                }
+                
+                // DEBUG: Log bytecode at offset 635 specifically (where MOVSP should be)
+                if (offset == 635)
+                {
+                    int savedPos = _reader.Position;
+                    _reader.Seek(635);
+                    byte peekByte = _reader.ReadUInt8();
+                    _reader.Seek(savedPos);
+                    Console.WriteLine($"DEBUG NCSBinaryReader: At offset 635, byte=0x{peekByte:X2} ({peekByte})");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryReader: At offset 635, byte=0x{peekByte:X2} ({peekByte})");
+                }
 
                 try
                 {
                     var instruction = ReadInstruction();
+                    int newPosition = _reader.Position;
+                    // DEBUG: Log instruction read completion
+                    if (offset >= 630 && offset <= 645)
+                    {
+                        Console.WriteLine($"DEBUG NCSBinaryReader: Successfully read instruction at offset {offset}, new position={newPosition}, instruction type={instruction.InsType}");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Successfully read instruction at offset {offset}, new position={newPosition}, instruction type={instruction.InsType}");
+                    }
                     // DEBUG: Check if this offset already exists (shouldn't happen, but let's verify)
                     if (_instructions.ContainsKey(offset))
                     {
@@ -449,7 +474,11 @@ namespace Andastra.Parsing.Formats.NCS
             }
             else if (instruction.InsType == NCSInstructionType.MOVSP)
             {
-                instruction.Args.Add(_reader.ReadInt32(bigEndian: true));
+                int currentPos = _reader.Position;
+                int offsetValue = _reader.ReadInt32(bigEndian: true);
+                int newPos = _reader.Position;
+                Console.WriteLine($"DEBUG NCSBinaryReader: Read MOVSP offset at position {currentPos}, value={offsetValue}, new position={newPos}");
+                instruction.Args.Add(offsetValue);
             }
             else if (instruction.InsType == NCSInstructionType.JMP || instruction.InsType == NCSInstructionType.JSR
                 || instruction.InsType == NCSInstructionType.JZ || instruction.InsType == NCSInstructionType.JNZ)

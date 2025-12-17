@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Config;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Formats.TwoDA;
@@ -150,4 +151,3 @@ namespace Andastra.Parsing.Tests.Integration
         }
     }
 }
-
