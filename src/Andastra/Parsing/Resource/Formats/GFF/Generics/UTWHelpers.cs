@@ -24,9 +24,10 @@ namespace Andastra.Parsing.Resource.Generics
             utw.Tag = root.Acquire<string>("Tag", "");
             utw.Name = root.Acquire<LocalizedString>("LocalizedName", LocalizedString.FromInvalid());
             utw.Description = root.Acquire<LocalizedString>("Description", LocalizedString.FromInvalid());
-            utw.HasMapNote = root.Acquire<bool>("HasMapNote", false);
+            // HasMapNote and MapNoteEnabled are stored as UInt8 (0 or 1), need to read as byte and convert
+            utw.HasMapNote = root.GetUInt8("HasMapNote") != 0;
             utw.MapNote = root.Acquire<LocalizedString>("MapNote", LocalizedString.FromInvalid());
-            utw.MapNoteEnabled = root.Acquire<bool>("MapNoteEnabled", false);
+            utw.MapNoteEnabled = root.GetUInt8("MapNoteEnabled") != 0;
             utw.PaletteId = root.Acquire<int>("PaletteID", 0);
             utw.Comment = root.Acquire<string>("Comment", "");
 

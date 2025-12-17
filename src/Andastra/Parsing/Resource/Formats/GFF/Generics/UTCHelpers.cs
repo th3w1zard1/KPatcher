@@ -51,18 +51,18 @@ namespace Andastra.Parsing.Resource.Generics
             utc.BodyVariation = root.Acquire<int>("BodyVariation", 0);
             utc.TextureVariation = root.Acquire<int>("TextureVar", 0);
 
-            // Extract boolean flags
-            utc.NotReorienting = root.Acquire<int>("NotReorienting", 0) != 0;
-            utc.PartyInteract = root.Acquire<int>("PartyInteract", 0) != 0;
-            utc.NoPermDeath = root.Acquire<int>("NoPermDeath", 0) != 0;
-            utc.Min1Hp = root.Acquire<int>("Min1HP", 0) != 0;
-            utc.Plot = root.Acquire<int>("Plot", 0) != 0;
-            utc.Interruptable = root.Acquire<int>("Interruptable", 0) != 0;
-            utc.IsPc = root.Acquire<int>("IsPC", 0) != 0;
-            utc.Disarmable = root.Acquire<int>("Disarmable", 0) != 0;
-            utc.IgnoreCrePath = root.Acquire<int>("IgnoreCrePath", 0) != 0;
-            utc.Hologram = root.Acquire<int>("Hologram", 0) != 0;
-            utc.WillNotRender = root.Acquire<int>("WillNotRender", 0) != 0;
+            // Extract boolean flags - stored as UInt8, use GetUInt8() != 0 (matching UTW fix)
+            utc.NotReorienting = root.GetUInt8("NotReorienting") != 0;
+            utc.PartyInteract = root.GetUInt8("PartyInteract") != 0;
+            utc.NoPermDeath = root.GetUInt8("NoPermDeath") != 0;
+            utc.Min1Hp = root.GetUInt8("Min1HP") != 0;
+            utc.Plot = root.GetUInt8("Plot") != 0;
+            utc.Interruptable = root.GetUInt8("Interruptable") != 0;
+            utc.IsPc = root.GetUInt8("IsPC") != 0;
+            utc.Disarmable = root.GetUInt8("Disarmable") != 0;
+            utc.IgnoreCrePath = root.GetUInt8("IgnoreCrePath") != 0;
+            utc.Hologram = root.GetUInt8("Hologram") != 0;
+            utc.WillNotRender = root.GetUInt8("WillNotRender") != 0;
 
             // Extract stats
             utc.Alignment = root.Acquire<int>("GoodEvil", 0);
