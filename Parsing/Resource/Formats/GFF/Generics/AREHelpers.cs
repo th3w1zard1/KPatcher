@@ -50,6 +50,12 @@ namespace Andastra.Parsing.Resource.Generics
             are.OnExit = root.Acquire<ResRef>("OnExit", ResRef.FromBlank());
             are.OnHeartbeat = root.Acquire<ResRef>("OnHeartbeat", ResRef.FromBlank());
             are.OnUserDefined = root.Acquire<ResRef>("OnUserDefined", ResRef.FromBlank());
+            // Matching Python: are.stealth_xp = bool(root.acquire("StealthXPEnabled", 0))
+            are.StealthXp = root.GetUInt8("StealthXPEnabled") == 1;
+            // Matching Python: are.stealth_xp_loss = root.acquire("StealthXPLoss", 0)
+            are.StealthXpLoss = root.Acquire<int>("StealthXPLoss", 0);
+            // Matching Python: are.stealth_xp_max = root.acquire("StealthXPMax", 0)
+            are.StealthXpMax = root.Acquire<int>("StealthXPMax", 0);
             // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:496
             // Original: are.loadscreen_id = root.acquire("LoadScreenID", 0)
             are.LoadScreenID = root.Acquire<int>("LoadScreenID", 0);
@@ -91,6 +97,16 @@ namespace Andastra.Parsing.Resource.Generics
             root.SetSingle("AlphaTest", are.AlphaTest);
             root.SetInt32("CameraStyle", are.CameraStyle);
             root.SetResRef("DefaultEnvMap", are.DefaultEnvMap);
+            // Matching Python: root.set_uint8("Unescapable", are.unescapable)
+            root.SetUInt8("Unescapable", are.Unescapable ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint8("DisableTransit", are.disable_transit)
+            root.SetUInt8("DisableTransit", are.DisableTransit ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint8("StealthXPEnabled", are.stealth_xp)
+            root.SetUInt8("StealthXPEnabled", are.StealthXp ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint32("StealthXPLoss", are.stealth_xp_loss)
+            root.SetUInt32("StealthXPLoss", (uint)are.StealthXpLoss);
+            // Matching Python: root.set_uint32("StealthXPMax", are.stealth_xp_max)
+            root.SetUInt32("StealthXPMax", (uint)are.StealthXpMax);
             root.SetResRef("Grass_TexName", are.GrassTexture);
             root.SetSingle("Grass_Density", are.GrassDensity);
             root.SetSingle("Grass_QuadSize", are.GrassSize);

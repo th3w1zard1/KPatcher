@@ -27,6 +27,9 @@ namespace Andastra.Parsing.Resource.Generics
         public ResRef DefaultEnvMap { get; set; } = ResRef.FromBlank();
         public bool DisableTransit { get; set; }
         public bool Unescapable { get; set; }
+        public bool StealthXp { get; set; }
+        public int StealthXpMax { get; set; }
+        public int StealthXpLoss { get; set; }
         public ResRef GrassTexture { get; set; } = ResRef.FromBlank();
         public float GrassDensity { get; set; }
         public float GrassSize { get; set; }
