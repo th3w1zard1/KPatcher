@@ -35,6 +35,14 @@ namespace Andastra.Parsing.Resource.Generics
             are.MapPoint2 = new System.Numerics.Vector2(
                 mapStruct.Acquire<float>("MapPt2X", 0.0f),
                 mapStruct.Acquire<float>("MapPt2Y", 0.0f));
+            // Matching Python: are.world_point_1 = Vector2(map_struct.acquire("WorldPt1X", 0.0), map_struct.acquire("WorldPt1Y", 0.0))
+            are.WorldPoint1 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("WorldPt1X", 0.0f),
+                mapStruct.Acquire<float>("WorldPt1Y", 0.0f));
+            // Matching Python: are.world_point_2 = Vector2(map_struct.acquire("WorldPt2X", 0.0), map_struct.acquire("WorldPt2Y", 0.0))
+            are.WorldPoint2 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("WorldPt2X", 0.0f),
+                mapStruct.Acquire<float>("WorldPt2Y", 0.0f));
             are.MapList = new System.Collections.Generic.List<ResRef>(); // Placeholder
 
             // Extract basic fields
@@ -112,6 +120,12 @@ namespace Andastra.Parsing.Resource.Generics
             // Matching Python: map_struct.set_single("MapPt2X", map_pt2.x) and map_struct.set_single("MapPt2Y", map_pt2.y)
             mapStruct.SetSingle("MapPt2X", are.MapPoint2.X);
             mapStruct.SetSingle("MapPt2Y", are.MapPoint2.Y);
+            // Matching Python: map_struct.set_single("WorldPt1X", are.world_point_1.x) and map_struct.set_single("WorldPt1Y", are.world_point_1.y)
+            mapStruct.SetSingle("WorldPt1X", are.WorldPoint1.X);
+            mapStruct.SetSingle("WorldPt1Y", are.WorldPoint1.Y);
+            // Matching Python: map_struct.set_single("WorldPt2X", are.world_point_2.x) and map_struct.set_single("WorldPt2Y", are.world_point_2.y)
+            mapStruct.SetSingle("WorldPt2X", are.WorldPoint2.X);
+            mapStruct.SetSingle("WorldPt2Y", are.WorldPoint2.Y);
 
             // Set basic fields
             root.SetString("Tag", are.Tag);

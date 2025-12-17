@@ -140,6 +140,24 @@ namespace Andastra.Parsing.Resource.Generics
         public Vector2 MapPoint2 { get; set; }
 
         /// <summary>
+        /// World point 1 (world coordinates).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:256
+        /// Original: self.world_point_1: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 WorldPoint1 { get; set; }
+
+        /// <summary>
+        /// World point 2 (world coordinates).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:257
+        /// Original: self.world_point_2: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 WorldPoint2 { get; set; }
+
+        /// <summary>
         /// Load screen ID (index into loadscreens.2da).
         /// </summary>
         /// <remarks>
