@@ -153,7 +153,10 @@ namespace Andastra.Parsing.Formats.NCS
             }
 
             int instructionCountBeforeLoop = _instructions.Count;
-            while (_reader.Position < safeEndPosition && _reader.Remaining > 0)
+            // CRITICAL: Only check Position < safeEndPosition, not Remaining
+            // Remaining is based on _size which may be different from TrueSize()
+            // safeEndPosition is already calculated using TrueSize(), so it's authoritative
+            while (_reader.Position < safeEndPosition)
             {
                 int offset = _reader.Position;
                 
@@ -377,6 +380,7 @@ namespace Andastra.Parsing.Formats.NCS
                         {
                             // Comparison operators with invalid qualifiers - use IntInt variant as fallback
                             // This preserves the instruction semantics while allowing roundtrip
+                            Console.WriteLine($"DEBUG NCSBinaryReader: Using fallback for {byteCode} with invalid qualifier 0x{qualifier:X2} at offset {instructionOffset}");
                             if (byteCode == NCSByteCode.LEQxx)
                             {
                                 instruction.InsType = NCSInstructionType.LEQII;
