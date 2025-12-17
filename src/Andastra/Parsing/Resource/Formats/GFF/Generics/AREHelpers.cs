@@ -23,6 +23,10 @@ namespace Andastra.Parsing.Resource.Generics
 
             // Matching Python: are.north_axis = ARENorthAxis(map_struct.acquire("NorthAxis", 0))
             are.NorthAxis = (ARENorthAxis)mapStruct.Acquire<int>("NorthAxis", 0);
+            // Matching Python: are.map_zoom = map_struct.acquire("MapZoom", 0)
+            are.MapZoom = mapStruct.Acquire<int>("MapZoom", 0);
+            // Matching Python: are.map_res_x = map_struct.acquire("MapResX", 0)
+            are.MapResX = mapStruct.Acquire<int>("MapResX", 0);
             are.MapList = new System.Collections.Generic.List<ResRef>(); // Placeholder
 
             // Extract basic fields
@@ -90,8 +94,10 @@ namespace Andastra.Parsing.Resource.Generics
             root.SetStruct("Map", mapStruct);
             // Matching Python: map_struct.set_int32("NorthAxis", are.north_axis.value)
             mapStruct.SetInt32("NorthAxis", (int)are.NorthAxis);
-            // mapStruct.SetInt32("MapZoom", are.MapZoom);
-            // mapStruct.SetInt32("MapResX", are.MapResX);
+            // Matching Python: map_struct.set_int32("MapZoom", are.map_zoom)
+            mapStruct.SetInt32("MapZoom", are.MapZoom);
+            // Matching Python: map_struct.set_int32("MapResX", are.map_res_x)
+            mapStruct.SetInt32("MapResX", are.MapResX);
 
             // Set basic fields
             root.SetString("Tag", are.Tag);
