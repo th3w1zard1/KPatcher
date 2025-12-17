@@ -30,6 +30,10 @@ namespace Andastra.Parsing.Resource.Generics
             are.AlphaTest = root.Acquire<int>("AlphaTest", 0);
             are.CameraStyle = root.Acquire<int>("CameraStyle", 0);
             are.DefaultEnvMap = root.Acquire<ResRef>("DefaultEnvMap", ResRef.FromBlank());
+            // Matching Python: are.unescapable = bool(root.acquire("Unescapable", 0))
+            are.Unescapable = root.GetUInt8("Unescapable") == 1;
+            // Matching Python: are.disable_transit = bool(root.acquire("DisableTransit", 0))
+            are.DisableTransit = root.GetUInt8("DisableTransit") == 1;
             are.GrassTexture = root.Acquire<ResRef>("Grass_TexName", ResRef.FromBlank());
             are.GrassDensity = root.Acquire<float>("Grass_Density", 0.0f);
             are.GrassSize = root.Acquire<float>("Grass_QuadSize", 0.0f);
