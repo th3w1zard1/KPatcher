@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using Andastra.Parsing;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
@@ -119,6 +120,24 @@ namespace Andastra.Parsing.Resource.Generics
         /// Original: self.map_res_x: int = 0
         /// </remarks>
         public int MapResX { get; set; }
+
+        /// <summary>
+        /// Map point 1 (image coordinates, normalized 0.0-1.0).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:254
+        /// Original: self.map_point_1: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 MapPoint1 { get; set; }
+
+        /// <summary>
+        /// Map point 2 (image coordinates, normalized 0.0-1.0).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:255
+        /// Original: self.map_point_2: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 MapPoint2 { get; set; }
 
         /// <summary>
         /// Load screen ID (index into loadscreens.2da).

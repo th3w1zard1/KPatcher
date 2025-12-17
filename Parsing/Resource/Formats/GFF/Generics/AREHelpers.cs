@@ -27,6 +27,14 @@ namespace Andastra.Parsing.Resource.Generics
             are.MapZoom = mapStruct.Acquire<int>("MapZoom", 0);
             // Matching Python: are.map_res_x = map_struct.acquire("MapResX", 0)
             are.MapResX = mapStruct.Acquire<int>("MapResX", 0);
+            // Matching Python: are.map_point_1 = Vector2(map_struct.acquire("MapPt1X", 0.0), map_struct.acquire("MapPt1Y", 0.0))
+            are.MapPoint1 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("MapPt1X", 0.0f),
+                mapStruct.Acquire<float>("MapPt1Y", 0.0f));
+            // Matching Python: are.map_point_2 = Vector2(map_struct.acquire("MapPt2X", 0.0), map_struct.acquire("MapPt2Y", 0.0))
+            are.MapPoint2 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("MapPt2X", 0.0f),
+                mapStruct.Acquire<float>("MapPt2Y", 0.0f));
             are.MapList = new System.Collections.Generic.List<ResRef>(); // Placeholder
 
             // Extract basic fields
@@ -98,6 +106,12 @@ namespace Andastra.Parsing.Resource.Generics
             mapStruct.SetInt32("MapZoom", are.MapZoom);
             // Matching Python: map_struct.set_int32("MapResX", are.map_res_x)
             mapStruct.SetInt32("MapResX", are.MapResX);
+            // Matching Python: map_struct.set_single("MapPt1X", map_pt1.x) and map_struct.set_single("MapPt1Y", map_pt1.y)
+            mapStruct.SetSingle("MapPt1X", are.MapPoint1.X);
+            mapStruct.SetSingle("MapPt1Y", are.MapPoint1.Y);
+            // Matching Python: map_struct.set_single("MapPt2X", map_pt2.x) and map_struct.set_single("MapPt2Y", map_pt2.y)
+            mapStruct.SetSingle("MapPt2X", are.MapPoint2.X);
+            mapStruct.SetSingle("MapPt2Y", are.MapPoint2.Y);
 
             // Set basic fields
             root.SetString("Tag", are.Tag);
