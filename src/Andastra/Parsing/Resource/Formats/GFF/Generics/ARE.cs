@@ -25,6 +25,8 @@ namespace Andastra.Parsing.Resource.Generics
         public int AlphaTest { get; set; }
         public int CameraStyle { get; set; }
         public ResRef DefaultEnvMap { get; set; } = ResRef.FromBlank();
+        public bool DisableTransit { get; set; }
+        public bool Unescapable { get; set; }
         public ResRef GrassTexture { get; set; } = ResRef.FromBlank();
         public float GrassDensity { get; set; }
         public float GrassSize { get; set; }
