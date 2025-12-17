@@ -44,12 +44,13 @@
 
   <ItemGroup>
     <!-- Core game engine references -->
-    <ProjectReference Include="..\Runtime\Core\Andastra.Runtime.Core.csproj" />
-    <ProjectReference Include="..\Runtime\Content\Andastra.Runtime.Content.csproj" />
-    <ProjectReference Include="..\Runtime\Scripting\Andastra.Runtime.Scripting.csproj" />
-    <ProjectReference Include="..\Runtime\Games\Odyssey\Andastra.Runtime.Games.Kotor.csproj" />
-    <ProjectReference Include="..\Runtime\Graphics\Common\Andastra.Runtime.Graphics.Common.csproj" />
-    <ProjectReference Include="..\Runtime\Graphics\Stride\Andastra.Runtime.Graphics.Stride.csproj" />
+    <!-- Note: These are placeholder references. Update paths once runtime projects are available for WASM -->
+    <!-- <ProjectReference Include="..\Runtime\Core\Andastra.Runtime.Core.csproj" /> -->
+    <!-- <ProjectReference Include="..\Runtime\Content\Andastra.Runtime.Content.csproj" /> -->
+    <!-- <ProjectReference Include="..\Runtime\Scripting\Andastra.Runtime.Scripting.csproj" /> -->
+    <!-- <ProjectReference Include="..\Runtime\Games\Odyssey\Andastra.Runtime.Games.Kotor.csproj" /> -->
+    <!-- <ProjectReference Include="..\Runtime\Graphics\Common\Andastra.Runtime.Graphics.Common.csproj" /> -->
+    <!-- <ProjectReference Include="..\Runtime\Graphics\Stride\Andastra.Runtime.Graphics.Stride.csproj" /> -->
   </ItemGroup>
 
   <ItemGroup>

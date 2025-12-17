@@ -73,7 +73,7 @@ app.MapPost("/api/runtime/key", (HttpContext context, EphemeralKeyGenerator keyG
             timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
         });
     }
-    catch (Exception ex)
+    catch (Exception)
     {
         return Results.Problem(
             detail: "Failed to generate key",
@@ -113,7 +113,7 @@ app.MapGet("/api/runtime/wasm", async (HttpContext context) =>
         
         return Results.Bytes(wasmBytes, contentType: "application/wasm-encrypted");
     }
-    catch (Exception ex)
+    catch (Exception)
     {
         return Results.Problem(
             detail: "Failed to read WASM binary",
