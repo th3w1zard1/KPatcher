@@ -28,7 +28,7 @@ namespace Andastra.Parsing.Formats.NCS
         [CanBeNull] public NCSInstruction Jump { get; set; }
         public int Offset { get; set; }
         public int LineNumber { get; set; }
-        
+
         // Store original bytecode/qualifier for roundtrip fidelity
         // When reading invalid qualifiers, we preserve the original values
         // so they can be written back exactly as they were
