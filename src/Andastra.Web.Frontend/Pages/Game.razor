@@ -1,0 +1,286 @@
+@page "/game"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<PageTitle>Andastra Game</PageTitle>
+
+<div class="game-container">
+    <h1>Andastra Browser Game</h1>
+    
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+    
+    @if (string.IsNullOrEmpty(sessionId))
+    {
+        <div class="game-menu">
+            <button class="btn btn-primary btn-lg" @onclick="StartGame" disabled="@isConnecting">
+                @if (isConnecting)
+                {
+                    <span>Connecting...</span>
+                }
+                else
+                {
+                    <span>Start New Game</span>
+                }
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="game-info">
+            <p>Session: @sessionId</p>
+            <p>Status: @connectionStatus</p>
+        </div>
+        
+        <div class="game-canvas-container" tabindex="0" 
+             @onkeydown="HandleKeyDown" 
+             @onkeyup="HandleKeyUp"
+             @onmousemove="HandleMouseMove"
+             @onmousedown="HandleMouseDown"
+             @onmouseup="HandleMouseUp">
+            
+            @if (!string.IsNullOrEmpty(currentFrameBase64))
+            {
+                <img src="data:image/jpeg;base64,@currentFrameBase64" 
+                     alt="Game Frame" 
+                     class="game-frame" />
+            }
+            else
+            {
+                <div class="loading-placeholder">
+                    <p>Loading game...</p>
+                </div>
+            }
+        </div>
+        
+        <div class="game-controls">
+            <button class="btn btn-danger" @onclick="StopGame">Stop Game</button>
+        </div>
+    }
+</div>
+
+<style>
+    .game-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .game-menu {
+        text-align: center;
+        margin: 50px 0;
+    }
+    
+    .game-info {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .game-canvas-container {
+        position: relative;
+        background: #000;
+        border: 2px solid #333;
+        border-radius: 5px;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: crosshair;
+    }
+    
+    .game-canvas-container:focus {
+        outline: 2px solid #007bff;
+    }
+    
+    .game-frame {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    .loading-placeholder {
+        color: #fff;
+        text-align: center;
+    }
+    
+    .game-controls {
+        margin-top: 10px;
+        text-align: center;
+    }
+    
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+</style>
+
+@code {
+    private HubConnection? hubConnection;
+    private string? sessionId;
+    private string? currentFrameBase64;
+    private string connectionStatus = "Disconnected";
+    private string? errorMessage;
+    private bool isConnecting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<string>("ReceiveFrame", (frameData) =>
+        {
+            currentFrameBase64 = frameData;
+            StateHasChanged();
+        });
+
+        hubConnection.Reconnecting += (error) =>
+        {
+            connectionStatus = "Reconnecting...";
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+
+        hubConnection.Reconnected += (connectionId) =>
+        {
+            connectionStatus = "Connected";
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+
+        hubConnection.Closed += (error) =>
+        {
+            connectionStatus = "Disconnected";
+            if (error != null)
+            {
+                errorMessage = $"Connection closed: {error.Message}";
+            }
+            StateHasChanged();
+            return Task.CompletedTask;
+        };
+    }
+
+    private async Task StartGame()
+    {
+        try
+        {
+            isConnecting = true;
+            errorMessage = null;
+            StateHasChanged();
+
+            if (hubConnection?.State != HubConnectionState.Connected)
+            {
+                await hubConnection!.StartAsync();
+                connectionStatus = "Connected";
+            }
+
+            sessionId = await hubConnection.InvokeAsync<string>("CreateSession");
+            await hubConnection.InvokeAsync("JoinSession", sessionId);
+            
+            isConnecting = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to start game: {ex.Message}";
+            isConnecting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task StopGame()
+    {
+        sessionId = null;
+        currentFrameBase64 = null;
+        
+        if (hubConnection?.State == HubConnectionState.Connected)
+        {
+            await hubConnection.StopAsync();
+            connectionStatus = "Disconnected";
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrEmpty(sessionId))
+        {
+            await hubConnection.InvokeAsync("SendInput", sessionId, new
+            {
+                Type = "keydown",
+                Key = e.Key
+            });
+        }
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrEmpty(sessionId))
+        {
+            await hubConnection.InvokeAsync("SendInput", sessionId, new
+            {
+                Type = "keyup",
+                Key = e.Key
+            });
+        }
+    }
+
+    private async Task HandleMouseMove(MouseEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrEmpty(sessionId))
+        {
+            await hubConnection.InvokeAsync("SendInput", sessionId, new
+            {
+                Type = "mousemove",
+                MouseX = (int)e.ClientX,
+                MouseY = (int)e.ClientY
+            });
+        }
+    }
+
+    private async Task HandleMouseDown(MouseEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrEmpty(sessionId))
+        {
+            await hubConnection.InvokeAsync("SendInput", sessionId, new
+            {
+                Type = "mousedown",
+                Button = e.Button
+            });
+        }
+    }
+
+    private async Task HandleMouseUp(MouseEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected && !string.IsNullOrEmpty(sessionId))
+        {
+            await hubConnection.InvokeAsync("SendInput", sessionId, new
+            {
+                Type = "mouseup",
+                Button = e.Button
+            });
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
