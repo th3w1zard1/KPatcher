@@ -103,6 +103,24 @@ namespace Andastra.Parsing.Resource.Generics
         public ARENorthAxis NorthAxis { get; set; } = ARENorthAxis.PositiveX;
 
         /// <summary>
+        /// Map zoom level.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:259
+        /// Original: self.map_zoom: int = 0
+        /// </remarks>
+        public int MapZoom { get; set; }
+
+        /// <summary>
+        /// Map resolution X.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:258
+        /// Original: self.map_res_x: int = 0
+        /// </remarks>
+        public int MapResX { get; set; }
+
+        /// <summary>
         /// Load screen ID (index into loadscreens.2da).
         /// </summary>
         /// <remarks>
