@@ -94,6 +94,15 @@ namespace Andastra.Parsing.Resource.Generics
         public List<ResRef> MapList { get; set; } = new List<ResRef>();
 
         /// <summary>
+        /// Map north axis orientation.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:260
+        /// Original: self.north_axis: ARENorthAxis = ARENorthAxis.PositiveX
+        /// </remarks>
+        public ARENorthAxis NorthAxis { get; set; } = ARENorthAxis.PositiveX;
+
+        /// <summary>
         /// Load screen ID (index into loadscreens.2da).
         /// </summary>
         /// <remarks>

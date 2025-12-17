@@ -21,7 +21,8 @@ namespace Andastra.Parsing.Resource.Generics
             // map_original_struct_id would need to be stored in ARE class
             // are.map_original_struct_id = mapStruct.StructId;
 
-            // are.north_axis = (ARENorthAxis)mapStruct.Acquire<int>("NorthAxis", 0);
+            // Matching Python: are.north_axis = ARENorthAxis(map_struct.acquire("NorthAxis", 0))
+            are.NorthAxis = (ARENorthAxis)mapStruct.Acquire<int>("NorthAxis", 0);
             are.MapList = new System.Collections.Generic.List<ResRef>(); // Placeholder
 
             // Extract basic fields
@@ -87,9 +88,10 @@ namespace Andastra.Parsing.Resource.Generics
             // Create Map struct
             var mapStruct = new GFFStruct();
             root.SetStruct("Map", mapStruct);
+            // Matching Python: map_struct.set_int32("NorthAxis", are.north_axis.value)
+            mapStruct.SetInt32("NorthAxis", (int)are.NorthAxis);
             // mapStruct.SetInt32("MapZoom", are.MapZoom);
             // mapStruct.SetInt32("MapResX", are.MapResX);
-            // mapStruct.SetInt32("NorthAxis", (int)are.NorthAxis);
 
             // Set basic fields
             root.SetString("Tag", are.Tag);
