@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
@@ -293,4 +294,3 @@ ReplaceFile0=replace.tlk
 
     }
 }
-

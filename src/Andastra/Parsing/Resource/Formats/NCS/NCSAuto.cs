@@ -167,7 +167,7 @@ namespace Andastra.Parsing.Formats.NCS
             {
                 try
                 {
-                    var parsed = Script.NwscriptParser.ParseNwscriptFile(nwscriptPath, game);
+                    var parsed = NwscriptParser.ParseNwscriptFile(nwscriptPath, game);
                     functions = parsed.functions;
                     constants = parsed.constants;
                 }
@@ -183,7 +183,7 @@ namespace Andastra.Parsing.Formats.NCS
             // If library is not provided, use default game library
             if (library == null)
             {
-                library = game.IsK1() ? Script.ScriptLib.KOTOR_LIBRARY : Script.ScriptLib.TSL_LIBRARY;
+                library = game.IsK1() ? ScriptLib.KOTOR_LIBRARY : ScriptLib.TSL_LIBRARY;
             }
             NCS ncs = compiler.Compile(source, library);
 

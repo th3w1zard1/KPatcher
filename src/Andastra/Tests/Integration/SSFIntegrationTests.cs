@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.SSF;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
@@ -235,4 +236,3 @@ Battlecry 3=StrRef7
 
     }
 }
-

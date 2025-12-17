@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;

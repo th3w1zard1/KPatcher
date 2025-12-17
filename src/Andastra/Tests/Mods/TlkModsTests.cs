@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;

@@ -3,6 +3,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.TwoDA;
 using Andastra.Parsing.Memory;
 using Andastra.Parsing.Mods.NSS;
+using Andastra.Utility;
 using JetBrains.Annotations;
 
 namespace Andastra.Parsing.Mods.TwoDA

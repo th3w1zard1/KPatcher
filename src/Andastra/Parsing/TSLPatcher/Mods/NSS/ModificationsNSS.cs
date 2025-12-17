@@ -204,7 +204,7 @@ namespace Andastra.Parsing.Mods.NSS
 
                 if (!memoryDict.ContainsKey(tokenId))
                 {
-                    throw new KeyError($"{tokenName}{tokenId} was not defined before use in '{SourceFile}'");
+                    throw new KeyNotFoundException($"{tokenName}{tokenId} was not defined before use in '{SourceFile}'");
                 }
 
                 string replacementValue = memoryDict[tokenId];
@@ -231,7 +231,7 @@ namespace Andastra.Parsing.Mods.NSS
 
                 if (!memoryDict.ContainsKey(tokenId))
                 {
-                    throw new KeyError($"{tokenName}{tokenId} was not defined before use in '{SourceFile}'");
+                    throw new KeyNotFoundException($"{tokenName}{tokenId} was not defined before use in '{SourceFile}'");
                 }
 
                 int replacementValue = memoryDict[tokenId];
