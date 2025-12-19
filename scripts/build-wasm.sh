@@ -87,7 +87,6 @@ WasmEncryption.EncryptWasmFile(wasmPath, outputPath, key);
 File.WriteAllBytes(keyPath, key);
 Console.WriteLine($"Encrypted WASM saved to: {outputPath}");
 Console.WriteLine($"Master key saved to: {keyPath}");
-Console.WriteLine($"Key (Base64): {Convert.ToBase64String(key)}");
 EOF
 
 dotnet script "$OUTPUT_DIR/encrypt.csx" \
