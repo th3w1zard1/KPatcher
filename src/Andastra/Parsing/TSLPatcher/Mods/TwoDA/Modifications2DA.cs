@@ -4,6 +4,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.TwoDA;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Mods.TwoDA
 {

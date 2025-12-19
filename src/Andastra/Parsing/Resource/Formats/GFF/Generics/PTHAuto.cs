@@ -3,6 +3,7 @@ using System.IO;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -69,4 +70,3 @@ namespace Andastra.Parsing.Resource.Generics
         }
     }
 }
-

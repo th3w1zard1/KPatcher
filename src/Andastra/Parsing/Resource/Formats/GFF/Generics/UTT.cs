@@ -1,6 +1,7 @@
 using Andastra.Parsing;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {

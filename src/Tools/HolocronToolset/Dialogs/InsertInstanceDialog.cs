@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Andastra.Parsing;
-using Andastra.Parsing.Resources;
+using Andastra.Parsing.Common;
+using Andastra.Parsing.Resource;
 using HolocronToolset.Data;
-using FileResource = Andastra.Parsing.Resources.FileResource;
-using Module = Andastra.Parsing.Module;
+using FileResource = Andastra.Parsing.Extract.FileResource;
+using Module = Andastra.Parsing.Common.Module;
 
 namespace HolocronToolset.Dialogs
 {
@@ -79,14 +79,38 @@ namespace HolocronToolset.Dialogs
                 FontSize = 18,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
             };
-            var okButton = new Button { Content = "OK" };
-            okButton.Click += (sender, e) => Accept();
-            var cancelButton = new Button { Content = "Cancel" };
-            cancelButton.Click += (sender, e) => Close();
+
+            // Create UI controls programmatically for test scenarios
+            _reuseResourceRadio = new RadioButton { Content = "Reuse Resource" };
+            _copyResourceRadio = new RadioButton { Content = "Copy Resource" };
+            _createResourceRadio = new RadioButton { Content = "Create Resource" };
+            _resrefEdit = new TextBox { Watermark = "ResRef" };
+            _locationSelect = new ComboBox();
+            _resourceFilter = new TextBox { Watermark = "Filter" };
+            _resourceList = new ListBox();
+            _okButton = new Button { Content = "OK" };
+            _cancelButton = new Button { Content = "Cancel" };
+
+            // Connect events
+            _reuseResourceRadio.IsCheckedChanged += (s, e) => OnResourceRadioToggled();
+            _copyResourceRadio.IsCheckedChanged += (s, e) => OnResourceRadioToggled();
+            _createResourceRadio.IsCheckedChanged += (s, e) => OnResourceRadioToggled();
+            _resrefEdit.TextChanged += (s, e) => OnResrefEdited(_resrefEdit.Text);
+            _resourceFilter.TextChanged += (s, e) => OnResourceFilterChanged();
+            _resourceList.SelectionChanged += (s, e) => OnResourceSelected();
+            _okButton.Click += (s, e) => Accept();
+            _cancelButton.Click += (s, e) => Close();
 
             panel.Children.Add(titleLabel);
-            panel.Children.Add(okButton);
-            panel.Children.Add(cancelButton);
+            panel.Children.Add(_reuseResourceRadio);
+            panel.Children.Add(_copyResourceRadio);
+            panel.Children.Add(_createResourceRadio);
+            panel.Children.Add(_resrefEdit);
+            panel.Children.Add(_locationSelect);
+            panel.Children.Add(_resourceFilter);
+            panel.Children.Add(_resourceList);
+            panel.Children.Add(_okButton);
+            panel.Children.Add(_cancelButton);
             Content = panel;
         }
 
@@ -102,16 +126,26 @@ namespace HolocronToolset.Dialogs
 
         private void SetupUI()
         {
-            // Find controls from XAML
-            _reuseResourceRadio = this.FindControl<RadioButton>("reuseResourceRadio");
-            _copyResourceRadio = this.FindControl<RadioButton>("copyResourceRadio");
-            _createResourceRadio = this.FindControl<RadioButton>("createResourceRadio");
-            _resrefEdit = this.FindControl<TextBox>("resrefEdit");
-            _locationSelect = this.FindControl<ComboBox>("locationSelect");
-            _resourceFilter = this.FindControl<TextBox>("resourceFilter");
-            _resourceList = this.FindControl<ListBox>("resourceList");
-            _okButton = this.FindControl<Button>("okButton");
-            _cancelButton = this.FindControl<Button>("cancelButton");
+            // Use try-catch to handle cases where XAML controls might not be available (e.g., in tests)
+            try
+            {
+                // Find controls from XAML
+                _reuseResourceRadio = this.FindControl<RadioButton>("reuseResourceRadio");
+                _copyResourceRadio = this.FindControl<RadioButton>("copyResourceRadio");
+                _createResourceRadio = this.FindControl<RadioButton>("createResourceRadio");
+                _resrefEdit = this.FindControl<TextBox>("resrefEdit");
+                _locationSelect = this.FindControl<ComboBox>("locationSelect");
+                _resourceFilter = this.FindControl<TextBox>("resourceFilter");
+                _resourceList = this.FindControl<ListBox>("resourceList");
+                _okButton = this.FindControl<Button>("okButton");
+                _cancelButton = this.FindControl<Button>("cancelButton");
+            }
+            catch
+            {
+                // XAML controls not available - create programmatic UI for tests
+                SetupProgrammaticUI();
+                return; // SetupProgrammaticUI already connects events
+            }
 
             if (_reuseResourceRadio != null)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Uninstall;
 using FluentAssertions;

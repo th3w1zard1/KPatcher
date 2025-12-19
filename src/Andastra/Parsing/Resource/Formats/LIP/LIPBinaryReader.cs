@@ -15,19 +15,19 @@ namespace Andastra.Parsing.Formats.LIP
         public LIPBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, sizeNullable);
         }
 
         public LIPBinaryReader(string filepath, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, sizeNullable);
         }
 
         public LIPBinaryReader(Stream source, int offset = 0, int size = 0)
         {
             int? sizeNullable = size > 0 ? (int?)size : null;
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, sizeNullable);
         }
 
         // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/lip/io_lip.py:32-56

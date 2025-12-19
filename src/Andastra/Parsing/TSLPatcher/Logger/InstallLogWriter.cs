@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Logger
 {
@@ -200,4 +201,3 @@ namespace Andastra.Parsing.Logger
         }
     }
 }
-

@@ -5,6 +5,7 @@ using System.Linq;
 using Andastra.Parsing;
 using Andastra.Parsing.Formats.ERF;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Extract
 {
@@ -55,7 +56,7 @@ namespace Andastra.Parsing.Extract
                 string part = nestedParts[i];
 
                 // Parse the current data as a capsule to find the next resource
-                using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(currentData))
+                using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(currentData))
                 {
                     string fileType = reader.ReadString(4);
                     reader.Skip(4); // file version
@@ -170,4 +171,3 @@ namespace Andastra.Parsing.Extract
         }
     }
 }
-

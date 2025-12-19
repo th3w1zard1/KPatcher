@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TLK
 {
@@ -121,4 +122,3 @@ namespace Andastra.Parsing.Formats.TLK
         }
     }
 }
-

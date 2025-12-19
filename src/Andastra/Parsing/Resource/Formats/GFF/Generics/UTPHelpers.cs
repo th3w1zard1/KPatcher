@@ -3,6 +3,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Resource;
 using static Andastra.Parsing.Common.GameExtensions;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -21,27 +22,28 @@ namespace Andastra.Parsing.Resource.Generics
             utp.Tag = root.Acquire<string>("Tag", "");
             utp.Name = root.Acquire<LocalizedString>("LocName", LocalizedString.FromInvalid());
             utp.ResRef = root.Acquire<ResRef>("TemplateResRef", ResRef.FromBlank());
-            utp.AutoRemoveKey = root.Acquire<int>("AutoRemoveKey", 0) != 0;
+            // Boolean fields stored as UInt8 - use GetUInt8() != 0 (matching UTW fix)
+            utp.AutoRemoveKey = root.GetUInt8("AutoRemoveKey") != 0;
             utp.Conversation = root.Acquire<ResRef>("Conversation", ResRef.FromBlank());
             utp.FactionId = root.Acquire<int>("Faction", 0);
-            utp.Plot = root.Acquire<int>("Plot", 0) != 0;
-            utp.NotBlastable = root.Acquire<int>("NotBlastable", 0) != 0;
-            utp.Min1Hp = root.Acquire<int>("Min1HP", 0) != 0;
-            utp.KeyRequired = root.Acquire<int>("KeyRequired", 0) != 0;
-            utp.Lockable = root.Acquire<int>("Lockable", 0) != 0;
-            utp.Locked = root.Acquire<int>("Locked", 0) != 0;
-            utp.UnlockDc = root.Acquire<int>("OpenLockDC", 0);
+            utp.Plot = root.GetUInt8("Plot") != 0;
+            utp.NotBlastable = root.GetUInt8("NotBlastable") != 0;
+            utp.Min1Hp = root.GetUInt8("Min1HP") != 0;
+            utp.KeyRequired = root.GetUInt8("KeyRequired") != 0;
+            utp.Lockable = root.GetUInt8("Lockable") != 0;
+            utp.Locked = root.GetUInt8("Locked") != 0;
+            utp.UnlockDc = root.GetUInt8("OpenLockDC");
             utp.KeyName = root.Acquire<string>("KeyName", "");
-            utp.AnimationState = root.Acquire<int>("AnimationState", 0);
+            utp.AnimationState = root.GetUInt8("AnimationState");
             utp.AppearanceId = root.Acquire<int>("Appearance", 0);
             utp.MaximumHp = root.Acquire<int>("HP", 0);
             utp.CurrentHp = root.Acquire<int>("CurrentHP", 0);
-            utp.Hardness = root.Acquire<int>("Hardness", 0);
-            utp.Fortitude = root.Acquire<int>("Fort", 0);
-            utp.HasInventory = root.Acquire<int>("HasInventory", 0) != 0;
-            utp.PartyInteract = root.Acquire<int>("PartyInteract", 0) != 0;
-            utp.Static = root.Acquire<int>("Static", 0) != 0;
-            utp.Useable = root.Acquire<int>("Useable", 0) != 0;
+            utp.Hardness = root.GetUInt8("Hardness");
+            utp.Fortitude = root.GetUInt8("Fort");
+            utp.HasInventory = root.GetUInt8("HasInventory") != 0;
+            utp.PartyInteract = root.GetUInt8("PartyInteract") != 0;
+            utp.Static = root.GetUInt8("Static") != 0;
+            utp.Useable = root.GetUInt8("Useable") != 0;
             utp.Comment = root.Acquire<string>("Comment", "");
             utp.UnlockDiff = root.Acquire<int>("OpenLockDiff", 0);
             utp.UnlockDiffMod = root.Acquire<int>("OpenLockDiffMod", 0);
@@ -71,7 +73,7 @@ namespace Andastra.Parsing.Resource.Generics
             foreach (var itemStruct in itemList)
             {
                 var resref = itemStruct.Acquire<ResRef>("InventoryRes", ResRef.FromBlank());
-                bool droppable = itemStruct.Acquire<int>("Dropable", 0) != 0;
+                bool droppable = itemStruct.GetUInt8("Dropable") != 0;
                 if (resref != null && !string.IsNullOrEmpty(resref.ToString()))
                 {
                     utp.Inventory.Add(new InventoryItem(resref, droppable));

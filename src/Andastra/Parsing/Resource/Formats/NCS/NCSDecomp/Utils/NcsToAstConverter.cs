@@ -1020,6 +1020,11 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp.Utils
             int convertedCount = 0;
             int nullCount = 0;
             int actionCount = 0;
+            // DEBUG: Log the range being processed
+            if (limit > 0 && limit == instructions.Count)
+            {
+                JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: Processing range {startIdx} to {limit - 1} (inclusive), last instruction index={instructions.Count - 1}, last instruction type={instructions[instructions.Count - 1]?.InsType}");
+            }
             for (int i = startIdx; i < limit; i++)
             {
                 if (instructions[i].InsType == NCSInstructionType.ACTION)
@@ -1033,10 +1038,21 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp.Utils
                 {
                     cmdBlock.AddCmd((AST.PCmd)(object)cmd);
                     convertedCount++;
+                    // DEBUG: Log ACTION conversions, especially near the end
+                    if (instructions[i].InsType == NCSInstructionType.ACTION && (i >= limit - 5 || i == limit - 1))
+                    {
+                        JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: Successfully converted ACTION at index {i} (near end, limit={limit})");
+                    }
                 }
                 else
                 {
                     nullCount++;
+                    // CRITICAL: Log if ACTION returns null (should never happen)
+                    if (instructions[i].InsType == NCSInstructionType.ACTION)
+                    {
+                        JavaSystem.@out.Println($"DEBUG ConvertInstructionRangeToSubroutine: ERROR - ACTION at index {i} returned null!");
+                        Console.Error.WriteLine($"ERROR ConvertInstructionRangeToSubroutine: ACTION at index {i} returned null!");
+                    }
                     if (nullCount <= 5) // Log first 5 null conversions
                     {
                         JavaSystem.@out.Println($"DEBUG NcsToAstConverter: Instruction at index {i} ({instructions[i].InsType}) returned null");

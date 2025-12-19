@@ -87,7 +87,7 @@ namespace Andastra.Parsing.Extract.Chitin
                 return;
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(bifPath))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(bifPath))
             {
                 string bifFileType = reader.ReadString(4);     // 0x0
                 string bifFileVersion = reader.ReadString(4);  // 0x4
@@ -132,7 +132,7 @@ namespace Andastra.Parsing.Extract.Chitin
         /// </summary>
         private (Dictionary<uint, string> keys, List<string> bifs) GetChitinData()
         {
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_keyPath))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_keyPath))
             {
                 // Read header
                 reader.Skip(8); // file type + version

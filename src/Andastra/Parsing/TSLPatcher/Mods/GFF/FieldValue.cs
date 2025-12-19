@@ -4,16 +4,17 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Memory;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Mods.GFF
 {
 
     /// <summary>
     /// GFF modification algorithms for TSLPatcher/HoloPatcher.
-    /// 
+    ///
     /// This module implements GFF field modification logic for applying patches from changes.ini files.
     /// Handles field additions, modifications, list operations, and struct manipulations.
-    /// 
+    ///
     /// References:
     /// ----------
     ///     vendor/TSLPatcher/TSLPatcher.pl - Original Perl GFF modification logic (broken and unfinished)
@@ -41,12 +42,12 @@ namespace Andastra.Parsing.Mods.GFF
 
         /// <summary>
         /// Applies a LocalizedString patch to a LocalizedString object.
-        /// 
+        ///
         /// Args:
         /// ----
         ///     locstring: LocalizedString object to apply patch to
         ///     memory: PatcherMemory object for resolving references
-        /// 
+        ///
         /// Processing Logic:
         /// ----------------
         ///     - Checks if stringref is set and sets locstring stringref if so
@@ -77,16 +78,16 @@ namespace Andastra.Parsing.Mods.GFF
 
         /// <summary>
         /// Validate a value based on its field type.
-        /// 
+        ///
         /// Args:
         /// ----
         ///     value: The value to validate
         ///     field_type: The field type to validate against
-        /// 
+        ///
         /// Returns:
         /// -------
         ///     value: The validated value
-        /// 
+        ///
         /// Processing Logic:
         /// ----------------
         ///     - Check if value matches field type
@@ -217,7 +218,7 @@ namespace Andastra.Parsing.Mods.GFF
             // In C#, Memory2DA is Dictionary<int, string> - paths are stored as strings
             if (!memory.Memory2DA.TryGetValue(TokenId, out string memoryVal))
             {
-                throw new KeyError($"2DAMEMORY{TokenId} was not defined before use");
+                throw new KeyError($"2DAMEMORY{TokenId}", "was not defined before use");
             }
             // In C#, memory values are stored as strings (paths are string values containing '/' or '\')
             return Validate(memoryVal, fieldType);
@@ -241,7 +242,7 @@ namespace Andastra.Parsing.Mods.GFF
         {
             if (!memory.MemoryStr.TryGetValue(TokenId, out int memoryVal))
             {
-                throw new KeyError($"StrRef{TokenId} was not defined before use!");
+                throw new KeyError($"StrRef{TokenId}", "was not defined before use!");
             }
             return Validate(memoryVal, fieldType);
         }

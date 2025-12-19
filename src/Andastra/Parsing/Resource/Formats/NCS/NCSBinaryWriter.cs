@@ -35,13 +35,28 @@ namespace Andastra.Parsing.Formats.NCS
             using (var writer = new System.IO.BinaryWriter(ms, Encoding.ASCII, leaveOpen: true))
             {
                 int offset = NCS_HEADER_SIZE;
+                int instructionCount = 0;
+                int minOffset = int.MaxValue;
+                int maxOffset = int.MinValue;
+
                 foreach (NCSInstruction instruction in _ncs.Instructions)
                 {
+                    instructionCount++;
+                    if (instruction.Offset < minOffset) minOffset = instruction.Offset;
+                    if (instruction.Offset > maxOffset) maxOffset = instruction.Offset;
+
                     int instId = RuntimeHelpers.GetHashCode(instruction);
                     int instructionSize = DetermineSize(instruction);
                     _sizes[instId] = instructionSize;
                     _offsets[instId] = offset;
                     offset += instructionSize;
+                }
+
+                // DEBUG: Log instruction count and offset range when writing
+                if (instructionCount > 0)
+                {
+                    Console.WriteLine($"DEBUG NCSBinaryWriter: Writing {instructionCount} instructions, offset range: {minOffset} to {maxOffset}, total size: {offset} bytes");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryWriter: Writing {instructionCount} instructions, offset range: {minOffset} to {maxOffset}, total size: {offset} bytes");
                 }
 
                 writer.Write(Encoding.ASCII.GetBytes("NCS "));
@@ -60,9 +75,27 @@ namespace Andastra.Parsing.Formats.NCS
 
         private void WriteInstruction(System.IO.BinaryWriter writer, NCSInstruction instruction)
         {
-            (NCSByteCode byteCode, byte qualifier) = instruction.InsType.GetValue();
-            writer.Write((byte)byteCode);
-            writer.Write(qualifier);
+            // For roundtrip fidelity, use original bytecode/qualifier if available
+            // This preserves invalid qualifiers that may exist in original files
+            byte byteCodeValue;
+            byte qualifierValue;
+
+            if (instruction.OriginalBytecode.HasValue && instruction.OriginalQualifier.HasValue)
+            {
+                // Use original bytecode/qualifier to preserve exact roundtrip
+                byteCodeValue = instruction.OriginalBytecode.Value;
+                qualifierValue = instruction.OriginalQualifier.Value;
+            }
+            else
+            {
+                // Fall back to canonical values from instruction type
+                (NCSByteCode byteCode, byte qualifier) = instruction.InsType.GetValue();
+                byteCodeValue = (byte)byteCode;
+                qualifierValue = qualifier;
+            }
+
+            writer.Write(byteCodeValue);
+            writer.Write(qualifierValue);
 
             // Handle instruction-specific arguments - order matches Python
             if (instruction.InsType == NCSInstructionType.DECxSP ||

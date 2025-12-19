@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.NCS;
 using Andastra.Parsing.Formats.NCS.Compiler;
 using Andastra.Parsing.Formats.NCS.Optimizers;
@@ -63,6 +64,5 @@ namespace Andastra.Parsing.Tests.Formats
         }
     }
 }
-
 
 

@@ -27,6 +27,7 @@ using Andastra.Utility;
 using SystemTextEncoding = System.Text.Encoding;
 using JetBrains.Annotations;
 using InstallationClass = Andastra.Parsing.Installation.Installation;
+using Andastra.Parsing.Common;
 namespace Andastra.Parsing.TSLPatcher
 {
     // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/tslpatcher/writer.py:1166-1212
@@ -1702,5 +1703,4 @@ namespace Andastra.Parsing.TSLPatcher
         public Dictionary<string, List<string>> InstallFolders => _installFolders;
     }
 }
-
 

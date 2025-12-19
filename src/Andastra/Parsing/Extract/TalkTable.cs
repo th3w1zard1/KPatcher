@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Resource;
 
 namespace Andastra.Parsing.Extract
@@ -62,7 +63,7 @@ namespace Andastra.Parsing.Extract
                 return string.Empty;
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 uint entries = reader.ReadUInt32();
@@ -86,7 +87,7 @@ namespace Andastra.Parsing.Extract
                 return ResRef.FromBlank();
             }
 
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 uint entries = reader.ReadUInt32();
@@ -104,7 +105,7 @@ namespace Andastra.Parsing.Extract
 
         public Dictionary<int, StringResult> Batch(IList<int> stringrefs)
         {
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(8);
                 Language language = LanguageExtensions.FromValue((int)reader.ReadUInt32());
@@ -134,7 +135,7 @@ namespace Andastra.Parsing.Extract
 
         public int Size()
         {
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(12);
                 return (int)reader.ReadUInt32();
@@ -143,7 +144,7 @@ namespace Andastra.Parsing.Extract
 
         public Language GetLanguage()
         {
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(_path))
             {
                 reader.Seek(8);
                 return LanguageExtensions.FromValue((int)reader.ReadUInt32());

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Andastra.Parsing.Resources;
+using Andastra.Parsing.Resource;
 
 namespace HolocronToolset.Dialogs.Save
 {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics.DLG
 {
@@ -143,4 +144,3 @@ namespace Andastra.Parsing.Resource.Generics.DLG
         }
     }
 }
-

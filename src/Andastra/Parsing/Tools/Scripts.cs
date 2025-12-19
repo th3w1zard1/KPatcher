@@ -4,6 +4,7 @@ using System.IO;
 using Andastra.Parsing;
 using Andastra.Parsing.Common.Script;
 using Andastra.Parsing.Formats.NCS;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {

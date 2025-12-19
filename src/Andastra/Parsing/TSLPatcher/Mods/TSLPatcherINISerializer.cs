@@ -13,6 +13,7 @@ using Andastra.Parsing.Mods.SSF;
 using Andastra.Parsing.Mods.TLK;
 using Andastra.Parsing.Mods.TwoDA;
 using TargetType = Andastra.Parsing.Mods.TwoDA.TargetType;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Mods
 {
@@ -930,4 +931,3 @@ namespace Andastra.Parsing.Mods
         }
     }
 }
-

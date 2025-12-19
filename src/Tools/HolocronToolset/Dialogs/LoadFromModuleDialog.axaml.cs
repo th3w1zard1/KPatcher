@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Andastra.Parsing.Resources;
-using FileResource = Andastra.Parsing.Resources.FileResource;
+using Andastra.Parsing.Resource;
+using FileResource = Andastra.Parsing.Extract.FileResource;
 
 namespace HolocronToolset.Dialogs
 {

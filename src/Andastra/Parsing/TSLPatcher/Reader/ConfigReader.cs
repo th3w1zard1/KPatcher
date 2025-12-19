@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Config;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Formats.SSF;
@@ -19,6 +20,7 @@ using Andastra.Parsing.Mods.TwoDA;
 using IniParser;
 using IniParser.Model;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Reader
 {
@@ -1142,7 +1144,7 @@ namespace Andastra.Parsing.Reader
                 int substringId = ParseIntValue(key.Substring(lowerKey.IndexOf("(lang") + 5, key.Length - lowerKey.IndexOf("(lang") - 6));
                 Language language;
                 Gender gender;
-                Andastra.Parsing.LocalizedString.SubstringPair(substringId, out language, out gender);
+                LocalizedString.SubstringPair(substringId, out language, out gender);
                 var locstring = new LocalizedStringDelta();
                 locstring.SetData(language, gender, strValue);
                 value = new FieldValueConstant(locstring);

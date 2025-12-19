@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.NCS.Compiler;
 using JetBrains.Annotations;
 

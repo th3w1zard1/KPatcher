@@ -144,11 +144,11 @@ namespace Andastra.Parsing.Formats.NCS.Compiler
 
         private static NCSInstructionType GetLogicalEqualityInstruction(DynamicDataType type1, DynamicDataType type2)
         {
-            if (type1.Builtin == Script.DataType.Int && type2.Builtin == Script.DataType.Int)
+            if (type1.Builtin == Common.Script.DataType.Int && type2.Builtin == Common.Script.DataType.Int)
             {
                 return NCSInstructionType.EQUALII;
             }
-            if (type1.Builtin == Script.DataType.Float && type2.Builtin == Script.DataType.Float)
+            if (type1.Builtin == Common.Script.DataType.Float && type2.Builtin == Common.Script.DataType.Float)
             {
                 return NCSInstructionType.EQUALFF;
             }

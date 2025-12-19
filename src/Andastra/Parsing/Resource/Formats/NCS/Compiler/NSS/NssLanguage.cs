@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.Compiler
 {

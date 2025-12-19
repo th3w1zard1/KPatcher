@@ -3,6 +3,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Resource;
 using static Andastra.Parsing.Common.GameExtensions;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -20,12 +21,13 @@ namespace Andastra.Parsing.Resource.Generics
             // Extract basic fields
             uts.Tag = root.Acquire<string>("Tag", "");
             uts.ResRef = root.Acquire<ResRef>("TemplateResRef", ResRef.FromBlank());
-            uts.Active = root.Acquire<int>("Active", 0) != 0;
-            uts.Continuous = root.Acquire<int>("Continuous", 0) != 0;
-            uts.Looping = root.Acquire<int>("Looping", 0) != 0;
-            uts.Positional = root.Acquire<int>("Positional", 0) != 0;
-            uts.RandomPosition = root.Acquire<int>("RandomPosition", 0) != 0;
-            uts.Random = root.Acquire<int>("Random", 0) != 0;
+            // Boolean fields stored as UInt8 - use GetUInt8() != 0 (matching UTW fix)
+            uts.Active = root.GetUInt8("Active") != 0;
+            uts.Continuous = root.GetUInt8("Continuous") != 0;
+            uts.Looping = root.GetUInt8("Looping") != 0;
+            uts.Positional = root.GetUInt8("Positional") != 0;
+            uts.RandomPosition = root.GetUInt8("RandomPosition") != 0;
+            uts.Random = root.GetUInt8("Random") != 0;
             uts.Name = root.Acquire<LocalizedString>("LocName", LocalizedString.FromInvalid());
             uts.Volume = root.Acquire<int>("Volume", 0);
             uts.VolumeVariance = root.Acquire<int>("VolumeVrtn", 0);

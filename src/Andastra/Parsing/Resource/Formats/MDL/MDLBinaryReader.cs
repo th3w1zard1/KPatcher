@@ -19,15 +19,15 @@ namespace Andastra.Parsing.Formats.MDL
         {
             if (source is string path)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(path, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromFile(path, offset, size);
             }
             if (source is byte[] bytes)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size);
             }
             if (source is Stream stream)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size);
+                return Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size);
             }
             throw new ArgumentException("Unsupported source type for MDL");
         }

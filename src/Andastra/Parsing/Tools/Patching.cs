@@ -13,6 +13,7 @@ using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Formats.TPC;
 using Andastra.Parsing.Resource;
 using Andastra.Parsing.Installation;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Tools
 {

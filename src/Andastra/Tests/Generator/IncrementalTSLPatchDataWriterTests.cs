@@ -165,7 +165,7 @@ namespace Andastra.Parsing.Tests.Generator
             // Create test SSF data
             var ssf = new SSF();
             var ssfPath = Path.Combine(_tempDir, "temp.ssf");
-            SSFAuto.WriteSsf(ssf, ssfPath, Andastra.Parsing.Resources.ResourceType.SSF);
+            SSFAuto.WriteSsf(ssf, ssfPath, Andastra.Parsing.Resource.ResourceType.SSF);
             var ssfData = File.ReadAllBytes(ssfPath);
 
             // Act

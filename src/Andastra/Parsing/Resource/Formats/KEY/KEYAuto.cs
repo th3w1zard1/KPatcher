@@ -90,15 +90,15 @@ namespace Andastra.Parsing.Formats.KEY
         {
             if (source is string filepath)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? (int?)size : null);
+                return Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? (int?)size : null);
             }
             if (source is byte[] bytes)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size > 0 ? (int?)size : null);
+                return Andastra.Parsing.Common.RawBinaryReader.FromBytes(bytes, offset, size > 0 ? (int?)size : null);
             }
             if (source is Stream stream)
             {
-                return Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size > 0 ? (int?)size : null);
+                return Andastra.Parsing.Common.RawBinaryReader.FromStream(stream, offset, size > 0 ? (int?)size : null);
             }
             throw new ArgumentException("Source must be string, byte[], or Stream for KEY");
         }

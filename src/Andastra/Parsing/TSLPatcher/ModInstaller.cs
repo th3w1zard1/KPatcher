@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 using Andastra.Parsing.Config;
 using Andastra.Parsing.Formats.Capsule;
 using Andastra.Parsing.Formats.ERF;
@@ -23,6 +24,7 @@ using Andastra.Parsing.Reader;
 using Andastra.Parsing.Resource;
 using IniParser.Model;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.TSLPatcher
 {
@@ -587,7 +589,7 @@ namespace Andastra.Parsing.TSLPatcher
                             $"IMPORTANT! The module at path '{outputContainerPath}' did not exist, building one in the 'Modules' folder immediately from the following files:" +
                             $"\n    Modules/{moduleRoot}.rim" +
                             $"\n    Modules/{moduleRoot}_s.rim" +
-                            (Game != null && (Game.Value == Andastra.Parsing.Game.TSL || Game.Value == Andastra.Parsing.Game.K2) ? $"\n    Modules/{moduleRoot}_dlg.erf" : "")
+                            (Game != null && (Game.Value == Common.Game.TSL || Game.Value == Common.Game.K2) ? $"\n    Modules/{moduleRoot}_dlg.erf" : "")
                         );
                         try
                         {
@@ -737,7 +739,7 @@ namespace Andastra.Parsing.TSLPatcher
         private static byte[] LoadResourceFile(string sourcePath)
         {
             // Python: with BinaryReader.from_auto(source) as reader: return reader.read_all()
-            using (var reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(sourcePath))
+            using (var reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(sourcePath))
             {
                 return reader.ReadAll();
             }
@@ -966,7 +968,7 @@ namespace Andastra.Parsing.TSLPatcher
             }
 
             // Load _dlg.erf if exists (TSL only)
-            if ((Game is null || Game.Value == Andastra.Parsing.Game.TSL || Game.Value == Andastra.Parsing.Game.K2) && File.Exists(filepathDlgErf))
+            if ((Game is null || Game.Value == Common.Game.TSL || Game.Value == Common.Game.K2) && File.Exists(filepathDlgErf))
             {
                 var erfCapsule = new Capsule(filepathDlgErf, createIfNotExist: false);
                 foreach (CapsuleResource res in erfCapsule)

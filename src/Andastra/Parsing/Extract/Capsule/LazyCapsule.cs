@@ -10,6 +10,7 @@ using Andastra.Parsing.Formats.ERF;
 using Andastra.Parsing.Formats.RIM;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Extract.Capsule
 {
@@ -330,7 +331,7 @@ namespace Andastra.Parsing.Extract.Capsule
             string ext = Path.GetExtension(_filepath).ToLowerInvariant();
             if (ext == ".rim")
             {
-                var container = new RIM.RIM();
+                var container = new Formats.RIM.RIM();
                 container.SetData(resname, restype, resdata);
                 foreach (var resource in Resources())
                 {
@@ -341,7 +342,7 @@ namespace Andastra.Parsing.Extract.Capsule
             else if (ext == ".erf" || ext == ".mod" || ext == ".sav" || ext == ".hak")
             {
                 ERFType erfType = ERFTypeExtensions.FromExtension(ext);
-                var container = new ERF.ERF(erfType);
+                var container = new Formats.ERF.ERF(erfType);
                 container.SetData(resname, restype, resdata);
                 foreach (var resource in Resources())
                 {
@@ -366,7 +367,7 @@ namespace Andastra.Parsing.Extract.Capsule
             string ext = Path.GetExtension(_filepath).ToLowerInvariant();
             if (ext == ".rim")
             {
-                var container = new RIM.RIM();
+                var container = new Formats.RIM.RIM();
                 foreach (var resource in Resources())
                 {
                     if (string.Equals(resource.ResName, resname, StringComparison.OrdinalIgnoreCase) && resource.ResType == restype)
@@ -380,7 +381,7 @@ namespace Andastra.Parsing.Extract.Capsule
             else if (ext == ".erf" || ext == ".mod" || ext == ".sav" || ext == ".hak")
             {
                 ERFType erfType = ERFTypeExtensions.FromExtension(ext);
-                var container = new ERF.ERF(erfType);
+                var container = new Formats.ERF.ERF(erfType);
                 foreach (var resource in Resources())
                 {
                     if (string.Equals(resource.ResName, resname, StringComparison.OrdinalIgnoreCase) && resource.ResType == restype)
@@ -404,9 +405,9 @@ namespace Andastra.Parsing.Extract.Capsule
         /// <summary>
         /// Converts this lazy capsule to a fully-loaded Capsule.
         /// </summary>
-        public Capsule ToCapsule()
+        public Formats.Capsule.Capsule ToCapsule()
         {
-            var capsule = new Capsule(_filepath);
+            var capsule = new Formats.Capsule.Capsule(_filepath);
             return capsule;
         }
 
@@ -416,4 +417,3 @@ namespace Andastra.Parsing.Extract.Capsule
         public int Count => GetResources().Count;
     }
 }
-

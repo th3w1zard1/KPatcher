@@ -3,6 +3,7 @@ using System.Numerics;
 using System.IO;
 using System.Text;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common
 {
@@ -899,4 +900,3 @@ namespace Andastra.Parsing.Common
         public override void Dispose() => _memoryWriter.Dispose();
     }
 }
-

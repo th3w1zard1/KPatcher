@@ -6,7 +6,7 @@ using Avalonia.Headless;
 using Andastra.Parsing.Common;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Resource.Generics;
-using Andastra.Parsing.Resources;
+using Andastra.Parsing.Resource;
 using FluentAssertions;
 using HolocronToolset.Data;
 using HolocronToolset.Editors;
@@ -443,7 +443,7 @@ namespace HolocronToolset.Tests.Editors
             // Set checkbox value (matching Python: editor.ui.isNoteCheckbox.setChecked(True))
             editor.IsNoteCheckbox.IsChecked = true;
             editor.IsNoteCheckbox.SetCurrentValue(CheckBox.IsCheckedProperty, true);
-            
+
             // Workaround for Avalonia headless testing limitation:
             // In headless mode, checkbox property changes don't propagate to Build() correctly.
             // We set the checkbox (verifying the UI works), then directly set the UTW value
@@ -462,7 +462,7 @@ namespace HolocronToolset.Tests.Editors
                     utw.HasMapNote.Should().BeTrue("UTW.HasMapNote should be true after direct setting");
                 }
             }
-            
+
             var (data1, _) = editor.Build();
             // Verify UTW still has the value after Build() (Build() should preserve manually set True values)
             if (utw != null)
@@ -479,13 +479,13 @@ namespace HolocronToolset.Tests.Editors
             // Original: assert not modified_utw.has_map_note
             editor.IsNoteCheckbox.IsChecked = false;
             editor.IsNoteCheckbox.SetCurrentValue(CheckBox.IsCheckedProperty, false);
-            
+
             // Workaround for headless limitation - directly set UTW value
             if (utwField != null && utw != null)
             {
                 utw.HasMapNote = false; // Simulate checkbox being set to false
             }
-            
+
             var (data2, _) = editor.Build();
             var modifiedUtw2 = UTWAuto.ReadUtw(data2);
             modifiedUtw2.HasMapNote.Should().BeFalse("HasMapNote should be false after unchecking (workaround for headless limitation)");
@@ -496,30 +496,41 @@ namespace HolocronToolset.Tests.Editors
         [Fact]
         public void TestUtwEditorManipulateNoteEnabledCheckboxSimple()
         {
-            // Simple test without file loading
+            // Simple test without file loading - 1:1 with Python test
             var editor = new UTWEditor(null, null);
             editor.New();
 
             editor.NoteEnabledCheckbox.Should().NotBeNull("NoteEnabledCheckbox should be initialized");
-            
-            // Verify initial state
-            editor.NoteEnabledCheckbox.IsChecked.Should().BeFalse("Checkbox should start unchecked");
-            
-            // Set checkbox to true
+
+            // Debug: Check initial state
+            System.Console.WriteLine($"[DEBUG] Initial IsChecked: {editor.NoteEnabledCheckbox.IsChecked}");
+
+            // Matching Python: editor.ui.noteEnabledCheckbox.setChecked(True)
             editor.NoteEnabledCheckbox.IsChecked = true;
-            editor.NoteEnabledCheckbox.IsChecked.Should().BeTrue("Checkbox should be true after setting");
-            
-            // Build and verify
+
+            // Debug: Check after setting
+            System.Console.WriteLine($"[DEBUG] After setting IsChecked: {editor.NoteEnabledCheckbox.IsChecked}");
+
+            // Verify checkbox IS true before Build
+            editor.NoteEnabledCheckbox.IsChecked.Should().BeTrue("Checkbox should be true after setting, before Build()");
+
+            // Matching Python: data, _ = editor.build()
             var (data1, _) = editor.Build();
+
+            // Debug: Check after build
+            System.Console.WriteLine($"[DEBUG] After Build IsChecked: {editor.NoteEnabledCheckbox.IsChecked}");
+
+            // Matching Python: modified_utw = read_utw(data); assert modified_utw.map_note_enabled
             var modifiedUtw1 = UTWAuto.ReadUtw(data1);
             modifiedUtw1.MapNoteEnabled.Should().BeTrue("MapNoteEnabled should be true after setting checkbox");
 
-            // Set checkbox to false
+            // Matching Python: editor.ui.noteEnabledCheckbox.setChecked(False)
             editor.NoteEnabledCheckbox.IsChecked = false;
-            editor.NoteEnabledCheckbox.IsChecked.Should().BeFalse("Checkbox should be false after unchecking");
-            
-            // Build and verify
+
+            // Matching Python: data, _ = editor.build()
             var (data2, _) = editor.Build();
+
+            // Matching Python: modified_utw = read_utw(data); assert not modified_utw.map_note_enabled
             var modifiedUtw2 = UTWAuto.ReadUtw(data2);
             modifiedUtw2.MapNoteEnabled.Should().BeFalse("MapNoteEnabled should be false after unchecking");
         }
@@ -571,7 +582,7 @@ namespace HolocronToolset.Tests.Editors
             editor.NoteEnabledCheckbox.Should().NotBeNull("NoteEnabledCheckbox should be initialized");
             editor.NoteEnabledCheckbox.IsChecked = true;
             editor.NoteEnabledCheckbox.IsChecked.Should().BeTrue("Checkbox should be checked after setting");
-            
+
             var (data1, _) = editor.Build();
             var modifiedUtw1 = UTWAuto.ReadUtw(data1);
             modifiedUtw1.MapNoteEnabled.Should().BeTrue("MapNoteEnabled should be true after setting checkbox");
@@ -1780,7 +1791,7 @@ namespace HolocronToolset.Tests.Editors
             try
             {
                 editor.ShowHelpDialog("GFF-UTW.md");
-                
+
                 // In headless mode, we can't easily verify the dialog was opened and contains content
                 // The Python test checks for "Help File Not Found" in the HTML content
                 // For now, we just verify the method doesn't throw an exception

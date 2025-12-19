@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using JavaSystem = Andastra.Parsing.Formats.NCS.NCSDecomp.JavaSystem;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.NCSDecomp
 {
@@ -554,4 +555,3 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp
         }
     }
 }
-

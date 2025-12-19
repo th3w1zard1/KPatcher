@@ -81,7 +81,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Andastra\Formats\Andastra.Parsing.csproj" />
+    <ProjectReference Include="..\Parsing\Andastra.Parsing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

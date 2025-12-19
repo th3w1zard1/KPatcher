@@ -24,6 +24,7 @@ using TwoDAAuto = Andastra.Parsing.Formats.TwoDA.TwoDAAuto;
 using GFFAuto = Andastra.Parsing.Formats.GFF.GFFAuto;
 using SSFAuto = Andastra.Parsing.Formats.SSF.SSFAuto;
 using LIPAuto = Andastra.Parsing.Formats.LIP.LIPAuto;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.TSLPatcher
 {
@@ -1070,4 +1071,3 @@ namespace Andastra.Parsing.TSLPatcher
         }
     }
 }
-

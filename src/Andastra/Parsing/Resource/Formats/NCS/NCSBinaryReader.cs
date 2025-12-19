@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Andastra.Parsing;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS
 {
@@ -35,17 +36,17 @@ namespace Andastra.Parsing.Formats.NCS
 
         public NCSBinaryReader(string filepath, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromFile(filepath, offset, size > 0 ? size : (int?)null);
         }
 
         public NCSBinaryReader(byte[] data, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromBytes(data, offset, size > 0 ? size : (int?)null);
         }
 
         public NCSBinaryReader(Stream source, int offset = 0, int size = 0)
         {
-            _reader = Andastra.Parsing.Common.Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
+            _reader = Andastra.Parsing.Common.RawBinaryReader.FromStream(source, offset, size > 0 ? size : (int?)null);
         }
 
         /// <summary>
@@ -152,7 +153,10 @@ namespace Andastra.Parsing.Formats.NCS
             }
 
             int instructionCountBeforeLoop = _instructions.Count;
-            while (_reader.Position < safeEndPosition && _reader.Remaining > 0)
+            // CRITICAL: Only check Position < safeEndPosition, not Remaining
+            // Remaining is based on _size which may be different from TrueSize()
+            // safeEndPosition is already calculated using TrueSize(), so it's authoritative
+            while (_reader.Position < safeEndPosition)
             {
                 int offset = _reader.Position;
                 
@@ -162,10 +166,35 @@ namespace Andastra.Parsing.Formats.NCS
                     Console.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset} (near known ACTION locations: 138, 514)");
                     Console.Error.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset} (near known ACTION locations: 138, 514)");
                 }
+                
+                // DEBUG: Log when we're near the end of the file (for k_act_com41 debugging)
+                if (offset >= 630 && offset <= 645)
+                {
+                    Console.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset}, remaining={safeEndPosition - offset} bytes until safeEndPosition={safeEndPosition}");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryReader: Reading instruction at offset {offset}, remaining={safeEndPosition - offset} bytes until safeEndPosition={safeEndPosition}");
+                }
+                
+                // DEBUG: Log bytecode at offset 635 specifically (where MOVSP should be)
+                if (offset == 635)
+                {
+                    int savedPos = _reader.Position;
+                    _reader.Seek(635);
+                    byte peekByte = _reader.ReadUInt8();
+                    _reader.Seek(savedPos);
+                    Console.WriteLine($"DEBUG NCSBinaryReader: At offset 635, byte=0x{peekByte:X2} ({peekByte})");
+                    Console.Error.WriteLine($"DEBUG NCSBinaryReader: At offset 635, byte=0x{peekByte:X2} ({peekByte})");
+                }
 
                 try
                 {
                     var instruction = ReadInstruction();
+                    int newPosition = _reader.Position;
+                    // DEBUG: Log instruction read completion
+                    if (offset >= 630 && offset <= 645)
+                    {
+                        Console.WriteLine($"DEBUG NCSBinaryReader: Successfully read instruction at offset {offset}, new position={newPosition}, instruction type={instruction.InsType}");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Successfully read instruction at offset {offset}, new position={newPosition}, instruction type={instruction.InsType}");
+                    }
                     // DEBUG: Check if this offset already exists (shouldn't happen, but let's verify)
                     if (_instructions.ContainsKey(offset))
                     {
@@ -310,7 +339,9 @@ namespace Andastra.Parsing.Formats.NCS
 
             NCSInstruction instruction = new NCSInstruction
             {
-                Offset = instructionOffset
+                Offset = instructionOffset,
+                OriginalBytecode = byteCodeValue,
+                OriginalQualifier = qualifier
             };
 
             // Special handling for RESERVED opcode - it appears with various qualifiers
@@ -334,6 +365,7 @@ namespace Andastra.Parsing.Formats.NCS
                     if (instruction.InsType == NCSInstructionType.ACTION)
                     {
                         Console.WriteLine($"DEBUG NCSBinaryReader: Successfully parsed ACTION instruction at offset {instructionOffset}");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Successfully parsed ACTION instruction at offset {instructionOffset}");
                     }
                 }
                 catch (ArgumentException e)
@@ -350,13 +382,61 @@ namespace Andastra.Parsing.Formats.NCS
                     }
                     else
                     {
-                        string msg =
-                            $"Unknown NCS instruction type combination: " +
-                            $"bytecode=0x{byteCodeValue:X2} ({byteCode}), " +
-                            $"qualifier=0x{qualifier:X2} at offset {instructionOffset}.\n" +
-                            "  The bytecode is recognized but this qualifier combination is not supported.";
-
-                        throw new InvalidDataException(msg, e);
+                        // For roundtrip fidelity, preserve invalid qualifiers by using a fallback type
+                        // We'll use the closest matching instruction type, but preserve original bytecode/qualifier
+                        // This allows us to write back the exact same bytecode/qualifier even if it's invalid
+                        Console.WriteLine($"DEBUG NCSBinaryReader: Invalid qualifier 0x{qualifier:X2} for bytecode 0x{byteCodeValue:X2} at offset {instructionOffset}, preserving original for roundtrip");
+                        Console.Error.WriteLine($"DEBUG NCSBinaryReader: Invalid qualifier 0x{qualifier:X2} for bytecode 0x{byteCodeValue:X2} at offset {instructionOffset}, preserving original for roundtrip");
+                        
+                        // Try to find a fallback instruction type based on bytecode alone
+                        // For LOGANDxx (0x06), use LOGANDII as fallback but preserve original qualifier
+                        if (byteCode == NCSByteCode.LOGANDxx)
+                        {
+                            instruction.InsType = NCSInstructionType.LOGANDII;
+                        }
+                        else if (byteCode == NCSByteCode.MOVSP)
+                        {
+                            // MOVSP with invalid qualifier - use MOVSP as fallback but preserve original qualifier
+                            instruction.InsType = NCSInstructionType.MOVSP;
+                        }
+                        else if (byteCode == NCSByteCode.LEQxx || byteCode == NCSByteCode.GEQxx || 
+                                 byteCode == NCSByteCode.GTxx || byteCode == NCSByteCode.LTxx ||
+                                 byteCode == NCSByteCode.EQUALxx || byteCode == NCSByteCode.NEQUALxx)
+                        {
+                            // Comparison operators with invalid qualifiers - use IntInt variant as fallback
+                            // This preserves the instruction semantics while allowing roundtrip
+                            Console.WriteLine($"DEBUG NCSBinaryReader: Using fallback for {byteCode} with invalid qualifier 0x{qualifier:X2} at offset {instructionOffset}");
+                            if (byteCode == NCSByteCode.LEQxx)
+                            {
+                                instruction.InsType = NCSInstructionType.LEQII;
+                            }
+                            else if (byteCode == NCSByteCode.GEQxx)
+                            {
+                                instruction.InsType = NCSInstructionType.GEQII;
+                            }
+                            else if (byteCode == NCSByteCode.GTxx)
+                            {
+                                instruction.InsType = NCSInstructionType.GTII;
+                            }
+                            else if (byteCode == NCSByteCode.LTxx)
+                            {
+                                instruction.InsType = NCSInstructionType.LTII;
+                            }
+                            else if (byteCode == NCSByteCode.EQUALxx)
+                            {
+                                instruction.InsType = NCSInstructionType.EQUALII;
+                            }
+                            else if (byteCode == NCSByteCode.NEQUALxx)
+                            {
+                                instruction.InsType = NCSInstructionType.NEQUALII;
+                            }
+                        }
+                        else
+                        {
+                            // For other bytecodes, we need to handle them case by case
+                            // For now, use RESERVED as a fallback to avoid crashing
+                            instruction.InsType = NCSInstructionType.RESERVED;
+                        }
                     }
                 }
             }
@@ -394,7 +474,11 @@ namespace Andastra.Parsing.Formats.NCS
             }
             else if (instruction.InsType == NCSInstructionType.MOVSP)
             {
-                instruction.Args.Add(_reader.ReadInt32(bigEndian: true));
+                int currentPos = _reader.Position;
+                int offsetValue = _reader.ReadInt32(bigEndian: true);
+                int newPos = _reader.Position;
+                Console.WriteLine($"DEBUG NCSBinaryReader: Read MOVSP offset at position {currentPos}, value={offsetValue}, new position={newPos}");
+                instruction.Args.Add(offsetValue);
             }
             else if (instruction.InsType == NCSInstructionType.JMP || instruction.InsType == NCSInstructionType.JSR
                 || instruction.InsType == NCSInstructionType.JZ || instruction.InsType == NCSInstructionType.JNZ)
@@ -486,4 +570,3 @@ namespace Andastra.Parsing.Formats.NCS
         }
     }
 }
-

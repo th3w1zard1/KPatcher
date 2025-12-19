@@ -2,6 +2,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.GFF;
 using Andastra.Parsing.Resource;
 using GFFAuto = Andastra.Parsing.Formats.GFF.GFFAuto;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -20,7 +21,28 @@ namespace Andastra.Parsing.Resource.Generics
             // map_original_struct_id would need to be stored in ARE class
             // are.map_original_struct_id = mapStruct.StructId;
 
-            // are.north_axis = (ARENorthAxis)mapStruct.Acquire<int>("NorthAxis", 0);
+            // Matching Python: are.north_axis = ARENorthAxis(map_struct.acquire("NorthAxis", 0))
+            are.NorthAxis = (ARENorthAxis)mapStruct.Acquire<int>("NorthAxis", 0);
+            // Matching Python: are.map_zoom = map_struct.acquire("MapZoom", 0)
+            are.MapZoom = mapStruct.Acquire<int>("MapZoom", 0);
+            // Matching Python: are.map_res_x = map_struct.acquire("MapResX", 0)
+            are.MapResX = mapStruct.Acquire<int>("MapResX", 0);
+            // Matching Python: are.map_point_1 = Vector2(map_struct.acquire("MapPt1X", 0.0), map_struct.acquire("MapPt1Y", 0.0))
+            are.MapPoint1 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("MapPt1X", 0.0f),
+                mapStruct.Acquire<float>("MapPt1Y", 0.0f));
+            // Matching Python: are.map_point_2 = Vector2(map_struct.acquire("MapPt2X", 0.0), map_struct.acquire("MapPt2Y", 0.0))
+            are.MapPoint2 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("MapPt2X", 0.0f),
+                mapStruct.Acquire<float>("MapPt2Y", 0.0f));
+            // Matching Python: are.world_point_1 = Vector2(map_struct.acquire("WorldPt1X", 0.0), map_struct.acquire("WorldPt1Y", 0.0))
+            are.WorldPoint1 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("WorldPt1X", 0.0f),
+                mapStruct.Acquire<float>("WorldPt1Y", 0.0f));
+            // Matching Python: are.world_point_2 = Vector2(map_struct.acquire("WorldPt2X", 0.0), map_struct.acquire("WorldPt2Y", 0.0))
+            are.WorldPoint2 = new System.Numerics.Vector2(
+                mapStruct.Acquire<float>("WorldPt2X", 0.0f),
+                mapStruct.Acquire<float>("WorldPt2Y", 0.0f));
             are.MapList = new System.Collections.Generic.List<ResRef>(); // Placeholder
 
             // Extract basic fields
@@ -29,6 +51,10 @@ namespace Andastra.Parsing.Resource.Generics
             are.AlphaTest = root.Acquire<int>("AlphaTest", 0);
             are.CameraStyle = root.Acquire<int>("CameraStyle", 0);
             are.DefaultEnvMap = root.Acquire<ResRef>("DefaultEnvMap", ResRef.FromBlank());
+            // Matching Python: are.unescapable = bool(root.acquire("Unescapable", 0))
+            are.Unescapable = root.GetUInt8("Unescapable") == 1;
+            // Matching Python: are.disable_transit = bool(root.acquire("DisableTransit", 0))
+            are.DisableTransit = root.GetUInt8("DisableTransit") == 1;
             are.GrassTexture = root.Acquire<ResRef>("Grass_TexName", ResRef.FromBlank());
             are.GrassDensity = root.Acquire<float>("Grass_Density", 0.0f);
             are.GrassSize = root.Acquire<float>("Grass_QuadSize", 0.0f);
@@ -45,6 +71,12 @@ namespace Andastra.Parsing.Resource.Generics
             are.OnExit = root.Acquire<ResRef>("OnExit", ResRef.FromBlank());
             are.OnHeartbeat = root.Acquire<ResRef>("OnHeartbeat", ResRef.FromBlank());
             are.OnUserDefined = root.Acquire<ResRef>("OnUserDefined", ResRef.FromBlank());
+            // Matching Python: are.stealth_xp = bool(root.acquire("StealthXPEnabled", 0))
+            are.StealthXp = root.GetUInt8("StealthXPEnabled") == 1;
+            // Matching Python: are.stealth_xp_loss = root.acquire("StealthXPLoss", 0)
+            are.StealthXpLoss = root.Acquire<int>("StealthXPLoss", 0);
+            // Matching Python: are.stealth_xp_max = root.acquire("StealthXPMax", 0)
+            are.StealthXpMax = root.Acquire<int>("StealthXPMax", 0);
             // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:496
             // Original: are.loadscreen_id = root.acquire("LoadScreenID", 0)
             are.LoadScreenID = root.Acquire<int>("LoadScreenID", 0);
@@ -76,9 +108,24 @@ namespace Andastra.Parsing.Resource.Generics
             // Create Map struct
             var mapStruct = new GFFStruct();
             root.SetStruct("Map", mapStruct);
-            // mapStruct.SetInt32("MapZoom", are.MapZoom);
-            // mapStruct.SetInt32("MapResX", are.MapResX);
-            // mapStruct.SetInt32("NorthAxis", (int)are.NorthAxis);
+            // Matching Python: map_struct.set_int32("NorthAxis", are.north_axis.value)
+            mapStruct.SetInt32("NorthAxis", (int)are.NorthAxis);
+            // Matching Python: map_struct.set_int32("MapZoom", are.map_zoom)
+            mapStruct.SetInt32("MapZoom", are.MapZoom);
+            // Matching Python: map_struct.set_int32("MapResX", are.map_res_x)
+            mapStruct.SetInt32("MapResX", are.MapResX);
+            // Matching Python: map_struct.set_single("MapPt1X", map_pt1.x) and map_struct.set_single("MapPt1Y", map_pt1.y)
+            mapStruct.SetSingle("MapPt1X", are.MapPoint1.X);
+            mapStruct.SetSingle("MapPt1Y", are.MapPoint1.Y);
+            // Matching Python: map_struct.set_single("MapPt2X", map_pt2.x) and map_struct.set_single("MapPt2Y", map_pt2.y)
+            mapStruct.SetSingle("MapPt2X", are.MapPoint2.X);
+            mapStruct.SetSingle("MapPt2Y", are.MapPoint2.Y);
+            // Matching Python: map_struct.set_single("WorldPt1X", are.world_point_1.x) and map_struct.set_single("WorldPt1Y", are.world_point_1.y)
+            mapStruct.SetSingle("WorldPt1X", are.WorldPoint1.X);
+            mapStruct.SetSingle("WorldPt1Y", are.WorldPoint1.Y);
+            // Matching Python: map_struct.set_single("WorldPt2X", are.world_point_2.x) and map_struct.set_single("WorldPt2Y", are.world_point_2.y)
+            mapStruct.SetSingle("WorldPt2X", are.WorldPoint2.X);
+            mapStruct.SetSingle("WorldPt2Y", are.WorldPoint2.Y);
 
             // Set basic fields
             root.SetString("Tag", are.Tag);
@@ -86,6 +133,16 @@ namespace Andastra.Parsing.Resource.Generics
             root.SetSingle("AlphaTest", are.AlphaTest);
             root.SetInt32("CameraStyle", are.CameraStyle);
             root.SetResRef("DefaultEnvMap", are.DefaultEnvMap);
+            // Matching Python: root.set_uint8("Unescapable", are.unescapable)
+            root.SetUInt8("Unescapable", are.Unescapable ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint8("DisableTransit", are.disable_transit)
+            root.SetUInt8("DisableTransit", are.DisableTransit ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint8("StealthXPEnabled", are.stealth_xp)
+            root.SetUInt8("StealthXPEnabled", are.StealthXp ? (byte)1 : (byte)0);
+            // Matching Python: root.set_uint32("StealthXPLoss", are.stealth_xp_loss)
+            root.SetUInt32("StealthXPLoss", (uint)are.StealthXpLoss);
+            // Matching Python: root.set_uint32("StealthXPMax", are.stealth_xp_max)
+            root.SetUInt32("StealthXPMax", (uint)are.StealthXpMax);
             root.SetResRef("Grass_TexName", are.GrassTexture);
             root.SetSingle("Grass_Density", are.GrassDensity);
             root.SetSingle("Grass_QuadSize", are.GrassSize);

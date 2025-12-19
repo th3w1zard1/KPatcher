@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Numerics;
 using Andastra.Parsing;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Resource.Generics
 {
@@ -24,6 +26,11 @@ namespace Andastra.Parsing.Resource.Generics
         public int AlphaTest { get; set; }
         public int CameraStyle { get; set; }
         public ResRef DefaultEnvMap { get; set; } = ResRef.FromBlank();
+        public bool DisableTransit { get; set; }
+        public bool Unescapable { get; set; }
+        public bool StealthXp { get; set; }
+        public int StealthXpMax { get; set; }
+        public int StealthXpLoss { get; set; }
         public ResRef GrassTexture { get; set; } = ResRef.FromBlank();
         public float GrassDensity { get; set; }
         public float GrassSize { get; set; }
@@ -86,6 +93,69 @@ namespace Andastra.Parsing.Resource.Generics
         public ResRef OnUserDefined2 { get; set; } = ResRef.FromBlank();
         public List<string> AreaList { get; set; } = new List<string>();
         public List<ResRef> MapList { get; set; } = new List<ResRef>();
+
+        /// <summary>
+        /// Map north axis orientation.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:260
+        /// Original: self.north_axis: ARENorthAxis = ARENorthAxis.PositiveX
+        /// </remarks>
+        public ARENorthAxis NorthAxis { get; set; } = ARENorthAxis.PositiveX;
+
+        /// <summary>
+        /// Map zoom level.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:259
+        /// Original: self.map_zoom: int = 0
+        /// </remarks>
+        public int MapZoom { get; set; }
+
+        /// <summary>
+        /// Map resolution X.
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:258
+        /// Original: self.map_res_x: int = 0
+        /// </remarks>
+        public int MapResX { get; set; }
+
+        /// <summary>
+        /// Map point 1 (image coordinates, normalized 0.0-1.0).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:254
+        /// Original: self.map_point_1: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 MapPoint1 { get; set; }
+
+        /// <summary>
+        /// Map point 2 (image coordinates, normalized 0.0-1.0).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:255
+        /// Original: self.map_point_2: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 MapPoint2 { get; set; }
+
+        /// <summary>
+        /// World point 1 (world coordinates).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:256
+        /// Original: self.world_point_1: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 WorldPoint1 { get; set; }
+
+        /// <summary>
+        /// World point 2 (world coordinates).
+        /// </summary>
+        /// <remarks>
+        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/generics/are.py:257
+        /// Original: self.world_point_2: Vector2 = Vector2.from_null()
+        /// </remarks>
+        public Vector2 WorldPoint2 { get; set; }
 
         /// <summary>
         /// Load screen ID (index into loadscreens.2da).

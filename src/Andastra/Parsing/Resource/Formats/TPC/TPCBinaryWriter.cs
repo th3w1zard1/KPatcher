@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using Andastra.Parsing;
 using Andastra.Parsing.Resource;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.TPC
 {
@@ -117,4 +118,3 @@ namespace Andastra.Parsing.Formats.TPC
         }
     }
 }
-

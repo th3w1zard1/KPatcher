@@ -2,6 +2,7 @@ using System;
 using Andastra.Parsing.Extract;
 using Andastra.Parsing.Resource;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Installation
 {
@@ -46,4 +47,3 @@ namespace Andastra.Parsing.Installation
         }
     }
 }
-

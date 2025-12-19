@@ -7,6 +7,7 @@ using Andastra.Parsing;
 using Andastra.Parsing.Formats.TLK;
 using Andastra.Parsing.Logger;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Uninstall
 {
@@ -316,4 +317,3 @@ namespace Andastra.Parsing.Uninstall
         }
     }
 }
-

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Andastra.Parsing;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.ERF
 {
@@ -101,4 +102,3 @@ namespace Andastra.Parsing.Formats.ERF
         }
     }
 }
-

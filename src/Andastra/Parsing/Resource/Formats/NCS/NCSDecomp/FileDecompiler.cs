@@ -20,6 +20,7 @@ using JavaSystem = Andastra.Parsing.Formats.NCS.NCSDecomp.JavaSystem;
 using Process = System.Diagnostics.Process;
 using Thread = System.Threading.Thread;
 using Throwable = System.Exception;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Formats.NCS.NCSDecomp
 {
@@ -3871,7 +3872,6 @@ namespace Andastra.Parsing.Formats.NCS.NCSDecomp
         }
     }
 }
-
 
 
 

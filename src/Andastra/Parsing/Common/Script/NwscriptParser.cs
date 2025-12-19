@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Andastra.Parsing.Formats.NCS.Compiler;
 using Andastra.Parsing.Formats.NCS.Compiler.NSS;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Common.Script
 {
@@ -523,4 +524,3 @@ namespace Andastra.Parsing.Common.Script
         }
     }
 }
-

@@ -5,6 +5,7 @@ using Andastra.Parsing.Formats.SSF;
 using Andastra.Parsing.Logger;
 using Andastra.Parsing.Memory;
 using JetBrains.Annotations;
+using Andastra.Parsing.Common;
 
 namespace Andastra.Parsing.Mods.SSF
 {
