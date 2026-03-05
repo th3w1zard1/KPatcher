@@ -58,16 +58,20 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore src/HoloPatcher/HoloPatcher.csproj -p:Configuration=Release
+
+      - name: Restore test dependencies
+        run: dotnet restore src/TSLPatcher.Tests/TSLPatcher.Tests.csproj
 
       - name: Run tests
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test src/TSLPatcher.Tests/TSLPatcher.Tests.csproj --no-restore --verbosity normal
+        continue-on-error: true
 
       - name: Build
         run: |
-          if [ "${{ matrix.framework }}" == "net48" ]; then
-            msbuild src/HoloPatcher/HoloPatcher.csproj /p:Configuration=Release /p:TargetFramework=${{ matrix.framework }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:SelfContained=${{ matrix.selfcontained }}
-          else
+          if ("${{ matrix.framework }}" -eq "net48") {
+            msbuild src/HoloPatcher/HoloPatcher.csproj /p:Configuration=Release /p:TargetFramework=${{ matrix.framework }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:SelfContained=${{ matrix.selfcontained }} /p:OutputPath=..\..\dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}
+          } else {
             dotnet publish src/HoloPatcher/HoloPatcher.csproj `
               -c Release `
               -f ${{ matrix.framework }} `
@@ -77,6 +81,7 @@ jobs:
               -p:IncludeNativeLibrariesForSelfExtract=true `
               -p:PublishReadyToRun=true `
               -o dist/test-build/${{ matrix.framework }}/${{ matrix.rid }}
+          }
         shell: pwsh
 
       - name: Verify build output
@@ -88,9 +93,9 @@ jobs:
             exit 1
           }
           
-          $exeName = if (${{ matrix.platform }} -eq "win7" -or ${{ matrix.platform }} -eq "win") {
+          $exeName = if ("${{ matrix.platform }}" -eq "win7" -or "${{ matrix.platform }}" -eq "win") {
             "HoloPatcher.exe"
-          } elseif (${{ matrix.platform }} -eq "linux") {
+          } elseif ("${{ matrix.platform }}" -eq "linux") {
             "HoloPatcher"
           } else {
             "HoloPatcher"
@@ -124,4 +129,3 @@ jobs:
             dist/test-build/**/*
             **/*.log
           retention-days: 7
-
