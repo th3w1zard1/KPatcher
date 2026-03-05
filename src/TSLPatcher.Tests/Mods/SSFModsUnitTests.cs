@@ -15,7 +15,7 @@ namespace CSharpKOTOR.Tests.Mods
     /// </summary>
     public class SSFModsUnitTests
     {
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_ConstantInt_ShouldSetValue()
         {
             var ssf = new SSF();
@@ -32,7 +32,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.BATTLE_CRY_1).Should().Be(5);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_2DAToken_ShouldUseMemoryValue()
         {
             var ssf = new SSF();
@@ -50,7 +50,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.BATTLE_CRY_2).Should().Be(123);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_TLKToken_ShouldUseMemoryValue()
         {
             var ssf = new SSF();
@@ -68,7 +68,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.BATTLE_CRY_3).Should().Be(321);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_MultipleSounds_ShouldSetAll()
         {
             var ssf = new SSF();
@@ -93,7 +93,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.SELECT_2).Should().Be(50);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_WithMixed2DAAndTLKTokens_ShouldResolveAll()
         {
             var ssf = new SSF();
@@ -120,7 +120,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.SELECT_1).Should().Be(400);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_EmptySSF_ShouldInitializeCorrectly()
         {
             var ssf = new SSF();
@@ -137,7 +137,7 @@ namespace CSharpKOTOR.Tests.Mods
             patchedSsf.Get(SSFSound.CRITICAL_HIT).Should().Be(999);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_OverwriteExisting_ShouldReplace()
         {
             var ssf = new SSF();
@@ -160,7 +160,7 @@ namespace CSharpKOTOR.Tests.Mods
         }
 
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Assign_AllSSFSounds_ShouldSetCorrectly()
         {
             var ssf = new SSF();

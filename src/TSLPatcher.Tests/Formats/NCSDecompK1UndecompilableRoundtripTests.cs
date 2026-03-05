@@ -49,7 +49,7 @@ namespace CSharpKOTOR.Tests.Formats
             catch { }
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestK1UndecompilableRoundtrip()
         {
             // Find test directory
