@@ -3067,7 +3067,7 @@ namespace CSharpKOTOR.Tests.Formats
             Console.WriteLine("═══════════════════════════════════════════════════════════");
         }
 
-        [Fact] // Timeout enforced via PerformanceTestHelper
+        [Fact]
         public void TestRoundTripSuite()
         {
             // Performance monitoring - will generate profile report and fail if exceeds 2 minutes

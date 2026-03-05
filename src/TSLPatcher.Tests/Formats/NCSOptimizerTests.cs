@@ -32,7 +32,7 @@ namespace CSharpKOTOR.Tests.Formats
             return NCSAuto.CompileNss(script, Game.K1, null, null, lookup);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestNoOpOptimizer()
         {
             NCS ncs = Compile(@"

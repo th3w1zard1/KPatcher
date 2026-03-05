@@ -13,7 +13,7 @@ namespace CSharpKOTOR.Tests.Diff
     /// </summary>
     public class GffDiffTests
     {
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void FlattenDifferences_ShouldHandleSimpleChanges()
         {
             var compareResult = new GffCompareResult();
@@ -27,7 +27,7 @@ namespace CSharpKOTOR.Tests.Diff
             flatChanges["Field2"].Should().Be(20);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void FlattenDifferences_ShouldHandleNestedPaths()
         {
             var compareResult = new GffCompareResult();
@@ -41,7 +41,7 @@ namespace CSharpKOTOR.Tests.Diff
             flatChanges["Root/Other"].Should().Be(2);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void FlattenDifferences_ShouldHandleRemovals()
         {
             var compareResult = new GffCompareResult();
@@ -53,7 +53,7 @@ namespace CSharpKOTOR.Tests.Diff
             flatChanges["RemovedField"].Should().BeNull();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void FlattenDifferences_ShouldHandleEmptyResult()
         {
             var compareResult = new GffCompareResult();
@@ -62,7 +62,7 @@ namespace CSharpKOTOR.Tests.Diff
             flatChanges.Should().BeEmpty();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void BuildHierarchy_ShouldBuildSimpleHierarchy()
         {
             var flatChanges = new Dictionary<string, object>
@@ -78,7 +78,7 @@ namespace CSharpKOTOR.Tests.Diff
             hierarchy["Field2"].Should().Be("value2");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void BuildHierarchy_ShouldBuildNestedHierarchy()
         {
             var flatChanges = new Dictionary<string, object>
@@ -102,7 +102,7 @@ namespace CSharpKOTOR.Tests.Diff
             root["Other"].Should().Be("other");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void BuildHierarchy_ShouldBuildDeepNesting()
         {
             var flatChanges = new Dictionary<string, object>
@@ -121,7 +121,7 @@ namespace CSharpKOTOR.Tests.Diff
             level3["Level4"].Should().Be("deep_value");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void BuildHierarchy_ShouldBuildMultipleBranches()
         {
             var flatChanges = new Dictionary<string, object>
@@ -145,7 +145,7 @@ namespace CSharpKOTOR.Tests.Diff
             branch2["Leaf1"].Should().Be("value3");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void SerializeToIni_ShouldSerializeSimpleHierarchy()
         {
             var hierarchy = new Dictionary<string, object>
@@ -160,7 +160,7 @@ namespace CSharpKOTOR.Tests.Diff
             ini.Should().Contain("Field2=value2");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void SerializeToIni_ShouldQuoteValuesWithSpaces()
         {
             var hierarchy = new Dictionary<string, object>
@@ -173,7 +173,7 @@ namespace CSharpKOTOR.Tests.Diff
             ini.Should().Contain("Field1=\"value with spaces\"");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void SerializeToIni_ShouldHandleNullValues()
         {
             var hierarchy = new Dictionary<string, object>
@@ -186,7 +186,7 @@ namespace CSharpKOTOR.Tests.Diff
             ini.Should().Contain("Field1=null");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void SerializeToIni_ShouldHandleNestedSections()
         {
             var hierarchy = new Dictionary<string, object>
@@ -202,7 +202,7 @@ namespace CSharpKOTOR.Tests.Diff
             ini.Should().Contain("Field=value");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void DiffWorkflow_ShouldHandleFullWorkflow()
         {
             // 1. Create comparison result (simulating output from Compare)

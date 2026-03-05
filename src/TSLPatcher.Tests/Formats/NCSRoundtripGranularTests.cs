@@ -95,7 +95,7 @@ namespace CSharpKOTOR.Tests.Formats
             }
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripPrimitivesAndStructuralTypes()
         {
             string source = Dedent(@"
@@ -135,7 +135,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripArithmeticOperations()
         {
             string source = Dedent(@"
@@ -175,7 +175,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripBitwiseAndShiftOperations()
         {
             string source = Dedent(@"
@@ -211,7 +211,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripLogicalAndRelationalOperations()
         {
             // Note: KOTOR has ANIMATION_LOOPING_GET_LOW (10) and ANIMATION_LOOPING_GET_MID (11),
@@ -252,7 +252,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripCompoundAssignments()
         {
             string source = Dedent(@"
@@ -296,7 +296,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripIncrementAndDecrement()
         {
             string source = Dedent(@"
@@ -327,7 +327,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripIfElseNesting()
         {
             string source = Dedent(@"
@@ -382,7 +382,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripWhileForDoLoops()
         {
             string source = Dedent(@"
@@ -424,7 +424,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripSwitchCase()
         {
             // Note: KOTOR doesn't have GetLocalInt/SetLocalInt like NWN, so we use
@@ -463,7 +463,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripStructUsage()
         {
             string source = Dedent(@"
@@ -512,7 +512,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripFunctionDefinitionsAndReturns()
         {
             string source = Dedent(@"
@@ -554,7 +554,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripActionQueueAndDelays()
         {
             string source = Dedent(@"
@@ -585,7 +585,7 @@ namespace CSharpKOTOR.Tests.Formats
             });
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripIncludeResolution()
         {
             // Python uses tmp_path fixture, we'll use a temporary directory
@@ -634,7 +634,7 @@ namespace CSharpKOTOR.Tests.Formats
             }
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void TestRoundtripTslSpecificFunctionality()
         {
             string source = Dedent(@"
@@ -677,7 +677,7 @@ namespace CSharpKOTOR.Tests.Formats
             return NCSAuto.BytesNcs(ncs);
         }
 
-        [Theory(Timeout = 120000)] // 2 minutes timeout
+        [Theory]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]

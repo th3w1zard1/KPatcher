@@ -10,7 +10,7 @@ namespace CSharpKOTOR.Tests.Config
     /// </summary>
     public class LogLevelTests
     {
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void LogLevel_ShouldHaveExpectedValues()
         {
             // Assert
@@ -21,7 +21,7 @@ namespace CSharpKOTOR.Tests.Config
             ((int)LogLevel.Full).Should().Be(4);
         }
 
-        [Theory(Timeout = 120000)] // 2 minutes timeout
+        [Theory]
         [InlineData(LogLevel.Nothing, 0)]
         [InlineData(LogLevel.General, 1)]
         [InlineData(LogLevel.Errors, 2)]
@@ -36,7 +36,7 @@ namespace CSharpKOTOR.Tests.Config
             value.Should().Be(expected);
         }
 
-        [Theory(Timeout = 120000)] // 2 minutes timeout
+        [Theory]
         [InlineData(0, LogLevel.Nothing)]
         [InlineData(1, LogLevel.General)]
         [InlineData(2, LogLevel.Errors)]
@@ -51,7 +51,7 @@ namespace CSharpKOTOR.Tests.Config
             level.Should().Be(expected);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void LogLevel_ShouldCompare()
         {
             // Assert

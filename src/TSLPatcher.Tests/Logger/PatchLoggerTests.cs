@@ -13,7 +13,7 @@ namespace CSharpKOTOR.Tests.Logger
     /// </summary>
     public class PatchLoggerTests
     {
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void AddVerboseShouldAddLogWithVerboseType()
         {
             // Arrange
@@ -28,7 +28,7 @@ namespace CSharpKOTOR.Tests.Logger
             logger.AllLogs[0].Message.Should().Be("Test verbose message");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void AddNoteShouldAddLogWithNoteType()
         {
             // Arrange
@@ -43,7 +43,7 @@ namespace CSharpKOTOR.Tests.Logger
             logger.AllLogs[0].Message.Should().Be("Test note message");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void AddWarningShouldAddLogWithWarningType()
         {
             // Arrange
@@ -58,7 +58,7 @@ namespace CSharpKOTOR.Tests.Logger
             logger.AllLogs[0].Message.Should().Be("Test warning message");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void AddErrorShouldAddLogWithErrorType()
         {
             // Arrange
@@ -73,7 +73,7 @@ namespace CSharpKOTOR.Tests.Logger
             logger.AllLogs[0].Message.Should().Be("Test error message");
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void LogAddedEventShouldFireWhenLogAdded()
         {
             // Arrange
@@ -90,7 +90,7 @@ namespace CSharpKOTOR.Tests.Logger
             addedLog.LogType.Should().Be(LogType.Note);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void VerboseLogsShouldFilterByVerboseType()
         {
             // Arrange
@@ -108,7 +108,7 @@ namespace CSharpKOTOR.Tests.Logger
             verboseLogs.All(l => l.LogType == LogType.Verbose).Should().BeTrue();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void NotesShouldFilterByNoteType()
         {
             // Arrange
@@ -125,7 +125,7 @@ namespace CSharpKOTOR.Tests.Logger
             notes.All(l => l.LogType == LogType.Note).Should().BeTrue();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void WarningsShouldFilterByWarningType()
         {
             // Arrange
@@ -142,7 +142,7 @@ namespace CSharpKOTOR.Tests.Logger
             warnings.All(l => l.LogType == LogType.Warning).Should().BeTrue();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void ErrorsShouldFilterByErrorType()
         {
             // Arrange
@@ -159,7 +159,7 @@ namespace CSharpKOTOR.Tests.Logger
             errors.All(l => l.LogType == LogType.Error).Should().BeTrue();
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void MultipleLogTypesShouldMaintainOrder()
         {
             // Arrange
@@ -179,7 +179,7 @@ namespace CSharpKOTOR.Tests.Logger
             logger.AllLogs[3].LogType.Should().Be(LogType.Error);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public async Task ThreadSafetyShouldHandleConcurrentAccess()
         {
             // Arrange

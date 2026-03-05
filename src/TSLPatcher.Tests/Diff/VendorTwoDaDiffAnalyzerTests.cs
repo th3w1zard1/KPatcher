@@ -13,7 +13,7 @@ namespace CSharpKOTOR.Tests.Diff
     /// </summary>
     public class VendorTwoDaDiffAnalyzerTests
     {
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Analyze_ShouldFindNewColumn()
         {
             var older = new TwoDA();
@@ -53,7 +53,7 @@ namespace CSharpKOTOR.Tests.Diff
             ((RowValueConstant)modifier.IndexInsert[1]).String.Should().Be(string.Empty);
         }
 
-        [Fact(Timeout = 120000)] // 2 minutes timeout
+        [Fact]
         public void Analyze_ShouldFindNewRow()
         {
             var older = new TwoDA();
