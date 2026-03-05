@@ -21,6 +21,7 @@ HoloPatcher.NET is a C#/.NET Avalonia desktop application for installing Star Wa
 - **Do NOT build the .sln file directly.** The solution (`HoloPatcher.sln`) references many projects that don't exist on disk (NCSDecomp, HolocronToolset.NET, OdysseyRuntime sub-projects). Build individual `.csproj` files instead.
 - **`--framework net9` is required** when running the HoloPatcher executable via `dotnet run` because the project multi-targets in Release mode and `dotnet run` cannot pick a default.
 - **.NET SDK is installed at `$HOME/.dotnet`**, which is added to `PATH` via `~/.bashrc`. The update script also ensures this.
-- **Pre-existing test failures**: ~893 of 976 tests fail with "Tests marked with Timeout are only supported for async tests" due to a version mismatch between xunit 2.9.3 and xunit.runner.visualstudio 3.1.5. This is a known pre-existing issue, not caused by environment setup. The 83 passing tests cover the core functionality.
+- **Test results on Linux**: 936/976 pass. 40 failures are platform-specific (Windows path tests, Linux exception-type differences, NCS external compiler requirement). These pass on Windows except NCS roundtrip tests.
 - **NCS Roundtrip tests** require `nwnnsscomp.exe` (Windows-only external compiler) and will always fail on Linux.
+- **CI workflows** target specific `.csproj` files, NOT the `.sln`. The solution references 11 missing projects and cannot be used with `dotnet restore/build/test`.
 - **Avalonia GUI** requires `DISPLAY=:1` environment variable to launch the X11 window.
