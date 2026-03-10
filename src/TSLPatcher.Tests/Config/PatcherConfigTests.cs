@@ -1,8 +1,8 @@
-using CSharpKOTOR.Config;
+using TSLPatcher.Core.Config;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Config
+namespace TSLPatcher.Core.Tests.Config
 {
 
     /// <summary>

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using CSharpKOTOR.Diff;
-using CSharpKOTOR.Formats.GFF;
+using TSLPatcher.Core.Diff;
+using TSLPatcher.Core.Formats.GFF;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Diff
+namespace TSLPatcher.Core.Tests.Diff
 {
 
     /// <summary>

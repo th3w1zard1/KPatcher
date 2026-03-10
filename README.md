@@ -22,8 +22,9 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 
 ## Project Structure
 
-- **HoloPatcher** - Main Avalonia UI application
-- **TSLPatcher.Core** - Core patching engine and logic (portable library)
+- **HoloPatcher** - Main Avalonia desktop application
+- **HoloPatcher.UI** - Packable Avalonia UI library
+- **TSLPatcher.Core** - Packable core patching engine and data/model library
 
 ## Features
 
@@ -125,6 +126,23 @@ The Avalonia UI application follows MVVM pattern:
 - **Views/** - XAML views
 - **ViewModels/** - View models with business logic
 - **Services/** - Application services
+
+## NuGet Packages
+
+Release builds generate the public library packages consumed by other .NET projects:
+
+- **TSLPatcher.Core** - Core patching engine and format/model library
+- **HoloPatcher.UI** - Avalonia UI layer built on top of `TSLPatcher.Core`
+
+Example consumption:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="TSLPatcher.Core" Version="2.0.0-alpha3" />
+  <PackageReference Include="HoloPatcher" Version="2.0.0-alpha3" />
+  <PackageReference Include="HoloPatcher.UI" Version="2.0.0-alpha3" />
+</ItemGroup>
+```
 
 ## Port Implementation Details
 

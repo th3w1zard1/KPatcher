@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Xunit.Abstractions;
 
-namespace CSharpKOTOR.Tests.Performance
+namespace TSLPatcher.Core.Tests.Performance
 {
     /// <summary>
     /// Helper class for performance testing with timeout enforcement and profiling.

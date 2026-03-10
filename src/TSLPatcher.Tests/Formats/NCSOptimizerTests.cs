@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.NCS;
-using CSharpKOTOR.Formats.NCS.Compiler;
-using CSharpKOTOR.Formats.NCS.Optimizers;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.NCS;
+using TSLPatcher.Core.Formats.NCS.Compiler;
+using TSLPatcher.Core.Formats.NCS.Optimizers;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

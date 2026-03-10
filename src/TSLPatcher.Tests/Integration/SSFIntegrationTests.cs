@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.SSF;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods.SSF;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.SSF;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods.SSF;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Integration
+namespace TSLPatcher.Core.Tests.Integration
 {
 
     /// <summary>
@@ -181,7 +181,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 1=5
 ";
-            CSharpKOTOR.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -201,7 +201,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 2=2DAMEMORY5
 ";
-            CSharpKOTOR.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -222,7 +222,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 3=StrRef7
 ";
-            CSharpKOTOR.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();

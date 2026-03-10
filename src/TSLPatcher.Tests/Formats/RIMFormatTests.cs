@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Formats.RIM;
-using CSharpKOTOR.Resources;
-using CSharpKOTOR.Tests.Common;
+using TSLPatcher.Core.Formats.RIM;
+using TSLPatcher.Core.Resources;
+using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static CSharpKOTOR.Formats.RIM.RIMAuto;
+using static TSLPatcher.Core.Formats.RIM.RIMAuto;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

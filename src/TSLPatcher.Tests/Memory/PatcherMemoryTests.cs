@@ -1,10 +1,10 @@
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods.GFF;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods.GFF;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Memory
+namespace TSLPatcher.Core.Tests.Memory
 {
 
     /// <summary>

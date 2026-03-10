@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace CSharpKOTOR.Tests.Performance
+namespace TSLPatcher.Core.Tests.Performance
 {
     /// <summary>
     /// Performance profiler that tracks method execution times and generates cProfile-like output.

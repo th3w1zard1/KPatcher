@@ -1,14 +1,14 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.GFF;
-using CSharpKOTOR.Resources;
-using CSharpKOTOR.Tests.Common;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.GFF;
+using TSLPatcher.Core.Resources;
+using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static CSharpKOTOR.Formats.GFF.GFFAuto;
+using static TSLPatcher.Core.Formats.GFF.GFFAuto;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

@@ -12,7 +12,7 @@ HoloPatcher.NET is a C#/.NET Avalonia desktop application for installing Star Wa
 |---|---|
 | Restore | `dotnet restore src/HoloPatcher/HoloPatcher.csproj` |
 | Build (Debug) | `dotnet build src/HoloPatcher/HoloPatcher.csproj --configuration Debug --framework net9` |
-| Build (Release, with analyzers) | `dotnet build src/CSharpKOTOR/CSharpKOTOR.csproj --configuration Release` |
+| Build (Release, with analyzers) | `dotnet build src/TSLPatcher.Core/TSLPatcher.Core.csproj --configuration Release` |
 | Run tests | `dotnet test src/TSLPatcher.Tests/TSLPatcher.Tests.csproj` |
 | Run app | `DISPLAY=:1 dotnet run --project src/HoloPatcher/HoloPatcher.csproj --configuration Debug --framework net9` |
 

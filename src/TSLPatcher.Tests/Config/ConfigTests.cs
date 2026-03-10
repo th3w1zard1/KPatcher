@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.Capsule;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods;
-using CSharpKOTOR.Patcher;
-using CSharpKOTOR.Resources;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.Capsule;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods;
+using TSLPatcher.Core.Patcher;
+using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Config
+namespace TSLPatcher.Core.Tests.Config
 {
 
     /// <summary>

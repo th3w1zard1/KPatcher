@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CSharpKOTOR.Logger;
+using TSLPatcher.Core.Logger;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Logger
+namespace TSLPatcher.Core.Tests.Logger
 {
 
     /// <summary>

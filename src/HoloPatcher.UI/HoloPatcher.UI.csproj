@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
-    <Version>2.0.0-alpha1</Version>
+    <Version>2.0.0-alpha3</Version>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -20,6 +20,9 @@
     <PackageProjectUrl>https://github.com/th3w1zard1/HoloPatcher.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/th3w1zard1/HoloPatcher.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>BSL-1.1</PackageLicenseExpression>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
@@ -31,21 +34,21 @@
     </TargetFrameworks>
     <!-- Add each TFM conditionally -->
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0.0'))">
-      $(TargetFrameworks);net10
+      $(TargetFrameworks);net10.0
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '9.0.0'))">
-      $(TargetFrameworks);net9
+      $(TargetFrameworks);net9.0
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '8.0.0'))">
-      $(TargetFrameworks);net8
+      $(TargetFrameworks);net8.0
     </TargetFrameworks>
     <!-- === .NET 7 SDK: include net7.0 + net6.0 (legacy support) === -->
     <TargetFrameworks Condition="$([System.String]::new('$(NETCoreSdkVersion)').StartsWith('7.'))">
-      $(TargetFrameworks);net7;net6
+      $(TargetFrameworks);net7.0;net6.0
     </TargetFrameworks>
     <!-- === .NET 6 SDK: include (legacy support) === -->
     <TargetFrameworks Condition="$([System.String]::new('$(NETCoreSdkVersion)').StartsWith('6.'))">
-      $(TargetFrameworks);net6
+      $(TargetFrameworks);net6.0
     </TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' AND Exists('$(MSBuildProgramFiles32)\..\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8')">
       $(TargetFrameworks);net48
@@ -54,7 +57,7 @@
       $(TargetFrameworks);net462
     </TargetFrameworks>
     <!-- Ensure we always have at least one framework to avoid empty TargetFrameworks -->
-    <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net9</TargetFrameworks>
+      <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net9.0</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Release Configuration -->
@@ -75,7 +78,7 @@
   <!-- Debug Configuration: Optimized for faster development builds -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <!-- Single target framework for fastest Debug builds -->
-    <TargetFrameworks>net9</TargetFrameworks>
+      <TargetFrameworks>net9.0</TargetFrameworks>
     <!-- Disable analyzers in Debug builds for faster compilation -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
@@ -119,7 +122,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpKOTOR\CSharpKOTOR.csproj" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <ProjectReference Include="..\TSLPatcher.Core\TSLPatcher.Core.csproj" />
   </ItemGroup>
 
 </Project>

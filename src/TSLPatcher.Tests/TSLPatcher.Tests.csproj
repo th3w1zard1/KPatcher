@@ -81,7 +81,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CSharpKOTOR\CSharpKOTOR.csproj" />
+    <ProjectReference Include="..\TSLPatcher.Core\TSLPatcher.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

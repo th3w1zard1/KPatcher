@@ -17,7 +17,7 @@ if ([string]::IsNullOrEmpty($ProjectPath))
     # Try to find test projects
     $testProjects = @(
         "src\TSLPatcher.Tests\TSLPatcher.Tests.csproj",
-        "tests\CSharpKOTOR.Tests\CSharpKOTOR.Tests.csproj"
+        "tests\TSLPatcher.Core.Tests\TSLPatcher.Core.Tests.csproj"
     )
     
     foreach ($proj in $testProjects)

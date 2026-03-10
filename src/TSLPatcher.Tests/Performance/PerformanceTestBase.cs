@@ -5,7 +5,7 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace CSharpKOTOR.Tests.Performance
+namespace TSLPatcher.Core.Tests.Performance
 {
     /// <summary>
     /// Base class for performance-tested classes in xUnit.

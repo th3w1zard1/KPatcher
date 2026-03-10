@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.NCS;
-using CSharpKOTOR.Formats.NCS.Compiler;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.NCS;
+using TSLPatcher.Core.Formats.NCS.Compiler;
 
 class Program
 {

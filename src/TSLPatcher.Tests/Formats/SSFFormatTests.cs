@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Formats.SSF;
-using CSharpKOTOR.Resources;
+using TSLPatcher.Core.Formats.SSF;
+using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
-using static CSharpKOTOR.Formats.SSF.SSFAuto;
+using static TSLPatcher.Core.Formats.SSF.SSFAuto;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

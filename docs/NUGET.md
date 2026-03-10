@@ -13,8 +13,8 @@ To build NuGet packages for both projects:
 dotnet pack --configuration Release
 
 # Packages will be created in:
-# - src/TSLPatcher.Core/bin/Release/TSLPatcher.Core.2.0.0-alpha1.nupkg
-# - src/HoloPatcher/bin/Release/HoloPatcher.2.0.0-alpha1.nupkg
+# - src/TSLPatcher.Core/bin/Release/TSLPatcher.Core.2.0.0-alpha3.nupkg
+# - src/HoloPatcher.UI/bin/Release/HoloPatcher.UI.2.0.0-alpha3.nupkg
 ```
 
 ### Build Individual Packages
@@ -23,8 +23,8 @@ dotnet pack --configuration Release
 # Build only TSLPatcher.Core
 dotnet pack src/TSLPatcher.Core/TSLPatcher.Core.csproj --configuration Release
 
-# Build only HoloPatcher
-dotnet pack src/HoloPatcher/HoloPatcher.csproj --configuration Release
+# Build only HoloPatcher.UI
+dotnet pack src/HoloPatcher.UI/HoloPatcher.UI.csproj --configuration Release
 ```
 
 ## Installing Packages
@@ -43,7 +43,7 @@ mkdir nuget-packages
 
 ```bash
 dotnet add package TSLPatcher.Core --source ./nuget-packages
-dotnet add package HoloPatcher --source ./nuget-packages
+dotnet add package HoloPatcher.UI --source ./nuget-packages
 ```
 
 ### From NuGet.org (after publishing)
@@ -52,15 +52,15 @@ Once published to NuGet.org, install via:
 
 ```bash
 dotnet add package TSLPatcher.Core
-dotnet add package HoloPatcher
+dotnet add package HoloPatcher.UI
 ```
 
 Or add to your `.csproj`:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="TSLPatcher.Core" Version="2.0.0-alpha1" />
-  <PackageReference Include="HoloPatcher" Version="2.0.0-alpha1" />
+  <PackageReference Include="TSLPatcher.Core" Version="2.0.0-alpha3" />
+  <PackageReference Include="HoloPatcher.UI" Version="2.0.0-alpha3" />
 </ItemGroup>
 ```
 
@@ -90,15 +90,14 @@ var installer = new ModInstaller(
 installer.Install();
 ```
 
-### Using HoloPatcher
+### Using HoloPatcher.UI
 
-HoloPatcher can be used as a library for programmatic access:
+HoloPatcher.UI can be used as a library for programmatic access:
 
 ```csharp
-using HoloPatcher;
+using HoloPatcher.UI;
 
-// Access core functionality through HoloPatcher classes
-// (Implementation depends on what public APIs are exposed)
+// Access the Avalonia UI layer from your application.
 ```
 
 ## Publishing to NuGet.org
@@ -114,8 +113,8 @@ using HoloPatcher;
 # Publish TSLPatcher.Core
 dotnet nuget push src/TSLPatcher.Core/bin/Release/TSLPatcher.Core.*.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
 
-# Publish HoloPatcher
-dotnet nuget push src/HoloPatcher/bin/Release/HoloPatcher.*.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
+# Publish HoloPatcher.UI
+dotnet nuget push src/HoloPatcher.UI/bin/Release/HoloPatcher.UI.*.nupkg --api-key YOUR_API_KEY --source https://api.nuget.org/v3/index.json
 ```
 
 3. **Publish symbol packages** (optional):
@@ -126,15 +125,15 @@ dotnet nuget push src/TSLPatcher.Core/bin/Release/TSLPatcher.Core.*.snupkg --api
 
 ## Package Dependencies
 
-- **TSLPatcher.Core**: Standalone library with no dependencies on HoloPatcher
-- **HoloPatcher**: Depends on TSLPatcher.Core (automatically included when installing HoloPatcher)
+- **TSLPatcher.Core**: Standalone core patching and format/model library
+- **HoloPatcher.UI**: Depends on TSLPatcher.Core for the Avalonia UI layer
 
 ## Version Management
 
 Update the version in the `.csproj` files:
 
 ```xml
-<Version>2.0.0-alpha1</Version>
+<Version>2.0.0-alpha3</Version>
 ```
 
 Follow [Semantic Versioning](https://semver.org/):
@@ -148,4 +147,4 @@ Follow [Semantic Versioning](https://semver.org/):
 
 - Packages are automatically generated on Release builds when `GeneratePackageOnBuild` is `true`
 - Symbol packages (`.snupkg`) are included for debugging support
-- Both packages support multiple target frameworks (.NET 6.0, 7.0, 8.0, 9.0, 10.0, and .NET Framework 4.6.2, 4.8)
+- The active public package identities are `TSLPatcher.Core` and `HoloPatcher.UI`

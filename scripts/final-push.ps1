@@ -16,7 +16,7 @@ if ($envContent -match 'NUGET_API_KEY\s*=\s*"([^"]+)"') {
 }
 
 # Find package
-$pkg = Get-ChildItem "src/CSharpKOTOR/bin/Release" -Filter "*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$pkg = Get-ChildItem "src/TSLPatcher.Core/bin/Release" -Filter "*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $pkg) {
     $output += "ERROR: No package found"
     $output | Out-File "push-log.txt"

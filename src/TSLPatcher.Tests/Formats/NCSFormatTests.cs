@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Formats.NCS;
-using CSharpKOTOR.Tests.Common;
+using TSLPatcher.Core.Formats.NCS;
+using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

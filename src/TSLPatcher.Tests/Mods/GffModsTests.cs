@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.GFF;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods.GFF;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.GFF;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods.GFF;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Mods
+namespace TSLPatcher.Core.Tests.Mods
 {
 
     /// <summary>

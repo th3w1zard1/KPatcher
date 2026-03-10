@@ -1,4 +1,4 @@
-# Build NuGet packages for CSharpKOTOR and HoloPatcher
+# Build NuGet packages for TSLPatcher.Core and HoloPatcher
 # Usage: .\build-nuget.ps1 [--publish] [--source <feed-url>] [--api-key <key>]
 #
 # API Key can be provided via:
@@ -41,12 +41,12 @@ if ([string]::IsNullOrWhiteSpace($Source)) {
 
 Write-Host "Building NuGet packages..." -ForegroundColor Green
 
-# Build CSharpKOTOR package
-Write-Host "`nBuilding CSharpKOTOR..." -ForegroundColor Cyan
-dotnet pack src/CSharpKOTOR/CSharpKOTOR.csproj --configuration $Configuration --no-build
+# Build TSLPatcher.Core package
+Write-Host "`nBuilding TSLPatcher.Core..." -ForegroundColor Cyan
+dotnet pack src/TSLPatcher.Core/TSLPatcher.Core.csproj --configuration $Configuration --no-build
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Failed to build CSharpKOTOR package" -ForegroundColor Red
+    Write-Host "Failed to build TSLPatcher.Core package" -ForegroundColor Red
     exit 1
 }
 
@@ -60,13 +60,13 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Find package files
-$tslCorePackage = Get-ChildItem -Path "src/CSharpKOTOR/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
+$tslCorePackage = Get-ChildItem -Path "src/TSLPatcher.Core/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
 $holoPatcherPackage = Get-ChildItem -Path "src/HoloPatcher/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
 
 if ($tslCorePackage) {
-    Write-Host "`nCSharpKOTOR package created: $($tslCorePackage.FullName)" -ForegroundColor Green
+    Write-Host "`nTSLPatcher.Core package created: $($tslCorePackage.FullName)" -ForegroundColor Green
 } else {
-    Write-Host "`nCSharpKOTOR package not found!" -ForegroundColor Red
+    Write-Host "`nTSLPatcher.Core package not found!" -ForegroundColor Red
     exit 1
 }
 
@@ -97,12 +97,12 @@ if ($Publish) {
         $pushArgs += "--api-key", $ApiKey
     }
 
-    # Publish CSharpKOTOR
-    Write-Host "Publishing CSharpKOTOR..." -ForegroundColor Cyan
+    # Publish TSLPatcher.Core
+    Write-Host "Publishing TSLPatcher.Core..." -ForegroundColor Cyan
     & dotnet $pushArgs $tslCorePackage.FullName
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to publish CSharpKOTOR" -ForegroundColor Red
+        Write-Host "Failed to publish TSLPatcher.Core" -ForegroundColor Red
         exit 1
     }
 
@@ -116,11 +116,11 @@ if ($Publish) {
     }
 
     # Publish symbol packages if they exist
-    $tslCoreSymbols = Get-ChildItem -Path "src/CSharpKOTOR/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
+    $tslCoreSymbols = Get-ChildItem -Path "src/TSLPatcher.Core/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
     $holoPatcherSymbols = Get-ChildItem -Path "src/HoloPatcher/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
 
     if ($tslCoreSymbols) {
-        Write-Host "Publishing CSharpKOTOR symbols..." -ForegroundColor Cyan
+        Write-Host "Publishing TSLPatcher.Core symbols..." -ForegroundColor Cyan
         & dotnet $pushArgs $tslCoreSymbols.FullName
     }
 

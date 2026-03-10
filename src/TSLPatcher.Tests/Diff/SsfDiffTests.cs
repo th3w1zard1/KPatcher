@@ -1,9 +1,9 @@
-using CSharpKOTOR.Diff;
-using CSharpKOTOR.Formats.SSF;
+using TSLPatcher.Core.Diff;
+using TSLPatcher.Core.Formats.SSF;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Diff
+namespace TSLPatcher.Core.Tests.Diff
 {
 
     /// <summary>

@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods.TLK;
-using CSharpKOTOR.Resources;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods.TLK;
+using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Integration
+namespace TSLPatcher.Core.Tests.Integration
 {
 
     /// <summary>
@@ -237,7 +237,7 @@ StrRef1=1
             string appendTlkPath = Path.Combine(TempDir, "append.tlk");
             appendTlk.Save(appendTlkPath);
 
-            CSharpKOTOR.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");
@@ -273,7 +273,7 @@ ReplaceFile0=replace.tlk
             string replaceTlkPath = Path.Combine(TempDir, "replace.tlk");
             replaceTlk.Save(replaceTlkPath);
 
-            CSharpKOTOR.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Uninstall;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Uninstall;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Uninstall
+namespace TSLPatcher.Core.Tests.Uninstall
 {
 
     /// <summary>

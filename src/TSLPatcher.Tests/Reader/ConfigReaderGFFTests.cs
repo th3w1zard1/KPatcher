@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Config;
-using CSharpKOTOR.Formats.GFF;
-using CSharpKOTOR.Mods.GFF;
-using CSharpKOTOR.Reader;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Config;
+using TSLPatcher.Core.Formats.GFF;
+using TSLPatcher.Core.Mods.GFF;
+using TSLPatcher.Core.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Reader
+namespace TSLPatcher.Core.Tests.Reader
 {
 
     /// <summary>

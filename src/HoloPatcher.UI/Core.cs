@@ -6,14 +6,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Config;
-using CSharpKOTOR.Installation;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Namespaces;
-using CSharpKOTOR.Patcher;
-using CSharpKOTOR.Reader;
-using CSharpKOTOR.Uninstall;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Config;
+using TSLPatcher.Core.Installation;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Namespaces;
+using TSLPatcher.Core.Patcher;
+using TSLPatcher.Core.Reader;
+using TSLPatcher.Core.Uninstall;
 using JetBrains.Annotations;
 #if WINDOWS
 using Microsoft.Win32;
@@ -24,7 +24,7 @@ namespace HoloPatcher.UI
 
     /// <summary>
     /// Core functionality for HoloPatcher.
-    /// Equivalent to holopatcher/csharpkotor.py
+    /// Equivalent to holopatcher/TSLPatcher.Core.py
     /// </summary>
     public static class Core
     {

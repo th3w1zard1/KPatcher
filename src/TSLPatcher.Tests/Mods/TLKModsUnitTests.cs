@@ -1,12 +1,12 @@
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
-using CSharpKOTOR.Mods.TLK;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
+using TSLPatcher.Core.Mods.TLK;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Mods
+namespace TSLPatcher.Core.Tests.Mods
 {
 
     /// <summary>

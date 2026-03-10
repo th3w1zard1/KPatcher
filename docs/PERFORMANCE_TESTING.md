@@ -31,7 +31,7 @@ public void MyTest()
 }
 ```
 
-### NUnit (CSharpKOTOR.Tests)
+### NUnit (TSLPatcher.Core.Tests)
 
 Tests use the `[PerformanceTest]` attribute:
 

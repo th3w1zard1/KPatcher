@@ -1,9 +1,9 @@
 using System;
-using CSharpKOTOR.Common;
+using TSLPatcher.Core.Common;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Common
+namespace TSLPatcher.Core.Tests.Common
 {
 
     /// <summary>

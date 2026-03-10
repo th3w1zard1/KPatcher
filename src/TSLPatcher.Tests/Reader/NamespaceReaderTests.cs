@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Namespaces;
-using CSharpKOTOR.Reader;
+using TSLPatcher.Core.Namespaces;
+using TSLPatcher.Core.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Reader
+namespace TSLPatcher.Core.Tests.Reader
 {
     /// <summary>
     /// Tests for NamespaceReader functionality.

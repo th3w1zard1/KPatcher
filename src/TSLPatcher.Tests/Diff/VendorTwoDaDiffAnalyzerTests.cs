@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using CSharpKOTOR.Diff;
-using CSharpKOTOR.Formats.TwoDA;
-using CSharpKOTOR.Mods.TwoDA;
+using TSLPatcher.Core.Diff;
+using TSLPatcher.Core.Formats.TwoDA;
+using TSLPatcher.Core.Mods.TwoDA;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Diff
+namespace TSLPatcher.Core.Tests.Diff
 {
 
     /// <summary>

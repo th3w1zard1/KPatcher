@@ -1,8 +1,8 @@
-using CSharpKOTOR.Namespaces;
+using TSLPatcher.Core.Namespaces;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Namespaces
+namespace TSLPatcher.Core.Tests.Namespaces
 {
 
     /// <summary>

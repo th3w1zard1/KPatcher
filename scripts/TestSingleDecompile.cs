@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Formats.NCS.NCSDecomp;
-using CSharpKOTOR.Common;
+using TSLPatcher.Core.Formats.NCS.NCSDecomp;
+using TSLPatcher.Core.Common;
 
 class TestSingleDecompile
 {

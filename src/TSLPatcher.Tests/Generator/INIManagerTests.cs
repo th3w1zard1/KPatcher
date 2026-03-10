@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpKOTOR.TSLPatcher;
+using TSLPatcher.Core.TSLPatcher;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Generator
+namespace TSLPatcher.Core.Tests.Generator
 {
     /// <summary>
     /// Comprehensive tests for INIManager.

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.NCS;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.NCS;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
     /// <summary>
     /// Granular tests for NCS roundtrip compilation/decompilation.

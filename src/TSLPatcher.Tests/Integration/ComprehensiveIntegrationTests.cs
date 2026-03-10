@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Config;
-using CSharpKOTOR.Formats.GFF;
-using CSharpKOTOR.Formats.SSF;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Formats.TwoDA;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Memory;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Config;
+using TSLPatcher.Core.Formats.GFF;
+using TSLPatcher.Core.Formats.SSF;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Formats.TwoDA;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Memory;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Integration
+namespace TSLPatcher.Core.Tests.Integration
 {
 
     /// <summary>

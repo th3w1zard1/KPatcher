@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using CSharpKOTOR.Formats.TwoDA;
+using TSLPatcher.Core.Formats.TwoDA;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

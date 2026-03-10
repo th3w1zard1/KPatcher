@@ -57,12 +57,13 @@ Tools/HoloPatcher.NET/
 │   │   ├── App.axaml            # Application definition
 │   │   └── Program.cs           # Entry point
 │   │
-│   └── TSLPatcher.Core/         # Core patching library
+│   ├── HoloPatcher.UI/          # Packable Avalonia UI library
+│   └── TSLPatcher.Core/         # Packable core patching library
 │       ├── Config/              # Configuration models
 │       ├── Logger/              # Logging system
 │       ├── Memory/              # Token memory
 │       ├── Namespaces/          # Namespace management
-│       └── Mods/                # Modification operations (TODO)
+│       └── Mods/                # Modification operations
 │
 ├── README.md                    # Project documentation
 ├── MIGRATION_GUIDE.md           # Python → C# migration guide

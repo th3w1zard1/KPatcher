@@ -4,26 +4,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.GFF;
-using CSharpKOTOR.Formats.SSF;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Formats.TwoDA;
-using CSharpKOTOR.Resources;
-using TLKAuto = CSharpKOTOR.Formats.TLK.TLKAuto;
-using TwoDAAuto = CSharpKOTOR.Formats.TwoDA.TwoDAAuto;
-using GFFAuto = CSharpKOTOR.Formats.GFF.GFFAuto;
-using SSFAuto = CSharpKOTOR.Formats.SSF.SSFAuto;
-using CSharpKOTOR.Mods;
-using CSharpKOTOR.Mods.GFF;
-using CSharpKOTOR.Mods.SSF;
-using CSharpKOTOR.Mods.TLK;
-using CSharpKOTOR.Mods.TwoDA;
-using CSharpKOTOR.TSLPatcher;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.GFF;
+using TSLPatcher.Core.Formats.SSF;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Formats.TwoDA;
+using TSLPatcher.Core.Resources;
+using TLKAuto = TSLPatcher.Core.Formats.TLK.TLKAuto;
+using TwoDAAuto = TSLPatcher.Core.Formats.TwoDA.TwoDAAuto;
+using GFFAuto = TSLPatcher.Core.Formats.GFF.GFFAuto;
+using SSFAuto = TSLPatcher.Core.Formats.SSF.SSFAuto;
+using TSLPatcher.Core.Mods;
+using TSLPatcher.Core.Mods.GFF;
+using TSLPatcher.Core.Mods.SSF;
+using TSLPatcher.Core.Mods.TLK;
+using TSLPatcher.Core.Mods.TwoDA;
+using TSLPatcher.Core.TSLPatcher;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Generator
+namespace TSLPatcher.Core.Tests.Generator
 {
     /// <summary>
     /// Comprehensive tests for IncrementalTSLPatchDataWriter.
@@ -165,7 +165,7 @@ namespace CSharpKOTOR.Tests.Generator
             // Create test SSF data
             var ssf = new SSF();
             var ssfPath = Path.Combine(_tempDir, "temp.ssf");
-            SSFAuto.WriteSsf(ssf, ssfPath, CSharpKOTOR.Resources.ResourceType.SSF);
+            SSFAuto.WriteSsf(ssf, ssfPath, TSLPatcher.Core.Resources.ResourceType.SSF);
             var ssfData = File.ReadAllBytes(ssfPath);
 
             // Act

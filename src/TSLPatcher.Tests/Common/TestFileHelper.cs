@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace CSharpKOTOR.Tests.Common
+namespace TSLPatcher.Core.Tests.Common
 {
 
     internal static class TestFileHelper

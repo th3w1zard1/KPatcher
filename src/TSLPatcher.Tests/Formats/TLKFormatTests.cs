@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Resources;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
-using static CSharpKOTOR.Formats.TLK.TLKAuto;
+using static TSLPatcher.Core.Formats.TLK.TLKAuto;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

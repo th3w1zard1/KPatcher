@@ -1,18 +1,18 @@
 using System;
 using System.IO;
 using System.Linq;
-using CSharpKOTOR.Config;
-using CSharpKOTOR.Formats.TLK;
-using CSharpKOTOR.Logger;
-using CSharpKOTOR.Mods.TLK;
-using CSharpKOTOR.Reader;
-using CSharpKOTOR.Resources;
+using TSLPatcher.Core.Config;
+using TSLPatcher.Core.Formats.TLK;
+using TSLPatcher.Core.Logger;
+using TSLPatcher.Core.Mods.TLK;
+using TSLPatcher.Core.Reader;
+using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Reader
+namespace TSLPatcher.Core.Tests.Reader
 {
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace CSharpKOTOR.Tests.Reader
 
         private void CreateTestTLKFile(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(CSharpKOTOR.Common.Language.English);
+            var tlk = new TLK(TSLPatcher.Core.Common.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);
@@ -103,7 +103,7 @@ namespace CSharpKOTOR.Tests.Reader
 
         private void CreateTestTLKFileInModRoot(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(CSharpKOTOR.Common.Language.English);
+            var tlk = new TLK(TSLPatcher.Core.Common.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);

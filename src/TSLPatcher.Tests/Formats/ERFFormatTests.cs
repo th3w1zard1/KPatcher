@@ -1,13 +1,13 @@
 using System;
 using System.IO;
-using CSharpKOTOR.Formats.ERF;
-using CSharpKOTOR.Resources;
-using CSharpKOTOR.Tests.Common;
+using TSLPatcher.Core.Formats.ERF;
+using TSLPatcher.Core.Resources;
+using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static CSharpKOTOR.Formats.ERF.ERFAuto;
+using static TSLPatcher.Core.Formats.ERF.ERFAuto;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
 
     /// <summary>

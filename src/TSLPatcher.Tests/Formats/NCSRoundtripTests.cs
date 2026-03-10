@@ -11,16 +11,16 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CSharpKOTOR.Common;
-using CSharpKOTOR.Formats.NCS;
-using CSharpKOTOR.Formats.NCS.NCSDecomp;
-using IOException = CSharpKOTOR.Formats.NCS.NCSDecomp.IOException;
-using NcsFile = CSharpKOTOR.Formats.NCS.NCSDecomp.NcsFile;
-using CSharpKOTOR.Tests.Performance;
+using TSLPatcher.Core.Common;
+using TSLPatcher.Core.Formats.NCS;
+using TSLPatcher.Core.Formats.NCS.NCSDecomp;
+using IOException = TSLPatcher.Core.Formats.NCS.NCSDecomp.IOException;
+using NcsFile = TSLPatcher.Core.Formats.NCS.NCSDecomp.NcsFile;
+using TSLPatcher.Core.Tests.Performance;
 using FluentAssertions;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Formats
+namespace TSLPatcher.Core.Tests.Formats
 {
     /// <summary>
     /// Exhaustive round-trip tests for the decompiler and compiler:
@@ -1027,7 +1027,7 @@ namespace CSharpKOTOR.Tests.Formats
         }
 
         /// <summary>
-        /// Compiles NSS to NCS using the inbuilt compiler (CSharpKOTOR native implementation).
+        /// Compiles NSS to NCS using the inbuilt compiler (TSLPatcher.Core native implementation).
         /// </summary>
         private static void RunInbuiltCompiler(string originalNssPath, string compiledOut, string gameFlag)
         {

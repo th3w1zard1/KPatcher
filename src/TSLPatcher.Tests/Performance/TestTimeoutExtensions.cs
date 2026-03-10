@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace CSharpKOTOR.Tests.Performance
+namespace TSLPatcher.Core.Tests.Performance
 {
     /// <summary>
     /// Extension methods for enforcing test timeouts in xUnit tests.
