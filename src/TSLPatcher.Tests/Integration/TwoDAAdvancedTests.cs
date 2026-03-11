@@ -88,7 +88,7 @@ ColumnLabel=NewCol
 DefaultValue=default
 I1=special_value
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -127,7 +127,7 @@ ColumnLabel=NewCol
 DefaultValue=
 L1=2DAMEMORY5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -165,7 +165,7 @@ ColumnLabel=NewCol
 DefaultValue=
 L1=StrRef5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -202,7 +202,7 @@ I0=X
 I1=Y
 2DAMEMORY0=I0
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -242,7 +242,7 @@ I0=X
 I1=Y
 2DAMEMORY0=L1
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act
@@ -389,7 +389,7 @@ name=Copied
 ColumnLabel=NewCol
 DefaultValue=default
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             Modifications2DA modifications = config.Patches2DA.First(p => p.SaveAs == "test.2da");
 
             // Act

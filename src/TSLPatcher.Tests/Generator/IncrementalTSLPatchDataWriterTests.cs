@@ -10,10 +10,10 @@ using TSLPatcher.Core.Formats.SSF;
 using TSLPatcher.Core.Formats.TLK;
 using TSLPatcher.Core.Formats.TwoDA;
 using TSLPatcher.Core.Resources;
-using TLKAuto = TSLPatcher.Core.Formats.TLK.TLKAuto;
-using TwoDAAuto = TSLPatcher.Core.Formats.TwoDA.TwoDAAuto;
-using GFFAuto = TSLPatcher.Core.Formats.GFF.GFFAuto;
-using SSFAuto = TSLPatcher.Core.Formats.SSF.SSFAuto;
+using TLKAuto = global::TSLPatcher.Core.Formats.TLK.TLKAuto;
+using TwoDAAuto = global::TSLPatcher.Core.Formats.TwoDA.TwoDAAuto;
+using GFFAuto = global::TSLPatcher.Core.Formats.GFF.GFFAuto;
+using SSFAuto = global::TSLPatcher.Core.Formats.SSF.SSFAuto;
 using TSLPatcher.Core.Mods;
 using TSLPatcher.Core.Mods.GFF;
 using TSLPatcher.Core.Mods.SSF;
@@ -165,7 +165,7 @@ namespace TSLPatcher.Core.Tests.Generator
             // Create test SSF data
             var ssf = new SSF();
             var ssfPath = Path.Combine(_tempDir, "temp.ssf");
-            SSFAuto.WriteSsf(ssf, ssfPath, TSLPatcher.Core.Resources.ResourceType.SSF);
+            SSFAuto.WriteSsf(ssf, ssfPath, ResourceType.SSF);
             var ssfData = File.ReadAllBytes(ssfPath);
 
             // Act
@@ -388,6 +388,83 @@ namespace TSLPatcher.Core.Tests.Generator
             // Assert
             // Should apply pending 2DA row references if any exist
             writer.AllModifications.Gff.Should().Contain(modGFF);
+        }
+
+        [Fact]
+        public void WriteModification_AddRow_ShouldCreateDeferredGff2DaLink()
+        {
+            string vanillaDir = Path.Combine(_tempDir, "vanilla");
+            string moddedDir = Path.Combine(_tempDir, "modded");
+            Directory.CreateDirectory(vanillaDir);
+            Directory.CreateDirectory(moddedDir);
+
+            var writer = new IncrementalTSLPatchDataWriter(_tslpatchdataPath, "changes.ini");
+
+            var vanillaTwoDa = new TwoDA(new List<string> { "label", "modeltype" });
+            vanillaTwoDa.AddRow("0", new Dictionary<string, object> { ["label"] = "appearance_0", ["modeltype"] = "P" });
+            vanillaTwoDa.AddRow("1", new Dictionary<string, object> { ["label"] = "appearance_1", ["modeltype"] = "F" });
+            byte[] vanillaTwoDaData = new TwoDABinaryWriter(vanillaTwoDa).Write();
+
+            var moddedTwoDa = new TwoDA(new List<string> { "label", "modeltype" });
+            moddedTwoDa.AddRow("0", new Dictionary<string, object> { ["label"] = "appearance_0", ["modeltype"] = "P" });
+            moddedTwoDa.AddRow("1", new Dictionary<string, object> { ["label"] = "appearance_1", ["modeltype"] = "F" });
+            moddedTwoDa.AddRow("new_row_label", new Dictionary<string, object> { ["label"] = "new_appearance", ["modeltype"] = "S" });
+            File.WriteAllBytes(Path.Combine(moddedDir, "appearance.2da"), new TwoDABinaryWriter(moddedTwoDa).Write());
+
+            var mod2Da = new Modifications2DA("appearance.2da");
+            mod2Da.Modifiers.Add(new AddRow2DA(
+                "add_row_0",
+                null,
+                "new_row_label",
+                new Dictionary<string, RowValue>
+                {
+                    ["label"] = new RowValueConstant("new_appearance"),
+                    ["modeltype"] = new RowValueConstant("S")
+                }));
+
+            var moddedGff = new GFF(GFFContent.UTC);
+            moddedGff.Root.SetUInt16("Appearance_Type", 2);
+            byte[] moddedGffData = moddedGff.ToBytes();
+            File.WriteAllBytes(Path.Combine(moddedDir, "creature.utc"), moddedGffData);
+
+            var modGff = new ModificationsGFF("creature.utc", false);
+            modGff.Modifiers.Add(new ModifyFieldGFF("Appearance_Type", new FieldValueConstant(2)));
+
+            writer.WriteModification(mod2Da, vanillaTwoDaData, sourcePath: vanillaDir, moddedSourcePath: moddedDir);
+            writer.WriteModification(modGff, moddedGffData, sourcePath: moddedDir);
+            writer.FinalizeWriter();
+
+            string iniContent = File.ReadAllText(_iniPath);
+            iniContent.Should().Contain("2DAMEMORY0=RowIndex");
+            iniContent.Should().Contain("Appearance_Type=2DAMEMORY0");
+        }
+
+        [Fact]
+        public void FinalizeWriter_AddColumnValueMatch_ShouldReplaceGffLiteralWith2DaMemory()
+        {
+            var writer = new IncrementalTSLPatchDataWriter(_tslpatchdataPath, "changes.ini");
+
+            var mod2Da = new Modifications2DA("baseitems.2da");
+            var addColumn = new AddColumn2DA(
+                "add_column_0",
+                "newstat",
+                "0",
+                new Dictionary<int, RowValue> { [1] = new RowValueConstant("42") },
+                new Dictionary<string, RowValue>(),
+                new Dictionary<int, string>());
+            mod2Da.Modifiers.Add(addColumn);
+
+            var modGff = new ModificationsGFF("test_item.uti", false);
+            modGff.Modifiers.Add(new ModifyFieldGFF("CustomStat", new FieldValueConstant(42)));
+
+            writer.WriteModification(mod2Da);
+            writer.WriteModification(modGff);
+            writer.FinalizeWriter();
+
+            string iniContent = File.ReadAllText(_iniPath);
+            iniContent.Should().Contain("2DAMEMORY0=I1");
+            iniContent.Should().Contain("CustomStat=2DAMEMORY0");
+            iniContent.Should().NotContain("CustomStat=42");
         }
     }
 }

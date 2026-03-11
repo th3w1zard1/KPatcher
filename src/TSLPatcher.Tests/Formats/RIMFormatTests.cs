@@ -5,7 +5,7 @@ using TSLPatcher.Core.Resources;
 using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static TSLPatcher.Core.Formats.RIM.RIMAuto;
+using static global::TSLPatcher.Core.Formats.RIM.RIMAuto;
 
 namespace TSLPatcher.Core.Tests.Formats
 {

@@ -63,7 +63,7 @@ namespace TSLPatcher.Core.Tests.Integration
         protected PatcherConfig SetupIniAndConfig(string iniText, string modPath = null)
         {
             // Use unified INI parser (case-sensitive for changes.ini files)
-            IniData ini = TSLPatcher.Core.Reader.ConfigReader.ParseIniText(iniText, caseInsensitive: false);
+            IniData ini = global::TSLPatcher.Core.Reader.ConfigReader.ParseIniText(iniText, caseInsensitive: false);
             var config = new PatcherConfig();
             string actualModPath = modPath ?? TempDir;
 

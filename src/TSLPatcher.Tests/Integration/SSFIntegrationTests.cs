@@ -181,7 +181,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 1=5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -201,7 +201,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 2=2DAMEMORY5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();
@@ -222,7 +222,7 @@ File0=test.ssf
 [test.ssf]
 Battlecry 3=StrRef7
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var ssf = new SSF();
 
             var memory = new PatcherMemory();

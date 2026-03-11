@@ -4,7 +4,7 @@ using TSLPatcher.Core.Formats.SSF;
 using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
-using static TSLPatcher.Core.Formats.SSF.SSFAuto;
+using static global::TSLPatcher.Core.Formats.SSF.SSFAuto;
 
 namespace TSLPatcher.Core.Tests.Formats
 {

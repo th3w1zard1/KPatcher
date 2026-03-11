@@ -6,7 +6,7 @@ using TSLPatcher.Core.Resources;
 using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static TSLPatcher.Core.Formats.TwoDA.TwoDAAuto;
+using static global::TSLPatcher.Core.Formats.TwoDA.TwoDAAuto;
 
 namespace TSLPatcher.Core.Tests.Formats
 {

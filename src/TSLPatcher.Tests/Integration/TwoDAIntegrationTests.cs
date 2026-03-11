@@ -711,7 +711,7 @@ AddColumn0=add_column_0
 ColumnLabel=Col3
 DefaultValue=****
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -743,7 +743,7 @@ AddColumn0=add_column_0
 ColumnLabel=Col3
 DefaultValue=X
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -776,7 +776,7 @@ ColumnLabel=Col3
 DefaultValue=****
 I0=X
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -809,7 +809,7 @@ ColumnLabel=Col3
 DefaultValue=****
 L1=2DAMEMORY5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -843,7 +843,7 @@ ColumnLabel=Col3
 DefaultValue=****
 L1=StrRef5
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -879,7 +879,7 @@ I0=X
 I1=Y
 2DAMEMORY0=I0
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]
@@ -915,7 +915,7 @@ I0=X
 I1=Y
 2DAMEMORY0=L1
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             TwoDA twoda = CreateTest2DA(
                 new[] { "Col1", "Col2" },
                 new[]

@@ -134,15 +134,10 @@
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
-    <Compile Remove="Formats\NCS\NCSDecomp\K1UndecompilableRoundtripTest.cs" />
     <Compile Remove="Tools\Archives.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Formats\NCS\NCSDecomp\lexer.dat" />
-    <EmbeddedResource Include="Formats\NCS\NCSDecomp\parser.dat">
-      <LogicalName>TSLPatcher.Core.Formats.NCS.NCSDecomp.parser.dat</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

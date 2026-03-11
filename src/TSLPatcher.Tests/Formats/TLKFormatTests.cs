@@ -5,7 +5,7 @@ using TSLPatcher.Core.Formats.TLK;
 using TSLPatcher.Core.Resources;
 using FluentAssertions;
 using Xunit;
-using static TSLPatcher.Core.Formats.TLK.TLKAuto;
+using static global::TSLPatcher.Core.Formats.TLK.TLKAuto;
 
 namespace TSLPatcher.Core.Tests.Formats
 {

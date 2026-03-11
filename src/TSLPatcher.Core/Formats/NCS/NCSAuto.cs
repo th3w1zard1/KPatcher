@@ -7,12 +7,9 @@ using System.Text.RegularExpressions;
 using TSLPatcher.Core.Common;
 using TSLPatcher.Core.Common.Script;
 using TSLPatcher.Core.Formats.NCS.Compiler;
-using TSLPatcher.Core.Formats.NCS.NCSDecomp;
-using TSLPatcher.Core.Formats.NCS.NCSDecomp.Utils;
 using TSLPatcher.Core.Formats.NCS.Optimizers;
 using TSLPatcher.Core.Resources;
 using JetBrains.Annotations;
-using FileScriptData = TSLPatcher.Core.Formats.NCS.NCSDecomp.Utils.FileScriptData;
 
 namespace TSLPatcher.Core.Formats.NCS
 {
@@ -213,71 +210,6 @@ namespace TSLPatcher.Core.Formats.NCS
             }
 
             return ncs;
-        }
-
-        /// <summary>
-        /// Decompile NCS bytecode to NSS source code.
-        /// Uses the DeNCS decompiler (1:1 port from vendor/DeNCS) for accurate decompilation.
-        /// </summary>
-        public static string DecompileNcs(
-            [CanBeNull] NCS ncs,
-            Game game,
-            List<ScriptFunction> functions = null,
-            [CanBeNull] List<ScriptConstant> constants = null,
-            [CanBeNull] string nwscriptPath = null)
-        {
-            if (ncs == null)
-            {
-                throw new ArgumentNullException(nameof(ncs));
-            }
-
-            // Use FileDecompiler (DeNCS port) for 1:1 accurate decompilation
-            NCSDecomp.FileDecompiler fileDecompiler;
-            if (!string.IsNullOrEmpty(nwscriptPath) && System.IO.File.Exists(nwscriptPath))
-            {
-                // Use nwscript file directly if provided
-                var nwscriptFile = new NCSDecomp.NcsFile(nwscriptPath);
-                fileDecompiler = new NCSDecomp.FileDecompiler(nwscriptFile);
-            }
-            else
-            {
-                // Fall back to lazy loading (will search for nwscript file)
-                NWScriptLocator.GameType gameType = game.IsK2() ? NWScriptLocator.GameType.TSL : NWScriptLocator.GameType.K1;
-                fileDecompiler = new NCSDecomp.FileDecompiler(null, gameType);
-            }
-
-            FileScriptData data = null;
-            try
-            {
-                data = fileDecompiler.DecompileNcsObject(ncs);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(
-                    "Decompilation failed with exception: " + ex.Message +
-                    (ex.InnerException != null ? " (Inner: " + ex.InnerException.Message + ")" : "") +
-                    ". FileDecompiler returned null. " +
-                    "This usually means the decompiler couldn't analyze the NCS bytecode structure. " +
-                    "Check console output for detailed error messages.", ex);
-            }
-
-            if (data == null)
-            {
-                throw new InvalidOperationException(
-                    "Decompilation failed - FileDecompiler returned null. " +
-                    "This usually means the decompiler couldn't analyze the NCS bytecode structure. " +
-                    "Possible causes: no main subroutine found, actions file not loaded, or exception during decompilation. " +
-                    "Check console output for detailed error messages.");
-            }
-
-            data.GenerateCode();
-            string code = data.GetCode();
-
-            // Clean up
-            data.Close();
-            fileDecompiler.CloseAllFiles();
-
-            return code ?? string.Empty;
         }
     }
 }

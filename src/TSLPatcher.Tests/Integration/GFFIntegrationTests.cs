@@ -538,7 +538,7 @@ Path=List
 Label=
 TypeId=1
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var gff = new GFF();
             var gffList = new GFFList();
             gff.Root.SetList("List", gffList);
@@ -582,7 +582,7 @@ Label=
 TypeId=0
 2DAMEMORY12=ListIndex
 ";
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var gff = new GFF();
             gff.Root.SetList("List", new GFFList());
 

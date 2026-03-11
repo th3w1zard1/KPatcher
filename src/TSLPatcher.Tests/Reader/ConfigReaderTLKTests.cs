@@ -91,7 +91,7 @@ namespace TSLPatcher.Core.Tests.Reader
 
         private void CreateTestTLKFile(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(TSLPatcher.Core.Common.Language.English);
+            var tlk = new TLK(global::TSLPatcher.Core.Common.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);
@@ -103,7 +103,7 @@ namespace TSLPatcher.Core.Tests.Reader
 
         private void CreateTestTLKFileInModRoot(string filename, (string text, string sound)[] entries)
         {
-            var tlk = new TLK(TSLPatcher.Core.Common.Language.English);
+            var tlk = new TLK(global::TSLPatcher.Core.Common.Language.English);
             foreach ((string text, string sound) in entries)
             {
                 tlk.Add(text, sound);

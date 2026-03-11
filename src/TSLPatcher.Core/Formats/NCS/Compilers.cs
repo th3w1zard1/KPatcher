@@ -57,7 +57,6 @@ namespace TSLPatcher.Core.Formats.NCS
         KOTOR_TOOL,
         V1,
         KOTOR_SCRIPTING_TOOL,
-        NCSDecomp,
         XOREOS,
         KNSSCOMP
     }
@@ -93,8 +92,7 @@ namespace TSLPatcher.Core.Formats.NCS
                     "todo",
                     new Dictionary<string, List<string>>
                     {
-                        ["compile"] = new List<string> { "-c", "{source}", "-o", "{output}" },
-                        ["decompile"] = new List<string> { "-d", "{source}", "-o", "{output}" }
+                        ["compile"] = new List<string> { "-c", "{source}", "-o", "{output}" }
                     }
                 ),
                 [KnownExternalCompilers.KOTOR_TOOL] = new ExternalCompilerConfig(
@@ -104,8 +102,7 @@ namespace TSLPatcher.Core.Formats.NCS
                     "Fred Tetra",
                     new Dictionary<string, List<string>>
                     {
-                        ["compile"] = new List<string> { "-c", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" },
-                        ["decompile"] = new List<string> { "-d", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" }
+                        ["compile"] = new List<string> { "-c", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" }
                     }
                 ),
                 [KnownExternalCompilers.V1] = new ExternalCompilerConfig(
@@ -115,8 +112,7 @@ namespace TSLPatcher.Core.Formats.NCS
                     "todo",
                     new Dictionary<string, List<string>>
                     {
-                        ["compile"] = new List<string> { "-c", "{source}", "{output}" },
-                        ["decompile"] = new List<string> { "-d", "{source}", "{output}" }
+                        ["compile"] = new List<string> { "-c", "{source}", "{output}" }
                     }
                 ),
                 [KnownExternalCompilers.KOTOR_SCRIPTING_TOOL] = new ExternalCompilerConfig(
@@ -126,16 +122,8 @@ namespace TSLPatcher.Core.Formats.NCS
                     "James Goad",
                     new Dictionary<string, List<string>>
                     {
-                        ["compile"] = new List<string> { "-c", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" },
-                        ["decompile"] = new List<string> { "-d", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" }
+                        ["compile"] = new List<string> { "-c", "--outputdir", "{output_dir}", "-o", "{output_name}", "-g", "{game_value}", "{source}" }
                     }
-                ),
-                [KnownExternalCompilers.NCSDecomp] = new ExternalCompilerConfig(
-                    "539EB689D2E0D3751AEED273385865278BEF6696C46BC0CAB116B40C3B2FE820",
-                    "NCSDecomp",
-                    new DateTime(2006, 5, 30),
-                    "todo",
-                    new Dictionary<string, List<string>>()
                 ),
                 [KnownExternalCompilers.XOREOS] = new ExternalCompilerConfig(
                     "",
@@ -204,12 +192,6 @@ namespace TSLPatcher.Core.Formats.NCS
         {
             ExternalCompilerConfig config = ExternalCompilerConfig.GetAll()[ChosenCompiler];
             return FormatArgs(config.CommandLine["compile"], executable);
-        }
-
-        public List<string> GetDecompileArgs(string executable)
-        {
-            ExternalCompilerConfig config = ExternalCompilerConfig.GetAll()[ChosenCompiler];
-            return FormatArgs(config.CommandLine["decompile"], executable);
         }
 
         private List<string> FormatArgs(List<string> argsList, string executable)
@@ -401,96 +383,6 @@ namespace TSLPatcher.Core.Formats.NCS
             catch (Exception e)
             {
                 throw new InvalidOperationException($"Failed to run compiler: {e.Message}", e);
-            }
-        }
-
-        public (string stdout, string stderr) DecompileScript(
-            string sourceFile,
-            string outputFile,
-            Game game,
-            int timeout = 5)
-        {
-            if (!File.Exists(sourceFile))
-            {
-                throw new FileNotFoundException($"Source file not found: {sourceFile}");
-            }
-
-            if (!File.Exists(_nwnnsscompPath))
-            {
-                throw new InvalidOperationException($"Compiler executable not found: {_nwnnsscompPath}");
-            }
-
-            NwnnsscompConfig config = Config(sourceFile, outputFile, game);
-
-            ExternalCompilerConfig compilerConfig = ExternalCompilerConfig.GetAll()[config.ChosenCompiler];
-            if (compilerConfig.CommandLine.GetValueOrDefault("decompile") == null || compilerConfig.CommandLine["decompile"].Count == 0)
-            {
-                throw new InvalidOperationException($"Compiler '{compilerConfig.Name}' does not support decompilation");
-            }
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = _nwnnsscompPath,
-                Arguments = string.Join(" ", config.GetDecompileArgs(_nwnnsscompPath).Skip(1)),
-                WorkingDirectory = Path.GetDirectoryName(sourceFile) ?? "",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            try
-            {
-                using (var process = new Process { StartInfo = startInfo })
-                {
-                    var output = new StringBuilder();
-                    var error = new StringBuilder();
-
-                    process.OutputDataReceived += (sender, args) =>
-                    {
-                        if (!string.IsNullOrEmpty(args?.Data))
-                        {
-                            output.AppendLine(args.Data);
-                        }
-                    };
-
-                    process.ErrorDataReceived += (sender, args) =>
-                    {
-                        if (!string.IsNullOrEmpty(args?.Data))
-                        {
-                            error.AppendLine(args.Data);
-                        }
-                    };
-
-                    process.Start();
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-
-                    bool finished = process.WaitForExit(timeout * 1000);
-
-                    if (!finished)
-                    {
-                        process.Kill();
-                        throw new InvalidOperationException($"Decompilation timed out after {timeout} seconds");
-                    }
-
-                    (string stdout, string stderr) = GetOutput(process.ExitCode, output.ToString(), error.ToString());
-
-                    if (process.ExitCode != 0 && !string.IsNullOrEmpty(stderr))
-                    {
-                        throw new InvalidOperationException($"Decompilation failed with return code {process.ExitCode}: {stderr}");
-                    }
-
-                    return (stdout, stderr);
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException($"Failed to run decompiler: {e.Message}", e);
             }
         }
 

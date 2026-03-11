@@ -8,7 +8,7 @@ using TSLPatcher.Core.Formats.NCS.Compiler.NSS;
 using FluentAssertions;
 using Xunit;
 
-namespace TSLPatcher.Core.Tests.Formats
+namespace TSLPatcher.Tests.Formats
 {
     /// <summary>
     /// Tests for NSS to NCS compilation.

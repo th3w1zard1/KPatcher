@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TSLPatcher.Core.Memory;
 using TSLPatcher.Core.Mods.TwoDA;
 using Xunit;
-using TwoDAFile = TSLPatcher.Core.Formats.TwoDA.TwoDA;
+using TwoDAFile = global::TSLPatcher.Core.Formats.TwoDA.TwoDA;
 
 namespace TSLPatcher.Core.Tests.Mods.TwoDA
 {

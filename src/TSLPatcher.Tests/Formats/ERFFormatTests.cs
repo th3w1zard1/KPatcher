@@ -5,7 +5,7 @@ using TSLPatcher.Core.Resources;
 using TSLPatcher.Core.Tests.Common;
 using FluentAssertions;
 using Xunit;
-using static TSLPatcher.Core.Formats.ERF.ERFAuto;
+using static global::TSLPatcher.Core.Formats.ERF.ERFAuto;
 
 namespace TSLPatcher.Core.Tests.Formats
 {

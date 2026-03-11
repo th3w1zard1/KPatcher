@@ -237,7 +237,7 @@ StrRef1=1
             string appendTlkPath = Path.Combine(TempDir, "append.tlk");
             appendTlk.Save(appendTlkPath);
 
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");
@@ -273,7 +273,7 @@ ReplaceFile0=replace.tlk
             string replaceTlkPath = Path.Combine(TempDir, "replace.tlk");
             replaceTlk.Save(replaceTlkPath);
 
-            TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
+            global::TSLPatcher.Core.Config.PatcherConfig config = SetupIniAndConfig(iniText);
             var dialogTlk = new TLK();
             dialogTlk.Add("Old1");
             dialogTlk.Add("Old2");
