@@ -3,8 +3,8 @@
 
 param(
     [string]$HpVersion = "v2.0.0",
-    [string]$ProjectFile = "src\HoloPatcher\HoloPatcher.csproj",
-    [string]$PublishProfilesDir = "src\HoloPatcher\Properties\PublishProfiles",
+    [string]$ProjectFile = "src\KPatcher\KPatcher.csproj",
+    [string]$PublishProfilesDir = "src\KPatcher\Properties\PublishProfiles",
     [string]$SevenZipPath = "C:\Program Files\7-Zip\7z.exe",
     [string]$OutputDir = "dist",
     [switch]$Verbose,
@@ -289,7 +289,7 @@ function New-Archive {
     $framework = $ProfileInfo.Framework
     $rid = $ProfileInfo.Rid
     $lastSection = $ProfileInfo.LastSection
-    $topLevelFolder = "HoloPatcher $HpVersion-$rid"
+    $topLevelFolder = "KPatcher $HpVersion-$rid"
 
     # Determine publish folder path using timestamped build directory
     if ([string]::IsNullOrEmpty($lastSection)) {
@@ -455,7 +455,7 @@ function New-Archive {
 # Main execution
 try {
     Write-Log "Error action preference set" -Level "DEBUG" -Variables @{ "ErrorAction" = $ErrorAction }
-    Write-Log "Starting HoloPatcher release build process" -Level "INFO" -Variables @{
+    Write-Log "Starting KPatcher release build process" -Level "INFO" -Variables @{
         "HpVersion"         = $HpVersion;
         "ProjectFile"        = $ProjectFile;
         "PublishProfilesDir" = $PublishProfilesDir

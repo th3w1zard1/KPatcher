@@ -1,6 +1,6 @@
 # GitHub Actions Workflows Documentation
 
-This document describes the GitHub Actions workflows for HoloPatcher.NET.
+This document describes the GitHub Actions workflows for KPatcher.NET.
 
 ## Overview
 
@@ -94,7 +94,7 @@ Go to Repository Settings → Secrets and variables → Actions, and add:
 
 ### 3. Update UpdateManager
 
-In `src/HoloPatcher/UpdateManager.cs`, set:
+In `src/KPatcher/UpdateManager.cs`, set:
 
 ```csharp
 Ed25519PublicKey = "your_base64_public_key_here"
@@ -106,7 +106,7 @@ Or use an environment variable or configuration file.
 
 The `release-please-config.json` is already configured. It will:
 - Monitor commits for conventional commit messages
-- Update version in `HoloPatcher.csproj`
+- Update version in `KPatcher.csproj`
 - Create release PRs automatically
 
 ## Release Process
@@ -136,7 +136,7 @@ The `release-please-config.json` is already configured. It will:
 
 ### Manual Release
 
-1. **Update version** in `src/HoloPatcher/HoloPatcher.csproj`:
+1. **Update version** in `src/KPatcher/KPatcher.csproj`:
    ```xml
    <Version>2.0.0</Version>
    ```

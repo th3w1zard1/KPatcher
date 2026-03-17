@@ -11,7 +11,7 @@ All tests in the project are configured with:
 
 ## Test Framework Support
 
-### xUnit (TSLPatcher.Tests)
+### xUnit (KPatcher.Tests)
 
 Tests use the `[Fact(Timeout = 120000)]` attribute to enforce 2-minute timeouts:
 
@@ -31,7 +31,7 @@ public void MyTest()
 }
 ```
 
-### NUnit (TSLPatcher.Core.Tests)
+### NUnit (KPatcher.Core.Tests)
 
 Tests use the `[PerformanceTest]` attribute:
 
@@ -53,7 +53,7 @@ public void MyTest()
 .\scripts\RunAllTestsWithProfiling.ps1
 
 # Run specific test project
-.\scripts\RunAllTestsWithProfiling.ps1 -Projects @("src\TSLPatcher.Tests\TSLPatcher.Tests.csproj")
+.\scripts\RunAllTestsWithProfiling.ps1 -Projects @("src\KPatcher.Tests\KPatcher.Tests.csproj")
 
 # Run with filter
 .\scripts\RunAllTestsWithProfiling.ps1 -Filter "FullyQualifiedName~NCSRoundtripTests"
@@ -62,7 +62,7 @@ public void MyTest()
 ### Using dotnet test directly
 
 ```powershell
-dotnet test src/TSLPatcher.Tests/TSLPatcher.Tests.csproj --logger "console;verbosity=detailed"
+dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --logger "console;verbosity=detailed"
 ```
 
 All tests automatically have timeout enforcement - no additional configuration needed.

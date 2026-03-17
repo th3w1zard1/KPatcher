@@ -2,7 +2,7 @@
 # Generates cProfile-like output for bottleneck analysis
 
 param(
-    [string[]]$Projects = @("src\TSLPatcher.Tests\TSLPatcher.Tests.csproj", "tests\TSLPatcher.Core.Tests\TSLPatcher.Core.Tests.csproj"),
+    [string[]]$Projects = @("src\KPatcher.Tests\KPatcher.Tests.csproj", "tests\KPatcher.Core.Tests\KPatcher.Core.Tests.csproj"),
     [string]$Filter = "",
     [int]$MaxSeconds = 120,
     [switch]$EnableProfiling = $true,

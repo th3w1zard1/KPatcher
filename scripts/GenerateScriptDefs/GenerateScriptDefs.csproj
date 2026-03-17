@@ -6,6 +6,6 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TSLPatcher.Core\TSLPatcher.Core.csproj" />
+    <ProjectReference Include="..\..\src\KPatcher.Core\KPatcher.Core.csproj" />
   </ItemGroup>
 </Project>

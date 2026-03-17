@@ -7,10 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using TSLPatcher.Core.Common;
-using TSLPatcher.Core.Common.Script;
-using TSLPatcher.Core.Formats.NCS.Compiler;
-using TSLPatcher.Core.Formats.NCS.Compiler.NSS;
+using KPatcher.Core.Common;
+using KPatcher.Core.Common.Script;
+using KPatcher.Core.Formats.NCS.Compiler;
+using KPatcher.Core.Formats.NCS.Compiler.NSS;
 
 namespace GenerateScriptDefs
 {
@@ -756,10 +756,10 @@ namespace GenerateScriptDefs
             // Original: def generate_scriptdefs(k1_constants: list[dict], k1_functions: list[dict], k2_constants: list[dict], k2_functions: list[dict]) -> str:
             var sb = new StringBuilder();
             sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using TSLPatcher.Core.Common;");
-            sb.AppendLine("using TSLPatcher.Core.Common.Script;");
+            sb.AppendLine("using KPatcher.Core.Common;");
+            sb.AppendLine("using KPatcher.Core.Common.Script;");
             sb.AppendLine();
-            sb.AppendLine("namespace TSLPatcher.Core.Common.Script");
+            sb.AppendLine("namespace KPatcher.Core.Common.Script");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("    /// <summary>");
@@ -841,7 +841,7 @@ namespace GenerateScriptDefs
             string repoRoot = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..", "..", ".."));
             string k1Nss = Path.Combine(repoRoot, "vendor", "DeNCS", "k1_nwscript.nss");
             string k2Nss = Path.Combine(repoRoot, "vendor", "DeNCS", "tsl_nwscript.nss");
-            string outputFile = Path.Combine(repoRoot, "src", "TSLPatcher.Core", "Common", "Script", "ScriptDefs.cs");
+            string outputFile = Path.Combine(repoRoot, "src", "KPatcher.Core", "Common", "Script", "ScriptDefs.cs");
 
             // Verify files exist
             if (!File.Exists(k1Nss))

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build NuGet packages for TSLPatcher.Core and HoloPatcher
+# Build NuGet packages for KPatcher.Core and KPatcher
 # Usage: ./build-nuget.sh [--publish] [--source <feed-url>] [--api-key <key>]
 
 set -e
@@ -36,33 +36,33 @@ done
 
 echo "Building NuGet packages..."
 
-# Build TSLPatcher.Core package
+# Build KPatcher.Core package
 echo ""
-echo "Building TSLPatcher.Core..."
-dotnet pack src/TSLPatcher.Core/TSLPatcher.Core.csproj --configuration "$CONFIGURATION" --no-build
+echo "Building KPatcher.Core..."
+dotnet pack src/KPatcher.Core/KPatcher.Core.csproj --configuration "$CONFIGURATION" --no-build
 
-# Build HoloPatcher package
+# Build KPatcher package
 echo ""
-echo "Building HoloPatcher..."
-dotnet pack src/HoloPatcher/HoloPatcher.csproj --configuration "$CONFIGURATION" --no-build
+echo "Building KPatcher..."
+dotnet pack src/KPatcher/KPatcher.csproj --configuration "$CONFIGURATION" --no-build
 
 # Find package files
-TSL_CORE_PACKAGE=$(find "src/TSLPatcher.Core/bin/$CONFIGURATION" -name "*.nupkg" | head -n 1)
-HOLO_PATCHER_PACKAGE=$(find "src/HoloPatcher/bin/$CONFIGURATION" -name "*.nupkg" | head -n 1)
+TSL_CORE_PACKAGE=$(find "src/KPatcher.Core/bin/$CONFIGURATION" -name "*.nupkg" | head -n 1)
+HOLO_PATCHER_PACKAGE=$(find "src/KPatcher/bin/$CONFIGURATION" -name "*.nupkg" | head -n 1)
 
 if [ -z "$TSL_CORE_PACKAGE" ]; then
-    echo "TSLPatcher.Core package not found!"
+    echo "KPatcher.Core package not found!"
     exit 1
 fi
 
 if [ -z "$HOLO_PATCHER_PACKAGE" ]; then
-    echo "HoloPatcher package not found!"
+    echo "KPatcher package not found!"
     exit 1
 fi
 
 echo ""
-echo "TSLPatcher.Core package created: $TSL_CORE_PACKAGE"
-echo "HoloPatcher package created: $HOLO_PATCHER_PACKAGE"
+echo "KPatcher.Core package created: $TSL_CORE_PACKAGE"
+echo "KPatcher package created: $HOLO_PATCHER_PACKAGE"
 
 # Publish if requested
 if [ "$PUBLISH" = true ]; then
@@ -74,25 +74,25 @@ if [ "$PUBLISH" = true ]; then
     echo ""
     echo "Publishing packages to $SOURCE..."
 
-    # Publish TSLPatcher.Core
-    echo "Publishing TSLPatcher.Core..."
+    # Publish KPatcher.Core
+    echo "Publishing KPatcher.Core..."
     dotnet nuget push "$TSL_CORE_PACKAGE" --api-key "$API_KEY" --source "$SOURCE" --skip-duplicate
 
-    # Publish HoloPatcher
-    echo "Publishing HoloPatcher..."
+    # Publish KPatcher
+    echo "Publishing KPatcher..."
     dotnet nuget push "$HOLO_PATCHER_PACKAGE" --api-key "$API_KEY" --source "$SOURCE" --skip-duplicate
 
     # Publish symbol packages if they exist
-    TSL_CORE_SYMBOLS=$(find "src/TSLPatcher.Core/bin/$CONFIGURATION" -name "*.snupkg" | head -n 1)
-    HOLO_PATCHER_SYMBOLS=$(find "src/HoloPatcher/bin/$CONFIGURATION" -name "*.snupkg" | head -n 1)
+    TSL_CORE_SYMBOLS=$(find "src/KPatcher.Core/bin/$CONFIGURATION" -name "*.snupkg" | head -n 1)
+    HOLO_PATCHER_SYMBOLS=$(find "src/KPatcher/bin/$CONFIGURATION" -name "*.snupkg" | head -n 1)
 
     if [ -n "$TSL_CORE_SYMBOLS" ]; then
-        echo "Publishing TSLPatcher.Core symbols..."
+        echo "Publishing KPatcher.Core symbols..."
         dotnet nuget push "$TSL_CORE_SYMBOLS" --api-key "$API_KEY" --source "$SOURCE" --skip-duplicate
     fi
 
     if [ -n "$HOLO_PATCHER_SYMBOLS" ]; then
-        echo "Publishing HoloPatcher symbols..."
+        echo "Publishing KPatcher symbols..."
         dotnet nuget push "$HOLO_PATCHER_SYMBOLS" --api-key "$API_KEY" --source "$SOURCE" --skip-duplicate
     fi
 

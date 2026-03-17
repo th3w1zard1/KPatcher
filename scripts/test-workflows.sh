@@ -104,13 +104,13 @@ if [ "$CHECK_SECRETS" = true ] || [ "$ALL" = true ]; then
     echo "    - NETSPARKLE_PUBLIC_KEY (optional)"
     echo ""
     echo "  To check secrets, go to:"
-    echo "    https://github.com/th3w1zard1/HoloPatcher.NET/settings/secrets/actions"
+    echo "    https://github.com/th3w1zard1/KPatcher.NET/settings/secrets/actions"
     echo ""
 fi
 
 # Check UpdateManager configuration
 echo "Checking UpdateManager configuration..."
-UPDATE_MANAGER_PATH="src/HoloPatcher/UpdateManager.cs"
+UPDATE_MANAGER_PATH="src/KPatcher/UpdateManager.cs"
 if [ -f "$UPDATE_MANAGER_PATH" ]; then
     if grep -q 'Ed25519PublicKey\s*=\s*""' "$UPDATE_MANAGER_PATH"; then
         echo "  ⚠ Ed25519PublicKey is empty in UpdateManager.cs"

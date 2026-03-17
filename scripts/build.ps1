@@ -1,16 +1,16 @@
-# Build script for HoloPatcher.NET (PowerShell)
+# Build script for KPatcher.NET (PowerShell)
 
-Write-Host "Building HoloPatcher.NET..." -ForegroundColor Green
+Write-Host "Building KPatcher.NET..." -ForegroundColor Green
 
 # Restore dependencies
-dotnet restore HoloPatcher.sln
+dotnet restore KPatcher.sln
 
 # Build the solution
-dotnet build HoloPatcher.sln --configuration Release
+dotnet build KPatcher.sln --configuration Release
 
 # Run tests
 Write-Host "Running tests..." -ForegroundColor Cyan
-dotnet test HoloPatcher.sln --configuration Release --no-build
+dotnet test KPatcher.sln --configuration Release --no-build
 
 Write-Host "Build complete!" -ForegroundColor Green
 

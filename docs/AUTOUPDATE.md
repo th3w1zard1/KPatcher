@@ -1,6 +1,6 @@
 # Auto-Update Configuration with NetSparkle
 
-HoloPatcher uses [NetSparkle](https://github.com/netsparkleupdater/netsparkle) for industry-standard automatic updates. This document explains how to set up and configure the auto-update system.
+KPatcher uses [NetSparkle](https://github.com/netsparkleupdater/netsparkle) for industry-standard automatic updates. This document explains how to set up and configure the auto-update system.
 
 ## Overview
 
@@ -108,9 +108,9 @@ The generated appcast.xml follows this structure:
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
-    <title>HoloPatcher Updates</title>
-    <link>https://github.com/th3w1zard1/HoloPatcher.NET</link>
-    <description>HoloPatcher update feed</description>
+    <title>KPatcher Updates</title>
+    <link>https://github.com/th3w1zard1/KPatcher.NET</link>
+    <description>KPatcher update feed</description>
     <language>en</language>
     <item>
       <title>Version 2.0.0</title>
@@ -119,7 +119,7 @@ The generated appcast.xml follows this structure:
       <sparkle:shortVersionString>2.0.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>Windows 10</sparkle:minimumSystemVersion>
       <enclosure 
-        url="https://github.com/user/repo/releases/download/v2.0.0/HoloPatcher-2.0.0-win-x64.zip"
+        url="https://github.com/user/repo/releases/download/v2.0.0/KPatcher-2.0.0-win-x64.zip"
         sparkle:version="2.0.0"
         sparkle:shortVersionString="2.0.0"
         sparkle:os="windows"
@@ -256,8 +256,8 @@ private void InitializeUpdateManager()
 {
     _updateManager = new UpdateManager
     {
-        AppcastUrl = "https://github.com/th3w1zard1/HoloPatcher.NET/releases/latest/download/appcast.xml",
-        BetaAppcastUrl = "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/bleeding-edge/appcast-beta.xml",
+        AppcastUrl = "https://github.com/th3w1zard1/KPatcher.NET/releases/latest/download/appcast.xml",
+        BetaAppcastUrl = "https://github.com/th3w1zard1/KPatcher.NET/releases/download/bleeding-edge/appcast-beta.xml",
         CheckOnStartup = true,
         SilentCheck = true,
         UseBetaChannel = false,
