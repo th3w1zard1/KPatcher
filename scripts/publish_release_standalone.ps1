@@ -168,8 +168,8 @@ function Get-PredefinedPublishProfiles {
             }
         },
         [pscustomobject]@{
-            Name              = "net9.0_linux-arm64_selfcontained"
-            BaseName          = "net9.0_linux-arm64_selfcontained"
+            Name              = "net9.0.0_linux-arm64_selfcontained"
+            BaseName          = "net9.0.0_linux-arm64_selfcontained"
             TargetFramework   = "net9.0"
             RuntimeIdentifier = "linux-arm64"
             SelfContained     = $true
@@ -491,7 +491,7 @@ function Remove-LeftoverFiles {
         }
 
         # Check if this looks like an old build folder (contains framework names)
-        $isOldBuild = $subdir.Name -match "(net48|net9\.0|win7-|linux-|osx-|selfcontained)"
+        $isOldBuild = $subdir.Name -match "(net48|net9.0\.0|win7-|linux-|osx-|selfcontained)"
         if ($isOldBuild) {
             Write-Log "Removing leftover build folder: $($subdir.Name)" -Level "DEBUG" -Variables @{ "Folder" = $subdir.FullName }
             try {

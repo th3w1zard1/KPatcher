@@ -111,7 +111,7 @@ param(
     [ValidateSet("k1", "k2")]
     [string]$Game = "k2",
 
-    [string]$AssemblyPath = "src/KPatcher.Core/bin/Debug/net9/KPatcher.Core.dll",
+    [string]$AssemblyPath = "src/KPatcher.Core/bin/Debug/net9.0/KPatcher.Core.dll",
 
     [Parameter(ParameterSetName="Compile")]
     [Parameter(ParameterSetName="RoundTrip")]
