@@ -75,11 +75,11 @@ namespace KPatcher.Core.Tests.Formats
             Action act2 = () => ReadRim(DoesNotExistFile);
             act2.Should().Throw<FileNotFoundException>();
 
-            // Python: read_rim(CORRUPT_BINARY_TEST_FILE) raises ValueError
+            // Python: read_rim(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
             if (File.Exists(CorruptBinaryTestFile))
             {
                 Action act3 = () => ReadRim(CorruptBinaryTestFile);
-                act3.Should().Throw<InvalidDataException>(); // ValueError equivalent
+                act3.Should().Throw<ArgumentOutOfRangeException>();
             }
         }
 

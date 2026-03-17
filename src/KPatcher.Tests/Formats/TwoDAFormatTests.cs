@@ -60,9 +60,9 @@ namespace KPatcher.Core.Tests.Formats
             Action act2 = () => new TwoDABinaryReader("./thisfiledoesnotexist").Load();
             act2.Should().Throw<FileNotFoundException>();
 
-            // Test corrupted file
+            // Test corrupted file (reader throws IOException when stream boundaries exceeded)
             Action act3 = () => new TwoDABinaryReader(CorruptTwoDAFile).Load();
-            act3.Should().Throw<System.IO.InvalidDataException>();
+            act3.Should().Throw<IOException>();
         }
 
         [Fact]

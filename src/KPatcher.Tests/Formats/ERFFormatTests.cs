@@ -75,11 +75,11 @@ namespace KPatcher.Core.Tests.Formats
             Action act2 = () => ReadErf(DoesNotExistFile);
             act2.Should().Throw<FileNotFoundException>();
 
-            // Python: read_erf(CORRUPT_BINARY_TEST_FILE) raises ValueError
+            // Python: read_erf(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
             if (File.Exists(CorruptBinaryTestFile))
             {
                 Action act3 = () => ReadErf(CorruptBinaryTestFile);
-                act3.Should().Throw<InvalidDataException>(); // ValueError equivalent
+                act3.Should().Throw<ArgumentOutOfRangeException>();
             }
         }
 

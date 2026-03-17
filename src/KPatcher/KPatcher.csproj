@@ -93,6 +93,8 @@
 
   <!-- AvaloniaUI defs -->
   <PropertyGroup>
+    <!-- Workaround for MSB4022: AvaloniaBuildTasksLocation can be empty when buildTransitive targets load before props (solution build). -->
+    <AvaloniaBuildTasksLocation Condition="'$(AvaloniaBuildTasksLocation)' == ''">$(NuGetPackageRoot)avalonia\11.3.9\tools\netstandard2.0\Avalonia.Build.Tasks.dll</AvaloniaBuildTasksLocation>
     <AvaloniaCopyWin32Dll>false</AvaloniaCopyWin32Dll>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <NoWin32Manifest>true</NoWin32Manifest>

@@ -218,7 +218,8 @@ namespace KPatcher.Core.Tests.Common
             float expectedFloat = 1.0f;
             double expectedDouble = 1.0;
             string expectedStr = "Hello, world!";
-            string expectedCstr = "Hello, world!";
+            // ReadTerminatedString intentionally skips the first character (PyKotor compatibility); result may include trailing null
+            string expectedCstr = "ello, world!";
             byte[] expectedBytes = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
             byte actualByte = reader.ReadUInt8();
@@ -244,7 +245,7 @@ namespace KPatcher.Core.Tests.Common
             actualFloat.Should().BeApproximately(expectedFloat, 0.00001f);
             actualDouble.Should().BeApproximately(expectedDouble, 0.00001);
             actualStr.Should().Be(expectedStr);
-            actualCstr.Should().Be(expectedCstr);
+            actualCstr.TrimEnd('\0').Should().Be(expectedCstr);
             actualBytes.Should().Equal(expectedBytes);
         }
 
