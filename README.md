@@ -1,6 +1,6 @@
-# HoloPatcher.NET
+# KPatcher.NET
 
-A direct 1:1 port of HoloPatcher from Python to C#/.NET with Avalonia UI framework.
+A direct 1:1 port of KPatcher from Python to C#/.NET with Avalonia UI framework.
 
 ## Port Philosophy
 
@@ -22,9 +22,9 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 
 ## Project Structure
 
-- **HoloPatcher** - Main Avalonia desktop application
-- **HoloPatcher.UI** - Packable Avalonia UI library
-- **TSLPatcher.Core** - Packable core patching engine and data/model library
+- **KPatcher** - Main Avalonia desktop application
+- **KPatcher.UI** - Packable Avalonia UI library
+- **KPatcher.Core** - Packable core patching engine and data/model library
 
 ## Features
 
@@ -95,7 +95,7 @@ Current test coverage includes:
 ## Building
 
 ```bash
-cd Tools/HoloPatcher.NET
+cd Tools/KPatcher.NET
 dotnet restore
 dotnet build
 ```
@@ -103,12 +103,12 @@ dotnet build
 ## Running
 
 ```bash
-dotnet run --project src/HoloPatcher/HoloPatcher.csproj
+dotnet run --project src/KPatcher/KPatcher.csproj
 ```
 
 ## Architecture
 
-### TSLPatcher.Core
+### KPatcher.Core
 
 The core library contains all the patching logic independent of UI:
 
@@ -119,7 +119,7 @@ The core library contains all the patching logic independent of UI:
 - **Mods/** - Modification operations (GFF, 2DA, TLK, etc.)
 - **Patcher/** - Main installation engine
 
-### HoloPatcher
+### KPatcher
 
 The Avalonia UI application follows MVVM pattern:
 
@@ -131,22 +131,22 @@ The Avalonia UI application follows MVVM pattern:
 
 Release builds generate the public library packages consumed by other .NET projects:
 
-- **TSLPatcher.Core** - Core patching engine and format/model library
-- **HoloPatcher.UI** - Avalonia UI layer built on top of `TSLPatcher.Core`
+- **KPatcher.Core** - Core patching engine and format/model library
+- **KPatcher.UI** - Avalonia UI layer built on top of `KPatcher.Core`
 
 Example consumption:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="TSLPatcher.Core" Version="2.0.0-alpha3" />
-  <PackageReference Include="HoloPatcher" Version="2.0.0-alpha3" />
-  <PackageReference Include="HoloPatcher.UI" Version="2.0.0-alpha3" />
+  <PackageReference Include="KPatcher.Core" Version="2.0.0-alpha3" />
+  <PackageReference Include="KPatcher" Version="2.0.0-alpha3" />
+  <PackageReference Include="KPatcher.UI" Version="2.0.0-alpha3" />
 </ItemGroup>
 ```
 
 ## Port Implementation Details
 
-This codebase is a direct translation from the original Python/Tkinter implementation located in `vendor/PyKotor/Tools/HoloPatcher/src/holopatcher/`. The following technical adaptations were made solely for language and framework compatibility:
+This codebase is a direct translation from the original Python/Tkinter implementation located in `vendor/PyKotor/Tools/KPatcher/src/kpatcher/`. The following technical adaptations were made solely for language and framework compatibility:
 
 1. **UI Framework**: Tkinter → Avalonia (required for cross-platform .NET UI)
 2. **Language**: Python → C# (.NET) (syntax translation only, no logic changes)
@@ -160,7 +160,7 @@ This codebase is a direct translation from the original Python/Tkinter implement
 
 When contributing to this port:
 
-1. **Reference the original Python code** in `vendor/PyKotor/Tools/HoloPatcher/src/holopatcher/`
+1. **Reference the original Python code** in `vendor/PyKotor/Tools/KPatcher/src/kpatcher/`
 2. **Maintain strict 1:1 functional equivalence**—no creative changes or feature additions
 3. **Preserve original logic**—translate, don't reimplement
 4. **Follow C# coding conventions** for syntax and style

@@ -2,8 +2,8 @@
   "packages": {
     ".": {
       "release-type": "node",
-      "package-name": "HoloPatcher",
-      "version-file": "src/HoloPatcher/HoloPatcher.csproj",
+      "package-name": "KPatcher",
+      "version-file": "src/KPatcher/KPatcher.csproj",
       "extra-files": [
         "src/CSharpKOTOR/CSharpKOTOR.csproj"
       ],

@@ -58,21 +58,21 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore dependencies
-        run: dotnet restore src/HoloPatcher/HoloPatcher.csproj -p:Configuration=Release
+        run: dotnet restore src/KPatcher/KPatcher.csproj -p:Configuration=Release
 
       - name: Restore test dependencies
-        run: dotnet restore src/TSLPatcher.Tests/TSLPatcher.Tests.csproj
+        run: dotnet restore src/KPatcher.Tests/KPatcher.Tests.csproj
 
       - name: Run tests
-        run: dotnet test src/TSLPatcher.Tests/TSLPatcher.Tests.csproj --no-restore --verbosity normal
+        run: dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --no-restore --verbosity normal
         continue-on-error: true
 
       - name: Build
         run: |
           if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/HoloPatcher/HoloPatcher.csproj /p:Configuration=Release /p:TargetFramework=${{ matrix.framework }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:SelfContained=${{ matrix.selfcontained }} /p:OutputPath=..\..\dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}
+            msbuild src/KPatcher/KPatcher.csproj /p:Configuration=Release /p:TargetFramework=${{ matrix.framework }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:SelfContained=${{ matrix.selfcontained }} /p:OutputPath=..\..\dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}
           } else {
-            dotnet publish src/HoloPatcher/HoloPatcher.csproj `
+            dotnet publish src/KPatcher/KPatcher.csproj `
               -c Release `
               -f ${{ matrix.framework }} `
               -r ${{ matrix.rid }} `
@@ -94,11 +94,11 @@ jobs:
           }
           
           $exeName = if ("${{ matrix.platform }}" -eq "win7" -or "${{ matrix.platform }}" -eq "win") {
-            "HoloPatcher.exe"
+            "KPatcher.exe"
           } elseif ("${{ matrix.platform }}" -eq "linux") {
-            "HoloPatcher"
+            "KPatcher"
           } else {
-            "HoloPatcher"
+            "KPatcher"
           }
           
           $exePath = Join-Path $outputDir $exeName

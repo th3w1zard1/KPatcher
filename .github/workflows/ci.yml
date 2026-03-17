@@ -24,13 +24,13 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/TSLPatcher.Tests/TSLPatcher.Tests.csproj
+        run: dotnet restore src/KPatcher.Tests/KPatcher.Tests.csproj
 
       - name: Build
-        run: dotnet build src/TSLPatcher.Tests/TSLPatcher.Tests.csproj --no-restore -c Debug
+        run: dotnet build src/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
 
       - name: Test
-        run: dotnet test src/TSLPatcher.Tests/TSLPatcher.Tests.csproj --no-build -c Debug --verbosity normal
+        run: dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --verbosity normal
         continue-on-error: true
 
   lint:
@@ -46,7 +46,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/HoloPatcher/HoloPatcher.csproj -p:Configuration=Release
+        run: dotnet restore src/KPatcher/KPatcher.csproj -p:Configuration=Release
 
       - name: Run analyzers
-        run: dotnet build src/HoloPatcher/HoloPatcher.csproj --no-restore -c Release -p:RunAnalyzersDuringBuild=true
+        run: dotnet build src/KPatcher/KPatcher.csproj --no-restore -c Release -p:RunAnalyzersDuringBuild=true

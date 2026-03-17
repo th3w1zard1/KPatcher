@@ -1,4 +1,4 @@
-# Build NuGet packages for TSLPatcher.Core and HoloPatcher
+# Build NuGet packages for KPatcher.Core and KPatcher
 # Usage: .\build-nuget.ps1 [--publish] [--source <feed-url>] [--api-key <key>]
 #
 # API Key can be provided via:
@@ -41,39 +41,39 @@ if ([string]::IsNullOrWhiteSpace($Source)) {
 
 Write-Host "Building NuGet packages..." -ForegroundColor Green
 
-# Build TSLPatcher.Core package
-Write-Host "`nBuilding TSLPatcher.Core..." -ForegroundColor Cyan
-dotnet pack src/TSLPatcher.Core/TSLPatcher.Core.csproj --configuration $Configuration --no-build
+# Build KPatcher.Core package
+Write-Host "`nBuilding KPatcher.Core..." -ForegroundColor Cyan
+dotnet pack src/KPatcher.Core/KPatcher.Core.csproj --configuration $Configuration --no-build
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Failed to build TSLPatcher.Core package" -ForegroundColor Red
+    Write-Host "Failed to build KPatcher.Core package" -ForegroundColor Red
     exit 1
 }
 
-# Build HoloPatcher package
-Write-Host "`nBuilding HoloPatcher..." -ForegroundColor Cyan
-dotnet pack src/HoloPatcher/HoloPatcher.csproj --configuration $Configuration --no-build
+# Build KPatcher package
+Write-Host "`nBuilding KPatcher..." -ForegroundColor Cyan
+dotnet pack src/KPatcher/KPatcher.csproj --configuration $Configuration --no-build
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Failed to build HoloPatcher package" -ForegroundColor Red
+    Write-Host "Failed to build KPatcher package" -ForegroundColor Red
     exit 1
 }
 
 # Find package files
-$tslCorePackage = Get-ChildItem -Path "src/TSLPatcher.Core/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
-$holoPatcherPackage = Get-ChildItem -Path "src/HoloPatcher/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
+$tslCorePackage = Get-ChildItem -Path "src/KPatcher.Core/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
+$holoPatcherPackage = Get-ChildItem -Path "src/KPatcher/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
 
 if ($tslCorePackage) {
-    Write-Host "`nTSLPatcher.Core package created: $($tslCorePackage.FullName)" -ForegroundColor Green
+    Write-Host "`nKPatcher.Core package created: $($tslCorePackage.FullName)" -ForegroundColor Green
 } else {
-    Write-Host "`nTSLPatcher.Core package not found!" -ForegroundColor Red
+    Write-Host "`nKPatcher.Core package not found!" -ForegroundColor Red
     exit 1
 }
 
 if ($holoPatcherPackage) {
-    Write-Host "HoloPatcher package created: $($holoPatcherPackage.FullName)" -ForegroundColor Green
+    Write-Host "KPatcher package created: $($holoPatcherPackage.FullName)" -ForegroundColor Green
 } else {
-    Write-Host "HoloPatcher package not found!" -ForegroundColor Red
+    Write-Host "KPatcher package not found!" -ForegroundColor Red
     exit 1
 }
 
@@ -97,35 +97,35 @@ if ($Publish) {
         $pushArgs += "--api-key", $ApiKey
     }
 
-    # Publish TSLPatcher.Core
-    Write-Host "Publishing TSLPatcher.Core..." -ForegroundColor Cyan
+    # Publish KPatcher.Core
+    Write-Host "Publishing KPatcher.Core..." -ForegroundColor Cyan
     & dotnet $pushArgs $tslCorePackage.FullName
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to publish TSLPatcher.Core" -ForegroundColor Red
+        Write-Host "Failed to publish KPatcher.Core" -ForegroundColor Red
         exit 1
     }
 
-    # Publish HoloPatcher
-    Write-Host "Publishing HoloPatcher..." -ForegroundColor Cyan
+    # Publish KPatcher
+    Write-Host "Publishing KPatcher..." -ForegroundColor Cyan
     & dotnet $pushArgs $holoPatcherPackage.FullName
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to publish HoloPatcher" -ForegroundColor Red
+        Write-Host "Failed to publish KPatcher" -ForegroundColor Red
         exit 1
     }
 
     # Publish symbol packages if they exist
-    $tslCoreSymbols = Get-ChildItem -Path "src/TSLPatcher.Core/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
-    $holoPatcherSymbols = Get-ChildItem -Path "src/HoloPatcher/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
+    $tslCoreSymbols = Get-ChildItem -Path "src/KPatcher.Core/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
+    $holoPatcherSymbols = Get-ChildItem -Path "src/KPatcher/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
 
     if ($tslCoreSymbols) {
-        Write-Host "Publishing TSLPatcher.Core symbols..." -ForegroundColor Cyan
+        Write-Host "Publishing KPatcher.Core symbols..." -ForegroundColor Cyan
         & dotnet $pushArgs $tslCoreSymbols.FullName
     }
 
     if ($holoPatcherSymbols) {
-        Write-Host "Publishing HoloPatcher symbols..." -ForegroundColor Cyan
+        Write-Host "Publishing KPatcher symbols..." -ForegroundColor Cyan
         & dotnet $pushArgs $holoPatcherSymbols.FullName
     }
 

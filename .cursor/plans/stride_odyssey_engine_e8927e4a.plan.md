@@ -452,7 +452,7 @@ To keep a defensible clean-room posture:
 
 ### 0) Repository + build foundation
 
-- Add the new `OdysseyRuntime` projects to `HoloPatcher.sln`.
+- Add the new `OdysseyRuntime` projects to `KPatcher.sln`.
 - Enforce conventions:
   - C# language version pinned (7.3) in new projects.
   - Nullable reference types disabled.
@@ -2398,7 +2398,7 @@ This plan intentionally reuses existing libraries and avoids duplicating tool st
 - **HolocronToolset.NET** can become a future “authoring” companion; the runtime should expose:
   - a stable content cache format (or import APIs),
   - a module preview mode for rapid iteration.
-- **HoloPatcher** (TSLPatcher port) remains the mod application tool:
+- **KPatcher** (KPatcher port) remains the mod application tool:
   - runtime should respect the same precedence semantics so patched installs behave as expected.
 
 ### 28) Non-goals (explicitly out of scope for the first playable engine)

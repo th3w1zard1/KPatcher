@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using TSLPatcher.Core.Common;
-using TSLPatcher.Core.Formats.NCS;
-using TSLPatcher.Core.Formats.NCS.Compiler;
+using KPatcher.Core.Common;
+using KPatcher.Core.Formats.NCS;
+using KPatcher.Core.Formats.NCS.Compiler;
 
 class Program
 {

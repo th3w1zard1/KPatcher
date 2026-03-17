@@ -33,7 +33,7 @@
     Target game version: "k1" (KOTOR) or "k2" (TSL). Defaults to "k2".
 
 .PARAMETER AssemblyPath
-    Path to the TSLPatcher.Core.dll assembly. Defaults to the standard build output location.
+    Path to the KPatcher.Core.dll assembly. Defaults to the standard build output location.
 
 .PARAMETER LibraryLookup
     Additional directories to search for included files (compile/roundtrip operations).
@@ -111,7 +111,7 @@ param(
     [ValidateSet("k1", "k2")]
     [string]$Game = "k2",
 
-    [string]$AssemblyPath = "src/TSLPatcher.Core/bin/Debug/net9/TSLPatcher.Core.dll",
+    [string]$AssemblyPath = "src/KPatcher.Core/bin/Debug/net9/KPatcher.Core.dll",
 
     [Parameter(ParameterSetName="Compile")]
     [Parameter(ParameterSetName="RoundTrip")]
@@ -176,7 +176,7 @@ function Resolve-WorkspacePath {
 function Load-Assembly {
     if (-not (Test-Path $script:AssemblyPath)) {
         Write-Error "Assembly not found: $script:AssemblyPath"
-        Write-Host "Hint: Build the TSLPatcher.Core project first: dotnet build src/TSLPatcher.Core/TSLPatcher.Core.csproj"
+        Write-Host "Hint: Build the KPatcher.Core project first: dotnet build src/KPatcher.Core/KPatcher.Core.csproj"
         exit 1
     }
 
@@ -310,7 +310,7 @@ function Invoke-Compile {
         }
     }
     
-    $gameType = if ($Game -eq "k1") { [TSLPatcher.Core.Common.Game]::K1 } else { [TSLPatcher.Core.Common.Game]::K2 }
+    $gameType = if ($Game -eq "k1") { [KPatcher.Core.Common.Game]::K1 } else { [KPatcher.Core.Common.Game]::K2 }
     
     $successCount = 0
     $skipCount = 0
@@ -344,8 +344,8 @@ function Invoke-Compile {
             Write-Host "Compiling: $([System.IO.Path]::GetFileName($inputFile))" -NoNewline
             
             $source = [System.IO.File]::ReadAllText($inputFile, [System.Text.Encoding]::UTF8)
-            $ncs = [TSLPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($source, $gameType, $null, $null, $libraryLookupList)
-            [TSLPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs, $outputFile)
+            $ncs = [KPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($source, $gameType, $null, $null, $libraryLookupList)
+            [KPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs, $outputFile)
             
             $fileSize = (Get-Item $outputFile).Length
             $instructionCount = $ncs.Instructions.Count
@@ -394,7 +394,7 @@ function Invoke-Decompile {
     Write-Host "Game: $Game" -ForegroundColor Cyan
     Write-Host ""
     
-    $gameType = if ($Game -eq "k1") { [TSLPatcher.Core.Common.Game]::K1 } else { [TSLPatcher.Core.Common.Game]::K2 }
+    $gameType = if ($Game -eq "k1") { [KPatcher.Core.Common.Game]::K1 } else { [KPatcher.Core.Common.Game]::K2 }
     
     $successCount = 0
     $skipCount = 0
@@ -427,8 +427,8 @@ function Invoke-Decompile {
         try {
             Write-Host "Decompiling: $([System.IO.Path]::GetFileName($inputFile))" -NoNewline
             
-            $ncs = [TSLPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($inputFile)
-            $nssCode = [TSLPatcher.Core.Formats.NCS.NCSAuto]::DecompileNcs($ncs, $gameType)
+            $ncs = [KPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($inputFile)
+            $nssCode = [KPatcher.Core.Formats.NCS.NCSAuto]::DecompileNcs($ncs, $gameType)
             [System.IO.File]::WriteAllText($outputFile, $nssCode, [System.Text.Encoding]::UTF8)
             
             Write-Host " ✓ ($($nssCode.Length) chars)" -ForegroundColor Green
@@ -565,8 +565,8 @@ function Invoke-Compare {
         Write-Host ""
         
         try {
-            $origNcs = [TSLPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($originalPath)
-            $rtNcs = [TSLPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($roundTripPath)
+            $origNcs = [KPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($originalPath)
+            $rtNcs = [KPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($roundTripPath)
         }
         catch {
             Write-Error "Failed to load NCS files: $_"
@@ -726,7 +726,7 @@ function Invoke-RoundTrip {
         }
     }
     
-    $gameType = if ($Game -eq "k1") { [TSLPatcher.Core.Common.Game]::K1 } else { [TSLPatcher.Core.Common.Game]::K2 }
+    $gameType = if ($Game -eq "k1") { [KPatcher.Core.Common.Game]::K1 } else { [KPatcher.Core.Common.Game]::K2 }
     
     $successCount = 0
     $failureCount = 0
@@ -768,8 +768,8 @@ function Invoke-RoundTrip {
         try {
             Write-Host "  [1/4] Compiling original NSS..." -NoNewline
             $source = [System.IO.File]::ReadAllText($inputFile, [System.Text.Encoding]::UTF8)
-            $ncs1 = [TSLPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($source, $gameType, $null, $null, $libraryLookupList)
-            [TSLPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs1, $firstNcs)
+            $ncs1 = [KPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($source, $gameType, $null, $null, $libraryLookupList)
+            [KPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs1, $firstNcs)
             
             if (-not (Test-Path $firstNcs)) {
                 throw "First compilation did not produce output file"
@@ -780,8 +780,8 @@ function Invoke-RoundTrip {
             Write-Host " ✓ ($size1 bytes, $inst1 instructions)" -ForegroundColor Green
             
             Write-Host "  [2/4] Decompiling NCS..." -NoNewline
-            $ncs1Loaded = [TSLPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($firstNcs)
-            $decompiled = [TSLPatcher.Core.Formats.NCS.NCSAuto]::DecompileNcs($ncs1Loaded, $gameType)
+            $ncs1Loaded = [KPatcher.Core.Formats.NCS.NCSAuto]::ReadNcs($firstNcs)
+            $decompiled = [KPatcher.Core.Formats.NCS.NCSAuto]::DecompileNcs($ncs1Loaded, $gameType)
             [System.IO.File]::WriteAllText($decompiledNss, $decompiled, [System.Text.Encoding]::UTF8)
             
             if (-not (Test-Path $decompiledNss)) {
@@ -792,8 +792,8 @@ function Invoke-RoundTrip {
             Write-Host " ✓ ($decompiledLength chars)" -ForegroundColor Green
             
             Write-Host "  [3/4] Recompiling decompiled NSS..." -NoNewline
-            $ncs2 = [TSLPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($decompiled, $gameType, $null, $null, $libraryLookupList)
-            [TSLPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs2, $secondNcs)
+            $ncs2 = [KPatcher.Core.Formats.NCS.NCSAuto]::CompileNss($decompiled, $gameType, $null, $null, $libraryLookupList)
+            [KPatcher.Core.Formats.NCS.NCSAuto]::WriteNcs($ncs2, $secondNcs)
             
             if (-not (Test-Path $secondNcs)) {
                 throw "Second compilation did not produce output file"
@@ -902,7 +902,7 @@ function Invoke-GenerateDefs {
     
     $K1NssPath = Join-Path $script:WorkspaceRoot "include\k1_nwscript.nss"
     $K2NssPath = Join-Path $script:WorkspaceRoot "include\k2_nwscript.nss"
-    $OutputPath = Join-Path $script:WorkspaceRoot "src\TSLPatcher.Core\Common\Script\ScriptDefs.cs"
+    $OutputPath = Join-Path $script:WorkspaceRoot "src\KPatcher.Core\Common\Script\ScriptDefs.cs"
     
     Write-Host "Generating ScriptDefs.cs from NSS files..." -ForegroundColor Cyan
     Write-Host "  K1: $K1NssPath"
@@ -1240,10 +1240,10 @@ function Invoke-GenerateDefs {
     
     $csCode = @"
 using System.Collections.Generic;
-using TSLPatcher.Core.Common;
-using TSLPatcher.Core.Common.Script;
+using KPatcher.Core.Common;
+using KPatcher.Core.Common.Script;
 
-namespace TSLPatcher.Core.Common.Script
+namespace KPatcher.Core.Common.Script
 {
 
     /// <summary>

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TSLPatcher.Utility.Tools
+namespace KPatcher.Utility.Tools
 {
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/playpazaak.py
     // Original: Pazaak card game implementation and rules
@@ -29,20 +29,20 @@ namespace TSLPatcher.Utility.Tools
 
         public override string ToString()
         {
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.YellowSpecial)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.YellowSpecial)
             {
                 return $"Yellow {Value}";
             }
             string valueStr = Value.ToString();
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.Positive)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.Positive)
             {
                 return $"+{valueStr}";
             }
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.Negative)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.Negative)
             {
                 return $"-{valueStr}";
             }
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.PosOrNeg)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.PosOrNeg)
             {
                 return $"+/-{valueStr}";
             }
@@ -53,19 +53,19 @@ namespace TSLPatcher.Utility.Tools
         // Original: def get_value(self, choice: str | None = None) -> int:
         public int GetValue(string choice = null)
         {
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.Positive)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.Positive)
             {
                 return (int)Value;
             }
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.Negative)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.Negative)
             {
                 return -(int)Value;
             }
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.PosOrNeg)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.PosOrNeg)
             {
                 return choice == "+" ? (int)Value : -(int)Value;
             }
-            if (CardType == global::TSLPatcher.Utility.Tools.CardType.YellowSpecial)
+            if (CardType == global::KPatcher.Utility.Tools.CardType.YellowSpecial)
             {
                 if (Value is List<int> list && list.Count > 0)
                 {

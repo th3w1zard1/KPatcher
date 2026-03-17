@@ -1,4 +1,4 @@
-# HoloPatcher.NET Quick Start Guide
+# KPatcher.NET Quick Start Guide
 
 ## Prerequisites
 
@@ -18,14 +18,14 @@
 **Windows (PowerShell)**:
 
 ```powershell
-cd Tools\HoloPatcher.NET
+cd Tools\KPatcher.NET
 .\build.ps1
 ```
 
 **Linux/macOS (Bash)**:
 
 ```bash
-cd Tools/HoloPatcher.NET
+cd Tools/KPatcher.NET
 chmod +x build.sh
 ./build.sh
 ```
@@ -33,7 +33,7 @@ chmod +x build.sh
 ### Option 2: Using .NET CLI
 
 ```bash
-cd Tools/HoloPatcher.NET
+cd Tools/KPatcher.NET
 dotnet restore
 dotnet build
 ```
@@ -41,24 +41,24 @@ dotnet build
 ## Running the Application
 
 ```bash
-cd Tools/HoloPatcher.NET
-dotnet run --project src/HoloPatcher/HoloPatcher.csproj
+cd Tools/KPatcher.NET
+dotnet run --project src/KPatcher/KPatcher.csproj
 ```
 
 ## Project Structure Overview
 
 ```sh
-Tools/HoloPatcher.NET/
-├── HoloPatcher.sln              # Solution file
+Tools/KPatcher.NET/
+├── KPatcher.sln              # Solution file
 ├── src/
-│   ├── HoloPatcher/             # Main UI application (Avalonia)
+│   ├── KPatcher/             # Main UI application (Avalonia)
 │   │   ├── Views/               # XAML views
 │   │   ├── ViewModels/          # View models (MVVM)
 │   │   ├── App.axaml            # Application definition
 │   │   └── Program.cs           # Entry point
 │   │
-│   ├── HoloPatcher.UI/          # Packable Avalonia UI library
-│   └── TSLPatcher.Core/         # Packable core patching library
+│   ├── KPatcher.UI/          # Packable Avalonia UI library
+│   └── KPatcher.Core/         # Packable core patching library
 │       ├── Config/              # Configuration models
 │       ├── Logger/              # Logging system
 │       ├── Memory/              # Token memory
@@ -76,18 +76,18 @@ Tools/HoloPatcher.NET/
 
 **Visual Studio 2022**:
 
-- Open `HoloPatcher.sln`
+- Open `KPatcher.sln`
 - Press F5 to build and run
 
 **JetBrains Rider**:
 
-- Open `HoloPatcher.sln`
+- Open `KPatcher.sln`
 - Click the Run button or press Shift+F10
 
 **VS Code**:
 
 ```bash
-cd Tools/HoloPatcher.NET
+cd Tools/KPatcher.NET
 code .
 ```
 
@@ -108,7 +108,7 @@ The codebase follows MVVM (Model-View-ViewModel) pattern:
 
 **To add patching features**:
 
-1. Add models to `TSLPatcher.Core`
+1. Add models to `KPatcher.Core`
 2. Implement business logic
 3. Expose through ViewModels
 
@@ -119,7 +119,7 @@ The codebase follows MVVM (Model-View-ViewModel) pattern:
 dotnet build
 
 # Run
-dotnet run --project src/HoloPatcher/HoloPatcher.csproj
+dotnet run --project src/KPatcher/KPatcher.csproj
 
 # (Future) Run tests
 dotnet test
@@ -151,9 +151,9 @@ dotnet test
 
 ## Next Steps for Development
 
-1. **Implement ConfigReader** (`TSLPatcher.Core/Config/ConfigReader.cs`)
+1. **Implement ConfigReader** (`KPatcher.Core/Config/ConfigReader.cs`)
    - Port INI parsing logic from Python
-   - Reference: `Libraries/PyKotor/src/pykotor/tslpatcher/reader.py`
+   - Reference: `Libraries/PyKotor/src/pykotor/kpatcher/reader.py`
 
 2. **Implement Namespace Loading**
    - Parse `namespaces.ini`
@@ -212,7 +212,7 @@ dotnet build
 For issues or questions:
 
 1. Check `MIGRATION_GUIDE.md` for implementation patterns
-2. Review original Python source in `Libraries/PyKotor/src/pykotor/tslpatcher/`
+2. Review original Python source in `Libraries/PyKotor/src/pykotor/kpatcher/`
 3. Consult Avalonia documentation
 4. Check .NET API documentation
 
@@ -222,6 +222,6 @@ When adding new features:
 
 1. Follow existing code structure
 2. Use MVVM pattern for UI code
-3. Keep business logic in TSLPatcher.Core
+3. Keep business logic in KPatcher.Core
 4. Add XML documentation comments
 5. Test with actual KOTOR mods when possible

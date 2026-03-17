@@ -92,13 +92,13 @@ if ($CheckSecrets -or $All) {
     Write-Host "    - NETSPARKLE_PUBLIC_KEY (optional)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  To check secrets, go to:" -ForegroundColor White
-    Write-Host "    https://github.com/th3w1zard1/HoloPatcher.NET/settings/secrets/actions" -ForegroundColor Gray
+    Write-Host "    https://github.com/th3w1zard1/KPatcher.NET/settings/secrets/actions" -ForegroundColor Gray
     Write-Host ""
 }
 
 # Check UpdateManager configuration
 Write-Host "Checking UpdateManager configuration..." -ForegroundColor Yellow
-$updateManagerPath = "src/HoloPatcher/UpdateManager.cs"
+$updateManagerPath = "src/KPatcher/UpdateManager.cs"
 if (Test-Path $updateManagerPath) {
     $content = Get-Content $updateManagerPath -Raw
     if ($content -match 'Ed25519PublicKey\s*=\s*""') {

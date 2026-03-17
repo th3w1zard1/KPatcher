@@ -2,7 +2,7 @@
 # This ensures all tests fail if they exceed 2 minutes
 
 param(
-    [string]$TestProjectPath = "src\TSLPatcher.Tests\TSLPatcher.Tests.csproj"
+    [string]$TestProjectPath = "src\KPatcher.Tests\KPatcher.Tests.csproj"
 )
 
 $ErrorActionPreference = "Continue"
@@ -12,7 +12,7 @@ Write-Host "Project: $TestProjectPath"
 Write-Host ""
 
 # Find all test files
-$testFiles = Get-ChildItem -Path "src\TSLPatcher.Tests" -Filter "*.cs" -Recurse | Where-Object {
+$testFiles = Get-ChildItem -Path "src\KPatcher.Tests" -Filter "*.cs" -Recurse | Where-Object {
     $content = Get-Content $_.FullName -Raw
     $content -match '\[Fact\]|\[Theory\]'
 }

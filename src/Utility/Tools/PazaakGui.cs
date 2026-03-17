@@ -1,6 +1,6 @@
 using System;
 
-namespace TSLPatcher.Utility.Tools
+namespace KPatcher.Utility.Tools
 {
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/pazaak_gui.py
     // Original: Pazaak GUI implementation using PyQt

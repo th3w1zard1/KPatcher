@@ -17,7 +17,7 @@ def escape_csharp_string(s):
 output = """using System.Collections.Generic;
 using System.Text;
 
-namespace TSLPatcher.Core.Common.Script;
+namespace KPatcher.Core.Common.Script;
 
 /// <summary>
 /// NWScript library include files for KOTOR and TSL.
@@ -65,7 +65,7 @@ output += """    };
 """
 
 # Write to file
-with open('src/TSLPatcher.Core/Common/Script/ScriptLib.cs', 'w', encoding='utf-8') as f:
+with open('src/KPatcher.Core/Common/Script/ScriptLib.cs', 'w', encoding='utf-8') as f:
     f.write(output)
 
 print("Generated ScriptLib.cs successfully!")

@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using TSLPatcher.Core.Formats.NCS.NCSDecomp;
-using TSLPatcher.Core.Common;
+using KPatcher.Core.Formats.NCS.NCSDecomp;
+using KPatcher.Core.Common;
 
 class TestSingleDecompile
 {

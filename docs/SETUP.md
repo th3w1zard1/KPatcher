@@ -52,7 +52,7 @@ This will:
 
 ## Step 3: Update UpdateManager.cs
 
-Open `src/HoloPatcher/UpdateManager.cs` and set the public key:
+Open `src/KPatcher/UpdateManager.cs` and set the public key:
 
 ```csharp
 Ed25519PublicKey = "your_base64_public_key_here"

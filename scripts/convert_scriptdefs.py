@@ -110,10 +110,10 @@ def convert_function(func: ScriptFunction) -> str:
 
 # Generate C# file
 output = """using System.Collections.Generic;
-using TSLPatcher.Core.Common;
-using TSLPatcher.Core.Common.Script;
+using KPatcher.Core.Common;
+using KPatcher.Core.Common.Script;
 
-namespace TSLPatcher.Core.Common.Script;
+namespace KPatcher.Core.Common.Script;
 
 /// <summary>
 /// NWScript constant and function definitions for KOTOR and TSL.
@@ -176,7 +176,7 @@ output += """    };
 """
 
 # Write to file
-with open('src/TSLPatcher.Core/Common/Script/ScriptDefs.cs', 'w', encoding='utf-8') as f:
+with open('src/KPatcher.Core/Common/Script/ScriptDefs.cs', 'w', encoding='utf-8') as f:
     f.write(output)
 
 print("Generated ScriptDefs.cs successfully!")

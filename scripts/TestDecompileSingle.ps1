@@ -11,8 +11,8 @@ Write-Host "Output: $OutputFile"
 Write-Host ""
 
 # Build the project first
-Write-Host "Building TSLPatcher.Core..."
-dotnet build src/TSLPatcher.Core/TSLPatcher.Core.csproj --no-incremental | Out-Null
+Write-Host "Building KPatcher.Core..."
+dotnet build src/KPatcher.Core/KPatcher.Core.csproj --no-incremental | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!"
     exit 1
@@ -22,8 +22,8 @@ if ($LASTEXITCODE -ne 0) {
 $decompilerCode = @"
 using System;
 using System.IO;
-using TSLPatcher.Core.Formats.NCS.NCSDecomp;
-using TSLPatcher.Core.Common;
+using KPatcher.Core.Formats.NCS.NCSDecomp;
+using KPatcher.Core.Common;
 
 class TestDecompile {
     static void Main(string[] args) {
@@ -53,7 +53,7 @@ $decompilerCode | Out-File -FilePath $tempCsFile -Encoding UTF8
 
 try {
     Write-Host "Compiling test program..."
-    dotnet run --project src/TSLPatcher.Core/TSLPatcher.Core.csproj -- "$NcsFile" "$OutputFile" 2>&1 | Write-Host
+    dotnet run --project src/KPatcher.Core/KPatcher.Core.csproj -- "$NcsFile" "$OutputFile" 2>&1 | Write-Host
     
     if (Test-Path $OutputFile) {
         Write-Host ""

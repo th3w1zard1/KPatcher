@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TSLPatcher.Core.Common;
-using TSLPatcher.Core.Formats.ERF;
-using TSLPatcher.Core.Formats.KEY;
-using TSLPatcher.Core.Formats.RIM;
-using TSLPatcher.Core.Resource.Formats.BIF;
-using TSLPatcher.Core.Resources;
+using KPatcher.Core.Common;
+using KPatcher.Core.Formats.ERF;
+using KPatcher.Core.Formats.KEY;
+using KPatcher.Core.Formats.RIM;
+using KPatcher.Core.Resource.Formats.BIF;
+using KPatcher.Core.Resources;
 using JetBrains.Annotations;
 
-namespace TSLPatcher.Utility.Tools
+namespace KPatcher.Utility.Tools
 {
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/archives.py:33-47
     // Original: def matches_filter(text: str, pattern: str) -> bool:

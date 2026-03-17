@@ -11,7 +11,7 @@ if ($envContent -match 'NUGET_API_KEY\s*=\s*"([^"]+)"') {
 }
 
 # Find package
-$pkg = Get-ChildItem "src/TSLPatcher.Core/bin/Release" -Filter "*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$pkg = Get-ChildItem "src/KPatcher.Core/bin/Release" -Filter "*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $pkg) {
     Write-Host "ERROR: No package found!" -ForegroundColor Red
     exit 1
