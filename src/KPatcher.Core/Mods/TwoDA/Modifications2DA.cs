@@ -54,6 +54,19 @@ namespace KPatcher.Core.Mods.TwoDA
         {
             Formats.TwoDA.TwoDA twoda = new TwoDABinaryReader(source).Load();
             Apply(twoda, memory, logger, game);
+
+            // Exceeding row count maximums will break the game. If over limit, skip applying (return original bytes).
+            if (HardcappedRowLimits.TryGetValue(SaveAs.ToLowerInvariant(), out int twodaRowLimit))
+            {
+                int curRowCount = twoda.GetHeight();
+                if (curRowCount > twodaRowLimit)
+                {
+                    int rowsAdded = curRowCount - twodaRowLimit;
+                    logger.AddError($"{SaveAs} has a max row count of {twodaRowLimit}. Adding more will break the game. This mod attempted to add {rowsAdded} rows and have not been applied.");
+                    return source;
+                }
+            }
+
             return new TwoDABinaryWriter(twoda).Write();
         }
 
@@ -120,17 +133,6 @@ namespace KPatcher.Core.Mods.TwoDA
                 if (!string.IsNullOrEmpty(strVal))
                 {
                     memory.MemoryStr[tokenId] = int.Parse(strVal);
-                }
-            }
-
-            // Exceeding row count maximums will break the game.
-            if (HardcappedRowLimits.TryGetValue(SaveAs.ToLowerInvariant(), out int twodaRowLimit))
-            {
-                int curRowCount = twoda.GetHeight();
-                int rowsAdded = curRowCount - twodaRowLimit;
-                if (curRowCount > twodaRowLimit)
-                {
-                    throw new InvalidOperationException($"{SaveAs} has a max row count of {twodaRowLimit}. Adding more will break the game. This mod attempted to add {rowsAdded} rows and have not been applied.");
                 }
             }
         }

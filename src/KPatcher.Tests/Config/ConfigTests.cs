@@ -98,7 +98,7 @@ namespace KPatcher.Core.Tests.Config
             File.WriteAllBytes(testFilePath, testData);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             result.Should().NotBeNull();
@@ -124,7 +124,7 @@ namespace KPatcher.Core.Tests.Config
             var capsule = new Capsule(capsulePath, createIfNotExist: true);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: true, capsule: capsule);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: capsule);
 
             // Assert
             result.Should().BeNull();
@@ -151,7 +151,7 @@ namespace KPatcher.Core.Tests.Config
             File.WriteAllBytes(outputPath, testData);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: true, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: null);
 
             // Assert
             result.Should().NotBeNull();
@@ -181,7 +181,7 @@ namespace KPatcher.Core.Tests.Config
             File.WriteAllBytes(modFilePath, testData);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             result.Should().NotBeNull();
@@ -221,7 +221,7 @@ namespace KPatcher.Core.Tests.Config
             capsule.Save();
 
             // Act - When replace_file=False and existsAtOutput=True, Python loads from capsule
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: true, capsule: capsule);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: capsule);
 
             // Assert
             result.Should().NotBeNull();
@@ -245,7 +245,7 @@ namespace KPatcher.Core.Tests.Config
             };
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             result.Should().BeNull();
@@ -270,7 +270,7 @@ namespace KPatcher.Core.Tests.Config
             var capsule = new Capsule(capsulePath, createIfNotExist: true);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: true, capsule: capsule);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: capsule);
 
             // Assert
             result.Should().BeNull();
@@ -292,7 +292,7 @@ namespace KPatcher.Core.Tests.Config
             };
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: true, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: null);
 
             // Assert
             result.Should().BeNull();
@@ -314,7 +314,7 @@ namespace KPatcher.Core.Tests.Config
             };
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempGamePath, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempGamePath, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             result.Should().BeNull();

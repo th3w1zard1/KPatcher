@@ -369,9 +369,11 @@ namespace KPatcher.Core.Patcher
 
                     try
                     {
-                        string outputContainerPath = Path.Combine(gamePath, patch.Destination);
+                        string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
+                        string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
+                        string outputContainerPath = Path.Combine(gamePath, destination);
 
-                        HandleCapsuleResult result = HandleCapsuleAndBackup(patch, outputContainerPath);
+                        HandleCapsuleResult result = HandleCapsuleAndBackup(patch, outputContainerPath, destination, saveAs);
 
                         if (!ShouldPatch(patch, result.Exists, result.Capsule))
                         {
@@ -379,7 +381,7 @@ namespace KPatcher.Core.Patcher
                         }
 
                         // Can be null if not found
-                        byte[] dataToPatch = LookupResource(patch, outputContainerPath, existsAtOutput: result.Exists, capsule: result.Capsule);
+                        byte[] dataToPatch = LookupResource(patch, outputContainerPath, saveAs, result.Exists, result.Capsule);
 
                         if (dataToPatch is null)
                         {
@@ -408,7 +410,7 @@ namespace KPatcher.Core.Patcher
                                 HandleOverrideType(patch);
                                 HandleModRimShadow(patch);
 
-                                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(patch.SaveAs).Unpack();
+                                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                                 result.Capsule.Add(resName, resType, patchedDataBytes);
                                 result.Capsule.Save();
                             }
@@ -416,7 +418,7 @@ namespace KPatcher.Core.Patcher
                             {
                                 // Python: output_container_path.mkdir(exist_ok=True, parents=True)
                                 Directory.CreateDirectory(outputContainerPath);
-                                string destinationPath = Path.Combine(outputContainerPath, patch.SaveAs);
+                                string destinationPath = Path.Combine(outputContainerPath, saveAs);
                                 File.WriteAllBytes(destinationPath, patchedDataBytes);
                             }
 
@@ -558,13 +560,15 @@ namespace KPatcher.Core.Patcher
         /// </summary>
         private HandleCapsuleResult HandleCapsuleAndBackup(
             PatcherModifications patch,
-            string outputContainerPath)
+            string outputContainerPath,
+            string destination,
+            string saveAs)
         {
             // Can be null if not found
             Capsule capsule = null;
             bool exists = false;
 
-            if (IsCapsuleFile(patch.Destination))
+            if (IsCapsuleFile(destination))
             {
                 // Python: module_root: str = Installation.get_module_root(output_container_path)
                 string moduleRoot = Installation.Installation.GetModuleRoot(outputContainerPath);
@@ -603,25 +607,25 @@ namespace KPatcher.Core.Patcher
                     else
                     {
                         // Python: raise FileNotFoundError(errno.ENOENT, msg, str(output_container_path))
-                        string msg = $"The capsule '{patch.Destination}' did not exist, or permission issues occurred, when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...";
+                        string msg = $"The capsule '{destination}' did not exist, or permission issues occurred, when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...";
                         throw new FileNotFoundException(msg, outputContainerPath);
                     }
                 }
 
                 capsule = new Capsule(outputContainerPath, createIfNotExist: false);
                 (string backupPath, HashSet<string> processedFiles) = GetBackup();
-                CreateBackupHelper(outputContainerPath, backupPath, processedFiles, Path.GetDirectoryName(patch.Destination) ?? "");
+                CreateBackupHelper(outputContainerPath, backupPath, processedFiles, Path.GetDirectoryName(destination) ?? "");
 
                 // Python: exists = capsule.contains(*ResourceIdentifier.from_path(patch.saveas).unpack())
-                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(patch.SaveAs).Unpack();
+                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                 exists = capsule.Contains(resName, resType);
             }
             else
             {
                 // Python: create_backup(self.log, output_container_path.joinpath(patch.saveas), *self.backup(), patch.destination)
-                string fullPath = Path.Combine(outputContainerPath, patch.SaveAs);
+                string fullPath = Path.Combine(outputContainerPath, saveAs);
                 (string backupPath, HashSet<string> processedFiles) = GetBackup();
-                CreateBackupHelper(fullPath, backupPath, processedFiles, patch.Destination);
+                CreateBackupHelper(fullPath, backupPath, processedFiles, destination);
 
                 // Python: exists = output_container_path.joinpath(patch.saveas).is_file()
                 exists = File.Exists(fullPath);
@@ -751,6 +755,7 @@ namespace KPatcher.Core.Patcher
         public byte[] LookupResource(
             PatcherModifications patch,
             string outputContainerPath,
+            string saveAs,
             bool existsAtOutput,
             [CanBeNull] Capsule capsule)
         {
@@ -771,12 +776,12 @@ namespace KPatcher.Core.Patcher
                 //   return self.load_resource_file(output_container_path / patch.saveas)
                 if (capsule is null)
                 {
-                    string targetPath = Path.Combine(outputContainerPath, patch.SaveAs);
+                    string targetPath = Path.Combine(outputContainerPath, saveAs);
                     return LoadResourceFile(targetPath);
                 }
 
                 // Python: return capsule.resource(*ResourceIdentifier.from_path(patch.saveas).unpack())
-                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(patch.SaveAs).Unpack();
+                (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                 return capsule.GetResource(resName, resType);
             }
             catch (Exception ex)
@@ -792,45 +797,47 @@ namespace KPatcher.Core.Patcher
             bool exists,
             [CanBeNull] Capsule capsule = null)
         {
-            string localFolder = patch.Destination == "." ? new DirectoryInfo(gamePath).Name : patch.Destination;
+            string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
+            string localFolder = destination == "." ? new DirectoryInfo(gamePath).Name : destination;
             string containerType = capsule is null ? "folder" : "archive";
 
             // Python uses action[:-1] which removes last character, not just trailing whitespace
             string actionBase = patch.Action.Length > 0 ? patch.Action.Substring(0, patch.Action.Length - 1) : patch.Action;
 
+            string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             if (patch.ReplaceFile && exists)
             {
-                string saveAsStr = patch.SaveAs != patch.SourceFile ? $"'{patch.SaveAs}' in" : "in";
+                string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
                 log.AddNote($"{actionBase}ing '{patch.SourceFile}' and replacing existing file {saveAsStr} the '{localFolder}' {containerType}");
                 return true;
             }
 
             if (!patch.SkipIfNotReplace && !patch.ReplaceFile && exists)
             {
-                log.AddNote($"{actionBase}ing existing file '{patch.SaveAs}' in the '{localFolder}' {containerType}");
+                log.AddNote($"{actionBase}ing existing file '{saveAs}' in the '{localFolder}' {containerType}");
                 return true;
             }
 
             if (patch.SkipIfNotReplace && !patch.ReplaceFile && exists)
             {
-                log.AddNote($"'{patch.SaveAs}' already exists in the '{localFolder}' {containerType}. Skipping file...");
+                log.AddNote($"'{saveAs}' already exists in the '{localFolder}' {containerType}. Skipping file...");
                 return false;
             }
 
             // If capsule doesn't exist on disk, return false (matches Python: capsule.filepath().is_file())
             if (capsule != null && !capsule.Path.IsFile())
             {
-                log.AddError($"The capsule '{patch.Destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
+                log.AddError($"The capsule '{destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
                 return false;
             }
             if (capsule != null && !capsule.ExistedOnDisk && !patch.ReplaceFile)
             {
-                log.AddError($"The capsule '{patch.Destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
+                log.AddError($"The capsule '{destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
                 return false;
             }
 
-            string saveType = (capsule != null && patch.SaveAs == patch.SourceFile) ? "adding" : "saving";
-            string savingAsStr = patch.SaveAs != patch.SourceFile ? $"as '{patch.SaveAs}' in" : "to";
+            string saveType = (capsule != null && saveAs == patch.SourceFile) ? "adding" : "saving";
+            string savingAsStr = saveAs != patch.SourceFile ? $"as '{saveAs}' in" : "to";
             log.AddNote($"{actionBase}ing '{patch.SourceFile}' and {saveType} {savingAsStr} the '{localFolder}' {containerType}");
             return true;
         }
@@ -848,8 +855,9 @@ namespace KPatcher.Core.Patcher
                 return;
             }
 
+            string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             string overrideDir = Path.Combine(gamePath, "Override");
-            string overrideResourcePath = Path.Combine(overrideDir, patch.SaveAs);
+            string overrideResourcePath = Path.Combine(overrideDir, saveAs);
 
             // Python: if override_resource_path.is_file():
             if (!File.Exists(overrideResourcePath))
@@ -860,7 +868,7 @@ namespace KPatcher.Core.Patcher
             if (overrideType == OverrideType.RENAME)
             {
                 // Python: renamed_file_path: CaseAwarePath = override_dir / f"old_{patch.saveas}"
-                string renamedFilePath = Path.Combine(overrideDir, $"old_{patch.SaveAs}");
+                string renamedFilePath = Path.Combine(overrideDir, $"old_{saveAs}");
                 int i = 2;
                 string filestem = Path.GetFileNameWithoutExtension(renamedFilePath);
 
@@ -877,18 +885,19 @@ namespace KPatcher.Core.Patcher
                 {
                     // Python: shutil.move(str(override_resource_path), str(renamed_file_path))
                     File.Move(overrideResourcePath, renamedFilePath);
-                    log.AddNote($"Renamed existing Override file '{patch.SaveAs}' to '{Path.GetFileName(renamedFilePath)}' to prevent shadowing.");
+                    log.AddNote($"Renamed existing Override file '{saveAs}' to '{Path.GetFileName(renamedFilePath)}' to prevent shadowing.");
                 }
                 catch (Exception ex)
                 {
                     // Python: self.log.add_error(f"Could not rename '{patch.saveas}' to '{renamed_file_path.name}' in the Override folder: {universal_simplify_exception(e)}")
-                    log.AddError($"Could not rename '{patch.SaveAs}' to '{Path.GetFileName(renamedFilePath)}' in the Override folder: {ex.Message}");
+                    log.AddError($"Could not rename '{saveAs}' to '{Path.GetFileName(renamedFilePath)}' in the Override folder: {ex.Message}");
                 }
             }
             else if (overrideType == OverrideType.WARN)
             {
                 // Python: self.log.add_warning(f"A resource located at '{override_resource_path}' is shadowing this mod's changes in {patch.destination}!")
-                log.AddWarning($"A resource located at '{overrideResourcePath}' is shadowing this mod's changes in {patch.Destination}!");
+                string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
+                log.AddWarning($"A resource located at '{overrideResourcePath}' is shadowing this mod's changes in {destination}!");
             }
         }
 
@@ -899,7 +908,9 @@ namespace KPatcher.Core.Patcher
         private void HandleModRimShadow(PatcherModifications patch)
         {
             // Python: erfrim_path: CaseAwarePath = self.game_path / patch.destination / patch.saveas
-            string erfrimPath = Path.Combine(gamePath, patch.Destination, patch.SaveAs);
+            string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
+            string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
+            string erfrimPath = Path.Combine(gamePath, destination, saveAs);
 
             // Python: mod_path: CaseAwarePath = erfrim_path.with_name(f"{Installation.get_module_root(erfrim_path.name)}.mod")
             string moduleRoot = Installation.Installation.GetModuleRoot(Path.GetFileName(erfrimPath));
@@ -908,7 +919,7 @@ namespace KPatcher.Core.Patcher
             // Python: if erfrim_path != mod_path and mod_path.is_file():
             if (!erfrimPath.Equals(modFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(modFilePath))
             {
-                log.AddWarning($"This mod intends to install '{patch.SaveAs}' into '{patch.Destination}', but is overshadowed by the existing '{Path.GetFileName(modFilePath)}'!");
+                log.AddWarning($"This mod intends to install '{saveAs}' into '{destination}', but is overshadowed by the existing '{Path.GetFileName(modFilePath)}'!");
             }
         }
 

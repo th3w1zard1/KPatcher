@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 
 namespace KPatcher.UI.Views.Dialogs
 {
@@ -6,7 +7,7 @@ namespace KPatcher.UI.Views.Dialogs
     {
         public UpdateProgressWindow()
         {
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
             ViewModel = new UpdateProgressViewModel();
             DataContext = ViewModel;
             CanResize = false;

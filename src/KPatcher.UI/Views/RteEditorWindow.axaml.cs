@@ -8,6 +8,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using AvRichTextBox;
 using KPatcher.UI.Rte;
@@ -23,16 +24,27 @@ namespace KPatcher.UI.Views
         private string _currentFilePath;
         private bool _isDirty;
 
+        private ComboBox _fontSizeComboBox;
+        private ComboBox _fontFamilyComboBox;
+        private ComboBox _foregroundComboBox;
+        private ComboBox _backgroundComboBox;
+        private RichTextBox _editor;
+
         public RteEditorWindow(string initialDirectory = null)
         {
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
+            _fontSizeComboBox = this.FindControl<ComboBox>("_fontSizeComboBox");
+            _fontFamilyComboBox = this.FindControl<ComboBox>("_fontFamilyComboBox");
+            _foregroundComboBox = this.FindControl<ComboBox>("_foregroundComboBox");
+            _backgroundComboBox = this.FindControl<ComboBox>("_backgroundComboBox");
+            _editor = this.FindControl<RichTextBox>("Editor");
             _initialDirectory = initialDirectory;
             PopulateFontSelector();
-            FontSizeComboBox.SelectedIndex = 2;
-            ForegroundComboBox.SelectedIndex = 0;
-            BackgroundComboBox.SelectedIndex = 0;
-            Editor.FlowDocument.Selection_Changed += OnSelectionChanged;
-            Editor.AddHandler(KeyUpEvent, OnEditorKeyUp, Avalonia.Interactivity.RoutingStrategies.Bubble);
+            _fontSizeComboBox.SelectedIndex = 2;
+            _foregroundComboBox.SelectedIndex = 0;
+            _backgroundComboBox.SelectedIndex = 0;
+            _editor.FlowDocument.Selection_Changed += OnSelectionChanged;
+            _editor.AddHandler(KeyUpEvent, OnEditorKeyUp, RoutingStrategies.Bubble);
             _ = InitializeNewDocumentAsync();
         }
 
@@ -45,10 +57,10 @@ namespace KPatcher.UI.Views
 
             foreach (string font in fonts)
             {
-                FontFamilyComboBox.Items.Add(new ComboBoxItem { Content = font });
+                _fontFamilyComboBox.Items.Add(new ComboBoxItem { Content = font });
             }
 
-            FontFamilyComboBox.SelectedIndex = 0;
+            _fontFamilyComboBox.SelectedIndex = 0;
         }
 
         private async Task InitializeNewDocumentAsync()
@@ -58,18 +70,18 @@ namespace KPatcher.UI.Views
                 return;
             }
 
-            Editor.FlowDocument = new FlowDocument();
+            _editor.FlowDocument = new FlowDocument();
             _currentFilePath = null;
             _isDirty = false;
             UpdateTitle();
         }
 
-        private void OnNewDocument(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnNewDocument(object sender, RoutedEventArgs e)
         {
             _ = InitializeNewDocumentAsync();
         }
 
-        private async void OnOpenDocument(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void OnOpenDocument(object sender, RoutedEventArgs e)
         {
             if (!await ConfirmDiscardChangesAsync())
             {
@@ -101,18 +113,18 @@ namespace KPatcher.UI.Views
 
             string json = await File.ReadAllTextAsync(path);
             var document = RteDocument.Parse(json);
-            RteDocumentConverter.ApplyToRichTextBox(Editor, document);
+            RteDocumentConverter.ApplyToRichTextBox(_editor, document);
             _currentFilePath = path;
             _isDirty = false;
             UpdateTitle();
         }
 
-        private async void OnSaveDocument(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void OnSaveDocument(object sender, RoutedEventArgs e)
         {
             await SaveDocumentAsync(false);
         }
 
-        private async void OnSaveDocumentAs(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void OnSaveDocumentAs(object sender, RoutedEventArgs e)
         {
             await SaveDocumentAsync(true);
         }
@@ -141,13 +153,13 @@ namespace KPatcher.UI.Views
                 _currentFilePath = file.Path.LocalPath;
             }
 
-            var rte = RteDocumentConverter.FromFlowDocument(Editor.FlowDocument);
+            var rte = RteDocumentConverter.FromFlowDocument(_editor.FlowDocument);
             await File.WriteAllTextAsync(_currentFilePath, rte.ToJson());
             _isDirty = false;
             UpdateTitle();
         }
 
-        private void OnCloseEditor(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnCloseEditor(object sender, RoutedEventArgs e)
         {
             Close();
         }
@@ -209,29 +221,29 @@ namespace KPatcher.UI.Views
             UpdateTitle();
         }
 
-        private void OnBoldClicked(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnBoldClicked(object sender, RoutedEventArgs e)
         {
             ToggleFontWeight(FontWeight.Bold);
         }
 
-        private void OnItalicClicked(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnItalicClicked(object sender, RoutedEventArgs e)
         {
             ToggleFontStyle(FontStyle.Italic);
         }
 
-        private void OnUnderlineClicked(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnUnderlineClicked(object sender, RoutedEventArgs e)
         {
             ToggleTextDecoration(TextDecorationLocation.Underline);
         }
 
-        private void OnStrikeClicked(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void OnStrikeClicked(object sender, RoutedEventArgs e)
         {
             ToggleTextDecoration(TextDecorationLocation.Strikethrough);
         }
 
         private void ToggleFontWeight(FontWeight weight)
         {
-            var selection = Editor.FlowDocument.Selection;
+            var selection = _editor.FlowDocument.Selection;
             var current = selection.GetFormatting(AvaloniaTextElement.FontWeightProperty) as FontWeight? ?? FontWeight.Normal;
             var newValue = current == weight ? FontWeight.Normal : weight;
             selection.ApplyFormatting(AvaloniaTextElement.FontWeightProperty, newValue);
@@ -240,7 +252,7 @@ namespace KPatcher.UI.Views
 
         private void ToggleFontStyle(FontStyle style)
         {
-            var selection = Editor.FlowDocument.Selection;
+            var selection = _editor.FlowDocument.Selection;
             var current = selection.GetFormatting(AvaloniaTextElement.FontStyleProperty) as FontStyle? ?? FontStyle.Normal;
             var newValue = current == style ? FontStyle.Normal : style;
             selection.ApplyFormatting(AvaloniaTextElement.FontStyleProperty, newValue);
@@ -249,7 +261,7 @@ namespace KPatcher.UI.Views
 
         private void ToggleTextDecoration(TextDecorationLocation location)
         {
-            var selection = Editor.FlowDocument.Selection;
+            var selection = _editor.FlowDocument.Selection;
             // Try to get TextDecorationsProperty via reflection since it may not be directly accessible
             Avalonia.AvaloniaProperty textDecorationsProp = null;
             try
@@ -295,47 +307,47 @@ namespace KPatcher.UI.Views
         private void OnFontSizeChanged(object sender, SelectionChangedEventArgs e)
         {
             double size;
-            var item = FontSizeComboBox.SelectedItem as ComboBoxItem;
+            var item = _fontSizeComboBox.SelectedItem as ComboBoxItem;
             if (item != null && double.TryParse(item.Content?.ToString(), out size))
             {
-                Editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.FontSizeProperty, size);
+                _editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.FontSizeProperty, size);
                 MarkDirty();
             }
         }
 
         private void OnFontFamilyChanged(object sender, SelectionChangedEventArgs e)
         {
-            var item = FontFamilyComboBox.SelectedItem as ComboBoxItem;
+            var item = _fontFamilyComboBox.SelectedItem as ComboBoxItem;
             var familyName = item?.Content as string;
             if (item != null && familyName != null)
             {
-                Editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.FontFamilyProperty, new FontFamily(familyName));
+                _editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.FontFamilyProperty, new FontFamily(familyName));
                 MarkDirty();
             }
         }
 
         private void OnForegroundChanged(object sender, SelectionChangedEventArgs e)
         {
-            var item = ForegroundComboBox.SelectedItem as ComboBoxItem;
+            var item = _foregroundComboBox.SelectedItem as ComboBoxItem;
             var name = item?.Content as string;
             if (item != null && name != null)
             {
                 var brush = new SolidColorBrush(ColorFromName(name));
-                Editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.ForegroundProperty, brush);
+                _editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.ForegroundProperty, brush);
                 MarkDirty();
             }
         }
 
         private void OnBackgroundChanged(object sender, SelectionChangedEventArgs e)
         {
-            var item = BackgroundComboBox.SelectedItem as ComboBoxItem;
+            var item = _backgroundComboBox.SelectedItem as ComboBoxItem;
             var name = item?.Content as string;
             if (item != null && name != null)
             {
                 IBrush brush = name.Equals("Transparent", StringComparison.OrdinalIgnoreCase)
                     ? (IBrush)Brushes.Transparent
                     : new SolidColorBrush(ColorFromName(name));
-                Editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.BackgroundProperty, brush);
+                _editor.FlowDocument.Selection.ApplyFormatting(AvaloniaTextElement.BackgroundProperty, brush);
                 MarkDirty();
             }
         }
@@ -355,15 +367,15 @@ namespace KPatcher.UI.Views
             }
         }
 
-        private void OnAlignLeft(object sender, Avalonia.Interactivity.RoutedEventArgs e) { ApplyAlignment(TextAlignment.Left); }
+        private void OnAlignLeft(object sender, RoutedEventArgs e) { ApplyAlignment(TextAlignment.Left); }
 
-        private void OnAlignCenter(object sender, Avalonia.Interactivity.RoutedEventArgs e) { ApplyAlignment(TextAlignment.Center); }
+        private void OnAlignCenter(object sender, RoutedEventArgs e) { ApplyAlignment(TextAlignment.Center); }
 
-        private void OnAlignRight(object sender, Avalonia.Interactivity.RoutedEventArgs e) { ApplyAlignment(TextAlignment.Right); }
+        private void OnAlignRight(object sender, RoutedEventArgs e) { ApplyAlignment(TextAlignment.Right); }
 
         private void ApplyAlignment(TextAlignment alignment)
         {
-            foreach (var paragraph in Editor.FlowDocument.GetSelectedParagraphs)
+            foreach (var paragraph in _editor.FlowDocument.GetSelectedParagraphs)
             {
                 paragraph.TextAlignment = alignment;
             }
@@ -388,7 +400,7 @@ namespace KPatcher.UI.Views
                 var prop = textElementType.GetProperty("TextDecorationsProperty", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (prop != null)
                 {
-                    var textDecorationsProp = prop.GetValue(null) as Avalonia.AvaloniaProperty;
+                    var textDecorationsProp = prop.GetValue(null) as AvaloniaProperty;
                     if (textDecorationsProp != null)
                     {
                         decorations = range.GetFormatting(textDecorationsProp) as TextDecorationCollection;

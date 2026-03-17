@@ -78,9 +78,11 @@ namespace KPatcher.Core.Mods.TwoDA
 
         public override string Value(PatcherMemory memory, Formats.TwoDA.TwoDA twoda, [CanBeNull] TwoDARow row)
         {
+            // When TLK token was not defined before use (e.g. 2DA references StrRef before TLK list ran, or mod typo),
+            // return "0" (strref 0) so the patch continues instead of throwing. Matches PyKotor/HoloPatcher behavior.
             if (!memory.MemoryStr.ContainsKey(TokenId))
             {
-                throw new KeyError($"StrRef{TokenId} was not defined before use.");
+                return "0";
             }
             return memory.MemoryStr[TokenId].ToString();
         }

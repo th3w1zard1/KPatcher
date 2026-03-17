@@ -325,7 +325,7 @@ namespace KPatcher.Core.Tests.Patcher
             var mockCapsule = new Capsule(Path.Combine(_tempDirectory, "test.mod"), createIfNotExist: true);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempDirectory, existsAtOutput: true, capsule: mockCapsule);
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: mockCapsule);
 
             // Assert
             Assert.Null(result);
@@ -341,7 +341,7 @@ namespace KPatcher.Core.Tests.Patcher
             patch.SourceFolder = ".";
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempDirectory, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             Assert.Null(result);
@@ -358,7 +358,7 @@ namespace KPatcher.Core.Tests.Patcher
             var mockCapsule = new Capsule(Path.Combine(_tempDirectory, "test.mod"), createIfNotExist: true);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempDirectory, existsAtOutput: true, capsule: mockCapsule);
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: mockCapsule);
 
             // Assert
             Assert.Null(result);
@@ -373,7 +373,7 @@ namespace KPatcher.Core.Tests.Patcher
             TestPatcherModifications patch = CreatePatch("nonexistent.txt", false);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempDirectory, existsAtOutput: true, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: true, capsule: null);
 
             // Assert
             Assert.Null(result);
@@ -388,7 +388,7 @@ namespace KPatcher.Core.Tests.Patcher
             TestPatcherModifications patch = CreatePatch("nonexistent.txt", false);
 
             // Act
-            byte[] result = _installer.LookupResource(patch, _tempDirectory, existsAtOutput: false, capsule: null);
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
 
             // Assert
             Assert.Null(result);

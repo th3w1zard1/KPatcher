@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using AvRichTextBox;
 using KPatcher.UI.Rte;
@@ -16,18 +17,18 @@ namespace KPatcher.UI.Views
 
     public partial class MainWindow : Window
     {
-        private ScrollViewer _logScrollViewer;
+        private readonly ScrollViewer _logScrollViewer;
         private RichTextBox _rtfRichTextBox;
-        private Avalonia.Controls.TextBlock _logTextBlock;
+        private readonly TextBlock _logTextBlock;
 
         public MainWindow()
         {
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
 
             // Get reference to scroll viewer, RichTextBox, and LogTextBlock
             _logScrollViewer = this.FindControl<ScrollViewer>("LogScrollViewer");
             _rtfRichTextBox = this.FindControl<RichTextBox>("RtfRichTextBox");
-            _logTextBlock = this.FindControl<Avalonia.Controls.TextBlock>("LogTextBlock");
+            _logTextBlock = this.FindControl<TextBlock>("LogTextBlock");
 
             // Subscribe to data context changes to set up auto-scroll and log formatting
             DataContextChanged += OnDataContextChanged;
