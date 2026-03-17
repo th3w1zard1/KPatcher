@@ -42,10 +42,10 @@ $packageId = if ($xml -match '<id>([^<]+)</id>') { $matches[1] } else { "UNKNOWN
 $packageVersion = if ($xml -match '<version>([^<]+)</version>') { $matches[1] } else { "UNKNOWN" }
 
 Write-Host "  Package ID: $packageId" -ForegroundColor Cyan
-Write-Host "  Package Version: $packageVersion" -ForegroundColor $(if ($packageVersion -eq "2.0.0-alpha2") { "Green" } else { "Yellow" })
+Write-Host "  Package Version: $packageVersion" -ForegroundColor $(if ($packageVersion -eq "0.1.0a") { "Green" } else { "Yellow" })
 
-if ($packageVersion -ne "2.0.0-alpha2") {
-    Write-Host "  WARNING: Version mismatch! Expected 2.0.0-alpha2, got $packageVersion" -ForegroundColor Yellow
+if ($packageVersion -ne "0.1.0a") {
+    Write-Host "  WARNING: Version mismatch! Expected 0.1.0a, got $packageVersion" -ForegroundColor Yellow
     Write-Host "  The package will be pushed with version $packageVersion" -ForegroundColor Yellow
 }
 

@@ -13,8 +13,8 @@ To build NuGet packages for both projects:
 dotnet pack --configuration Release
 
 # Packages will be created in:
-# - src/KPatcher.Core/bin/Release/KPatcher.Core.2.0.0-alpha3.nupkg
-# - src/KPatcher.UI/bin/Release/KPatcher.UI.2.0.0-alpha3.nupkg
+# - src/KPatcher.Core/bin/Release/KPatcher.Core.0.1.0a.nupkg
+# - src/KPatcher.UI/bin/Release/KPatcher.UI.0.1.0a.nupkg
 ```
 
 ### Build Individual Packages
@@ -59,8 +59,8 @@ Or add to your `.csproj`:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="KPatcher.Core" Version="2.0.0-alpha3" />
-  <PackageReference Include="KPatcher.UI" Version="2.0.0-alpha3" />
+  <PackageReference Include="KPatcher.Core" Version="0.1.0a" />
+  <PackageReference Include="KPatcher.UI" Version="0.1.0a" />
 </ItemGroup>
 ```
 
@@ -133,7 +133,7 @@ dotnet nuget push src/KPatcher.Core/bin/Release/KPatcher.Core.*.snupkg --api-key
 Update the version in the `.csproj` files:
 
 ```xml
-<Version>2.0.0-alpha3</Version>
+<Version>0.1.0a</Version>
 ```
 
 Follow [Semantic Versioning](https://semver.org/):

@@ -28,12 +28,12 @@ namespace KPatcher.UI
     /// </summary>
     public static class Core
     {
-        public const string VersionLabel = "v2.0.0a1";
+        public const string VersionLabel = "v0.1.0a";
 
         /// <summary>
         /// Checks if the version string indicates an alpha/pre-release version.
         /// Matches .NET versioning schema: checks for 'a' followed by digits or 'alpha' (case-insensitive).
-        /// Examples: "2.0.0a1", "2.0.0-alpha1", "2.0.0-alpha.1", "v2.0.0a1"
+        /// Examples: "0.1.0a", "0.1.0a", "0.1.0a", "v0.1.0a"
         /// </summary>
         public static bool IsAlphaVersion(string version)
         {
@@ -52,7 +52,7 @@ namespace KPatcher.UI
             }
 
             // Check for 'a' followed by a digit (e.g., "a1", "a2", "a10")
-            // This matches patterns like "2.0.0a1" or "2.0.0-a1"
+            // This matches patterns like "0.1.0a" or "0.1.0a"
             for (int i = 0; i < normalizedVersion.Length - 1; i++)
             {
                 if ((normalizedVersion[i] == 'a' || normalizedVersion[i] == 'A') &&

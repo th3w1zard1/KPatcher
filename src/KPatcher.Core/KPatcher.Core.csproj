@@ -101,7 +101,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>KPatcher.Core</PackageId>
-    <Version>2.0.0-alpha3</Version>
+    <Version>0.1.0a</Version>
     <Authors>th3w1zard1</Authors>
     <Company>bolabaden</Company>
     <Product>KPatcher.Core</Product>

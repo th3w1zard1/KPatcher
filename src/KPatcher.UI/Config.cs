@@ -16,7 +16,7 @@ namespace KPatcher.UI
     {
         private static readonly Dictionary<string, object> LocalProgramInfo = new Dictionary<string, object>()
         {
-            ["currentVersion"] = "2.0.0a1",
+            ["currentVersion"] = "0.1.0a",
             ["kpatcherLatestVersion"] = "1.5.2",
             ["kpatcherLatestBetaVersion"] = "1.7.0b1",
             ["updateInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher.NET/contents/src/KPatcher/Config.cs",

@@ -2,7 +2,7 @@
 # Comprehensive logging and optimizations
 
 param(
-    [string]$HpVersion = "v2.0.0",
+    [string]$HpVersion = "v0.1.0a",
     [string]$ProjectFile = "src\KPatcher\KPatcher.csproj",
     [string]$PublishProfilesDir = "src\KPatcher\Properties\PublishProfiles",
     [string]$SevenZipPath = "C:\Program Files\7-Zip\7z.exe",

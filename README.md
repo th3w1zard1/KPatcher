@@ -138,9 +138,9 @@ Example consumption:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="KPatcher.Core" Version="2.0.0-alpha3" />
-  <PackageReference Include="KPatcher" Version="2.0.0-alpha3" />
-  <PackageReference Include="KPatcher.UI" Version="2.0.0-alpha3" />
+  <PackageReference Include="KPatcher.Core" Version="0.1.0a" />
+  <PackageReference Include="KPatcher" Version="0.1.0a" />
+  <PackageReference Include="KPatcher.UI" Version="0.1.0a" />
 </ItemGroup>
 ```
 

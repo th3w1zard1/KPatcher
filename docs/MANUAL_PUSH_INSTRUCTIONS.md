@@ -11,7 +11,7 @@ Get-ChildItem "src/KPatcher.Core/bin/Release" -Filter "*.nupkg"
 ## Step 2: Check Package Metadata Version
 
 ```powershell
-$pkg = "src/KPatcher.Core/bin/Release/KPatcher.Core.2.0.0-alpha1.nupkg"
+$pkg = "src/KPatcher.Core/bin/Release/KPatcher.Core.0.1.0a.nupkg"
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = [System.IO.Compression.ZipFile]::OpenRead($pkg)
 $nuspec = $zip.Entries | Where-Object { $_.FullName -like "*.nuspec" } | Select-Object -First 1
@@ -28,7 +28,7 @@ if ($xml -match '<version>([^<]+)</version>') { Write-Host "Package version: $($
 
 ```powershell
 $apiKey = "YOUR_NUGET_API_KEY_HERE"
-$pkg = "src/KPatcher.Core/bin/Release/KPatcher.Core.2.0.0-alpha1.nupkg"
+$pkg = "src/KPatcher.Core/bin/Release/KPatcher.Core.0.1.0a.nupkg"
 dotnet nuget push $pkg --api-key $apiKey --source https://api.nuget.org/v3/index.json --skip-duplicate
 ```
 
@@ -36,7 +36,7 @@ dotnet nuget push $pkg --api-key $apiKey --source https://api.nuget.org/v3/index
 
 After pushing, check: <https://www.nuget.org/packages/KPatcher.Core/>
 
-**Note:** The package filename shows `alpha1` but the actual version in the package metadata (from .nuspec) is what NuGet uses. If the metadata shows `2.0.0-alpha2`, that's the version that will be published.
+**Note:** The package filename shows `alpha1` but the actual version in the package metadata (from .nuspec) is what NuGet uses. If the metadata shows `0.1.0a`, that's the version that will be published.
 
 ## If Push Fails
 
