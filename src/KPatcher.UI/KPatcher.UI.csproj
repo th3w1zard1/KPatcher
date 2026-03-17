@@ -81,9 +81,9 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <!-- Single target framework for fastest Debug builds -->
       <TargetFrameworks>net9.0</TargetFrameworks>
-    <!-- Disable analyzers in Debug builds for faster compilation -->
+    <!-- Disable style analyzers in Debug; keep RunAnalyzersDuringBuild true so Avalonia source generator runs (required for InitializeComponent and x:Name) -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
-    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 

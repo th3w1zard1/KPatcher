@@ -115,6 +115,14 @@
     <ProjectReference Include="..\KPatcher.UI\KPatcher.UI.csproj" />
   </ItemGroup>
 
+  <!-- Don't build project refs in the main build; we build UI ourselves so Avalonia source generator runs (it fails when UI is built only as a dependency). -->
+  <PropertyGroup Condition="'$(DesignTimeBuild)' != 'true'">
+    <BuildProjectReferences>false</BuildProjectReferences>
+  </PropertyGroup>
+  <Target Name="BuildUILibraryFirst" BeforeTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="..\KPatcher.UI\KPatcher.UI.csproj" Targets="Build" Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)" />
+  </Target>
+
   <!-- Include RtfDomParserAv.dll (required for RTF loading) - obtained from AvRichTextBox repository -->
   <ItemGroup>
     <None Include="RtfDomParserAv.dll" Condition="Exists('RtfDomParserAv.dll')">
