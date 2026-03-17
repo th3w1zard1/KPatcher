@@ -138,6 +138,9 @@ namespace KPatcher.Core.KPatcher
         // Key: gff_filename (lowercase) -> list of Pending2DARowReference
         private readonly Dictionary<string, List<Pending2DARowReference>> _pending2DaRowReferences = new Dictionary<string, List<Pending2DARowReference>>();
 
+        // Vanilla 2DA row count per file (for AddRow -> GFF deferred linking). Key: 2da filename (lowercase).
+        private readonly Dictionary<string, int> _twodaVanillaRowCounts = new Dictionary<string, int>();
+
         /// <summary>
         /// Initialize incremental writer.
         /// Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:1217-1317
@@ -337,6 +340,17 @@ namespace KPatcher.Core.KPatcher
             {
                 string destPath = Path.Combine(_tslpatchdataPath, filename);
                 File.WriteAllBytes(destPath, sourceData);
+                try
+                {
+                    var reader = new TwoDABinaryReader(sourceData);
+                    Formats.TwoDA.TwoDA twoda = reader.Load();
+                    string filenameLower = filename.ToLowerInvariant();
+                    _twodaVanillaRowCounts[filenameLower] = twoda.GetHeight();
+                }
+                catch (Exception e)
+                {
+                    _logFunc?.Invoke($"[DEBUG] Could not parse 2DA for row count: {e.Message}");
+                }
             }
 
             // Add to install folders
@@ -1393,12 +1407,14 @@ namespace KPatcher.Core.KPatcher
                 return; // No AddColumn values to link
             }
 
-            // Scan all GFF modifications for matching field values
+            // Scan all GFF modifications for matching field values (collect replacements to avoid modifying list during enumeration)
+            var gffReplacements = new List<Tuple<ModificationsGFF, int, ModifyFieldGFF>>();
             int tokensCreated = 0;
             foreach (var modGff in AllModifications.Gff)
             {
-                foreach (var gffModifier in modGff.Modifiers)
+                for (int i = 0; i < modGff.Modifiers.Count; i++)
                 {
+                    var gffModifier = modGff.Modifiers[i];
                     if (!(gffModifier is ModifyFieldGFF modifyField))
                     {
                         continue;
@@ -1459,16 +1475,15 @@ namespace KPatcher.Core.KPatcher
                         _logFunc?.Invoke($"  [AddColumn Token] Reusing existing 2DAMEMORY{tokenIdToUse}={storeKey} for value '{fieldValueStr}'");
                     }
 
-                    // Replace GFF field value with token reference
-                    // Since Value is read-only, we need to create a new ModifyFieldGFF and replace it in the list
-                    int modifierIndex = modGff.Modifiers.IndexOf(modifyField);
-                    if (modifierIndex >= 0)
-                    {
-                        var newModifyField = new ModifyFieldGFF(modifyField.Path, new FieldValue2DAMemory(tokenIdToUse), modifyField.Identifier);
-                        modGff.Modifiers[modifierIndex] = newModifyField;
-                        _logFunc?.Invoke($"  [AddColumn Token] Replaced {modGff.SourceFile} {modifyField.Path} = {fieldValueStr} with 2DAMEMORY{tokenIdToUse}");
-                    }
+                    var newModifyField = new ModifyFieldGFF(modifyField.Path, new FieldValue2DAMemory(tokenIdToUse), modifyField.Identifier);
+                    gffReplacements.Add(Tuple.Create(modGff, i, newModifyField));
+                    _logFunc?.Invoke($"  [AddColumn Token] Replaced {modGff.SourceFile} {modifyField.Path} = {fieldValueStr} with 2DAMEMORY{tokenIdToUse}");
                 }
+            }
+
+            foreach (var t in gffReplacements)
+            {
+                t.Item1.Modifiers[t.Item2] = t.Item3;
             }
 
             if (tokensCreated > 0)
@@ -1478,12 +1493,121 @@ namespace KPatcher.Core.KPatcher
         }
 
         /// <summary>
+        /// Create 2DAMEMORY tokens for AddRow when GFF field values match the new row's index.
+        /// When a GFF field (e.g. Appearance_Type) is set to the same index as an added 2DA row,
+        /// we store 2DAMEMORY#=RowIndex in the AddRow section and replace the GFF field with 2DAMEMORY#.
+        /// </summary>
+        private void CreateAddRow2DAMemoryTokens()
+        {
+            var gffReplacements = new List<Tuple<ModificationsGFF, int, ModifyFieldGFF>>();
+            int tokensCreated = 0;
+            foreach (var mod2da in AllModifications.Twoda)
+            {
+                string filenameLower = mod2da.SourceFile.ToLowerInvariant();
+                if (!_twodaVanillaRowCounts.TryGetValue(filenameLower, out int vanillaRowCount))
+                {
+                    continue;
+                }
+
+                int addRowOrdinal = 0;
+                foreach (var modifier in mod2da.Modifiers)
+                {
+                    if (!(modifier is AddRow2DA addRow))
+                    {
+                        continue;
+                    }
+
+                    int rowIndex = vanillaRowCount + addRowOrdinal;
+                    addRowOrdinal++;
+
+                    foreach (var modGff in AllModifications.Gff)
+                    {
+                        for (int i = 0; i < modGff.Modifiers.Count; i++)
+                        {
+                            var gffModifier = modGff.Modifiers[i];
+                            if (!(gffModifier is ModifyFieldGFF modifyField))
+                            {
+                                continue;
+                            }
+                            if (!(modifyField.Value is FieldValueConstant fieldConstant))
+                            {
+                                continue;
+                            }
+
+                            int? fieldInt = TryConvertToInt(fieldConstant.Stored);
+                            if (!fieldInt.HasValue || fieldInt.Value != rowIndex)
+                            {
+                                continue;
+                            }
+
+                            int tokenIdToUse;
+                            int? existingToken = null;
+                            foreach (var kvp in addRow.Store2DA)
+                            {
+                                if (kvp.Value is RowValueRowIndex)
+                                {
+                                    existingToken = kvp.Key;
+                                    break;
+                                }
+                            }
+                            if (existingToken.HasValue)
+                            {
+                                tokenIdToUse = existingToken.Value;
+                                _logFunc?.Invoke($"  [AddRow Token] Reusing 2DAMEMORY{tokenIdToUse}=RowIndex for {modGff.SourceFile} {modifyField.Path} = {rowIndex}");
+                            }
+                            else
+                            {
+                                tokenIdToUse = Allocate2DaToken();
+                                addRow.Store2DA[tokenIdToUse] = new RowValueRowIndex();
+                                _logFunc?.Invoke($"  [AddRow Token] Created 2DAMEMORY{tokenIdToUse}=RowIndex and linked {modGff.SourceFile} {modifyField.Path} = {rowIndex} -> 2DAMEMORY{tokenIdToUse}");
+                                tokensCreated++;
+                            }
+
+                            var newModifyField = new ModifyFieldGFF(modifyField.Path, new FieldValue2DAMemory(tokenIdToUse), modifyField.Identifier);
+                            gffReplacements.Add(Tuple.Create(modGff, i, newModifyField));
+                        }
+                    }
+                }
+            }
+
+            foreach (var t in gffReplacements)
+            {
+                t.Item1.Modifiers[t.Item2] = t.Item3;
+            }
+
+            if (tokensCreated > 0)
+            {
+                _logFunc?.Invoke($"  Created {tokensCreated} AddRow 2DAMEMORY token(s) with GFF linking");
+            }
+        }
+
+        private static int? TryConvertToInt(object value)
+        {
+            if (value == null) return null;
+            if (value is int i) return i;
+            if (value is short s) return s;
+            if (value is byte b) return b;
+            if (value is long l) return (int)l;
+            if (value is string str && int.TryParse(str, out int parsed)) return parsed;
+            try
+            {
+                return Convert.ToInt32(value);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Replace cell values with 2DAMEMORY token references when values match stored tokens.
         /// Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:1782-1880
         /// </summary>
         private void ReplaceCellsWith2DAMemoryTokens()
         {
-            // First, handle AddColumn token linking (must happen before processing other modifiers)
+            // AddRow token linking: GFF field value matching new row index -> 2DAMEMORY#=RowIndex and field=2DAMEMORY#
+            CreateAddRow2DAMemoryTokens();
+            // AddColumn token linking (must happen before processing other modifiers)
             CreateAddColumn2DAMemoryTokens();
 
             // Track which tokens are available at each point (tokens that have been stored)
