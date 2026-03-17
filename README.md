@@ -138,9 +138,9 @@ Example consumption:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="KPatcher.Core" Version="0.1.0a" />
-  <PackageReference Include="KPatcher" Version="0.1.0a" />
-  <PackageReference Include="KPatcher.UI" Version="0.1.0a" />
+  <PackageReference Include="KPatcher.Core" Version="0.1.0" />
+  <PackageReference Include="KPatcher" Version="0.1.0" />
+  <PackageReference Include="KPatcher.UI" Version="0.1.0" />
 </ItemGroup>
 ```
 
@@ -183,8 +183,4 @@ This project uses GitHub Actions for continuous integration and automated releas
 
 ## License
 
-This project is licensed under the Business Source License 1.1 (BSL-1.1). See the [LICENSE](LICENSE) file for details.
-
-**Important**: The BSL is not an Open Source license. The Licensed Work will transition to the GNU General Public License v2.0 or later on 2029-12-31 (Change Date).
-
-**Production Use**: Use of this software in a production environment, to provide services to third parties, or to generate revenue requires explicit authorization from the Licensor (th3w1zard1).
+This project is licensed under the GNU Lesser General Public License, version 3 or any later version (LGPL-3.0-or-later). See the [LICENSE](LICENSE) file for details.

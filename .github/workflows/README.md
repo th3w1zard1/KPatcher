@@ -70,7 +70,7 @@ Configure these secrets in your repository settings:
 To manually trigger a release build:
 
 ```bash
-gh workflow run build-all-platforms.yml -f version=0.1.0a -f tag_name=v0.1.0a
+gh workflow run build-all-platforms.yml -f version=0.1.0 -f tag_name=v0.1.0
 ```
 
 ## Platform Support Matrix

@@ -2,7 +2,7 @@
 # Comprehensive logging and optimizations
 
 param(
-    [string]$KmsVersion = "v0.1.0a",
+    [string]$KmsVersion = "v0.1.0",
     [string]$ProjectFile = "KOTORModSync.GUI\KOTORModSync.csproj",
     [string]$SevenZipPath = "C:\Program Files\7-Zip\7z.exe",
     [string]$OutputDir = "dist",

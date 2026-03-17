@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
-    <Version>0.1.0a</Version>
+    <Version>0.1.0</Version>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -13,20 +13,22 @@
     <IsPackable>true</IsPackable>
     <PackageId>KPatcher.UI</PackageId>
     <Authors>th3w1zard1</Authors>
-    <Company>KPatcher.NET</Company>
+    <Company>OpenKotOR</Company>
     <Product>KPatcher.UI</Product>
     <Description>Avalonia UI components for KPatcher.NET, providing a graphical interface for installing and managing KOTOR mods.</Description>
     <PackageTags>kotor;tsl;patcher;mod;gui;avalonia;kpatcher;ui</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>BSL-1.1</PackageLicenseExpression>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- IDE fallback: set single TFM for language server when multi-target logic isn't evaluated -->
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
     <!-- Helper to append without duplicate semicolons -->
     <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">

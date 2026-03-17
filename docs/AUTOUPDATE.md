@@ -113,20 +113,20 @@ The generated appcast.xml follows this structure:
     <description>KPatcher update feed</description>
     <language>en</language>
     <item>
-      <title>Version 0.1.0a</title>
+      <title>Version 0.1.0</title>
       <pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate>
-      <sparkle:version>0.1.0a</sparkle:version>
-      <sparkle:shortVersionString>0.1.0a</sparkle:shortVersionString>
+      <sparkle:version>0.1.0</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>Windows 10</sparkle:minimumSystemVersion>
       <enclosure 
-        url="https://github.com/user/repo/releases/download/v0.1.0a/KPatcher-0.1.0a-win-x64.zip"
-        sparkle:version="0.1.0a"
-        sparkle:shortVersionString="0.1.0a"
+        url="https://github.com/user/repo/releases/download/v0.1.0/KPatcher-0.1.0-win-x64.zip"
+        sparkle:version="0.1.0"
+        sparkle:shortVersionString="0.1.0"
         sparkle:os="windows"
         sparkle:edSignature="signature_here"
         length="12345678"
         type="application/zip" />
-      <sparkle:releaseNotesLink>https://github.com/user/repo/releases/tag/v0.1.0a</sparkle:releaseNotesLink>
+      <sparkle:releaseNotesLink>https://github.com/user/repo/releases/tag/v0.1.0</sparkle:releaseNotesLink>
     </item>
   </channel>
 </rss>
@@ -225,7 +225,7 @@ This can be triggered from a menu item or button in the UI.
 ### Updates Not Detected
 
 1. **Check appcast URL**: Verify the URL is accessible
-2. **Verify version format**: Use semantic versioning (e.g., `0.1.0a`)
+2. **Verify version format**: Use semantic versioning (e.g., `0.1.0`)
 3. **Check signature**: Ensure appcast is properly signed
 4. **Review logs**: Check application logs for update check errors
 

@@ -89,7 +89,7 @@ namespace KPatcher
                         foreach (var folder in simplectoFolders)
                         {
                             // Search in lib folders
-                            var libDirs = Directory.GetDirectories(folder, "lib", SearchOption.AllDirectories);
+                            string[] libDirs = Directory.GetDirectories(folder, "lib", SearchOption.AllDirectories);
                             foreach (var libDir in libDirs)
                             {
                                 var candidatePath = Path.Combine(libDir, "RtfDomParserAv.dll");

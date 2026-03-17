@@ -37,7 +37,7 @@ if ($xml -match '<id>([^<]+)</id>') {
 
 if ($xml -match '<version>([^<]+)</version>') {
     $version = $matches[1]
-    Write-Host "Package Version: $version" -ForegroundColor $(if ($version -eq "0.1.0a") { "Green" } else { "Yellow" })
+    Write-Host "Package Version: $version" -ForegroundColor $(if ($version -eq "0.1.0") { "Green" } else { "Yellow" })
 } else {
     Write-Host "ERROR: Could not find version in package metadata" -ForegroundColor Red
     exit 1

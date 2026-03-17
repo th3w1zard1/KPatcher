@@ -161,7 +161,7 @@ Use these prefixes for automatic versioning:
 
 - `feat:` → Minor version (1.0.0 → 1.1.0)
 - `fix:` → Patch version (1.0.0 → 1.0.1)
-- `BREAKING CHANGE:` → Major version (1.0.0 → 0.1.0a)
+- `BREAKING CHANGE:` → Major version (1.0.0 → 0.1.0)
 
 Examples:
 
@@ -178,11 +178,11 @@ If you need to manually trigger a release:
 ```bash
 # Update version in csproj
 # Create and push tag
-git tag v0.1.0a
-git push origin v0.1.0a
+git tag v0.1.0
+git push origin v0.1.0
 
 # Trigger build
-gh workflow run build-all-platforms.yml -f version=0.1.0a -f tag_name=v0.1.0a
+gh workflow run build-all-platforms.yml -f version=0.1.0 -f tag_name=v0.1.0
 ```
 
 ## Troubleshooting

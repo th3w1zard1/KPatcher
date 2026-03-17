@@ -4,6 +4,9 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <Platforms>AnyCPU;x86;x64;arm64</Platforms>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <!-- IDE fallback: overridden by Debug/Release PropertyGroups during actual builds -->
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
+    <TargetFrameworks>net9.0</TargetFrameworks>
   </PropertyGroup>
 
   <!-- RuntimeIdentifiers: Forward-compatible dynamic assignment based on .NET version -->
@@ -101,7 +104,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <PackageId>KPatcher.Core</PackageId>
-    <Version>0.1.0a</Version>
+    <Version>0.1.0</Version>
     <Authors>th3w1zard1</Authors>
     <Company>bolabaden</Company>
     <Product>KPatcher.Core</Product>
@@ -113,7 +116,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>BSL-1.1</PackageLicenseExpression>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

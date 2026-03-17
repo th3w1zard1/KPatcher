@@ -138,18 +138,18 @@ The `release-please-config.json` is already configured. It will:
 
 1. **Update version** in `src/KPatcher/KPatcher.csproj`:
    ```xml
-   <Version>0.1.0a</Version>
+   <Version>0.1.0</Version>
    ```
 
 2. **Create and push tag**:
    ```bash
-   git tag v0.1.0a
-   git push origin v0.1.0a
+   git tag v0.1.0
+   git push origin v0.1.0
    ```
 
 3. **Trigger build workflow**:
    ```bash
-   gh workflow run build-all-platforms.yml -f version=0.1.0a -f tag_name=v0.1.0a
+   gh workflow run build-all-platforms.yml -f version=0.1.0 -f tag_name=v0.1.0
    ```
 
 4. **Create release manually** on GitHub with artifacts
@@ -160,7 +160,7 @@ Release Please uses conventional commits to determine version bumps:
 
 - `feat:` → Minor version bump (1.0.0 → 1.1.0)
 - `fix:` → Patch version bump (1.0.0 → 1.0.1)
-- `BREAKING CHANGE:` → Major version bump (1.0.0 → 0.1.0a)
+- `BREAKING CHANGE:` → Major version bump (1.0.0 → 0.1.0)
 
 Examples:
 ```bash
@@ -208,7 +208,7 @@ git commit -m "feat!: redesign UI"  # Breaking change
 ### Release Issues
 
 1. **Verify secrets**: Ensure NETSPARKLE_PRIVATE_KEY is set
-2. **Check tag format**: Tags must start with 'v' (e.g., v0.1.0a)
+2. **Check tag format**: Tags must start with 'v' (e.g., v0.1.0)
 3. **Verify artifacts**: Ensure all builds completed successfully
 
 ### Appcast Generation

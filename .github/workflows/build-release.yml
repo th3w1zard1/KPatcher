@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build (e.g., 0.1.0a)'
+        description: 'Version to build (e.g., 0.1.0)'
         required: true
         type: string
       tag_name:
-        description: 'Git tag name (optional, e.g., v0.1.0a)'
+        description: 'Git tag name (optional, e.g., v0.1.0)'
         required: false
         type: string
   push:
