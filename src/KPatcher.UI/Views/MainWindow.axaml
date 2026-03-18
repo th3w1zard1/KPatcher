@@ -184,17 +184,17 @@
                                      VerticalAlignment="Stretch"
                                      Margin="0"/>
 
-                    <!-- TextBlock for formatted logs with colors - matches Python's tkinter text tags -->
-                    <ScrollViewer x:Name="LogScrollViewer"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  VerticalScrollBarVisibility="Auto"
-                                  IsVisible="{Binding IsNotRtfContent}">
-                        <TextBlock x:Name="LogTextBlock"
-                                   TextWrapping="Wrap"
-                                   FontFamily="Helvetica, Arial, sans-serif"
-                                   FontSize="9"
-                                   Padding="5"/>
-                    </ScrollViewer>
+                    <!-- Read-only TextBox for log: selectable (copy, Ctrl+A), larger font -->
+                    <TextBox x:Name="LogTextBox"
+                             Text="{Binding LogText}"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Helvetica, Arial, sans-serif"
+                             FontSize="12"
+                             Padding="5"
+                             IsVisible="{Binding IsNotRtfContent}"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"/>
                 </Grid>
             </Border>
         </Grid>

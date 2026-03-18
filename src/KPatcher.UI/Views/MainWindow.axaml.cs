@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using AvRichTextBox;
@@ -17,18 +16,16 @@ namespace KPatcher.UI.Views
 
     public partial class MainWindow : Window
     {
-        private readonly ScrollViewer _logScrollViewer;
+        private readonly TextBox _logTextBox;
         private RichTextBox _rtfRichTextBox;
-        private readonly TextBlock _logTextBlock;
 
         public MainWindow()
         {
             AvaloniaXamlLoader.Load(this);
 
-            // Get reference to scroll viewer, RichTextBox, and LogTextBlock
-            _logScrollViewer = this.FindControl<ScrollViewer>("LogScrollViewer");
+            // Get reference to log TextBox and RichTextBox
+            _logTextBox = this.FindControl<TextBox>("LogTextBox");
             _rtfRichTextBox = this.FindControl<RichTextBox>("RtfRichTextBox");
-            _logTextBlock = this.FindControl<TextBlock>("LogTextBlock");
 
             // Subscribe to data context changes to set up auto-scroll and log formatting
             DataContextChanged += OnDataContextChanged;
@@ -102,11 +99,13 @@ namespace KPatcher.UI.Views
             Console.WriteLine($"[RTF] PropertyChanged: {e.PropertyName}");
             if (e.PropertyName == nameof(MainWindowViewModel.LogText))
             {
-                // Format and display log text with colors and proper font sizes - matches Python's set_text_font
+                // Log text is bound to TextBox; scroll to end so latest entry is visible
                 Dispatcher.UIThread.Post(() =>
                 {
-                    FormatLogText();
-                    _logScrollViewer?.ScrollToEnd();
+                    if (_logTextBox != null && _logTextBox.Text != null)
+                    {
+                        _logTextBox.CaretIndex = _logTextBox.Text.Length;
+                    }
                 }, DispatcherPriority.Background);
             }
             else if (e.PropertyName == nameof(MainWindowViewModel.RtfContent))
@@ -567,74 +566,6 @@ namespace KPatcher.UI.Views
                     viewModel.IsRtfContent = false;
                     viewModel.AddLogEntry("Failed to load RTF content. Please check the console for details.", KPatcher.Core.Logger.LogType.Error);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Formats log text with colors and font sizes matching Python's tkinter text tags exactly.
-        /// Matches Python's set_text_font and tag_configure behavior.
-        /// </summary>
-        private void FormatLogText()
-        {
-            if (_logTextBlock is null || !(DataContext is MainWindowViewModel viewModel))
-            {
-                return;
-            }
-
-            // Clear existing inlines
-            _logTextBlock.Inlines.Clear();
-
-            // Base font size: 9 (matching Python's font_obj.configure(size=9))
-            // Bold font size: 10 (matching Python's bold_font.configure(size=10, weight="bold"))
-            const int baseFontSize = 9;
-            const int boldFontSize = 10;
-
-            // Format each log entry with appropriate colors and font weights
-            // Python tag colors:
-            // DEBUG: #6495ED (Cornflower Blue)
-            // INFO: #000000 (Black)
-            // WARNING: #CC4E00 (Orange) with background #FFF3E0, bold font
-            // ERROR: #DC143C (Firebrick) with bold font
-            // CRITICAL: #FFFFFF (White) on background #8B0000 (Dark Red) with bold font
-
-            foreach (var entry in viewModel.GetLogEntries())
-            {
-                var run = new Run(entry.Message + Environment.NewLine);
-
-                switch (entry.TagName)
-                {
-                    case "DEBUG":
-                        run.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#6495ED"));
-                        run.FontSize = baseFontSize;
-                        break;
-                    case "INFO":
-                        run.Foreground = Avalonia.Media.Brushes.Black;
-                        run.FontSize = baseFontSize;
-                        break;
-                    case "WARNING":
-                        run.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#CC4E00"));
-                        run.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#FFF3E0"));
-                        run.FontWeight = Avalonia.Media.FontWeight.Bold;
-                        run.FontSize = boldFontSize;
-                        break;
-                    case "ERROR":
-                        run.Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#DC143C"));
-                        run.FontWeight = Avalonia.Media.FontWeight.Bold;
-                        run.FontSize = boldFontSize;
-                        break;
-                    case "CRITICAL":
-                        run.Foreground = Avalonia.Media.Brushes.White;
-                        run.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#8B0000"));
-                        run.FontWeight = Avalonia.Media.FontWeight.Bold;
-                        run.FontSize = boldFontSize;
-                        break;
-                    default:
-                        run.Foreground = Avalonia.Media.Brushes.Black;
-                        run.FontSize = baseFontSize;
-                        break;
-                }
-
-                _logTextBlock.Inlines.Add(run);
             }
         }
 

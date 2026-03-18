@@ -55,14 +55,16 @@ namespace KPatcher.Core.Mods.TwoDA
             Formats.TwoDA.TwoDA twoda = new TwoDABinaryReader(source).Load();
             Apply(twoda, memory, logger, game);
 
-            // Exceeding row count maximums will break the game. If over limit, skip applying (return original bytes).
-            if (HardcappedRowLimits.TryGetValue(SaveAs.ToLowerInvariant(), out int twodaRowLimit))
+            // Match PyKotor twoda.py Modifications2DA.apply(): if game.is_k2(): return before hardcap check.
+            // K1 enforces 256-row caps on placeables/upcrystals etc.; TSL/K2 does not (vanilla K2 placeables can exceed 256).
+            if (!game.IsK2() && HardcappedRowLimits.TryGetValue(SaveAs.ToLowerInvariant(), out int twodaRowLimit))
             {
                 int curRowCount = twoda.GetHeight();
                 if (curRowCount > twodaRowLimit)
                 {
-                    int rowsAdded = curRowCount - twodaRowLimit;
-                    logger.AddError($"{SaveAs} has a max row count of {twodaRowLimit}. Adding more will break the game. This mod attempted to add {rowsAdded} rows and have not been applied.");
+                    int rowsOverLimit = curRowCount - twodaRowLimit;
+                    logger.AddError(
+                        $"{SaveAs} has a max row count of {twodaRowLimit} on KOTOR 1. Result has {curRowCount} rows ({rowsOverLimit} over the limit); changes were not applied.");
                     return source;
                 }
             }

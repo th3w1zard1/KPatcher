@@ -494,6 +494,28 @@ namespace KPatcher.UI
         }
 
         /// <summary>
+        /// Returns all detected KOTOR installation paths (K1 + TSL), flattened and deduplicated.
+        /// Matches HoloPatcher behavior: same sources as find_kotor_paths_from_default() at UI init.
+        /// </summary>
+        public static List<string> GetDetectedKotorPaths()
+        {
+            Dictionary<Game, List<string>> byGame = FindKotorPathsFromDefault();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var result = new List<string>();
+            foreach (List<string> paths in byGame.Values)
+            {
+                foreach (string path in paths)
+                {
+                    if (!string.IsNullOrEmpty(path) && seen.Add(path))
+                    {
+                        result.Add(path);
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Gets default KOTOR installation paths for the current platform.
         /// </summary>
         private static Dictionary<Game, List<string>> GetDefaultPaths()

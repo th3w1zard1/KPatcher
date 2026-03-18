@@ -1186,26 +1186,12 @@ namespace KPatcher.UI.ViewModels
 
         private void DetectGamePaths()
         {
-            // Common installation paths for KOTOR
-            string[] commonPaths = new[]
+            // Same as HoloPatcher: registry + default paths (K1 + TSL), flattened
+            List<string> detected = Core.GetDetectedKotorPaths();
+            GamePaths.Clear();
+            foreach (string path in detected)
             {
-            @"C:\Program Files (x86)\Steam\steamapps\common\Knights of the Old Republic II",
-            @"C:\Program Files (x86)\Steam\steamapps\common\swkotor",
-            @"C:\Program Files\Steam\steamapps\common\Knights of the Old Republic II",
-            @"C:\Program Files\Steam\steamapps\common\swkotor",
-            @"C:\GOG Games\Star Wars - KotOR",
-            @"C:\GOG Games\Star Wars - KotOR2",
-        };
-
-            foreach (string path in commonPaths)
-            {
-                if (Directory.Exists(path) && Installation.DetermineGame(path) != null)
-                {
-                    if (!GamePaths.Contains(path))
-                    {
-                        GamePaths.Add(path);
-                    }
-                }
+                GamePaths.Add(path);
             }
 
             if (GamePaths.Count > 0)

@@ -761,14 +761,23 @@ namespace KPatcher.Core.Patcher
         {
             try
             {
+                string sourceFolder = patch.SourceFolder ?? "";
+                string sourceFile = patch.SourceFile ?? "";
                 // Python logic: if patch.replace_file or not exists_at_output_location:
                 //   return self.load_resource_file(self.mod_path / patch.sourcefolder / patch.sourcefile)
                 if (patch.ReplaceFile || !existsAtOutput)
                 {
+                    if (string.IsNullOrWhiteSpace(sourceFile))
+                    {
+                        log.AddError(
+                            $"Could not load source file to {patch.Action.ToLower().Trim()}: SourceFile is missing or empty (fix or remove this InstallList / patch row in changes.ini).");
+                        return null;
+                    }
+
                     // Path resolution: mod_path / sourcefolder / sourcefile
                     // mod_path is typically the tslpatchdata folder (parent of changes.ini).
                     // If sourcefolder = ".", this resolves to mod_path itself (tslpatchdata folder).
-                    string sourcePath = Path.Combine(modPath, patch.SourceFolder, patch.SourceFile);
+                    string sourcePath = Path.Combine(modPath, sourceFolder, sourceFile);
                     return LoadResourceFile(sourcePath);
                 }
 
@@ -776,8 +785,22 @@ namespace KPatcher.Core.Patcher
                 //   return self.load_resource_file(output_container_path / patch.saveas)
                 if (capsule is null)
                 {
+                    if (string.IsNullOrWhiteSpace(saveAs))
+                    {
+                        log.AddError(
+                            $"Could not load file to {patch.Action.ToLower().Trim()}: SaveAs is missing or empty.");
+                        return null;
+                    }
+
                     string targetPath = Path.Combine(outputContainerPath, saveAs);
                     return LoadResourceFile(targetPath);
+                }
+
+                if (string.IsNullOrWhiteSpace(saveAs))
+                {
+                    log.AddError(
+                        $"Could not load resource from capsule to {patch.Action.ToLower().Trim()}: SaveAs is missing or empty.");
+                    return null;
                 }
 
                 // Python: return capsule.resource(*ResourceIdentifier.from_path(patch.saveas).unpack())
@@ -805,6 +828,12 @@ namespace KPatcher.Core.Patcher
             string actionBase = patch.Action.Length > 0 ? patch.Action.Substring(0, patch.Action.Length - 1) : patch.Action;
 
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
+            if (string.IsNullOrWhiteSpace(patch.SourceFile) && string.IsNullOrWhiteSpace(patch.SaveAs))
+            {
+                log.AddError(
+                    $"Skipping invalid {patch.Action.Trim()} entry: SourceFile and SaveAs are empty (often a blank line or bad key in changes.ini InstallList).");
+                return false;
+            }
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
