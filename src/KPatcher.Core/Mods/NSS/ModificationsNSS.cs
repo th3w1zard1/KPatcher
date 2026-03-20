@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,6 +11,7 @@ using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.NSS
 {
@@ -58,7 +60,7 @@ namespace KPatcher.Core.Mods.NSS
         {
             if (source is null)
             {
-                logger.AddError("Invalid nss source provided to ModificationsNSS.PatchResource()");
+                logger.AddError(PatcherResources.InvalidNssSourceProvided);
                 return true;
             }
 
@@ -98,7 +100,7 @@ namespace KPatcher.Core.Mods.NSS
                 }
                 catch (Exception e)
                 {
-                    logger.AddError($"Built-in compilation failed for '{SourceFile}': {e.Message}");
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
                 }
 
                 // If built-in failed and on Windows, try external compiler
@@ -111,7 +113,7 @@ namespace KPatcher.Core.Mods.NSS
                     }
                     else
                     {
-                        logger.AddError($"An error occurred while compiling '{SourceFile}' with the built-in compiler, trying external compiler...");
+                        logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ErrorOccurredWhileCompilingTryingExternalFormat, SourceFile));
                     }
 
                     if (nwnnsscompExists)
@@ -151,7 +153,7 @@ namespace KPatcher.Core.Mods.NSS
                 }
                 else if (!isWindows)
                 {
-                    logger.AddNote($"Patching from a unix operating system, compiling '{SourceFile}' using the built-in compilers...");
+                    logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.PatchingFromUnixCompilingFormat, SourceFile));
                 }
 
                 // Return compiled bytes if built-in succeeded, otherwise return source
@@ -160,7 +162,7 @@ namespace KPatcher.Core.Mods.NSS
                     return compiledBytes;
                 }
 
-                logger.AddWarning($"Could not compile '{SourceFile}'. Returning uncompiled NSS source.");
+                logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCompileReturningUncompiledFormat, SourceFile));
                 return Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
             }
 
@@ -181,7 +183,7 @@ namespace KPatcher.Core.Mods.NSS
             }
             else
             {
-                logger.AddError($"Expected MutableString for ModificationsNSS, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedMutableStringButGotFormat, mutableData.GetType().Name));
             }
         }
 

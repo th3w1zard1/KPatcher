@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using KPatcher.UI.Resources;
 
 namespace KPatcher.UI.Update
 {
@@ -57,7 +58,7 @@ namespace KPatcher.UI.Update
                 mirrors.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"No direct download links were provided for {platformKey}/{archKey}.");
+                    string.Format(CultureInfo.CurrentCulture, UIResources.NoDirectDownloadLinksForFormat, platformKey, archKey));
             }
 
             return mirrors;
@@ -119,7 +120,7 @@ namespace KPatcher.UI.Update
                 return "Darwin";
             }
 
-            throw new PlatformNotSupportedException("Unsupported operating system for automatic updates.");
+            throw new PlatformNotSupportedException(UIResources.UnsupportedOsForAutomaticUpdates);
         }
 
         private static string DetectArchitectureKey()
@@ -146,7 +147,7 @@ namespace KPatcher.UI.Update
         {
             if (raw is null || raw.Count == 0)
             {
-                throw new InvalidOperationException("Remote update payload was empty.");
+                throw new InvalidOperationException(UIResources.RemoteUpdatePayloadEmpty);
             }
 
             // If the dictionary already contains the typed payload we can shortcut.
@@ -161,7 +162,7 @@ namespace KPatcher.UI.Update
             var info = JsonSerializer.Deserialize<RemoteUpdateInfo>(json, SerializerOptions);
             if (info is null)
             {
-                throw new InvalidOperationException("Failed to parse remote update payload.");
+                throw new InvalidOperationException(UIResources.FailedToParseRemoteUpdatePayload);
             }
 
             return info;

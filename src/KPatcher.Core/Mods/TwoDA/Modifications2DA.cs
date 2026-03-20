@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.TwoDA
 {
@@ -85,7 +87,7 @@ namespace KPatcher.Core.Mods.TwoDA
         {
             if (!(mutableData is Formats.TwoDA.TwoDA twoda))
             {
-                logger.AddError($"Expected TwoDA object for Modifications2DA, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedTwoDAObjectButGotFormat, mutableData.GetType().Name));
                 return;
             }
 

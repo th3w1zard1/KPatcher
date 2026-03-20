@@ -119,7 +119,7 @@ namespace KPatcher.UI.Update
 
                                 if (contentLength.HasValue && downloaded < contentLength.Value)
                                 {
-                                    throw new IOException("The download ended prematurely.");
+                                    throw new IOException(UIResources.DownloadEndedPrematurely);
                                 }
 
                                 progress.ReportStatus(UIResources.DownloadComplete);
@@ -178,7 +178,7 @@ namespace KPatcher.UI.Update
             }
             else
             {
-                throw new NotSupportedException($"Unsupported archive format: {Path.GetExtension(archivePath)}");
+                throw new NotSupportedException(string.Format(CultureInfo.CurrentCulture, UIResources.UnsupportedArchiveFormat, Path.GetExtension(archivePath)));
             }
 
             progress.ReportStatus(UIResources.ArchiveExtracted);
@@ -225,7 +225,7 @@ namespace KPatcher.UI.Update
             System.Formats.Tar.TarFile.ExtractToDirectory(tarPath, outputDirectory, overwriteFiles: true);
 #else
             // Fallback for older frameworks - just throw not supported for tar.gz
-            throw new NotSupportedException("tar.gz extraction requires .NET 8 or greater");
+            throw new NotSupportedException(UIResources.TarGzRequiresNet8OrGreater);
 #endif
         }
 
@@ -252,14 +252,14 @@ namespace KPatcher.UI.Update
 #if NET8_0_OR_GREATER
             string currentProcessPath = Environment.ProcessPath
                 ?? Process.GetCurrentProcess().MainModule?.FileName
-                ?? throw new InvalidOperationException("Unable to locate current process path.");
+                ?? throw new InvalidOperationException(UIResources.UnableToLocateCurrentProcessPath);
 #else
             string currentProcessPath = Process.GetCurrentProcess().MainModule?.FileName
-                ?? throw new InvalidOperationException("Unable to locate current process path.");
+                ?? throw new InvalidOperationException(UIResources.UnableToLocateCurrentProcessPath);
 #endif
 
             string targetDirectory = Path.GetDirectoryName(currentProcessPath)
-                ?? throw new InvalidOperationException("Unable to determine application directory.");
+                ?? throw new InvalidOperationException(UIResources.UnableToDetermineApplicationDirectory);
 
             string scriptDirectory = Path.Combine(Path.GetTempPath(), "kpatcher_update_scripts");
             Directory.CreateDirectory(scriptDirectory);

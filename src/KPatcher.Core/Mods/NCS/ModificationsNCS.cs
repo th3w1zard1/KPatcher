@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.NCS
 {
@@ -268,7 +270,7 @@ namespace KPatcher.Core.Mods.NCS
             }
             else
             {
-                logger.AddError($"Expected byte[] for ModificationsNCS, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedByteArrayButGotFormat, mutableData.GetType().Name));
             }
         }
 

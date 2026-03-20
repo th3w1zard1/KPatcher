@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.SSF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.SSF
 {
@@ -78,7 +80,7 @@ namespace KPatcher.Core.Mods.SSF
             }
             else
             {
-                logger.AddError($"Expected SSF object for ModificationsSSF, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedSsfObjectButGotFormat, mutableData.GetType().Name));
             }
         }
     }

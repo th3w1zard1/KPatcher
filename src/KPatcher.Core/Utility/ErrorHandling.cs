@@ -61,7 +61,7 @@ namespace KPatcher.Core.Utility
             // Handle TimeoutError/TimeoutException
             if (e is TimeoutException)
             {
-                return (errorName, $"Operation timed out: {e.Message}");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.OperationTimedOut, e.Message));
             }
 
             // Handle OperationCanceledException

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,6 +9,7 @@ using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Logger;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -67,7 +69,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
             catch (Exception managedEx)
             {
-                _logger.AddWarning($"Managed compilation failed for '{filename}': {managedEx.Message}");
+                _logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.ManagedCompilationFailedFormat, filename, managedEx.Message));
             }
 
             if (isWindows && nwnnsscompExists)
@@ -77,13 +79,13 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                     byte[] compiledBytes = CompileWithExternal(tempNssPath, filename, game);
                     if (compiledBytes != null)
                     {
-                        _logger.AddNote($"Compiled '{filename}' using external nwnnsscomp.exe (managed compile failed).");
+                        _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.CompiledUsingExternalNwnnsscompFormat, filename));
                         return compiledBytes;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.AddError($"External nwnnsscomp also failed for '{filename}': {ex.Message}");
+                    _logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExternalNwnnsscompAlsoFailedFormat, filename, ex.Message));
                 }
             }
             else if (!nwnnsscompExists && isWindows)
@@ -91,7 +93,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 _logger.AddVerbose("nwnnsscomp.exe not present; no external fallback.");
             }
 
-            _logger.AddWarning($"Could not compile '{filename}'. Returning uncompiled NSS source.");
+            _logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCompileReturningUncompiledFormat, filename));
             return Encoding.GetEncoding("windows-1252").GetBytes(nssSource);
         }
 
@@ -217,7 +219,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
 
                 // If not the expected version, log a warning but still return true (let it work)
-                _logger.AddWarning($"The nwnnsscomp.exe is not the expected KPatcher version (detected: {productName ?? "UNKNOWN"}).");
+                _logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.NwnnsscompNotExpectedVersionFormat, productName ?? "UNKNOWN"));
                 return true;
             }
             catch

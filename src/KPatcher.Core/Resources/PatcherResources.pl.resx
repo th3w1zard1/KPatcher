@@ -8,6 +8,7 @@
   <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve"><value>Instrukcja ACTION wymaga co najmniej 2 argumentów</value></data>
   <data name="ApplyPatchFromIniSection" xml:space="preserve"><value>Zastosuj poprawkę z sekcji INI [{0}] FieldType: {1} Ścieżka GFF: '{2}'</value></data>
   <data name="BackingUpFile" xml:space="preserve"><value>Tworzenie kopii zapasowej '{0}'...</value></data>
+  <data name="BuiltInCompilationFailedFormat" xml:space="preserve"><value>Wbudowana kompilacja nie powiodła się dla '{0}': {1}</value></data>
   <data name="CannotAdvanceSameInstruction" xml:space="preserve"><value>Nie można przejść dalej: następna instrukcja w indeksie {0} jest taka sama jak bieżąca w indeksie {1}</value></data>
   <data name="CapsuleNotFoundOrPermission" xml:space="preserve"><value>Kapsuła '{0}' nie istniała lub wystąpiły problemy z uprawnieniami podczas próby {1} '{2}'. Pomijanie pliku...</value></data>
   <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve"><value>Kapsuła '{0}' nie istniała podczas próby {1} '{2}'. Pomijanie pliku...</value></data>
@@ -34,7 +35,9 @@
   <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Ostrzeżenie] Sterownik wyświetlacza niedostępny, nie można uruchomić w trybie GUI: {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Ostrzeżenie] Odinstalowanie zakończone z ostrzeżeniami</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Sekcja [CompileList] brakuje w ini.</value></data>
+  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve"><value>Skompilowano '{0}' używając zewnętrznego nwnnsscomp.exe (kompilacja zarządzana nie powiodła się).</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>ConfigReader zakończył ładowanie INI</value></data>
+  <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve"><value>Nie można skompilować '{0}'. Zwracanie nieskompilowanego źródła NSS.</value></data>
   <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>Nie można utworzyć folderu kopii zapasowej: {0}</value></data>
   <data name="CouldNotCreateInstallLogFile" xml:space="preserve"><value>Nie można utworzyć pliku dziennika instalacji: {0}</value></data>
   <data name="CouldNotDetermineEncoding" xml:space="preserve"><value>Nie można określić kodowania '{0}'. Próba wymuszonego ładowania...</value></data>
@@ -54,9 +57,19 @@
   <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>Wystąpił błąd podczas dodawania nowej linii 2DA w modyfikatorze „{0}”!</value></data>
   <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Błąd wyszukiwania etykiety kolumny dla indeksu kolumny {0}.</value></data>
   <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Błąd wyszukiwania etykiety wiersza dla indeksu wiersza {0}.</value></data>
+  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve"><value>Wystąpił błąd podczas kompilacji '{0}' z wbudowanym kompilatorem, próba zewnętrznego kompilatora...</value></data>
   <data name="ErrorParsingIniFile" xml:space="preserve"><value>Błąd parsowania pliku INI: {0}</value></data>
   <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Informacje:</value></data>
+  <data name="ExpectedByteArrayButGotFormat" xml:space="preserve"><value>Oczekiwano byte[] dla ModificationsNCS, ale otrzymano {0}</value></data>
+  <data name="ExpectedGffObjectButGotFormat" xml:space="preserve"><value>Oczekiwano obiektu GFF dla ModificationsGFF, ale otrzymano {0}</value></data>
   <data name="ExpectedGffStructButGot" xml:space="preserve"><value>Oczekiwano GFFStruct, ale otrzymano {0}</value></data>
+  <data name="ExpectedLocalizedStringButGotFormat" xml:space="preserve"><value>Oczekiwano LocalizedString, ale otrzymano {0}</value></data>
+  <data name="ExpectedLocalizedStringDeltaButGotFormat" xml:space="preserve"><value>Oczekiwano LocalizedStringDelta dla istniejącego pola, ale otrzymano {0}</value></data>
+  <data name="ExpectedMutableStringButGotFormat" xml:space="preserve"><value>Oczekiwano MutableString dla ModificationsNSS, ale otrzymano {0}</value></data>
+  <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve"><value>Oczekiwano obiektu SSF dla ModificationsSSF, ale otrzymano {0}</value></data>
+  <data name="ExpectedTlkObjectButGotFormat" xml:space="preserve"><value>Oczekiwano obiektu TLK dla ModificationsTLK, ale otrzymano {0}</value></data>
+  <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve"><value>Oczekiwano obiektu TwoDA dla Modifications2DA, ale otrzymano {0}</value></data>
+  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve"><value>Zewnętrzny nwnnsscomp również nie powiódł się dla '{0}': {1}</value></data>
   <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Niepowodzenie dodania nowego struct do listy '{0}' w [{1}]. Powód: Oczekiwano GFFStruct, ale otrzymano '{2}' ({3}) typu {4} Pomijanie...</value></data>
   <data name="FailedToBuildModule" xml:space="preserve"><value>Niepowodzenie budowania modułu '{0}': {1}</value></data>
   <data name="FailedToCopyLine2DA" xml:space="preserve"><value>Błąd! Nie udało się skopiować linii w 2DA! Pomijanie...</value></data>
@@ -72,6 +85,7 @@
   <data name="GameDetected" xml:space="preserve"><value>Wykryta gra: {0}</value></data>
   <data name="GamePath" xml:space="preserve"><value>Ścieżka gry: {0}</value></data>
   <data name="GffListSectionMissing" xml:space="preserve"><value>Sekcja [GFFList] brakuje w ini.</value></data>
+  <data name="GffPathNotFoundDefaultingToRootFormat" xml:space="preserve"><value>Ścieżka GFF '{0}' nie znaleziona, domyślnie używana jest struktura główna gff.</value></data>
   <data name="HackListSectionMissing" xml:space="preserve"><value>Sekcja [HACKList] brakuje w ini.</value></data>
   <data name="IOError" xml:space="preserve"><value>Błąd we/wy: {0}</value></data>
   <data name="InfiniteLoopDetectedExecuted" xml:space="preserve"><value>Wykryto nieskończoną pętlę: instrukcja w indeksie {0} ({1}) została wykonana {2} razy</value></data>
@@ -94,6 +108,7 @@
   <data name="Invalid2DAMemoryToken" xml:space="preserve"><value>Nieprawidłowy token 2DAMEMORY! Indeksy tokenów zaczynają się od 1.</value></data>
   <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve"><value>Nieprawidłowy folder gry, nie znaleziono pliku dialog.tlk! Wybierz właściwy katalog gry.</value></data>
   <data name="InvalidKotorDirectory" xml:space="preserve"><value>Wybrany katalog KOTOR nie jest prawidłową instalacją - nie można zainicjować ModInstaller.</value></data>
+  <data name="InvalidNssSourceProvided" xml:space="preserve"><value>Nieprawidłowe źródło nss przekazane do ModificationsNSS.PatchResource()</value></data>
   <data name="JumpInstructionNoTarget" xml:space="preserve"><value>Instrukcja skoku {0} w indeksie {1} nie ma celu skoku</value></data>
   <data name="JumpTargetNotFound" xml:space="preserve"><value>Cel skoku dla instrukcji {0} nie znaleziony w tabeli instrukcji</value></data>
   <data name="LanguageIntegerNotKnown" xml:space="preserve"><value>Nieznany identyfikator języka: {0}</value></data>
@@ -106,6 +121,7 @@
   <data name="LoadingSsfListPatches" xml:space="preserve"><value>Ładowanie poprawek [SSFList] z ini...</value></data>
   <data name="LoadingTlkListPatches" xml:space="preserve"><value>Ładowanie poprawek [TLKList] z ini...</value></data>
   <data name="LoadingTwoDAListPatches" xml:space="preserve"><value>Ładowanie poprawek [2DAList] z ini...</value></data>
+  <data name="ManagedCompilationFailedFormat" xml:space="preserve"><value>Kompilacja zarządzana nie powiodła się dla '{0}': {1}</value></data>
   <data name="ModOvershadowedByExisting" xml:space="preserve"><value>Ten mod zamierza zainstalować '{0}' w '{1}', ale jest przesłonięty przez istniejący '{2}'!</value></data>
   <data name="ModPath" xml:space="preserve"><value>Ścieżka moda: {0}</value></data>
   <data name="ModuleDidNotExistBuilding" xml:space="preserve"><value>WAŻNE! Moduł w ścieżce '{0}' nie istniał, budowanie jednego w folderze 'Modules' natychmiast z następujących plików:</value></data>
@@ -117,6 +133,7 @@
   <data name="NoTLKFileLoaded" xml:space="preserve"><value>Nie załadowano pliku TLK. Nie można kontynuować.</value></data>
   <data name="NoValidGameFolderSelected" xml:space="preserve"><value>Błąd! Nie wybrano prawidłowego folderu gry! Instalacja przerwana.</value></data>
   <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>Nie przypisano wartości do kolumny {0} dla nowej linii 2DA w modyfikatorze „{1}”...</value></data>
+  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve"><value>nwnnsscomp.exe nie jest oczekiwaną wersją KPatcher (wykryto: {0}).</value></data>
   <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>Nie znaleziono nwnnsscomp.exe w folderze TSLPatchData! Nie można skompilować skryptu.</value></data>
   <data name="OperationTimedOut" xml:space="preserve"><value>Operacja przekroczyła limit czasu: {0}</value></data>
   <data name="OperationWasCancelled" xml:space="preserve"><value>Operacja została anulowana: {0}</value></data>
@@ -127,8 +144,11 @@
   <data name="PatcherFinishedWithErrors" xml:space="preserve"><value>Patcher zakończył pracę, ale napotkano {0} błędów! Mod prawdopodobnie nie został poprawnie zainstalowany.</value></data>
   <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve"><value>Patcher zakończył pracę, ale napotkano {0} błędów i {1} ostrzeżeń! Mod prawdopodobnie nie został poprawnie zainstalowany.</value></data>
   <data name="PatcherFinishedWithWarnings" xml:space="preserve"><value>Patcher zakończył pracę, ale napotkano {0} ostrzeżeń! Mod może działać nieprawidłowo.</value></data>
+  <data name="PatchingFromUnixCompilingFormat" xml:space="preserve"><value>Stosowanie poprawek z systemu operacyjnego unix, kompilowanie '{0}' przy użyciu wbudowanych kompilatorów...</value></data>
   <data name="PatchingRimFileWarning" xml:space="preserve"><value>Ten mod stosuje poprawkę do pliku RIM Modules/{0}!
 Stosowanie poprawek do RIM jest wysoce niezgodne, niezalecane i powszechnie uważane za złą praktykę. Proszę poprosić dewelopera moda o naprawę tego.</value></data>
+  <data name="PathDoesNotExist" xml:space="preserve"><value>nie istnieje!</value></data>
+  <data name="PathIsNotGffStructInstance" xml:space="preserve"><value>nie jest instancją GFFStruct.</value></data>
   <data name="PathPointsToExpectedGffList" xml:space="preserve"><value>Ścieżka wskazuje na '{0}', oczekiwano GFFList.</value></data>
   <data name="PermissionDenied" xml:space="preserve"><value>Odmowa dostępu: {0}</value></data>
   <data name="Processing2DAPatches" xml:space="preserve"><value>Przetwarzanie poprawek 2DA...</value></data>
@@ -168,6 +188,8 @@ Stosowanie poprawek do RIM jest wysoce niezgodne, niezalecane i powszechnie uwa�
   <data name="UnableToLoad2DAFileSkipping" xml:space="preserve"><value>Nie można załadować pliku 2DA {0}! Pomijanie...</value></data>
   <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve"><value>Nie można załadować tekstu instrukcji! Folder „tslpatchdata” musi zawierać plik „info.rtf”.</value></data>
   <data name="UnableToLocateTLKFileToPatch" xml:space="preserve"><value>Błąd! Nie można zlokalizować pliku TLK do patchowania, plik „{0}” nie został znaleziony!</value></data>
+  <data name="UnableToModifyGffFieldFormat" xml:space="preserve"><value>Nie można zmodyfikować pola GFF '{0}'. Ścieżka '{1}' {2}</value></data>
+  <data name="UnableToUseFieldPathFrom2DAMemoryFormat" xml:space="preserve"><value>Nie można użyć !FieldPath z 2DAMEMORY. Pole nadrzędne w '{0}' {1}</value></data>
   <data name="UnexpectedModifierType" xml:space="preserve"><value>Nieoczekiwany typ modyfikatora: {0}: {1}</value></data>
   <data name="UnknownException" xml:space="preserve"><value>Nieznany wyjątek</value></data>
   <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve"><value>{0} użyto jako indeks przy zmianie linii w modyfikatorze „{1}”, ale plik 2DA nie ma etykiety dla tego indeksu.</value></data>

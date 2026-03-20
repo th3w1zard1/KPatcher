@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
@@ -7,6 +8,7 @@ using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.GFF
 {
@@ -349,7 +351,7 @@ namespace KPatcher.Core.Mods.GFF
         {
             if (!(rootContainer is GFFStruct rootStruct))
             {
-                logger.AddError($"Expected GFFStruct but got {rootContainer.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedGffStructButGot, rootContainer.GetType().Name));
                 return;
             }
 
@@ -375,7 +377,7 @@ namespace KPatcher.Core.Mods.GFF
             // if navigated_container is root_container:
             if (navigatedContainer == rootStruct)
             {
-                logger.AddNote($"GFF path '{workingPath}' not found, defaulting to the gff root struct.");
+                logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.GffPathNotFoundDefaultingToRootFormat, workingPath));
             }
 
             // if isinstance(navigated_container, GFFList):
@@ -387,10 +389,10 @@ namespace KPatcher.Core.Mods.GFF
             {
                 // reason: str = "Does not exist" if navigated_container is None else f"Path points to a '{navigated_container.__class__.__name__}', expected a GFFList."
                 string reason = navigatedContainer is null
-                    ? "Does not exist"
-                    : $"Path points to a '{navigatedContainer.GetType().Name}', expected a GFFList.";
+                    ? PatcherResources.DoesNotExist
+                    : string.Format(CultureInfo.CurrentCulture, PatcherResources.PathPointsToExpectedGffList, navigatedContainer.GetType().Name);
                 string pathDisplay = string.IsNullOrEmpty(workingPath) ? $"[{Identifier}]" : workingPath;
-                logger.AddError($"Unable to add struct to list '{pathDisplay}': {reason}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnableToAddStructToList, pathDisplay, reason));
                 return;
             }
 
@@ -421,13 +423,13 @@ namespace KPatcher.Core.Mods.GFF
             catch (KeyNotFoundException e)
             {
                 // except KeyError as e:
-                logger.AddError($"INI section [{Identifier}] threw an exception: {e}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.IniSectionThrewException, Identifier, e));
             }
 
             // if not isinstance(new_struct, GFFStruct):
             if (newStruct is null)
             {
-                logger.AddError($"Failed to add a new struct to list '{workingPath}' in [{Identifier}]. Reason: Expected GFFStruct but got '{newStruct}' ({newStruct}) of type {newStruct?.GetType().Name ?? "null"} Skipping...");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.FailedToAddNewStructToList, workingPath, Identifier, newStruct?.ToString() ?? "null", newStruct?.ToString() ?? "null", newStruct?.GetType().Name ?? "null"));
                 return;
             }
 
@@ -465,7 +467,7 @@ namespace KPatcher.Core.Mods.GFF
                     && !(addField is Memory2DAModifierGFF)
                     && !(addField is ModifyFieldGFF))
                 {
-                    logger.AddError($"Unexpected modifier type: {addField.GetType().Name}: {addField}");
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnexpectedModifierType, addField.GetType().Name, addField));
                     continue;
                 }
 
@@ -542,7 +544,7 @@ namespace KPatcher.Core.Mods.GFF
         {
             if (!(rootContainer is GFFStruct rootStruct))
             {
-                logger.AddError($"Expected GFFStruct but got {rootContainer.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedGffStructButGot, rootContainer.GetType().Name));
                 return;
             }
 
@@ -555,7 +557,7 @@ namespace KPatcher.Core.Mods.GFF
             if (!(navigatedContainer is GFFStruct structContainer))
             {
                 string reason = navigatedContainer is null ? "does not exist!" : "is not an instance of a GFFStruct.";
-                logger.AddError($"Unable to add new GFF Field '{Label}' at GFF Path '{containerPath}'! This {reason}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnableToAddNewGffField, Label, containerPath, reason));
                 return;
             }
 
@@ -577,8 +579,8 @@ namespace KPatcher.Core.Mods.GFF
                 object fromContainer = NavigateContainers(rootStruct, fromParentPath);
                 if (!(fromContainer is GFFStruct fromStruct))
                 {
-                    string reason = fromContainer is null ? "does not exist!" : "is not an instance of a GFFStruct.";
-                    logger.AddError($"Unable to use !FieldPath from 2DAMEMORY. Parent field at '{fromParentPath}' {reason}");
+                    string reason = fromContainer is null ? PatcherResources.PathDoesNotExist : PatcherResources.PathIsNotGffStructInstance;
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnableToUseFieldPathFrom2DAMemoryFormat, fromParentPath, reason));
                     return;
                 }
                 value = fromStruct.GetValue(fromLabel) ?? value;
@@ -597,7 +599,7 @@ namespace KPatcher.Core.Mods.GFF
                     && !(addField is ModifyFieldGFF)
                     && !(addField is Memory2DAModifierGFF))
                 {
-                    logger.AddError($"Unexpected modifier type: {addField.GetType().Name}");
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnexpectedModifierType, addField.GetType().Name, addField));
                     continue;
                 }
 
@@ -839,7 +841,7 @@ namespace KPatcher.Core.Mods.GFF
         {
             if (!(rootContainer is GFFStruct rootStruct))
             {
-                logger.AddError($"Expected GFFStruct but got {rootContainer.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedGffStructButGot, rootContainer.GetType().Name));
                 return;
             }
 
@@ -851,8 +853,8 @@ namespace KPatcher.Core.Mods.GFF
 
             if (!(navigatedContainer is GFFStruct navigatedStruct))
             {
-                string reason = navigatedContainer is null ? "does not exist!" : "is not an instance of a GFFStruct.";
-                logger.AddError($"Unable to modify GFF field '{label}'. Path '{Path}' {reason}");
+                string reason = navigatedContainer is null ? PatcherResources.PathDoesNotExist : PatcherResources.PathIsNotGffStructInstance;
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnableToModifyGffFieldFormat, label, Path, reason));
                 return;
             }
 
@@ -883,8 +885,8 @@ namespace KPatcher.Core.Mods.GFF
                 object fromContainer = NavigateContainers(rootStruct, fromParentPath);
                 if (!(fromContainer is GFFStruct fromStruct))
                 {
-                    string reason = fromContainer is null ? "does not exist!" : "is not an instance of a GFFStruct.";
-                    logger.AddError($"Unable use !FieldPath from 2DAMEMORY. Parent field at '{fromParentPath}' {reason}");
+                    string reason = fromContainer is null ? PatcherResources.PathDoesNotExist : PatcherResources.PathIsNotGffStructInstance;
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.UnableToUseFieldPathFrom2DAMemoryFormat, fromParentPath, reason));
                     return;
                 }
                 value = fromStruct.GetValue(fromLabel) ?? value;
@@ -917,7 +919,7 @@ namespace KPatcher.Core.Mods.GFF
             // assert isinstance(value, LocalizedString)
             if (!(value is LocalizedString locString))
             {
-                logger.AddError($"Expected LocalizedString but got {value?.GetType().Name ?? "null"}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedLocalizedStringButGotFormat, value?.GetType().Name ?? "null"));
                 return;
             }
 
@@ -931,7 +933,7 @@ namespace KPatcher.Core.Mods.GFF
                 // assert isinstance(value, LocalizedStringDelta)
                 if (!(value is LocalizedStringDelta delta))
                 {
-                    logger.AddError($"Expected LocalizedStringDelta for existing field but got {value.GetType().Name}");
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedLocalizedStringDeltaButGotFormat, value.GetType().Name));
                     return;
                 }
                 LocalizedString original = navigatedStruct.GetLocString(label);

@@ -8,6 +8,7 @@
   <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve"><value>Инструкция ACTION требует не менее 2 аргументов</value></data>
   <data name="ApplyPatchFromIniSection" xml:space="preserve"><value>Применить патч из секции INI [{0}] FieldType: {1} Путь GFF: '{2}'</value></data>
   <data name="BackingUpFile" xml:space="preserve"><value>Создание резервной копии '{0}'...</value></data>
+  <data name="BuiltInCompilationFailedFormat" xml:space="preserve"><value>Встроенная компиляция не удалась для '{0}': {1}</value></data>
   <data name="CannotAdvanceSameInstruction" xml:space="preserve"><value>Невозможно продвинуться: следующая инструкция по индексу {0} совпадает с текущей по индексу {1}</value></data>
   <data name="CapsuleNotFoundOrPermission" xml:space="preserve"><value>Капсула '{0}' не существовала, или возникли проблемы с разрешениями при попытке {1} '{2}'. Пропуск файла...</value></data>
   <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve"><value>Капсула '{0}' не существовала при попытке {1} '{2}'. Пропуск файла...</value></data>
@@ -34,7 +35,9 @@
   <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Предупреждение] Драйвер дисплея недоступен, невозможно запустить в режиме GUI: {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Предупреждение] Удаление завершено с предупреждениями</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Секция [CompileList] отсутствует в ini.</value></data>
+  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve"><value>Скомпилировано '{0}' с использованием внешнего nwnnsscomp.exe (управляемая компиляция не удалась).</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>ConfigReader завершил загрузку INI</value></data>
+  <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve"><value>Не удалось скомпилировать '{0}'. Возврат нескомпилированного исходного кода NSS.</value></data>
   <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>Не удалось создать папку резервной копии: {0}</value></data>
   <data name="CouldNotCreateInstallLogFile" xml:space="preserve"><value>Не удалось создать файл журнала установки: {0}</value></data>
   <data name="CouldNotDetermineEncoding" xml:space="preserve"><value>Не удалось определить кодировку '{0}'. Попытка принудительной загрузки...</value></data>
@@ -54,9 +57,19 @@
   <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>Ошибка при добавлении новой строки 2DA в модификаторе «{0}»!</value></data>
   <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Ошибка поиска метки столбца для индекса столбца {0}.</value></data>
   <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Ошибка поиска метки строки для индекса строки {0}.</value></data>
+  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve"><value>Произошла ошибка при компиляции '{0}' со встроенным компилятором, попытка внешнего компилятора...</value></data>
   <data name="ErrorParsingIniFile" xml:space="preserve"><value>Ошибка разбора INI: {0}</value></data>
   <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Информация:</value></data>
+  <data name="ExpectedByteArrayButGotFormat" xml:space="preserve"><value>Ожидался byte[] для ModificationsNCS, но получен {0}</value></data>
+  <data name="ExpectedGffObjectButGotFormat" xml:space="preserve"><value>Ожидался объект GFF для ModificationsGFF, но получен {0}</value></data>
   <data name="ExpectedGffStructButGot" xml:space="preserve"><value>Ожидался GFFStruct, но получен {0}</value></data>
+  <data name="ExpectedLocalizedStringButGotFormat" xml:space="preserve"><value>Ожидался LocalizedString, но получен {0}</value></data>
+  <data name="ExpectedLocalizedStringDeltaButGotFormat" xml:space="preserve"><value>Ожидался LocalizedStringDelta для существующего поля, но получен {0}</value></data>
+  <data name="ExpectedMutableStringButGotFormat" xml:space="preserve"><value>Ожидался MutableString для ModificationsNSS, но получен {0}</value></data>
+  <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve"><value>Ожидался объект SSF для ModificationsSSF, но получен {0}</value></data>
+  <data name="ExpectedTlkObjectButGotFormat" xml:space="preserve"><value>Ожидался объект TLK для ModificationsTLK, но получен {0}</value></data>
+  <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve"><value>Ожидался объект TwoDA для Modifications2DA, но получен {0}</value></data>
+  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve"><value>Внешний nwnnsscomp также не удался для '{0}': {1}</value></data>
   <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Ошибка при добавлении нового struct в список '{0}' в [{1}]. Причина: Ожидался GFFStruct, но получен '{2}' ({3}) типа {4} Пропуск...</value></data>
   <data name="FailedToBuildModule" xml:space="preserve"><value>Ошибка при создании модуля '{0}': {1}</value></data>
   <data name="FailedToCopyLine2DA" xml:space="preserve"><value>Ошибка! Не удалось скопировать строку в 2DA! Пропуск...</value></data>
@@ -72,6 +85,7 @@
   <data name="GameDetected" xml:space="preserve"><value>Игра обнаружена: {0}</value></data>
   <data name="GamePath" xml:space="preserve"><value>Путь игры: {0}</value></data>
   <data name="GffListSectionMissing" xml:space="preserve"><value>Секция [GFFList] отсутствует в ini.</value></data>
+  <data name="GffPathNotFoundDefaultingToRootFormat" xml:space="preserve"><value>Путь GFF '{0}' не найден, по умолчанию используется корневая структура gff.</value></data>
   <data name="HackListSectionMissing" xml:space="preserve"><value>Секция [HACKList] отсутствует в ini.</value></data>
   <data name="IOError" xml:space="preserve"><value>Ошибка ввода-вывода: {0}</value></data>
   <data name="InfiniteLoopDetectedExecuted" xml:space="preserve"><value>Обнаружен бесконечный цикл: инструкция по индексу {0} ({1}) была выполнена {2} раз</value></data>
@@ -94,6 +108,7 @@
   <data name="Invalid2DAMemoryToken" xml:space="preserve"><value>Недопустимый токен 2DAMEMORY! Индексы токенов начинаются с 1.</value></data>
   <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve"><value>Неверная папка игры, файл dialog.tlk не найден! Укажите правильный каталог игры.</value></data>
   <data name="InvalidKotorDirectory" xml:space="preserve"><value>Выбранный каталог KOTOR не является допустимой установкой - невозможно инициализировать ModInstaller.</value></data>
+  <data name="InvalidNssSourceProvided" xml:space="preserve"><value>Недопустимый источник nss передан в ModificationsNSS.PatchResource()</value></data>
   <data name="JumpInstructionNoTarget" xml:space="preserve"><value>Инструкция перехода {0} по индексу {1} не имеет цели перехода</value></data>
   <data name="JumpTargetNotFound" xml:space="preserve"><value>Цель перехода для инструкции {0} не найдена в таблице инструкций</value></data>
   <data name="LanguageIntegerNotKnown" xml:space="preserve"><value>Неизвестный код языка: {0}</value></data>
@@ -106,6 +121,7 @@
   <data name="LoadingSsfListPatches" xml:space="preserve"><value>Загрузка патчей [SSFList] из ini...</value></data>
   <data name="LoadingTlkListPatches" xml:space="preserve"><value>Загрузка патчей [TLKList] из ini...</value></data>
   <data name="LoadingTwoDAListPatches" xml:space="preserve"><value>Загрузка патчей [2DAList] из ini...</value></data>
+  <data name="ManagedCompilationFailedFormat" xml:space="preserve"><value>Управляемая компиляция не удалась для '{0}': {1}</value></data>
   <data name="ModOvershadowedByExisting" xml:space="preserve"><value>Этот мод намеревается установить '{0}' в '{1}', но затенен существующим '{2}'!</value></data>
   <data name="ModPath" xml:space="preserve"><value>Путь мода: {0}</value></data>
   <data name="ModuleDidNotExistBuilding" xml:space="preserve"><value>ВАЖНО! Модуль по пути '{0}' не существовал, создание одного в папке 'Modules' немедленно из следующих файлов:</value></data>
@@ -117,6 +133,7 @@
   <data name="NoTLKFileLoaded" xml:space="preserve"><value>Файл TLK не загружен. Продолжение невозможно.</value></data>
   <data name="NoValidGameFolderSelected" xml:space="preserve"><value>Ошибка! Не выбрана допустимая папка игры! Установка прервана.</value></data>
   <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>Не задано значение столбца {0} для новой строки 2DA в модификаторе «{1}»...</value></data>
+  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve"><value>nwnnsscomp.exe не является ожидаемой версией KPatcher (обнаружена: {0}).</value></data>
   <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>Не найден nwnnsscomp.exe в папке TSLPatchData! Невозможно скомпилировать скрипт.</value></data>
   <data name="OperationTimedOut" xml:space="preserve"><value>Операция превысила время ожидания: {0}</value></data>
   <data name="OperationWasCancelled" xml:space="preserve"><value>Операция была отменена: {0}</value></data>
@@ -127,8 +144,11 @@
   <data name="PatcherFinishedWithErrors" xml:space="preserve"><value>Патчер завершил работу, но ошибок: {0}. Мод, вероятно, установлен некорректно.</value></data>
   <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve"><value>Патчер завершил работу, но ошибок: {0} и предупреждений: {1}. Мод, вероятно, установлен некорректно.</value></data>
   <data name="PatcherFinishedWithWarnings" xml:space="preserve"><value>Патчер завершил работу, но обнаружено предупреждений: {0}. Мод может работать некорректно.</value></data>
+  <data name="PatchingFromUnixCompilingFormat" xml:space="preserve"><value>Применение патча из операционной системы unix, компиляция '{0}' с использованием встроенных компиляторов...</value></data>
   <data name="PatchingRimFileWarning" xml:space="preserve"><value>Этот мод применяет патч к файлу RIM Modules/{0}!
 Применение патчей к RIM крайне несовместимо, не рекомендуется и широко считается плохой практикой. Пожалуйста, попросите разработчика мода исправить это.</value></data>
+  <data name="PathDoesNotExist" xml:space="preserve"><value>не существует!</value></data>
+  <data name="PathIsNotGffStructInstance" xml:space="preserve"><value>не является экземпляром GFFStruct.</value></data>
   <data name="PathPointsToExpectedGffList" xml:space="preserve"><value>Путь указывает на '{0}', ожидается GFFList.</value></data>
   <data name="PermissionDenied" xml:space="preserve"><value>Доступ запрещен: {0}</value></data>
   <data name="Processing2DAPatches" xml:space="preserve"><value>Обработка патчей 2DA...</value></data>
@@ -168,6 +188,8 @@
   <data name="UnableToLoad2DAFileSkipping" xml:space="preserve"><value>Не удалось загрузить файл 2DA {0}! Пропуск...</value></data>
   <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve"><value>Не удалось загрузить текст инструкций! В папке «tslpatchdata» должен быть файл «info.rtf».</value></data>
   <data name="UnableToLocateTLKFileToPatch" xml:space="preserve"><value>Ошибка! Не удалось найти TLK для патча, файл «{0}» не найден!</value></data>
+  <data name="UnableToModifyGffFieldFormat" xml:space="preserve"><value>Не удалось изменить поле GFF '{0}'. Путь '{1}' {2}</value></data>
+  <data name="UnableToUseFieldPathFrom2DAMemoryFormat" xml:space="preserve"><value>Невозможно использовать !FieldPath из 2DAMEMORY. Родительское поле в '{0}' {1}</value></data>
   <data name="UnexpectedModifierType" xml:space="preserve"><value>Неожиданный тип модификатора: {0}: {1}</value></data>
   <data name="UnknownException" xml:space="preserve"><value>Неизвестное исключение</value></data>
   <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve"><value>{0} использован как индекс при смене строки в модификаторе «{1}», но в 2DA нет метки для этого индекса.</value></data>

@@ -234,7 +234,7 @@ namespace KPatcher.UI
                 }
                 else
                 {
-                    throw new FileNotFoundException($"No namespaces.ini, namespaces.yaml, changes.ini, or changes.yaml (or localized variants) found in {tslPatchDataPath}");
+                    throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.NoNamespacesOrChangesFoundInFormat, tslPatchDataPath));
                 }
             }
 
@@ -259,7 +259,7 @@ namespace KPatcher.UI
             PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
             if (namespaceOption is null)
             {
-                throw new ArgumentException($"Namespace '{selectedNamespaceName}' not found in namespaces list");
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
 
             string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
@@ -360,7 +360,7 @@ namespace KPatcher.UI
             var directory = new CaseAwarePath(directoryPath);
             if (!directory.IsDirectory())
             {
-                throw new ArgumentException($"Invalid KOTOR directory: {directoryPath}");
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.InvalidKotorDirectoryFormat, directoryPath));
             }
             return directory.GetResolvedPath();
         }
@@ -424,36 +424,36 @@ namespace KPatcher.UI
         {
             var sb = new StringBuilder();
             sb.AppendLine("==================================");
-            sb.AppendLine("TSLPatcher - CONFIGURATION SUMMARY");
+            sb.AppendLine(UIResources.ConfigSummaryTitle);
             sb.AppendLine("==================================");
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("Settings:");
+            sb.AppendLine(UIResources.ConfigSummarySettings);
             sb.AppendLine("---------");
-            sb.Append("Config file: ");
+            sb.Append(UIResources.ConfigFileLabel);
             sb.AppendLine(changesFileName);
-            sb.Append("Information file: ");
+            sb.Append(UIResources.InformationFileLabel);
             sb.AppendLine(infoFileName);
-            sb.AppendLine("Install location: User selected.");
-            sb.AppendLine("Make backups: Before modifying/overwriting existing files.");
-            sb.Append("Log level: ");
+            sb.AppendLine(UIResources.InstallLocationUserSelected);
+            sb.AppendLine(UIResources.MakeBackupsBeforeModifying);
+            sb.Append(UIResources.LogLevelLabel);
             sb.Append((int)config.LogLevel);
             sb.Append(" - ");
             sb.AppendLine(LogLevelSummary(config.LogLevel));
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("dialog tlk appending:");
+            sb.AppendLine(UIResources.DialogTlkAppending);
             sb.AppendLine("---------------------");
             int tlkAppendCount = config.PatchesTLK?.Modifiers?.Count(m => !m.IsReplacement) ?? 0;
-            sb.Append("New entries: ");
+            sb.Append(UIResources.NewEntriesLabel);
             sb.AppendLine(tlkAppendCount.ToString());
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("2DA file changes:");
+            sb.AppendLine(UIResources.ConfigSummaryTwoDAFileChanges);
             sb.AppendLine("-----------------");
             if (config.Patches2DA == null || config.Patches2DA.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -465,21 +465,21 @@ namespace KPatcher.UI
                     string file = m.SaveAs ?? m.SourceFile ?? "unknown";
                     sb.Append(" * ");
                     sb.Append(file);
-                    sb.Append(" - new rows: ");
+                    sb.Append(UIResources.ConfigSummaryNewRows);
                     sb.Append(newRows);
-                    sb.Append(", modified rows: ");
+                    sb.Append(UIResources.ConfigSummaryModifiedRows);
                     sb.Append(modifiedRows);
-                    sb.Append(", new columns: ");
+                    sb.Append(UIResources.ConfigSummaryNewColumns);
                     sb.AppendLine(newColumns.ToString());
                 }
             }
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("GFF file changes:");
+            sb.AppendLine(UIResources.ConfigSummaryGffFileChanges);
             sb.AppendLine("-----------------");
             if (config.PatchesGFF == null || config.PatchesGFF.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -489,17 +489,17 @@ namespace KPatcher.UI
                     string dest = m.Destination ?? "override";
                     sb.Append(" * ");
                     sb.Append(file);
-                    sb.Append(" - modify existing, location: ");
+                    sb.Append(UIResources.ConfigSummaryModifyExistingLocation);
                     sb.AppendLine(dest.ToLowerInvariant());
                 }
             }
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("NCS file integer hacks:");
+            sb.AppendLine(UIResources.ConfigSummaryNcsIntegerHacks);
             sb.AppendLine("-----------------------");
             if (config.PatchesNCS == null || config.PatchesNCS.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -511,11 +511,11 @@ namespace KPatcher.UI
             }
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("Modified & recompiled scripts:");
+            sb.AppendLine(UIResources.ConfigSummaryModifiedRecompiledScripts);
             sb.AppendLine("------------------------------");
             if (config.PatchesNSS == null || config.PatchesNSS.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -527,11 +527,11 @@ namespace KPatcher.UI
             }
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("New/modified Soundset files:");
+            sb.AppendLine(UIResources.ConfigSummaryNewModifiedSoundsetFiles);
             sb.AppendLine("----------------------------");
             if (config.PatchesSSF == null || config.PatchesSSF.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -543,11 +543,11 @@ namespace KPatcher.UI
             }
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine("Unpatched files to install:");
+            sb.AppendLine(UIResources.ConfigSummaryUnpatchedFilesToInstall);
             sb.AppendLine("---------------------------");
             if (config.InstallList == null || config.InstallList.Count == 0)
             {
-                sb.AppendLine("  (none)");
+                sb.AppendLine(UIResources.ConfigSummaryNone);
             }
             else
             {
@@ -556,11 +556,11 @@ namespace KPatcher.UI
                     .OrderBy(g => g.Key);
                 foreach (var group in byDest)
                 {
-                    sb.Append(" * Location: ");
+                    sb.Append(UIResources.ConfigSummaryLocation);
                     sb.AppendLine(group.Key);
                     foreach (InstallFile f in group)
                     {
-                        string action = f.ReplaceFile ? "overwrite" : "skip existing";
+                        string action = f.ReplaceFile ? UIResources.ConfigSummaryOverwrite : UIResources.ConfigSummarySkipExisting;
                         sb.Append("   --> ");
                         sb.Append(f.SaveAs ?? f.SourceFile ?? "unknown");
                         sb.Append(" - ");
@@ -576,12 +576,12 @@ namespace KPatcher.UI
         {
             switch (level)
             {
-                case LogLevel.Nothing: return "Nothing: No feedback.";
-                case LogLevel.General: return "General: Progress only.";
-                case LogLevel.Errors: return "Errors: Progress and errors.";
-                case LogLevel.Warnings: return "Standard: Progress, errors and warnings.";
-                case LogLevel.Full: return "Full: Verbose progress (debugging).";
-                default: return "Standard: Progress, errors and warnings.";
+                case LogLevel.Nothing: return UIResources.LogLevelNothing;
+                case LogLevel.General: return UIResources.LogLevelGeneral;
+                case LogLevel.Errors: return UIResources.LogLevelErrors;
+                case LogLevel.Warnings: return UIResources.LogLevelWarnings;
+                case LogLevel.Full: return UIResources.LogLevelFull;
+                default: return UIResources.LogLevelWarnings;
             }
         }
 
@@ -601,7 +601,7 @@ namespace KPatcher.UI
             PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
             if (namespaceOption is null)
             {
-                throw new ArgumentException($"Namespace '{selectedNamespaceName}' not found in namespaces list");
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
 
             string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
@@ -646,7 +646,7 @@ namespace KPatcher.UI
             PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
             if (namespaceOption is null)
             {
-                throw new ArgumentException($"Namespace '{selectedNamespaceName}' not found in namespaces list");
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
 
             string iniFilePath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
@@ -697,7 +697,7 @@ namespace KPatcher.UI
             string backupParentFolder = Path.Combine(modPath, "backup");
             if (!Directory.Exists(backupParentFolder))
             {
-                throw new DirectoryNotFoundException($"Backup folder not found: {backupParentFolder}");
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.BackupFolderNotFoundFormat, backupParentFolder));
             }
 
             var uninstaller = new ModUninstaller(

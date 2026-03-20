@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using System.Globalization;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.GFF
 {
@@ -55,7 +57,7 @@ namespace KPatcher.Core.Mods.GFF
             }
             else
             {
-                logger.AddError($"Expected GFF object for ModificationsGFF, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedGffObjectButGotFormat, mutableData.GetType().Name));
             }
         }
     }

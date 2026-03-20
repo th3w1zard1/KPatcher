@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using KPatcher.UI.Resources;
 
 namespace KPatcher.UI
 {
@@ -68,7 +69,7 @@ namespace KPatcher.UI
                     string base64Content = jsonDoc.RootElement.GetProperty("content").GetString();
                     if (string.IsNullOrEmpty(base64Content))
                     {
-                        throw new InvalidOperationException("No content found in GitHub API response");
+                        throw new InvalidOperationException(UIResources.NoContentInGitHubApiResponse);
                     }
 
                     // Decode base64 content
@@ -79,14 +80,14 @@ namespace KPatcher.UI
                     Match jsonMatch = Regex.Match(decodedContent, @"<---JSON_START--->\s*#\s*(.*?)\s*#\s*<---JSON_END--->", RegexOptions.Singleline);
                     if (!jsonMatch.Success)
                     {
-                        throw new InvalidOperationException("JSON data not found or markers are incorrect");
+                        throw new InvalidOperationException(UIResources.JsonDataNotFoundOrMarkersIncorrect);
                     }
 
                     string jsonStr = jsonMatch.Groups[1].Value;
                     Dictionary<string, object> remoteInfo = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonStr);
                     if (remoteInfo is null)
                     {
-                        throw new InvalidOperationException("Failed to deserialize remote info");
+                        throw new InvalidOperationException(UIResources.FailedToDeserializeRemoteInfo);
                     }
 
                     return remoteInfo;

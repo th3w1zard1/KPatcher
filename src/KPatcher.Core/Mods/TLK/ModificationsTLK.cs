@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Mods.TLK
 {
@@ -111,7 +113,7 @@ namespace KPatcher.Core.Mods.TLK
         {
             if (!(mutableData is Formats.TLK.TLK dialog))
             {
-                logger.AddError($"Expected TLK object for ModificationsTLK, but got {mutableData.GetType().Name}");
+                logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedTlkObjectButGotFormat, mutableData.GetType().Name));
                 return;
             }
 

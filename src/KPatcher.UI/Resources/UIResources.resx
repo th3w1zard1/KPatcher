@@ -219,4 +219,52 @@ For production use, please use the stable release.</value></data>
   <data name="TimeUnitMinutes" xml:space="preserve"><value>minutes</value></data>
   <data name="TimeUnitSecond" xml:space="preserve"><value>second</value></data>
   <data name="TimeUnitSeconds" xml:space="preserve"><value>seconds</value></data>
+  <data name="DownloadEndedPrematurely" xml:space="preserve"><value>The download ended prematurely.</value></data>
+  <data name="UnsupportedArchiveFormat" xml:space="preserve"><value>Unsupported archive format: {0}</value></data>
+  <data name="UnableToLocateCurrentProcessPath" xml:space="preserve"><value>Unable to locate current process path.</value></data>
+  <data name="UnableToDetermineApplicationDirectory" xml:space="preserve"><value>Unable to determine application directory.</value></data>
+  <data name="SelectedNamespaceNotFound" xml:space="preserve"><value>Selected namespace not found.</value></data>
+  <data name="UnsupportedOsForAutomaticUpdates" xml:space="preserve"><value>Unsupported operating system for automatic updates.</value></data>
+  <data name="RemoteUpdatePayloadEmpty" xml:space="preserve"><value>Remote update payload was empty.</value></data>
+  <data name="FailedToParseRemoteUpdatePayload" xml:space="preserve"><value>Failed to parse remote update payload.</value></data>
+  <data name="InstallLocationUserSelected" xml:space="preserve"><value>Install location: User selected.</value></data>
+  <data name="MakeBackupsBeforeModifying" xml:space="preserve"><value>Make backups: Before modifying/overwriting existing files.</value></data>
+  <data name="LogLevelNothing" xml:space="preserve"><value>Nothing: No feedback.</value></data>
+  <data name="LogLevelGeneral" xml:space="preserve"><value>General: Progress only.</value></data>
+  <data name="LogLevelErrors" xml:space="preserve"><value>Errors: Progress and errors.</value></data>
+  <data name="LogLevelWarnings" xml:space="preserve"><value>Standard: Progress, errors and warnings.</value></data>
+  <data name="LogLevelFull" xml:space="preserve"><value>Full: Verbose progress (debugging).</value></data>
+  <data name="NoNamespacesOrChangesFoundInFormat" xml:space="preserve"><value>No namespaces.ini, namespaces.yaml, changes.ini, or changes.yaml (or localized variants) found in {0}</value></data>
+  <data name="NamespaceNotFoundInListFormat" xml:space="preserve"><value>Namespace '{0}' not found in namespaces list</value></data>
+  <data name="InvalidKotorDirectoryFormat" xml:space="preserve"><value>Invalid KOTOR directory: {0}</value></data>
+  <data name="BackupFolderNotFoundFormat" xml:space="preserve"><value>Backup folder not found: {0}</value></data>
+  <data name="ChangesIniFileNotFoundFormat" xml:space="preserve"><value>Changes INI file not found: {0}</value></data>
+  <data name="NoContentInGitHubApiResponse" xml:space="preserve"><value>No content found in GitHub API response</value></data>
+  <data name="JsonDataNotFoundOrMarkersIncorrect" xml:space="preserve"><value>JSON data not found or markers are incorrect</value></data>
+  <data name="FailedToDeserializeRemoteInfo" xml:space="preserve"><value>Failed to deserialize remote info</value></data>
+  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>tar.gz extraction requires .NET 8 or greater</value></data>
+  <data name="NoDirectDownloadLinksForFormat" xml:space="preserve"><value>No direct download links were provided for {0}/{1}.</value></data>
+  <data name="FlowDocumentNotInitialized" xml:space="preserve"><value>FlowDocument is not initialized</value></data>
+  <data name="ConfigSummaryTitle" xml:space="preserve"><value>TSLPatcher - CONFIGURATION SUMMARY</value></data>
+  <data name="ConfigSummarySettings" xml:space="preserve"><value>Settings:</value></data>
+  <data name="ConfigFileLabel" xml:space="preserve"><value>Config file: </value></data>
+  <data name="InformationFileLabel" xml:space="preserve"><value>Information file: </value></data>
+  <data name="LogLevelLabel" xml:space="preserve"><value>Log level: </value></data>
+  <data name="DialogTlkAppending" xml:space="preserve"><value>dialog tlk appending:</value></data>
+  <data name="NewEntriesLabel" xml:space="preserve"><value>New entries: </value></data>
+  <data name="ConfigSummaryTwoDAFileChanges" xml:space="preserve"><value>2DA file changes:</value></data>
+  <data name="ConfigSummaryGffFileChanges" xml:space="preserve"><value>GFF file changes:</value></data>
+  <data name="ConfigSummaryNcsIntegerHacks" xml:space="preserve"><value>NCS file integer hacks:</value></data>
+  <data name="ConfigSummaryModifiedRecompiledScripts" xml:space="preserve"><value>Modified &amp; recompiled scripts:</value></data>
+  <data name="ConfigSummaryNewModifiedSoundsetFiles" xml:space="preserve"><value>New/modified Soundset files:</value></data>
+  <data name="ConfigSummaryUnpatchedFilesToInstall" xml:space="preserve"><value>Unpatched files to install:</value></data>
+  <data name="ConfigSummaryNone" xml:space="preserve"><value>  (none)</value></data>
+  <data name="ConfigSummaryNewRows" xml:space="preserve"><value> - new rows: </value></data>
+  <data name="ConfigSummaryModifiedRows" xml:space="preserve"><value>, modified rows: </value></data>
+  <data name="ConfigSummaryNewColumns" xml:space="preserve"><value>, new columns: </value></data>
+  <data name="ConfigSummaryModifyExistingLocation" xml:space="preserve"><value> - modify existing, location: </value></data>
+  <data name="ConfigSummaryLocation" xml:space="preserve"><value> * Location: </value></data>
+  <data name="ConfigSummaryOverwrite" xml:space="preserve"><value>overwrite</value></data>
+  <data name="ConfigSummarySkipExisting" xml:space="preserve"><value>skip existing</value></data>
+  <data name="ConfigurationSummaryToolTip" xml:space="preserve"><value>Configuration summary</value></data>
 </root>

@@ -563,4 +563,70 @@ Patching RIMs is highly incompatible, not recommended, and widely considered bad
   <data name="FileHasNoEntryPoint" xml:space="preserve">
     <value>This file has no entry point and cannot be compiled (Most likely an include file).</value>
   </data>
+  <data name="InvalidNssSourceProvided" xml:space="preserve">
+    <value>Invalid nss source provided to ModificationsNSS.PatchResource()</value>
+  </data>
+  <data name="BuiltInCompilationFailedFormat" xml:space="preserve">
+    <value>Built-in compilation failed for '{0}': {1}</value>
+  </data>
+  <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve">
+    <value>Could not compile '{0}'. Returning uncompiled NSS source.</value>
+  </data>
+  <data name="ExpectedMutableStringButGotFormat" xml:space="preserve">
+    <value>Expected MutableString for ModificationsNSS, but got {0}</value>
+  </data>
+  <data name="PatchingFromUnixCompilingFormat" xml:space="preserve">
+    <value>Patching from a unix operating system, compiling '{0}' using the built-in compilers...</value>
+  </data>
+  <data name="ExpectedByteArrayButGotFormat" xml:space="preserve">
+    <value>Expected byte[] for ModificationsNCS, but got {0}</value>
+  </data>
+  <data name="GffPathNotFoundDefaultingToRootFormat" xml:space="preserve">
+    <value>GFF path '{0}' not found, defaulting to the gff root struct.</value>
+  </data>
+  <data name="UnableToModifyGffFieldFormat" xml:space="preserve">
+    <value>Unable to modify GFF field '{0}'. Path '{1}' {2}</value>
+  </data>
+  <data name="PathDoesNotExist" xml:space="preserve">
+    <value>does not exist!</value>
+  </data>
+  <data name="PathIsNotGffStructInstance" xml:space="preserve">
+    <value>is not an instance of a GFFStruct.</value>
+  </data>
+  <data name="ExpectedGffObjectButGotFormat" xml:space="preserve">
+    <value>Expected GFF object for ModificationsGFF, but got {0}</value>
+  </data>
+  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve">
+    <value>An error occurred while compiling '{0}' with the built-in compiler, trying external compiler...</value>
+  </data>
+  <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve">
+    <value>Expected SSF object for ModificationsSSF, but got {0}</value>
+  </data>
+  <data name="UnableToUseFieldPathFrom2DAMemoryFormat" xml:space="preserve">
+    <value>Unable to use !FieldPath from 2DAMEMORY. Parent field at '{0}' {1}</value>
+  </data>
+  <data name="ExpectedLocalizedStringButGotFormat" xml:space="preserve">
+    <value>Expected LocalizedString but got {0}</value>
+  </data>
+  <data name="ExpectedLocalizedStringDeltaButGotFormat" xml:space="preserve">
+    <value>Expected LocalizedStringDelta for existing field but got {0}</value>
+  </data>
+  <data name="ExpectedTlkObjectButGotFormat" xml:space="preserve">
+    <value>Expected TLK object for ModificationsTLK, but got {0}</value>
+  </data>
+  <data name="ManagedCompilationFailedFormat" xml:space="preserve">
+    <value>Managed compilation failed for '{0}': {1}</value>
+  </data>
+  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve">
+    <value>Compiled '{0}' using external nwnnsscomp.exe (managed compile failed).</value>
+  </data>
+  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve">
+    <value>External nwnnsscomp also failed for '{0}': {1}</value>
+  </data>
+  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve">
+    <value>The nwnnsscomp.exe is not the expected KPatcher version (detected: {0}).</value>
+  </data>
+  <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve">
+    <value>Expected TwoDA object for Modifications2DA, but got {0}</value>
+  </data>
 </root>

@@ -559,7 +559,7 @@ namespace KPatcher.UI.ViewModels
                 PatcherNamespace selectedNs = _loadedNamespaces.FirstOrDefault(ns => ns.Name == SelectedNamespace);
                 if (selectedNs is null)
                 {
-                    throw new InvalidOperationException("Selected namespace not found.");
+                    throw new InvalidOperationException(UIResources.SelectedNamespaceNotFound);
                 }
 
                 // Use Core.InstallMod which handles path resolution correctly (matches Python)
@@ -570,7 +570,7 @@ namespace KPatcher.UI.ViewModels
 
                 if (!File.Exists(iniFilePath))
                 {
-                    throw new FileNotFoundException($"Changes INI file not found: {iniFilePath}");
+                    throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.ChangesIniFileNotFoundFormat, iniFilePath));
                 }
 
                 // namespace_mod_path: CaseAwarePath = ini_file_path.parent
@@ -748,7 +748,7 @@ namespace KPatcher.UI.ViewModels
                     PatcherNamespace selectedNs = _loadedNamespaces.FirstOrDefault(ns => ns.Name == SelectedNamespace);
                     if (selectedNs is null)
                     {
-                        throw new InvalidOperationException("Selected namespace not found.");
+                        throw new InvalidOperationException(UIResources.SelectedNamespaceNotFound);
                     }
 
                     Core.ValidateConfig(ModPath, _loadedNamespaces, SelectedNamespace, _logger);

@@ -439,7 +439,7 @@ namespace KPatcher.UI.Views
                         if (flowDoc is null)
                         {
                             Console.WriteLine("[RTF] WARNING: FlowDoc is null, cannot load RTF");
-                            throw new InvalidOperationException("FlowDocument is not initialized");
+                            throw new InvalidOperationException(UIResources.FlowDocumentNotInitialized);
                         }
                         Console.WriteLine("[RTF] FlowDoc is available, proceeding with LoadRtf");
 

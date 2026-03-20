@@ -8,6 +8,7 @@
   <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve"><value>L'instruction ACTION nécessite au moins 2 arguments</value></data>
   <data name="ApplyPatchFromIniSection" xml:space="preserve"><value>Appliquer le correctif depuis la section INI [{0}] FieldType : {1} Chemin GFF : '{2}'</value></data>
   <data name="BackingUpFile" xml:space="preserve"><value>Sauvegarde de '{0}'...</value></data>
+  <data name="BuiltInCompilationFailedFormat" xml:space="preserve"><value>La compilation intégrée a échoué pour '{0}': {1}</value></data>
   <data name="CannotAdvanceSameInstruction" xml:space="preserve"><value>Impossible d'avancer : l'instruction suivante à l'index {0} est la même que l'actuelle à l'index {1}</value></data>
   <data name="CapsuleNotFoundOrPermission" xml:space="preserve"><value>La capsule '{0}' n'existait pas, ou des problèmes d'autorisation se sont produits, lors de la tentative de {1} '{2}'. Fichier ignoré...</value></data>
   <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve"><value>La capsule '{0}' n'existait pas lors de la tentative de {1} '{2}'. Fichier ignoré...</value></data>
@@ -34,7 +35,9 @@
   <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Avertissement] Pilote d'affichage non disponible, impossible d'exécuter en mode GUI : {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Avertissement] Désinstallation terminée avec des avertissements</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Section [CompileList] manquante dans l'ini.</value></data>
+  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve"><value>Compilé '{0}' en utilisant nwnnsscomp.exe externe (compilation gérée échouée).</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>Le ConfigReader a terminé le chargement de l'INI</value></data>
+  <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve"><value>Impossible de compiler '{0}'. Retour de la source NSS non compilée.</value></data>
   <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>Impossible de créer le dossier de sauvegarde : {0}</value></data>
   <data name="CouldNotCreateInstallLogFile" xml:space="preserve"><value>Impossible de créer le fichier de journal d'installation : {0}</value></data>
   <data name="CouldNotDetermineEncoding" xml:space="preserve"><value>Impossible de déterminer l'encodage de '{0}'. Tentative de chargement forcé...</value></data>
@@ -54,9 +57,19 @@
   <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>Erreur lors de l’ajout d’une nouvelle ligne 2DA dans le modificateur « {0} » !</value></data>
   <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Erreur lors de la recherche de l’étiquette de colonne pour l’index {0}.</value></data>
   <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Erreur lors de la recherche de l’étiquette de ligne pour l’index {0}.</value></data>
+  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve"><value>Une erreur s'est produite lors de la compilation de '{0}' avec le compilateur intégré, tentative du compilateur externe...</value></data>
   <data name="ErrorParsingIniFile" xml:space="preserve"><value>Erreur d’analyse du fichier INI : {0}</value></data>
   <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Informations :</value></data>
+  <data name="ExpectedByteArrayButGotFormat" xml:space="preserve"><value>byte[] attendu pour ModificationsNCS, mais {0} obtenu</value></data>
+  <data name="ExpectedGffObjectButGotFormat" xml:space="preserve"><value>Objet GFF attendu pour ModificationsGFF, mais {0} obtenu</value></data>
   <data name="ExpectedGffStructButGot" xml:space="preserve"><value>GFFStruct attendu mais {0} obtenu</value></data>
+  <data name="ExpectedLocalizedStringButGotFormat" xml:space="preserve"><value>LocalizedString attendu mais {0} obtenu</value></data>
+  <data name="ExpectedLocalizedStringDeltaButGotFormat" xml:space="preserve"><value>LocalizedStringDelta attendu pour le champ existant mais {0} obtenu</value></data>
+  <data name="ExpectedMutableStringButGotFormat" xml:space="preserve"><value>MutableString attendu pour ModificationsNSS, mais {0} obtenu</value></data>
+  <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve"><value>Objet SSF attendu pour ModificationsSSF, mais {0} obtenu</value></data>
+  <data name="ExpectedTlkObjectButGotFormat" xml:space="preserve"><value>Objet TLK attendu pour ModificationsTLK, mais {0} obtenu</value></data>
+  <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve"><value>Objet TwoDA attendu pour Modifications2DA, mais {0} obtenu</value></data>
+  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve"><value>Le nwnnsscomp externe a également échoué pour '{0}': {1}</value></data>
   <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Échec de l'ajout d'un nouveau struct à la liste '{0}' dans [{1}]. Raison : GFFStruct attendu mais '{2}' ({3}) de type {4} obtenu. Ignoré...</value></data>
   <data name="FailedToBuildModule" xml:space="preserve"><value>Échec de la construction du module '{0}' : {1}</value></data>
   <data name="FailedToCopyLine2DA" xml:space="preserve"><value>Erreur ! Échec de la copie de ligne dans la 2DA ! Ignoré...</value></data>
@@ -72,6 +85,7 @@
   <data name="GameDetected" xml:space="preserve"><value>Jeu détecté : {0}</value></data>
   <data name="GamePath" xml:space="preserve"><value>Chemin du jeu : {0}</value></data>
   <data name="GffListSectionMissing" xml:space="preserve"><value>Section [GFFList] manquante dans l'ini.</value></data>
+  <data name="GffPathNotFoundDefaultingToRootFormat" xml:space="preserve"><value>Chemin GFF '{0}' introuvable, utilisation par défaut de la structure racine gff.</value></data>
   <data name="HackListSectionMissing" xml:space="preserve"><value>Section [HACKList] manquante dans l'ini.</value></data>
   <data name="IOError" xml:space="preserve"><value>Erreur E/S : {0}</value></data>
   <data name="InfiniteLoopDetectedExecuted" xml:space="preserve"><value>Boucle infinie détectée : l'instruction à l'index {0} ({1}) a été exécutée {2} fois</value></data>
@@ -94,6 +108,7 @@
   <data name="Invalid2DAMemoryToken" xml:space="preserve"><value>Jeton 2DAMEMORY invalide ! Les index commencent à 1.</value></data>
   <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve"><value>Dossier de jeu invalide, fichier dialog.tlk introuvable ! Sélectionnez le bon répertoire du jeu.</value></data>
   <data name="InvalidKotorDirectory" xml:space="preserve"><value>Le répertoire KOTOR choisi n'est pas une installation valide - impossible d'initialiser ModInstaller.</value></data>
+  <data name="InvalidNssSourceProvided" xml:space="preserve"><value>Source nss invalide fournie à ModificationsNSS.PatchResource()</value></data>
   <data name="JumpInstructionNoTarget" xml:space="preserve"><value>L'instruction de saut {0} à l'index {1} n'a pas de cible de saut</value></data>
   <data name="JumpTargetNotFound" xml:space="preserve"><value>Cible de saut pour l'instruction {0} introuvable dans la table d'instructions</value></data>
   <data name="LanguageIntegerNotKnown" xml:space="preserve"><value>Identifiant de langue inconnu : {0}</value></data>
@@ -106,6 +121,7 @@
   <data name="LoadingSsfListPatches" xml:space="preserve"><value>Chargement des correctifs [SSFList] depuis l'ini...</value></data>
   <data name="LoadingTlkListPatches" xml:space="preserve"><value>Chargement des correctifs [TLKList] depuis l'ini...</value></data>
   <data name="LoadingTwoDAListPatches" xml:space="preserve"><value>Chargement des correctifs [2DAList] depuis l'ini...</value></data>
+  <data name="ManagedCompilationFailedFormat" xml:space="preserve"><value>La compilation gérée a échoué pour '{0}': {1}</value></data>
   <data name="ModOvershadowedByExisting" xml:space="preserve"><value>Ce mod a l'intention d'installer '{0}' dans '{1}', mais est masqué par '{2}' existant !</value></data>
   <data name="ModPath" xml:space="preserve"><value>Chemin du mod : {0}</value></data>
   <data name="ModuleDidNotExistBuilding" xml:space="preserve"><value>IMPORTANT ! Le module au chemin '{0}' n'existait pas, création d'un dans le dossier 'Modules' immédiatement à partir des fichiers suivants :</value></data>
@@ -117,6 +133,7 @@
   <data name="NoTLKFileLoaded" xml:space="preserve"><value>Aucun fichier TLK chargé. Impossible de continuer.</value></data>
   <data name="NoValidGameFolderSelected" xml:space="preserve"><value>Erreur ! Aucun dossier de jeu valide sélectionné ! Installation annulée.</value></data>
   <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>Aucune valeur assignée à la colonne {0} pour la nouvelle ligne 2DA dans le modificateur « {1} »...</value></data>
+  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve"><value>Le nwnnsscomp.exe n'est pas la version KPatcher attendue (détectée: {0}).</value></data>
   <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>Impossible de trouver nwnnsscomp.exe dans le dossier TSLPatchData ! Impossible de compiler le script.</value></data>
   <data name="OperationTimedOut" xml:space="preserve"><value>Opération expirée : {0}</value></data>
   <data name="OperationWasCancelled" xml:space="preserve"><value>Opération annulée : {0}</value></data>
@@ -127,8 +144,11 @@
   <data name="PatcherFinishedWithErrors" xml:space="preserve"><value>Le patcher a terminé, mais {0} erreurs ! Le mod n’a probablement pas été installé correctement.</value></data>
   <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve"><value>Le patcher a terminé, mais {0} erreurs et {1} avertissements ! Le mod n’a probablement pas été installé correctement.</value></data>
   <data name="PatcherFinishedWithWarnings" xml:space="preserve"><value>Le patcher a terminé, mais {0} avertissements ! Le mod peut ne pas fonctionner correctement.</value></data>
+  <data name="PatchingFromUnixCompilingFormat" xml:space="preserve"><value>Application de correctifs depuis un système d'exploitation unix, compilation de '{0}' à l'aide des compilateurs intégrés...</value></data>
   <data name="PatchingRimFileWarning" xml:space="preserve"><value>Ce mod applique un correctif au fichier RIM Modules/{0} !
 L'application de correctifs aux RIM est très incompatible, non recommandée et largement considérée comme une mauvaise pratique. Veuillez demander au développeur du mod de corriger cela.</value></data>
+  <data name="PathDoesNotExist" xml:space="preserve"><value>n'existe pas !</value></data>
+  <data name="PathIsNotGffStructInstance" xml:space="preserve"><value>n'est pas une instance d'un GFFStruct.</value></data>
   <data name="PathPointsToExpectedGffList" xml:space="preserve"><value>Le chemin pointe vers un '{0}', un GFFList est attendu.</value></data>
   <data name="PermissionDenied" xml:space="preserve"><value>Permission refusée : {0}</value></data>
   <data name="Processing2DAPatches" xml:space="preserve"><value>Traitement des correctifs 2DA...</value></data>
@@ -168,6 +188,8 @@ L'application de correctifs aux RIM est très incompatible, non recommandée et 
   <data name="UnableToLoad2DAFileSkipping" xml:space="preserve"><value>Impossible de charger le fichier 2DA {0} ! Ignoré...</value></data>
   <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve"><value>Impossible de charger les instructions ! Le dossier « tslpatchdata » doit contenir « info.rtf ».</value></data>
   <data name="UnableToLocateTLKFileToPatch" xml:space="preserve"><value>Erreur ! Impossible de localiser le fichier TLK à patcher, fichier « {0} » introuvable !</value></data>
+  <data name="UnableToModifyGffFieldFormat" xml:space="preserve"><value>Impossible de modifier le champ GFF '{0}'. Chemin '{1}' {2}</value></data>
+  <data name="UnableToUseFieldPathFrom2DAMemoryFormat" xml:space="preserve"><value>Impossible d'utiliser !FieldPath depuis 2DAMEMORY. Champ parent à '{0}' {1}</value></data>
   <data name="UnexpectedModifierType" xml:space="preserve"><value>Type de modificateur inattendu : {0} : {1}</value></data>
   <data name="UnknownException" xml:space="preserve"><value>Exception inconnue</value></data>
   <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve"><value>{0} utilisé comme index lors du changement de ligne dans le modificateur « {1} », mais le fichier 2DA n’a pas d’étiquette pour cet index.</value></data>
