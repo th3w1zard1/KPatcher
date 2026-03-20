@@ -9,7 +9,7 @@
   <data name="AlignRight" xml:space="preserve"><value>По правому краю</value></data>
   <data name="AllUpdateMirrorsFailed" xml:space="preserve"><value>Все зеркала обновления недоступны.</value></data>
   <data name="AlphaBannerText" xml:space="preserve"><value>⚠️ АЛЬФА-ВЕРСИЯ — НЕ ДЛЯ ПРОДАКШЕНА ⚠️</value></data>
-  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ ВНИМАНИЕ: Это альфа-версия ({0}) KPatcher.NET
+  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ ВНИМАНИЕ: Это альфа-версия ({0}) KOTORPatcher
 
 Эта версия только для тестирования и демонстрации.
 НЕ для использования в продакшене.
@@ -91,7 +91,7 @@
   <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
   <data name="LanguageSpanish" xml:space="preserve"><value>Español</value></data>
   <data name="LoadedNamespacesCountFormat" xml:space="preserve"><value>Загружено пространств имён: {0}.</value></data>
-  <data name="MainWindowTitle" xml:space="preserve"><value>TSLPatcher</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>KPatcher</value></data>
   <data name="ManualDownloadButton" xml:space="preserve"><value>Скачать вручную</value></data>
   <data name="MenuAbout" xml:space="preserve"><value>О программе</value></data>
   <data name="MenuClose" xml:space="preserve"><value>_Закрыть</value></data>
@@ -145,6 +145,14 @@
   <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Права доступа успешно получены</value></data>
   <data name="TaskAlreadyRunning" xml:space="preserve"><value>Задача уже выполняется</value></data>
   <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>Для этого мода требуется подтверждение</value></data>
+  <data name="TimeUnitDay" xml:space="preserve"><value>день</value></data>
+  <data name="TimeUnitDays" xml:space="preserve"><value>дня</value></data>
+  <data name="TimeUnitHour" xml:space="preserve"><value>час</value></data>
+  <data name="TimeUnitHours" xml:space="preserve"><value>часа</value></data>
+  <data name="TimeUnitMinute" xml:space="preserve"><value>минута</value></data>
+  <data name="TimeUnitMinutes" xml:space="preserve"><value>минуты</value></data>
+  <data name="TimeUnitSecond" xml:space="preserve"><value>секунда</value></data>
+  <data name="TimeUnitSeconds" xml:space="preserve"><value>секунды</value></data>
   <data name="UnableToDeleteBackupPermissionFormat" xml:space="preserve"><value>Не удалось удалить восстановленную копию (права доступа). Запросить права и повторить?</value></data>
   <data name="UnableToFetchUpdateInfo" xml:space="preserve"><value>Не удалось получить данные об обновлении. Попробуйте позже.</value></data>
   <data name="UnableToLocateWindowForUpdater" xml:space="preserve"><value>Не удалось найти окно для обновления.</value></data>

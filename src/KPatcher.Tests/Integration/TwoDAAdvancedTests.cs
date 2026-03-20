@@ -319,7 +319,8 @@ I1=Y
             twoda.GetCellString("1", "value").Should().Be("from_token");
             twoda.GetCellString("1", "index").Should().Be("1");
             twoda.GetCellString("1", "label").Should().Be("1");
-            twoda.GetCellString("1", "cell").Should().Be("2"); // Value of id column
+            // RowValueRowCell reads the live row; Unpack evaluates all cells before UpdateValues (vendor twoda.py _unpack parity), so same-row peer "id" is not yet on the row.
+            twoda.GetCellString("1", "cell").Should().Be("");
         }
 
         [Fact]
@@ -479,9 +480,9 @@ DefaultValue=default
             // Act
             add.Apply(twoda, Memory);
 
-            // Assert
-            twoda.GetCellString("1", "reference").Should().Be("15"); // Value from id
-            twoda.GetCellString("1", "data").Should().Be("15"); // Value from reference (which got it from id)
+            // Assert: RowValueRowCell reads the live row; Unpack evaluates all cells before UpdateValues (vendor twoda.py _unpack parity), so same-row peers are not yet on the row.
+            twoda.GetCellString("1", "reference").Should().Be("");
+            twoda.GetCellString("1", "data").Should().Be("");
         }
     }
 }

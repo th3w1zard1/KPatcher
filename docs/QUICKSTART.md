@@ -1,4 +1,4 @@
-# KPatcher.NET Quick Start Guide
+# KPatcher Quick Start Guide
 
 ## Prerequisites
 
@@ -18,14 +18,14 @@
 **Windows (PowerShell)**:
 
 ```powershell
-cd Tools\KPatcher.NET
+cd Tools\KPatcher
 .\build.ps1
 ```
 
 **Linux/macOS (Bash)**:
 
 ```bash
-cd Tools/KPatcher.NET
+cd Tools/KPatcher
 chmod +x build.sh
 ./build.sh
 ```
@@ -33,7 +33,7 @@ chmod +x build.sh
 ### Option 2: Using .NET CLI
 
 ```bash
-cd Tools/KPatcher.NET
+cd Tools/KPatcher
 dotnet restore
 dotnet build
 ```
@@ -41,14 +41,14 @@ dotnet build
 ## Running the Application
 
 ```bash
-cd Tools/KPatcher.NET
+cd Tools/KPatcher
 dotnet run --project src/KPatcher/KPatcher.csproj
 ```
 
 ## Project Structure Overview
 
 ```sh
-Tools/KPatcher.NET/
+Tools/KPatcher/
 ├── KPatcher.sln              # Solution file
 ├── src/
 │   ├── KPatcher/             # Main UI application (Avalonia)
@@ -87,7 +87,7 @@ Tools/KPatcher.NET/
 **VS Code**:
 
 ```bash
-cd Tools/KPatcher.NET
+cd Tools/KPatcher
 code .
 ```
 

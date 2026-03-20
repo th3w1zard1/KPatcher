@@ -416,6 +416,12 @@ Patching RIMs is highly incompatible, not recommended, and widely considered bad
   <data name="CliInfoInstallTime" xml:space="preserve">
     <value>[Info] Install time: {0}</value>
   </data>
+  <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve">
+    <value>[Warning] Display driver not available, cannot run in GUI mode: {0}</value>
+  </data>
+  <data name="CliInfoUseHelpForOptions" xml:space="preserve">
+    <value>[Info] Use --help to see CLI options</value>
+  </data>
   <data name="CliInfoUninstallingMod" xml:space="preserve">
     <value>[Info] Uninstalling mod from {0}</value>
   </data>

@@ -1,6 +1,6 @@
 # GitHub Actions Workflows Documentation
 
-This document describes the GitHub Actions workflows for KPatcher.NET.
+This document describes the GitHub Actions workflows for KPatcher.
 
 ## Overview
 

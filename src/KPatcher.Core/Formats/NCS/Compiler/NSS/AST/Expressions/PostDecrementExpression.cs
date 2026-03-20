@@ -32,6 +32,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                     $"  Variable: {varName}");
             }
 
+            block.TempStack += variableType.Size(root);
+
             GetScopedResult scoped = FieldAccess.GetScoped(block, root);
             bool isGlobal = scoped.IsGlobal;
             int stackIndex = scoped.Offset;

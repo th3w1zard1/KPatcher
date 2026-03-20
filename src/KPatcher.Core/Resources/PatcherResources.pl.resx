@@ -27,9 +27,11 @@
   <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Info] Instalowanie moda z {0} do {1}</value></data>
   <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve"><value>[Info] Odinstalowanie zakończone pomyślnie</value></data>
   <data name="CliInfoUninstallingMod" xml:space="preserve"><value>[Info] Odinstalowywanie moda z {0}</value></data>
+  <data name="CliInfoUseHelpForOptions" xml:space="preserve"><value>[Info] Użyj --help, aby zobaczyć opcje CLI</value></data>
   <data name="CliInfoValidatingMod" xml:space="preserve"><value>[Info] Walidacja konfiguracji moda</value></data>
   <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve"><value>[Info] Walidacja zakończona pomyślnie</value></data>
   <data name="CliInnerException" xml:space="preserve"><value>Wewnętrzny wyjątek: {0}</value></data>
+  <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Ostrzeżenie] Sterownik wyświetlacza niedostępny, nie można uruchomić w trybie GUI: {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Ostrzeżenie] Odinstalowanie zakończone z ostrzeżeniami</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Sekcja [CompileList] brakuje w ini.</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>ConfigReader zakończył ładowanie INI</value></data>

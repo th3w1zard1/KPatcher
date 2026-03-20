@@ -109,7 +109,7 @@ The generated appcast.xml follows this structure:
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>KPatcher Updates</title>
-    <link>https://github.com/th3w1zard1/KPatcher.NET</link>
+    <link>https://github.com/th3w1zard1/KPatcher</link>
     <description>KPatcher update feed</description>
     <language>en</language>
     <item>
@@ -256,8 +256,8 @@ private void InitializeUpdateManager()
 {
     _updateManager = new UpdateManager
     {
-        AppcastUrl = "https://github.com/th3w1zard1/KPatcher.NET/releases/latest/download/appcast.xml",
-        BetaAppcastUrl = "https://github.com/th3w1zard1/KPatcher.NET/releases/download/bleeding-edge/appcast-beta.xml",
+        AppcastUrl = "https://github.com/th3w1zard1/KPatcher/releases/latest/download/appcast.xml",
+        BetaAppcastUrl = "https://github.com/th3w1zard1/KPatcher/releases/download/bleeding-edge/appcast-beta.xml",
         CheckOnStartup = true,
         SilentCheck = true,
         UseBetaChannel = false,

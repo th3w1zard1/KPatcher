@@ -14,8 +14,8 @@
     <Company>bolabaden</Company>
     <Product>KCompiler.Core</Product>
     <PackageTags>kotor;tsl;nss;ncs;nwnnsscomp;compiler;kcompiler</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -9,7 +9,7 @@
   <data name="AlignRight" xml:space="preserve"><value>Aligner à droite</value></data>
   <data name="AllUpdateMirrorsFailed" xml:space="preserve"><value>Tous les miroirs de mise à jour ont échoué.</value></data>
   <data name="AlphaBannerText" xml:space="preserve"><value>⚠️ VERSION ALPHA - NE PAS UTILISER EN PRODUCTION ⚠️</value></data>
-  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ ATTENTION : Ceci est une version ALPHA ({0}) de KPatcher.NET
+  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ ATTENTION : Ceci est une version ALPHA ({0}) de KOTORPatcher
 
 Cette version est destinée aux tests et démonstrations uniquement.
 Elle ne doit PAS être utilisée en production.
@@ -91,7 +91,7 @@ Pour un usage en production, utilisez la version stable.</value></data>
   <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
   <data name="LanguageSpanish" xml:space="preserve"><value>Español</value></data>
   <data name="LoadedNamespacesCountFormat" xml:space="preserve"><value>{0} espace(s) de noms chargé(s).</value></data>
-  <data name="MainWindowTitle" xml:space="preserve"><value>TSLPatcher</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>KPatcher</value></data>
   <data name="ManualDownloadButton" xml:space="preserve"><value>Téléchargement manuel</value></data>
   <data name="MenuAbout" xml:space="preserve"><value>À propos</value></data>
   <data name="MenuClose" xml:space="preserve"><value>_Fermer</value></data>
@@ -145,6 +145,14 @@ Pour un usage en production, utilisez la version stable.</value></data>
   <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Permission obtenue avec succès</value></data>
   <data name="TaskAlreadyRunning" xml:space="preserve"><value>Une tâche est déjà en cours</value></data>
   <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>Ce mod nécessite une confirmation</value></data>
+  <data name="TimeUnitDay" xml:space="preserve"><value>jour</value></data>
+  <data name="TimeUnitDays" xml:space="preserve"><value>jours</value></data>
+  <data name="TimeUnitHour" xml:space="preserve"><value>heure</value></data>
+  <data name="TimeUnitHours" xml:space="preserve"><value>heures</value></data>
+  <data name="TimeUnitMinute" xml:space="preserve"><value>minute</value></data>
+  <data name="TimeUnitMinutes" xml:space="preserve"><value>minutes</value></data>
+  <data name="TimeUnitSecond" xml:space="preserve"><value>seconde</value></data>
+  <data name="TimeUnitSeconds" xml:space="preserve"><value>secondes</value></data>
   <data name="UnableToDeleteBackupPermissionFormat" xml:space="preserve"><value>Impossible de supprimer la sauvegarde restaurée (permissions). Voulez-vous demander les permissions et réessayer ?</value></data>
   <data name="UnableToFetchUpdateInfo" xml:space="preserve"><value>Impossible de récupérer les informations de mise à jour. Réessayez plus tard.</value></data>
   <data name="UnableToLocateWindowForUpdater" xml:space="preserve"><value>Impossible de localiser la fenêtre pour la mise à jour.</value></data>

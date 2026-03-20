@@ -17,7 +17,7 @@
     <Authors>th3w1zard1</Authors>
     <Company>OpenKotOR</Company>
     <Product>KPatcher.UI</Product>
-    <Description>Avalonia UI components for KPatcher.NET, providing a graphical interface for installing and managing KOTOR mods.</Description>
+    <Description>Avalonia UI components for KPatcher, providing a graphical interface for installing and managing KOTOR mods.</Description>
     <PackageTags>kotor;tsl;patcher;mod;gui;avalonia;kpatcher;ui</PackageTags>
     <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Build script for KPatcher.NET
+# Build script for KPatcher
 
-echo "Building KPatcher.NET..."
+echo "Building KPatcher..."
 
 # Restore dependencies
 dotnet restore KPatcher.sln

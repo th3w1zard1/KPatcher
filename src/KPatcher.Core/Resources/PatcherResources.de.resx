@@ -27,9 +27,11 @@
   <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Info] Installiere Mod von {0} nach {1}</value></data>
   <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve"><value>[Info] Deinstallation erfolgreich abgeschlossen</value></data>
   <data name="CliInfoUninstallingMod" xml:space="preserve"><value>[Info] Deinstalliere Mod von {0}</value></data>
+  <data name="CliInfoUseHelpForOptions" xml:space="preserve"><value>[Info] Verwenden Sie --help, um CLI-Optionen anzuzeigen</value></data>
   <data name="CliInfoValidatingMod" xml:space="preserve"><value>[Info] Validiere Mod-Konfiguration</value></data>
   <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve"><value>[Info] Validierung erfolgreich abgeschlossen</value></data>
   <data name="CliInnerException" xml:space="preserve"><value>Interne Ausnahme: {0}</value></data>
+  <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Warnung] Anzeigetreiber nicht verfügbar, GUI-Modus nicht möglich: {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Warnung] Deinstallation mit Warnungen abgeschlossen</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Abschnitt [CompileList] fehlt in der ini.</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>Der ConfigReader hat das Laden der INI abgeschlossen</value></data>

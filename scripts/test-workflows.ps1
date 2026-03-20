@@ -92,7 +92,7 @@ if ($CheckSecrets -or $All) {
     Write-Host "    - NETSPARKLE_PUBLIC_KEY (optional)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  To check secrets, go to:" -ForegroundColor White
-    Write-Host "    https://github.com/th3w1zard1/KPatcher.NET/settings/secrets/actions" -ForegroundColor Gray
+    Write-Host "    https://github.com/th3w1zard1/KPatcher/settings/secrets/actions" -ForegroundColor Gray
     Write-Host ""
 }
 

@@ -112,8 +112,8 @@
     <Product>KPatcher.Core</Product>
     <Description>Core patching engine and logic for KOTORPatcher/KPatcher. Provides functionality for installing mods, applying patches to game files (2DA, GFF, TLK, SSF, NSS, NCS), and managing game installations.</Description>
     <PackageTags>kotor;tsl;patcher;mod;gff;2da;tlk;nss;ncs</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>

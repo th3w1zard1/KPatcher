@@ -19,26 +19,26 @@ namespace KPatcher.UI
             ["currentVersion"] = "0.1.0",
             ["kpatcherLatestVersion"] = "1.5.2",
             ["kpatcherLatestBetaVersion"] = "1.7.0b1",
-            ["updateInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher.NET/contents/src/KPatcher/Config.cs",
-            ["updateBetaInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher.NET/contents/src/KPatcher/Config.cs?ref=bleeding-edge",
+            ["updateInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher/contents/src/KPatcher/Config.cs",
+            ["updateBetaInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher/contents/src/KPatcher/Config.cs?ref=bleeding-edge",
             ["kpatcherDownloadLink"] = "https://deadlystream.com/files/file/1982-holocron-kpatcher",
-            ["kpatcherBetaDownloadLink"] = "https://github.com/th3w1zard1/KPatcher.NET/releases/tag/v1.70-patcher-beta1",
+            ["kpatcherBetaDownloadLink"] = "https://github.com/th3w1zard1/KPatcher/releases/tag/v1.70-patcher-beta1",
             ["kpatcherDirectLinks"] = new Dictionary<string, Dictionary<string, List<string>>>
             {
                 ["Darwin"] = new Dictionary<string, List<string>>
                 {
                     ["32bit"] = new List<string>(),
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher.NET/releases/download/{tag}/KPatcher_Mac.zip" }
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/KPatcher_Mac.zip" }
                 },
                 ["Linux"] = new Dictionary<string, List<string>>
                 {
                     ["32bit"] = new List<string>(),
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher.NET/releases/download/{tag}/KPatcher_Linux.zip" }
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/KPatcher_Linux.zip" }
                 },
                 ["Windows"] = new Dictionary<string, List<string>>
                 {
-                    ["32bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher.NET/releases/download/{tag}/KPatcher_Windows.zip" },
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher.NET/releases/download/{tag}/KPatcher_Windows.zip" }
+                    ["32bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/KPatcher_Windows.zip" },
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/KPatcher_Windows.zip" }
                 }
             },
             ["kpatcherLatestNotes"] = "",

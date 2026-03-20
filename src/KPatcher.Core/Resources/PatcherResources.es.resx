@@ -27,9 +27,11 @@
   <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Info] Instalando mod desde {0} a {1}</value></data>
   <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve"><value>[Info] Desinstalación completada exitosamente</value></data>
   <data name="CliInfoUninstallingMod" xml:space="preserve"><value>[Info] Desinstalando mod desde {0}</value></data>
+  <data name="CliInfoUseHelpForOptions" xml:space="preserve"><value>[Info] Use --help para ver opciones de CLI</value></data>
   <data name="CliInfoValidatingMod" xml:space="preserve"><value>[Info] Validando configuración del mod</value></data>
   <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve"><value>[Info] Validación completada exitosamente</value></data>
   <data name="CliInnerException" xml:space="preserve"><value>Excepción Interna: {0}</value></data>
+  <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Advertencia] Controlador de pantalla no disponible, no se puede ejecutar en modo GUI: {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Advertencia] Desinstalación completada con advertencias</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Sección [CompileList] faltante en el ini.</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>El ConfigReader terminó de cargar el INI</value></data>

@@ -187,6 +187,14 @@ namespace KPatcher.UI.Resources
         public static string PermissionErrorTitle => ResourceManager.GetString(nameof(PermissionErrorTitle), _resourceCulture);
         public static string UnableToDeleteBackupPermissionFormat => ResourceManager.GetString(nameof(UnableToDeleteBackupPermissionFormat), _resourceCulture);
         public static string GainingPermissionPleaseWait => ResourceManager.GetString(nameof(GainingPermissionPleaseWait), _resourceCulture);
+        public static string TimeUnitDay => ResourceManager.GetString(nameof(TimeUnitDay), _resourceCulture);
+        public static string TimeUnitDays => ResourceManager.GetString(nameof(TimeUnitDays), _resourceCulture);
+        public static string TimeUnitHour => ResourceManager.GetString(nameof(TimeUnitHour), _resourceCulture);
+        public static string TimeUnitHours => ResourceManager.GetString(nameof(TimeUnitHours), _resourceCulture);
+        public static string TimeUnitMinute => ResourceManager.GetString(nameof(TimeUnitMinute), _resourceCulture);
+        public static string TimeUnitMinutes => ResourceManager.GetString(nameof(TimeUnitMinutes), _resourceCulture);
+        public static string TimeUnitSecond => ResourceManager.GetString(nameof(TimeUnitSecond), _resourceCulture);
+        public static string TimeUnitSeconds => ResourceManager.GetString(nameof(TimeUnitSeconds), _resourceCulture);
     }
 }
 

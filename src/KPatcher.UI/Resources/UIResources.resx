@@ -82,7 +82,7 @@
   <data name="PlaceholderSelectKotor" xml:space="preserve"><value>Select your KOTOR directory path</value></data>
   <data name="AlphaBannerText" xml:space="preserve"><value>⚠️ ALPHA VERSION - NOT FOR PRODUCTION USE ⚠️</value></data>
   <data name="AlphaWarningTitle" xml:space="preserve"><value>ALPHA VERSION WARNING</value></data>
-  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ WARNING: This is an ALPHA version ({0}) of KPatcher.NET
+  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ WARNING: This is an ALPHA version ({0}) of KOTORPatcher
 
 This version is for testing and demonstration purposes only.
 It is NOT intended for production use.
@@ -211,4 +211,12 @@ For production use, please use the stable release.</value></data>
   <data name="PermissionErrorTitle" xml:space="preserve"><value>Permission Error</value></data>
   <data name="UnableToDeleteBackupPermissionFormat" xml:space="preserve"><value>Unable to delete the restored backup due to permission issues. Would you like to gain permission and try again?</value></data>
   <data name="GainingPermissionPleaseWait" xml:space="preserve"><value>Gaining permission, please wait...</value></data>
+  <data name="TimeUnitDay" xml:space="preserve"><value>day</value></data>
+  <data name="TimeUnitDays" xml:space="preserve"><value>days</value></data>
+  <data name="TimeUnitHour" xml:space="preserve"><value>hour</value></data>
+  <data name="TimeUnitHours" xml:space="preserve"><value>hours</value></data>
+  <data name="TimeUnitMinute" xml:space="preserve"><value>minute</value></data>
+  <data name="TimeUnitMinutes" xml:space="preserve"><value>minutes</value></data>
+  <data name="TimeUnitSecond" xml:space="preserve"><value>second</value></data>
+  <data name="TimeUnitSeconds" xml:space="preserve"><value>seconds</value></data>
 </root>

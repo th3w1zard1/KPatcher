@@ -1,5 +1,5 @@
 @echo off
-cd /d g:\GitHub\KPatcher.NET
+cd /d g:\GitHub\KPatcher
 echo Checking package...
 if not exist "src\KPatcher.Core\bin\Release\KPatcher.Core.0.1.0.nupkg" (
     echo ERROR: Package not found!

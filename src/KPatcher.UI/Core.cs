@@ -723,10 +723,10 @@ namespace KPatcher.UI
             int seconds = installTime.Seconds;
 
             var parts = new List<string>();
-            if (days > 0) { parts.Add($"{days} days"); }
-            if (hours > 0) { parts.Add($"{hours} hours"); }
-            if (minutes > 0 || (days == 0 && hours == 0)) { parts.Add($"{minutes} minutes"); }
-            parts.Add($"{seconds} seconds");
+            if (days > 0) { parts.Add($"{days} {(days == 1 ? UIResources.TimeUnitDay : UIResources.TimeUnitDays)}"); }
+            if (hours > 0) { parts.Add($"{hours} {(hours == 1 ? UIResources.TimeUnitHour : UIResources.TimeUnitHours)}"); }
+            if (minutes > 0 || (days == 0 && hours == 0)) { parts.Add($"{minutes} {(minutes == 1 ? UIResources.TimeUnitMinute : UIResources.TimeUnitMinutes)}"); }
+            parts.Add($"{seconds} {(seconds == 1 ? UIResources.TimeUnitSecond : UIResources.TimeUnitSeconds)}");
 
             return string.Join(", ", parts);
         }

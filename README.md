@@ -1,4 +1,4 @@
-# KPatcher.NET
+# KPatcher
 
 A direct 1:1 port of KPatcher from Python to C#/.NET with Avalonia UI framework.
 
@@ -101,7 +101,7 @@ Current test coverage includes:
 ## Building
 
 ```bash
-cd Tools/KPatcher.NET
+cd Tools/KPatcher
 dotnet restore
 dotnet build
 ```

@@ -184,8 +184,8 @@ namespace KPatcher
                 catch (Exception ex)
                 {
                     // If GUI is unavailable, print error and exit gracefully
-                    Console.Error.WriteLine($"[Warning] Display driver not available, cannot run in GUI mode: {ex.Message}");
-                    Console.Error.WriteLine("[Info] Use --help to see CLI options");
+                    Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliWarningDisplayDriverNotAvailable, ex.Message));
+                    Console.Error.WriteLine(PatcherResources.CliInfoUseHelpForOptions);
                     Environment.Exit(0);
                 }
             }
@@ -348,8 +348,8 @@ namespace KPatcher
                         logger,
                         cancellationToken);
 
-                    Console.WriteLine($"[Info] Install completed: {result.NumErrors} errors, {result.NumWarnings} warnings, {result.NumPatches} patches");
-                    Console.WriteLine($"[Info] Install time: {AppCore.FormatInstallTime(result.InstallTime)}");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallCompleted, result.NumErrors, result.NumWarnings, result.NumPatches));
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallTime, AppCore.FormatInstallTime(result.InstallTime)));
 
                     if (result.NumErrors > 0)
                     {

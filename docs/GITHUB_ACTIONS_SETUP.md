@@ -89,7 +89,7 @@ chmod +x scripts/setup-netsparkle-keys.sh
 
 ### 2. Configure GitHub Secrets
 
-Go to: <https://github.com/th3w1zard1/KPatcher.NET/settings/secrets/actions>
+Go to: <https://github.com/th3w1zard1/KPatcher/settings/secrets/actions>
 
 Add:
 

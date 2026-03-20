@@ -152,7 +152,7 @@ namespace KPatcher.UI.Update
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("KPatcher.NET AutoUpdater");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("KPatcher AutoUpdater");
             client.Timeout = TimeSpan.FromSeconds(30);
             return client;
         }

@@ -58,7 +58,9 @@ namespace KPatcher.Core.Resources
         public static string CliInfoInstallingMod => ResourceManager.GetString(nameof(CliInfoInstallingMod), _resourceCulture);
         public static string CliInfoUninstallCompletedSuccessfully => ResourceManager.GetString(nameof(CliInfoUninstallCompletedSuccessfully), _resourceCulture);
         public static string CliInfoUninstallingMod => ResourceManager.GetString(nameof(CliInfoUninstallingMod), _resourceCulture);
+        public static string CliInfoUseHelpForOptions => ResourceManager.GetString(nameof(CliInfoUseHelpForOptions), _resourceCulture);
         public static string CliInfoValidatingMod => ResourceManager.GetString(nameof(CliInfoValidatingMod), _resourceCulture);
+        public static string CliWarningDisplayDriverNotAvailable => ResourceManager.GetString(nameof(CliWarningDisplayDriverNotAvailable), _resourceCulture);
         public static string CliInfoValidationCompletedSuccessfully => ResourceManager.GetString(nameof(CliInfoValidationCompletedSuccessfully), _resourceCulture);
         public static string CliInnerException => ResourceManager.GetString(nameof(CliInnerException), _resourceCulture);
         public static string CliWarningUninstallCompletedWithWarnings => ResourceManager.GetString(nameof(CliWarningUninstallCompletedWithWarnings), _resourceCulture);

@@ -180,7 +180,7 @@ Write-Host "   Update src/KPatcher/UpdateManager.cs:" -ForegroundColor White
 Write-Host "   Ed25519PublicKey = `"$publicKey`"" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. Add Private Key to GitHub Secrets:" -ForegroundColor Yellow
-Write-Host "   - Go to: https://github.com/th3w1zard1/KPatcher.NET/settings/secrets/actions" -ForegroundColor White
+Write-Host "   - Go to: https://github.com/th3w1zard1/KPatcher/settings/secrets/actions" -ForegroundColor White
 Write-Host "   - Click 'New repository secret'" -ForegroundColor White
 Write-Host "   - Name: NETSPARKLE_PRIVATE_KEY" -ForegroundColor White
 Write-Host "   - Value: $privateKey" -ForegroundColor Gray

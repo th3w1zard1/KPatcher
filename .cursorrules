@@ -1,4 +1,4 @@
-# KPatcher.NET Rules and Conventions for AI LLM agents
+# KPatcher Rules and Conventions for AI LLM agents
 
 ## ⚠️ CRITICAL: Git Commit Requirement ⚠️
 
@@ -154,6 +154,6 @@ The tool supports `-WhatIf` for dry-run testing, `-Verbose` for detailed output,
 - DO NOT depend on external compiler availability for decompilation to work
 - NCSDecomp.NET must be completely self-contained and functional without any external tools
 
-**Note**: This restriction applies ONLY to `src/NCSDecomp` and `src/CSharpKOTOR/Formats/NCS/NCSDecomp`. Other parts of KPatcher.NET (e.g., tests, round-trip validation utilities) MAY use external compilers, but the core decompiler library must NOT.
+**Note**: This restriction applies ONLY to `src/NCSDecomp` and `src/CSharpKOTOR/Formats/NCS/NCSDecomp`. Other parts of KPatcher (e.g., tests, round-trip validation utilities) MAY use external compilers, but the core decompiler library must NOT.
 
 **If you see code in NCSDecomp.NET that calls external compilers, it should be removed or refactored to use internal implementations only.**

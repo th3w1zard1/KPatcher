@@ -1,6 +1,6 @@
-# Build script for KPatcher.NET (PowerShell)
+# Build script for KPatcher (PowerShell)
 
-Write-Host "Building KPatcher.NET..." -ForegroundColor Green
+Write-Host "Building KPatcher..." -ForegroundColor Green
 
 # Restore dependencies
 dotnet restore KPatcher.sln
