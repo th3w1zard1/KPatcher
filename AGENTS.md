@@ -25,3 +25,13 @@ KPatcher.NET is a C#/.NET Avalonia desktop application for installing Star Wars 
 - **NCS Roundtrip tests** require `nwnnsscomp.exe` (Windows-only external compiler) and will always fail on Linux.
 - **CI workflows** target specific `.csproj` files, NOT the `.sln`. The solution references 11 missing projects and cannot be used with `dotnet restore/build/test`.
 - **Avalonia GUI** requires `DISPLAY=:1` environment variable to launch the X11 window.
+
+## Learned User Preferences
+
+- When changing how mods are applied (2DA, TLK, GFF, install paths, or related patcher flows), treat mismatches with HoloPatcher or PyKotor as potential KPatcher bugs until parity with the vendored reference code is checked.
+- For UI features described as matching HoloPatcher (for example install auto-detection), follow the same registry and default-path discovery approach as vendored HoloPatcher unless there is a deliberate, documented reason to differ.
+- Keep the main log or status area readable at a comfortable font size and support normal text selection, copy, and select-all like a typical desktop text surface.
+
+## Learned Workspace Facts
+
+- Parity reference sources live under `vendor/PyKotor/Tools/HoloPatcher/src/holopatcher` and `vendor/PyKotor/Libraries/PyKotor/src/pykotor/tslpatcher/`.
