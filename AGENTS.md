@@ -26,12 +26,14 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 - **NSS→NCS** is implemented in **`KCompiler.Core`** (managed compiler, cross-platform). `KPatcher.Core` references that package; the patcher prefers managed compilation first and may fall back to `nwnnsscomp.exe` on Windows only if managed compile fails.
 - **NCS Roundtrip tests** may still involve external tooling where tests explicitly shell out to `nwnnsscomp.exe` on Windows.
 - **Avalonia GUI** requires `DISPLAY=:1` environment variable to launch the X11 window.
+- **Test host path errors**: If you see `System.ArgumentNullException: Value cannot be null. (Parameter 'path1')` in `Path.Combine` during test execution, ensure the project is built first: `dotnet build src/KPatcher.Tests/KPatcher.Tests.csproj` before running tests. This can occur with corrupted build state or when running tests without a prior build.
 
 ## Learned User Preferences
 
 - When changing how mods are applied (2DA, TLK, GFF, install paths, or related patcher flows), treat mismatches with HoloPatcher or PyKotor as potential KPatcher bugs until parity with the vendored reference code is checked.
 - For UI features described as matching HoloPatcher (for example install auto-detection), follow the same registry and default-path discovery approach as vendored HoloPatcher unless there is a deliberate, documented reason to differ.
 - Keep the main log or status area readable at a comfortable font size, with per-line color highlighting by log level (error/warning/note) and support for normal text selection, copy, and select-all like a typical desktop text surface.
+- Tests should be meticulous and thorough with multiple assertions per stage, as strict as possible.
 
 ### Localization
 

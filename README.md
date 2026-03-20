@@ -60,6 +60,26 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 - .NET 8.0 SDK
 - Avalonia 11.0.10
 
+## Vendor submodules
+
+This repository uses git submodules for reference and test assets:
+
+| Path | Purpose |
+|------|---------|
+| `vendor/PyKotor` | Parity reference (HoloPatcher, PyKotor library). |
+| `vendor/Vanilla_KOTOR_Script_Source` | Decompiled vanilla NSS (K1/TSL) for compile/roundtrip tests. |
+| `vendor/DeNCS` | NCS decompiler reference (Java); C# decoder port lives under `src/KPatcher.Core/Formats/NCS/Decompiler/`. |
+
+Clone with submodules to run vanilla NSS compile tests and to have full parity references:
+
+```bash
+git clone --recurse-submodules <repo-url>
+# or, for an existing clone:
+git submodule update --init --recursive
+```
+
+Note: `vendor/PyKotor` has nested submodules; if `submodule update --recursive` fails on a missing URL (e.g. Kotor-3D-Model-Converter), init only the top-level submodules.
+
 ## Testing
 
 The project includes comprehensive unit tests covering all core functionality. See [TESTING.md](TESTING.md) for detailed information.
