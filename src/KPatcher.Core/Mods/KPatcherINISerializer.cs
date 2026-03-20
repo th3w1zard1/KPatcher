@@ -1,5 +1,3 @@
-// Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:157-243
-// Original: class KPatcherINISerializer: ...
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,8 +12,6 @@ using TargetType = KPatcher.Core.Mods.TwoDA.TargetType;
 
 namespace KPatcher.Core.Mods
 {
-    // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:91-120
-    // Original: def escape_ini_value(value: str) -> str: ...
     public static class IniEscape
     {
         public static string EscapeIniValue(string value)
@@ -40,12 +36,8 @@ namespace KPatcher.Core.Mods
         }
     }
 
-    // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:157-243
-    // Original: class KPatcherINISerializer: ...
     public class KPatcherINISerializer
     {
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:160-173
-        // Original: @staticmethod def _format_ini_value(...): ...
         private static string FormatIniValue(object value)
         {
             string valueStr = value?.ToString() ?? "";
@@ -56,8 +48,6 @@ namespace KPatcher.Core.Mods
             return valueStr;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:175-242
-        // Original: def serialize(...): ...
         public string Serialize(
             ModificationsByType modificationsByType,
             bool includeHeader = true,
@@ -90,8 +80,6 @@ namespace KPatcher.Core.Mods
             return string.Join("\n", lines);
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:244-289
-        // Original: def _generate_header(self) -> list[str]: ...
         private List<string> GenerateHeader()
         {
             string today = DateTime.UtcNow.ToString("MM/dd/yyyy");
@@ -113,8 +101,6 @@ namespace KPatcher.Core.Mods
             };
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:291-297
-        // Original: def _generate_settings(self) -> list[str]: ...
         private List<string> GenerateSettings()
         {
             return new List<string>
@@ -125,8 +111,6 @@ namespace KPatcher.Core.Mods
             };
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:842-918
-        // Original: def _serialize_tlk_list(...): ...
         private List<string> SerializeTlkList(List<ModificationsTLK> modifications, bool verbose)
         {
             if (modifications == null || modifications.Count == 0)
@@ -194,8 +178,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:1100-1150
-        // Original: def _serialize_install_list(...): ...
         private List<string> SerializeInstallList(List<InstallFile> installFiles, bool verbose)
         {
             if (installFiles == null || installFiles.Count == 0)
@@ -214,8 +196,8 @@ namespace KPatcher.Core.Mods
                 string folder = folderGroup.Key;
                 foreach (var installFile in folderGroup)
                 {
-                    string filename = !string.IsNullOrEmpty(installFile.SaveAs) 
-                        ? installFile.SaveAs 
+                    string filename = !string.IsNullOrEmpty(installFile.SaveAs)
+                        ? installFile.SaveAs
                         : installFile.SourceFile;
                     lines.Add($"File{lines.Count - 1}={filename}");
                     lines.Add($"  !Destination={folder}");
@@ -230,8 +212,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:299-363
-        // Original: def _serialize_2da_list(...): ...
         private List<string> Serialize2DAList(List<Modifications2DA> modifications, bool verbose)
         {
             if (modifications == null || modifications.Count == 0)
@@ -258,8 +238,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:330-363
-        // Original: def _serialize_2da_file(...): ...
         private List<string> Serialize2DAFile(Modifications2DA mod2da)
         {
             var lines = new List<string>();
@@ -271,24 +249,24 @@ namespace KPatcher.Core.Mods
             {
                 if (modifier is ChangeRow2DA changeRow)
                 {
-                    string sectionName = !string.IsNullOrEmpty(changeRow.Identifier) 
-                        ? changeRow.Identifier 
+                    string sectionName = !string.IsNullOrEmpty(changeRow.Identifier)
+                        ? changeRow.Identifier
                         : $"{mod2da.SourceFile}_changerow_{modifierIdx}";
                     lines.Add($"ChangeRow{modifierIdx}={sectionName}");
                     modifierIdx++;
                 }
                 else if (modifier is AddRow2DA addRow)
                 {
-                    string sectionName = !string.IsNullOrEmpty(addRow.Identifier) 
-                        ? addRow.Identifier 
+                    string sectionName = !string.IsNullOrEmpty(addRow.Identifier)
+                        ? addRow.Identifier
                         : $"{mod2da.SourceFile}_addrow_{modifierIdx}";
                     lines.Add($"AddRow{modifierIdx}={sectionName}");
                     modifierIdx++;
                 }
                 else if (modifier is AddColumn2DA addColumn)
                 {
-                    string sectionName = !string.IsNullOrEmpty(addColumn.Identifier) 
-                        ? addColumn.Identifier 
+                    string sectionName = !string.IsNullOrEmpty(addColumn.Identifier)
+                        ? addColumn.Identifier
                         : $"{mod2da.SourceFile}_addcol_{modifierIdx}";
                     lines.Add($"AddColumn{modifierIdx}={sectionName}");
                     modifierIdx++;
@@ -308,8 +286,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:365-463
-        // Original: def _serialize_2da_modifier(...): ...
         private List<string> Serialize2DaModifier(object modifier)
         {
             var lines = new List<string>();
@@ -431,8 +407,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:485-499
-        // Original: def _serialize_row_value(...): ...
         private string SerializeRowValue(object rowValue)
         {
             if (rowValue is RowValue2DAMemory rv2da)
@@ -454,8 +428,6 @@ namespace KPatcher.Core.Mods
             throw new InvalidOperationException($"Cannot serialize runtime-only RowValue type: {rowValue.GetType().Name}");
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:501-518
-        // Original: def _serialize_store_row_value(...): ...
         private string SerializeStoreRowValue(object rowValue)
         {
             if (rowValue is RowValueRowIndex)
@@ -489,8 +461,6 @@ namespace KPatcher.Core.Mods
             throw new InvalidOperationException($"Unsupported RowValue type for memory storage serialization: {rowValue.GetType().Name}");
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:520-652
-        // Original: def _serialize_gff_list(...): ...
         private List<string> SerializeGffList(List<ModificationsGFF> modifications, bool verbose)
         {
             if (modifications == null || modifications.Count == 0)
@@ -518,8 +488,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:554-652
-        // Original: def _serialize_gff_file(...): ...
         private List<string> SerializeGffFile(ModificationsGFF modGff)
         {
             var lines = new List<string>();
@@ -600,8 +568,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:654-741
-        // Original: def _serialize_addfield_section(...): ...
         private List<string> SerializeAddfieldSection(ModifyGFF gffModifier, string sectionName)
         {
             var lines = new List<string>();
@@ -686,14 +652,14 @@ namespace KPatcher.Core.Mods
                         string nestedSection = "";
                         if (nestedMod is AddFieldGFF nestedAddField)
                         {
-                            nestedSection = !string.IsNullOrEmpty(nestedAddField.Identifier) 
-                                ? nestedAddField.Identifier 
+                            nestedSection = !string.IsNullOrEmpty(nestedAddField.Identifier)
+                                ? nestedAddField.Identifier
                                 : $"{sectionName}_nested_{nestedIdx}";
                         }
                         else if (nestedMod is AddStructToListGFF nestedAddStruct)
                         {
-                            nestedSection = !string.IsNullOrEmpty(nestedAddStruct.Identifier) 
-                                ? nestedAddStruct.Identifier 
+                            nestedSection = !string.IsNullOrEmpty(nestedAddStruct.Identifier)
+                                ? nestedAddStruct.Identifier
                                 : $"{sectionName}_nested_{nestedIdx}";
                         }
                         else
@@ -709,8 +675,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:785-820
-        // Original: def _serialize_field_value(...): ...
         private string SerializeFieldValue(object fieldValue)
         {
             if (fieldValue is FieldValue2DAMemory fv2da)
@@ -728,8 +692,6 @@ namespace KPatcher.Core.Mods
             return fieldValue?.ToString() ?? "";
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:822-840
-        // Original: def _get_gff_field_type_name(...): ...
         private string GetGffFieldTypeName(GFFFieldType fieldType)
         {
             // Map GFFFieldType enum to KPatcher string names
@@ -756,8 +718,6 @@ namespace KPatcher.Core.Mods
             }
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:920-1000
-        // Original: def _serialize_ssf_list(...): ...
         private List<string> SerializeSsfList(List<ModificationsSSF> modifications, bool verbose)
         {
             if (modifications == null || modifications.Count == 0)
@@ -785,8 +745,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:952-1000
-        // Original: def _serialize_ssf_file(...): ...
         private List<string> SerializeSsfFile(ModificationsSSF modSsf)
         {
             var lines = new List<string>();
@@ -818,8 +776,6 @@ namespace KPatcher.Core.Mods
             return lines;
         }
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:465-483
-        // Original: def _serialize_token_usage(...): ...
         private string SerializeTokenUsage(object tokenUsage)
         {
             // CRITICAL: This writes the TOKEN REFERENCE (e.g., 'StrRef5'), NOT the resolved value.

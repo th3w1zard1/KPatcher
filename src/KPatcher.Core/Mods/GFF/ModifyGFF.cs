@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.GFF
 {
@@ -25,7 +25,7 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Helper function to set localized string field.
-    /// Python: def set_locstring(struct: GFFStruct, label: str, value: LocalizedStringDelta, memory: PatcherMemory)
+    /// def set_locstring(struct: GFFStruct, label: str, value: LocalizedStringDelta, memory: PatcherMemory)
     /// </summary>
     internal static class GFFHelpers
     {
@@ -39,7 +39,6 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Abstract base for GFF modifications.
-    /// 1:1 port from Python ModifyGFF in pykotor/kpatcher/mods/gff.py
     /// </summary>
     public abstract class ModifyGFF
     {
@@ -47,7 +46,6 @@ namespace KPatcher.Core.Mods.GFF
 
         protected static void SetFieldValue(GFFStruct gffStruct, string label, object value, GFFFieldType fieldType, PatcherMemory memory)
         {
-            // Python: FIELD_TYPE_TO_SETTER[field_type](struct_container, label, value, memory)
             switch (fieldType)
             {
                 case GFFFieldType.UInt8:
@@ -144,21 +142,18 @@ namespace KPatcher.Core.Mods.GFF
         [CanBeNull]
         protected static object NavigateContainers(GFFStruct rootContainer, string path)
         {
-            // Python: path = PureWindowsPath(path)
-            // Python: if not path.name: return root_container
             if (string.IsNullOrEmpty(path))
             {
                 return rootContainer;
             }
 
             string[] parts = path.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
-            // Python: container: ComparableMixin | GFFStruct | GFFList | None = root_container
             // Can be null if not found
             object container = rootContainer;
 
             foreach (string step in parts)
             {
-                // Python: Skip >>##INDEXINLIST##<< sentinel - it's not a real path component
+                // Skip >>##INDEXINLIST##<< sentinel - it's not a real path component
                 if (step == ">>##INDEXINLIST##<<")
                 {
                     continue;
@@ -166,7 +161,6 @@ namespace KPatcher.Core.Mods.GFF
 
                 if (container is GFFStruct gffStruct)
                 {
-                    // Python: container = container.acquire(step, None, (GFFStruct, GFFList))
                     // Try struct first, then list
                     // Can be null if struct not found
                     if (gffStruct.TryGetStruct(step, out GFFStruct childStruct))
@@ -185,7 +179,6 @@ namespace KPatcher.Core.Mods.GFF
                 }
                 else if (container is GFFList gffList)
                 {
-                    // Python: container = container.at(int(step))
                     if (int.TryParse(step, out int index))
                     {
                         container = gffList.At(index);
@@ -201,7 +194,6 @@ namespace KPatcher.Core.Mods.GFF
                 }
             }
 
-            // Python: assert isinstance(container, (GFFStruct, GFFList, type(None)))
             return container;
         }
 
@@ -249,22 +241,18 @@ namespace KPatcher.Core.Mods.GFF
 
         /// <summary>
         /// Navigates to a field from the root gff struct from a path.
-        /// Python: def _navigate_to_field(self, root_container: GFFStruct, path: PureWindowsPath | os.PathLike | str) -> _GFFField | None
         /// Returns a tuple of (fieldType, value) or null if not found
         /// </summary>
         [CanBeNull]
         protected (GFFFieldType fieldType, object value)? NavigateToField(GFFStruct rootContainer, string path)
         {
-            // Python: path = PureWindowsPath(path)
-            // Python: container: GFFList | GFFStruct | None = self._navigate_containers(root_container, path.parent)
             (string parentPath, string label) = SplitPath(path);
             // Can be null if not found
             object container = NavigateContainers(rootContainer, parentPath);
 
-            // Python: return container._fields[label] if isinstance(container, GFFStruct) else None
             if (container is GFFStruct gffStruct)
             {
-                // Access field type and value - in C# we use TryGetFieldType and GetValue
+                // Access field type and value - here we use TryGetFieldType and GetValue
                 if (gffStruct.TryGetFieldType(label, out GFFFieldType fieldType))
                 {
                     // Can be null if not found
@@ -365,41 +353,39 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: list_container: GFFList | None = [CanBeNull] None
             GFFList listContainer = null;
 
-            // Python: if self.path.name == ">>##INDEXINLIST##<<":
             (_, string pathName) = SplitPath(Path);
             string workingPath = Path;
             if (pathName == ">>##INDEXINLIST##<<")
             {
                 logger.AddVerbose($"Removing unique sentinel from AddStructToListGFF instance (ini section [{Identifier}]). Path: '{Path}'");
-                // Python: self.path = self.path.parent  # HACK(th3w1zard1): idk why conditional parenting is necessary but it works
+                // self.path = self.path.parent  # HACK(th3w1zard1): idk why conditional parenting is necessary but it works
                 (workingPath, _) = SplitPath(Path);
                 Path = workingPath;
             }
 
-            // Python: navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, self.path) if self.path.name else root_container
+            // navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, self.path) if self.path.name else root_container
             (_, string workingPathName) = SplitPath(workingPath);
             // Can be null if not found
             object navigatedContainer = string.IsNullOrEmpty(workingPathName)
                 ? rootStruct
                 : NavigateContainers(rootStruct, workingPath);
 
-            // Python: if navigated_container is root_container:
+            // if navigated_container is root_container:
             if (navigatedContainer == rootStruct)
             {
                 logger.AddNote($"GFF path '{workingPath}' not found, defaulting to the gff root struct.");
             }
 
-            // Python: if isinstance(navigated_container, GFFList):
+            // if isinstance(navigated_container, GFFList):
             if (navigatedContainer is GFFList gffList)
             {
                 listContainer = gffList;
             }
             else
             {
-                // Python: reason: str = "Does not exist" if navigated_container is None else f"Path points to a '{navigated_container.__class__.__name__}', expected a GFFList."
+                // reason: str = "Does not exist" if navigated_container is None else f"Path points to a '{navigated_container.__class__.__name__}', expected a GFFList."
                 string reason = navigatedContainer is null
                     ? "Does not exist"
                     : $"Path points to a '{navigatedContainer.GetType().Name}', expected a GFFList.";
@@ -408,44 +394,44 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: new_struct: GFFStruct | None = [CanBeNull] None
+            // new_struct: GFFStruct | None = [CanBeNull] None
             GFFStruct newStruct = null;
             try
             {
-                // Python: lookup: Any = self.value.value(memory, GFFFieldType.Struct)
+                // lookup: Any = self.value.value(memory, GFFFieldType.Struct)
                 object lookup = Value.Value(memory, GFFFieldType.Struct);
 
-                // Python: if lookup == "listindex":
+                // if lookup == "listindex":
                 if (lookup is string listIndexStr && listIndexStr == "listindex")
                 {
-                    // Python: new_struct = GFFStruct(len(list_container._structs)-1)
+                    // new_struct = GFFStruct(len(list_container._structs)-1)
                     newStruct = new GFFStruct(listContainer.Count - 1);
                 }
-                // Python: elif isinstance(lookup, GFFStruct):
+                // elif isinstance(lookup, GFFStruct):
                 else if (lookup is GFFStruct gffStruct)
                 {
                     newStruct = gffStruct;
                 }
                 else
                 {
-                    // Python: raise ValueError(f"bad lookup: {lookup} ({lookup!r}) expected 'listindex' or GFFStruct")
+                    // raise ValueError(f"bad lookup: {lookup} ({lookup!r}) expected 'listindex' or GFFStruct")
                     throw new ArgumentException($"bad lookup: {lookup} ({lookup}) expected 'listindex' or GFFStruct");
                 }
             }
             catch (KeyNotFoundException e)
             {
-                // Python: except KeyError as e:
+                // except KeyError as e:
                 logger.AddError($"INI section [{Identifier}] threw an exception: {e}");
             }
 
-            // Python: if not isinstance(new_struct, GFFStruct):
+            // if not isinstance(new_struct, GFFStruct):
             if (newStruct is null)
             {
                 logger.AddError($"Failed to add a new struct to list '{workingPath}' in [{Identifier}]. Reason: Expected GFFStruct but got '{newStruct}' ({newStruct}) of type {newStruct?.GetType().Name ?? "null"} Skipping...");
                 return;
             }
 
-            // Python: list_container._structs.append(new_struct)
+            // list_container._structs.append(new_struct)
             // In C#, Add creates a new struct, so we need to add with the structId and then copy fields if it's an existing struct
             GFFStruct addedStruct = listContainer.Add(newStruct.StructId);
             // If newStruct is not the same as what Add created (i.e., it's an existing struct with fields), copy the fields
@@ -458,21 +444,21 @@ namespace KPatcher.Core.Mods.GFF
                 }
             }
 
-            // Python: if self.index_to_token is not None:
+            // if self.index_to_token is not None:
             if (IndexToToken.HasValue)
             {
-                // Python: length = str(len(list_container) - 1)
+                // length = str(len(list_container) - 1)
                 string length = (listContainer.Count - 1).ToString();
-                // Python: logger.add_verbose(f"Set 2DAMEMORY{self.index_to_token}={length}")
+                // logger.add_verbose(f"Set 2DAMEMORY{self.index_to_token}={length}")
                 logger.AddVerbose($"Set 2DAMEMORY{IndexToToken.Value}={length}");
-                // Python: memory.memory_2da[self.index_to_token] = length
+                // memory.memory_2da[self.index_to_token] = length
                 memory.Memory2DA[IndexToToken.Value] = length;
             }
 
-            // Python: for add_field in self.modifiers:
+            // for add_field in self.modifiers:
             foreach (ModifyGFF addField in Modifiers)
             {
-                // Python: assert isinstance(add_field, (AddFieldGFF, AddStructToListGFF, Memory2DAModifierGFF, ModifyFieldGFF)), f"{type(add_field).__name__}: {add_field}"
+                // assert isinstance(add_field, (AddFieldGFF, AddStructToListGFF, Memory2DAModifierGFF, ModifyFieldGFF)), f"{type(add_field).__name__}: {add_field}"
                 if (
                     !(addField is AddFieldGFF)
                     && !(addField is AddStructToListGFF)
@@ -483,10 +469,10 @@ namespace KPatcher.Core.Mods.GFF
                     continue;
                 }
 
-                // Python: list_index = len(list_container) - 1
+                // list_index = len(list_container) - 1
                 int listIndex = listContainer.Count - 1;
 
-                // Python: newpath = self.path / str(list_index)
+                // newpath = self.path / str(list_index)
                 string newpath = string.IsNullOrEmpty(workingPath)
                     ? listIndex.ToString()
                     : $"{workingPath}/{listIndex}";
@@ -494,7 +480,7 @@ namespace KPatcher.Core.Mods.GFF
                 string addFieldIdentifier = GetIdentifierForLogging(addField);
                 string addFieldPath = GetPathForLogging(addField);
                 logger.AddVerbose($"Resolved GFFList path of [{addFieldIdentifier}] from '{addFieldPath}' --> '{newpath}'");
-                // Python: add_field.path = newpath
+                // add_field.path = newpath
                 if (addField is AddFieldGFF addFieldGFF)
                 {
                     addFieldGFF.Path = newpath;
@@ -505,7 +491,7 @@ namespace KPatcher.Core.Mods.GFF
                     addStructToListGFF.Path = newpath; // FIXME: This is a limitation - in Python it's mutable but in C# it's not
                 }
 
-                // Python: add_field.apply(root_container, memory, logger)
+                // add_field.apply(root_container, memory, logger)
                 addField.Apply(rootStruct, memory, logger, game);
             }
         }
@@ -561,11 +547,9 @@ namespace KPatcher.Core.Mods.GFF
             }
 
             logger.AddVerbose($"Apply patch from INI section [{Identifier}] FieldType: {FieldType} GFF Path: '{Path}'");
-            // Python: container_path = self.path.parent if self.path.name == ">>##INDEXINLIST##<<" else self.path
             (string parentPath, string pathName) = SplitPath(Path);
             string containerPath = pathName == ">>##INDEXINLIST##<<" ? parentPath : Path ?? string.Empty;
 
-            // Python: navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, container_path)
             // Can be null if not found
             object navigatedContainer = NavigateContainers(rootStruct, containerPath);
             if (!(navigatedContainer is GFFStruct structContainer))
@@ -575,10 +559,8 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: value: Any = self.value.value(memory, self.field_type)
             object value = Value.Value(memory, FieldType);
 
-            // Python: if isinstance(value, PureWindowsPath): - Handle !FieldPath
             if (value is string strValue && (strValue.Contains('/') || strValue.Contains('\\')))
             {
                 string storedFieldpath = strValue;
@@ -605,13 +587,10 @@ namespace KPatcher.Core.Mods.GFF
 
             logger.AddVerbose($"AddField: Creating field of type '{FieldType}' value: '{value}' at GFF path '{Path}'. INI section: [{Identifier}]");
 
-            // Python: FIELD_TYPE_TO_SETTER[self.field_type](struct_container, self.label, value, memory)
             SetFieldValue(structContainer, Label, value, FieldType, memory);
 
-            // Python: for add_field in self.modifiers:
             foreach (ModifyGFF addField in Modifiers)
             {
-                // Python: assert isinstance(add_field, (AddFieldGFF, AddStructToListGFF, ModifyFieldGFF, Memory2DAModifierGFF))
                 if (
                     !(addField is AddFieldGFF)
                     && !(addField is AddStructToListGFF)
@@ -622,10 +601,10 @@ namespace KPatcher.Core.Mods.GFF
                     continue;
                 }
 
-                // Python: # HACK(th3w1zard1): resolves any >>##INDEXINLIST##<<, not sure why lengths aren't the same though (hence use of zip_longest)? Whatever, it works.
-                // Python: newpath = PureWindowsPath("")
-                // Python: for part, resolvedpart in zip_longest(add_field.path.parts, self.path.parts):
-                // Python:     newpath /= resolvedpart or part
+                // # HACK(th3w1zard1): resolves any >>##INDEXINLIST##<<, not sure why lengths aren't the same though (hence use of zip_longest)? Whatever, it works.
+                // newpath = PureWindowsPath("")
+                // for part, resolvedpart in zip_longest(add_field.path.parts, self.path.parts):
+                //     newpath /= resolvedpart or part
                 string childPath = addField is AddFieldGFF af ? af.Path : (addField is AddStructToListGFF asl ? asl.Path : string.Empty);
                 // Python zip_longest logic: newpath parts are resolvedpart or part
                 List<string> newpathParts = new List<string>();
@@ -681,26 +660,26 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: dest_field: _GFFField | None = None
-            // Python: source_field: _GFFField | None = None
+            // dest_field: _GFFField | None = None
+            // source_field: _GFFField | None = None
             (GFFFieldType fieldType, object value)? destFieldInfo = null;
             (GFFFieldType fieldType, object value)? sourceFieldInfo = null;
 
-            // Python: display_dest_name = f"2DAMEMORY{self.dest_token_id}"
+            // display_dest_name = f"2DAMEMORY{self.dest_token_id}"
             string displayDestName = $"2DAMEMORY{DestTokenId}";
 
-            // Python: display_src_name = f"2DAMEMORY{self.src_token_id}"
+            // display_src_name = f"2DAMEMORY{self.src_token_id}"
             string displaySrcName;
 
-            // Python: if self.src_token_id is None:  # assign the path and leave.
+            // if self.src_token_id is None:  # assign the path and leave.
             if (SrcTokenId is null)
             {
-                // Python: display_src_name = f"!FieldPath({self.path})"
+                // display_src_name = f"!FieldPath({self.path})"
                 displaySrcName = $"!FieldPath({Path})";
-                // Python: logger.add_verbose(f"Assign {display_dest_name}={display_src_name}")
+                // logger.add_verbose(f"Assign {display_dest_name}={display_src_name}")
                 logger.AddVerbose($"Assign {displayDestName}={displaySrcName}");
 
-                // Python: memory.memory_2da[self.dest_token_id] = self.path
+                // memory.memory_2da[self.dest_token_id] = self.path
                 // Python stores PureWindowsPath object, which when converted to string uses backslashes on Windows
                 // Match Python's behavior: PureWindowsPath uses backslashes, so store as-is (Path already has backslashes from ConfigReader)
                 // Python's PureWindowsPath("Nested\Field") converts to string as "Nested\Field" (single backslash)
@@ -709,71 +688,71 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: display_src_name = f"2DAMEMORY{self.src_token_id}"
+            // display_src_name = f"2DAMEMORY{self.src_token_id}"
             displaySrcName = $"2DAMEMORY{SrcTokenId.Value}";
-            // Python: logger.add_verbose(f"GFFList ptr !fieldpath: Assign {display_dest_name}={display_src_name} initiated. iniPath: {self.path}, section: [{self.identifier}]")
+            // logger.add_verbose(f"GFFList ptr !fieldpath: Assign {display_dest_name}={display_src_name} initiated. iniPath: {self.path}, section: [{self.identifier}]")
             logger.AddVerbose($"GFFList ptr !fieldpath: Assign {displayDestName}={displaySrcName} initiated. iniPath: {Path}, section: [{Identifier}]");
 
-            // Python: ptr_to_dest: PureWindowsPath | Any = memory.memory_2da.get(self.dest_token_id, None) if self.dest_token_id is not None else self.path
+            // ptr_to_dest: PureWindowsPath | Any = memory.memory_2da.get(self.dest_token_id, None) if self.dest_token_id is not None else self.path
             // Can be null if not found
             object ptrToDest = memory.Memory2DA.TryGetValue(DestTokenId, out string destPath) ? destPath : Path;
 
-            // Python: if isinstance(ptr_to_dest, PureWindowsPath):
+            // if isinstance(ptr_to_dest, PureWindowsPath):
             // In Python, PureWindowsPath("AppearanceType") is still a path (path.name="AppearanceType", path.parent="")
             // So we need to check if ptrToDest is a string (path) and try to navigate to it
             if (ptrToDest is string destPathStr)
             {
-                // Python: dest_field = self._navigate_to_field(root_container, ptr_to_dest)
+                // dest_field = self._navigate_to_field(root_container, ptr_to_dest)
                 destFieldInfo = NavigateToField(rootStruct, destPathStr);
 
-                // Python: if dest_field is None:
+                // if dest_field is None:
                 if (destFieldInfo is null)
                 {
-                    // Python: raise ValueError(f"Cannot assign 2DAMEMORY{self.dest_token_id}=2DAMEMORY{self.src_token_id}: LEFT side of assignment's path '{ptr_to_dest}' does not point to a valid GFF Field!")
+                    // raise ValueError(f"Cannot assign 2DAMEMORY{self.dest_token_id}=2DAMEMORY{self.src_token_id}: LEFT side of assignment's path '{ptr_to_dest}' does not point to a valid GFF Field!")
                     throw new ArgumentException($"Cannot assign 2DAMEMORY{DestTokenId}=2DAMEMORY{SrcTokenId.Value}: LEFT side of assignment's path '{ptrToDest}' does not point to a valid GFF Field!");
                 }
 
-                // Python: assert isinstance(dest_field, _GFFField)
-                // Python: logger.add_verbose(f"LEFT SIDE 2DAMEMORY{self.src_token_id} lookup at '{ptr_to_dest}' returned '{dest_field.value()}'")
+                // assert isinstance(dest_field, _GFFField)
+                // logger.add_verbose(f"LEFT SIDE 2DAMEMORY{self.src_token_id} lookup at '{ptr_to_dest}' returned '{dest_field.value()}'")
                 logger.AddVerbose($"LEFT SIDE 2DAMEMORY{SrcTokenId.Value} lookup at '{ptrToDest}' returned '{destFieldInfo.Value.value}'");
             }
-            // Python: elif ptr_to_dest is None:
+            // elif ptr_to_dest is None:
             else if (ptrToDest is null)
             {
-                // Python: logger.add_verbose(f"Left side {display_dest_name} is not defined yet.")
+                // logger.add_verbose(f"Left side {display_dest_name} is not defined yet.")
                 logger.AddVerbose($"Left side {displayDestName} is not defined yet.");
             }
             else
             {
-                // Python: logger.add_verbose(f"Left side {display_dest_name} value of {ptr_to_dest} will be overwritten.")
+                // logger.add_verbose(f"Left side {display_dest_name} value of {ptr_to_dest} will be overwritten.")
                 logger.AddVerbose($"Left side {displayDestName} value of {ptrToDest} will be overwritten.");
             }
 
-            // Python: # Lookup assigning value
-            // Python: ptr_to_src: PureWindowsPath | Any = memory.memory_2da.get(self.src_token_id, None)
+            // # Lookup assigning value
+            // ptr_to_src: PureWindowsPath | Any = memory.memory_2da.get(self.src_token_id, None)
             if (!memory.Memory2DA.TryGetValue(SrcTokenId.Value, out string ptrToSrc))
             {
                 ptrToSrc = null;
             }
 
-            // Python: if ptr_to_src is None:
+            // if ptr_to_src is None:
             if (ptrToSrc is null)
             {
-                // Python: raise ValueError(f"Cannot assign {display_dest_name}={display_src_name} because RIGHT side of assignment is undefined.")
+                // raise ValueError(f"Cannot assign {display_dest_name}={display_src_name} because RIGHT side of assignment is undefined.")
                 throw new ArgumentException($"Cannot assign {displayDestName}={displaySrcName} because RIGHT side of assignment is undefined.");
             }
 
-            // Python: if isinstance(ptr_to_src, PureWindowsPath):
+            // if isinstance(ptr_to_src, PureWindowsPath):
             if (ptrToSrc is string srcPathStr && (srcPathStr.Contains('/') || srcPathStr.Contains('\\')))
             {
-                // Python: logger.add_verbose(f"Assigner {display_src_name} is a pointer !FieldPath to another field located at '{ptr_to_src}'")
+                // logger.add_verbose(f"Assigner {display_src_name} is a pointer !FieldPath to another field located at '{ptr_to_src}'")
                 logger.AddVerbose($"Assigner {displaySrcName} is a pointer !FieldPath to another field located at '{ptrToSrc}'");
 
-                // Python: source_field = self._navigate_to_field(root_container, ptr_to_src)
+                // source_field = self._navigate_to_field(root_container, ptr_to_src)
                 sourceFieldInfo = NavigateToField(rootStruct, ptrToSrc);
 
-                // Python: assert not isinstance(source_field, PureWindowsPath)
-                // Python: assert isinstance(source_field, _GFFField)
+                // assert not isinstance(source_field, PureWindowsPath)
+                // assert isinstance(source_field, _GFFField)
                 if (sourceFieldInfo is null)
                 {
                     throw new InvalidOperationException($"Source field at '{ptrToSrc}' is not a valid GFF Field");
@@ -781,23 +760,23 @@ namespace KPatcher.Core.Mods.GFF
             }
             else
             {
-                // Python: logger.add_verbose(f"Assigner {display_src_name} holds literal value '{ptr_to_src}'. other stored info debug: Path: '{self.path}' INI section: [{self.identifier}]")
+                // logger.add_verbose(f"Assigner {display_src_name} holds literal value '{ptr_to_src}'. other stored info debug: Path: '{self.path}' INI section: [{self.identifier}]")
                 logger.AddVerbose($"Assigner {displaySrcName} holds literal value '{ptrToSrc}'. other stored info debug: Path: '{Path}' INI section: [{Identifier}]");
             }
 
-            // Python: if isinstance(dest_field, _GFFField):
+            // if isinstance(dest_field, _GFFField):
             if (destFieldInfo.HasValue)
             {
-                // Python: logger.add_verbose("assign dest ptr field.")
+                // logger.add_verbose("assign dest ptr field.")
                 logger.AddVerbose("assign dest ptr field.");
 
-                // Python: assert source_field is None or dest_field.field_type() is source_field.field_type(), f"Not a _GFFField: {ptr_to_src} ({display_src_name}) OR {dest_field.field_type()} != {source_field.field_type()}"
+                // assert source_field is None or dest_field.field_type() is source_field.field_type(), f"Not a _GFFField: {ptr_to_src} ({display_src_name}) OR {dest_field.field_type()} != {source_field.field_type()}"
                 if (sourceFieldInfo.HasValue && destFieldInfo.Value.fieldType != sourceFieldInfo.Value.fieldType)
                 {
                     throw new InvalidOperationException($"Not a _GFFField: {ptrToSrc} ({displaySrcName}) OR {destFieldInfo.Value.fieldType} != {sourceFieldInfo.Value.fieldType}");
                 }
 
-                // Python: dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
+                // dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
                 // Get the destination field path to set it
                 string destFieldPath = ptrToDest is string destPathForSetting && (destPathForSetting.Contains('/') || destPathForSetting.Contains('\\'))
                     ? destPathForSetting
@@ -807,7 +786,7 @@ namespace KPatcher.Core.Mods.GFF
                 object destContainer = NavigateContainers(rootStruct, destParentPath);
                 if (destContainer is GFFStruct destStruct)
                 {
-                    // Python: dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
+                    // dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
                     // Note: ptr_to_src can be either a path string or a literal value, FieldValueConstant handles both
                     object convertedValue = new FieldValueConstant(ptrToSrc).Value(memory, destFieldInfo.Value.fieldType);
                     SetFieldValue(destStruct, destLabel, convertedValue, destFieldInfo.Value.fieldType, memory);
@@ -815,7 +794,7 @@ namespace KPatcher.Core.Mods.GFF
             }
             else
             {
-                // Python: memory.memory_2da[self.dest_token_id] = ptr_to_dest
+                // memory.memory_2da[self.dest_token_id] = ptr_to_dest
                 memory.Memory2DA[DestTokenId] = ptrToDest?.ToString() ?? "";
             }
         }
@@ -864,8 +843,8 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: label: str = self.path.name
-            // Python: navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, self.path.parent)
+            // label: str = self.path.name
+            // navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, self.path.parent)
             (string parentPath, string label) = SplitPath(Path);
             // Can be null if not found
             object navigatedContainer = NavigateContainers(rootStruct, parentPath);
@@ -877,17 +856,17 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // Python: field_type: GFFFieldType = navigated_struct._fields[label].field_type()
+            // field_type: GFFFieldType = navigated_struct._fields[label].field_type()
             if (!navigatedStruct.TryGetFieldType(label, out GFFFieldType fieldType))
             {
                 // Field does not exist; align with KPatcher behavior by creating it on-the-fly.
                 fieldType = GFFFieldType.Int32;
             }
 
-            // Python: value: Any = self.value.value(memory, field_type)
+            // value: Any = self.value.value(memory, field_type)
             object value = Value.Value(memory, fieldType);
 
-            // Python: if isinstance(value, PureWindowsPath): - Handle !FieldPath
+            // if isinstance(value, PureWindowsPath): - Handle !FieldPath
             if (value is string strValue && (strValue.Contains('/') || strValue.Contains('\\')))
             {
                 string storedFieldpath = strValue;
@@ -912,7 +891,7 @@ namespace KPatcher.Core.Mods.GFF
                 logger.AddVerbose($"Acquired value '{value}' from field at !FieldPath '{storedFieldpath}'");
             }
 
-            // Python: try: orig_value = FIELD_TYPE_TO_GETTER[field_type](navigated_struct, label)
+            // try: orig_value = FIELD_TYPE_TO_GETTER[field_type](navigated_struct, label)
             try
             {
                 // Can be null if not found
@@ -928,28 +907,28 @@ namespace KPatcher.Core.Mods.GFF
 
             logger.AddVerbose($"Direct set value of determined field type '{fieldType}' at GFF path '{Path}' to new value '{value}'. INI section: [{Identifier}]");
 
-            // Python: if field_type is not GFFFieldType.LocalizedString:
+            // if field_type is not GFFFieldType.LocalizedString:
             if (fieldType != GFFFieldType.LocalizedString)
             {
                 SetFieldValue(navigatedStruct, label, value, fieldType, memory);
                 return;
             }
 
-            // Python: assert isinstance(value, LocalizedString)
+            // assert isinstance(value, LocalizedString)
             if (!(value is LocalizedString locString))
             {
                 logger.AddError($"Expected LocalizedString but got {value?.GetType().Name ?? "null"}");
                 return;
             }
 
-            // Python: if not navigated_struct.exists(label):
+            // if not navigated_struct.exists(label):
             if (!navigatedStruct.Exists(label))
             {
                 navigatedStruct.SetLocString(label, locString);
             }
             else
             {
-                // Python: assert isinstance(value, LocalizedStringDelta)
+                // assert isinstance(value, LocalizedStringDelta)
                 if (!(value is LocalizedStringDelta delta))
                 {
                     logger.AddError($"Expected LocalizedStringDelta for existing field but got {value.GetType().Name}");

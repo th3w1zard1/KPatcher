@@ -1,31 +1,33 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:KPatcher.UI.Views.Dialogs"
+        xmlns:ui="clr-namespace:KPatcher.UI.Resources"
         x:Class="KPatcher.UI.Views.Dialogs.UpdateProgressWindow"
         x:DataType="vm:UpdateProgressViewModel"
-        Title="KOTORPatcher Update"
-        Width="460"
-        Height="220"
+        Title="{x:Static ui:UIResources.KOTORPatcherUpdate}"
+        Width="480"
+        Height="200"
         CanResize="False"
         WindowStartupLocation="CenterOwner">
-    <StackPanel Margin="16"
-                Spacing="12">
+    <StackPanel Margin="24" Spacing="14">
         <TextBlock Text="{Binding StatusText}"
                    TextWrapping="Wrap"
-                   FontSize="16"
-                   FontWeight="Bold"/>
+                   FontSize="15"
+                   FontWeight="SemiBold"/>
 
         <ProgressBar Minimum="0"
                      Maximum="{Binding ProgressMaximum}"
                      Value="{Binding ProgressValue}"
                      IsIndeterminate="{Binding IsIndeterminate}"
-                     Height="18"/>
+                     Height="8"
+                     CornerRadius="4"/>
 
         <TextBlock Text="{Binding BytesText}"
-                   FontWeight="Medium"/>
+                   FontSize="13"/>
 
         <TextBlock Text="{Binding EtaText}"
-                   Foreground="{DynamicResource ThemeForegroundLowBrush}"/>
+                   FontSize="12"
+                   Opacity="0.8"/>
     </StackPanel>
 </Window>
 

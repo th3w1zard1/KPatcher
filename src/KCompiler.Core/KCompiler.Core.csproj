@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>KCompiler.Core</AssemblyName>
+    <RootNamespace>KCompiler</RootNamespace>
+    <Description>Cross-platform managed NSS→NCS compiler (nwnnsscomp-compatible CLI surface). Types for NSS/NCS live in KPatcher.Core.* namespaces for use by KPatcher.Core.</Description>
+    <IsPackable>true</IsPackable>
+    <PackageId>KCompiler.Core</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>th3w1zard1</Authors>
+    <Company>bolabaden</Company>
+    <Product>KCompiler.Core</Product>
+    <PackageTags>kotor;tsl;nss;ncs;nwnnsscomp;compiler;kcompiler</PackageTags>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher.NET</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- Single source of truth: same files as KPatcher.Core on disk; KPatcher.Core excludes these from its compile. -->
+  <ItemGroup>
+    <Compile Include="..\KPatcher.Core\Formats\NCS\**\*.cs">
+      <Link>shared\NCS\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Remove="..\KPatcher.Core\Formats\NCS\Compiler\NCSCompiler.cs" />
+    <Compile Include="..\KPatcher.Core\Common\Script\**\*.cs">
+      <Link>shared\Script\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Game.cs">
+      <Link>shared\Common\Game.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Language.cs">
+      <Link>shared\Common\Language.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\LocalizedString.cs">
+      <Link>shared\Common\LocalizedString.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Vector2.cs">
+      <Link>shared\Common\Vector2.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Vector3.cs">
+      <Link>shared\Common\Vector3.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Vector4.cs">
+      <Link>shared\Common\Vector4.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\Quaternion.cs">
+      <Link>shared\Common\Quaternion.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Common\BinaryReader.cs">
+      <Link>shared\Common\BinaryReader.cs</Link>
+    </Compile>
+    <Compile Include="..\KPatcher.Core\Resources\ResourceType.cs">
+      <Link>shared\Resources\ResourceType.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

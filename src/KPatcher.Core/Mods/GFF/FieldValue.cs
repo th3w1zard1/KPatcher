@@ -1,28 +1,22 @@
 using System;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.GFF
 {
 
     /// <summary>
-    /// GFF modification algorithms for KPatcher/KPatcher.
+    /// GFF modification algorithms for KPatcher/TSLPatcher.
     /// 
     /// This module implements GFF field modification logic for applying patches from changes.ini files.
     /// Handles field additions, modifications, list operations, and struct manipulations.
-    /// 
-    /// References:
-    /// ----------
-    ///     vendor/KPatcher/KPatcher.pl - Original Perl GFF modification logic (broken and unfinished)
-    ///     vendor/Kotor.NET/Kotor.NET.Patcher/ - Incomplete C# patcher
     /// </summary>
 
     /// <summary>
     /// Localized string with delta changes.
-    /// 1:1 port from Python LocalizedStringDelta
     /// </summary>
     public class LocalizedStringDelta : LocalizedString
     {
@@ -69,7 +63,6 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Abstract base for field values that can be constants or memory references.
-    /// 1:1 port from Python FieldValue in pykotor/kpatcher/mods/gff.py
     /// </summary>
     public abstract class FieldValue
     {
@@ -95,7 +88,6 @@ namespace KPatcher.Core.Mods.GFF
         /// </summary>
         protected static object Validate(object value, GFFFieldType fieldType)
         {
-            // !FieldPath - In Python this checks for PureWindowsPath, in C# we check for path-like strings
             if (value is string strValue && (strValue.Contains('/') || strValue.Contains('\\')))
             {
                 return strValue;
@@ -115,12 +107,10 @@ namespace KPatcher.Core.Mods.GFF
             }
             else if (GetReturnType(fieldType) == typeof(int) && value is string intStr)
             {
-                // Python: int(value) if value.strip() else "0"
                 return string.IsNullOrWhiteSpace(intStr) ? 0 : int.Parse(intStr);
             }
             else if (GetReturnType(fieldType) == typeof(float) && value is string floatStr)
             {
-                // Python: float(value) if value.strip() else "0.0"
                 return string.IsNullOrWhiteSpace(floatStr) ? 0f : float.Parse(floatStr);
             }
             return value;
@@ -156,7 +146,6 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Field value that stores a constant.
-    /// 1:1 port from Python FieldValueConstant
     /// </summary>
     public class FieldValueConstant : FieldValue
     {
@@ -177,7 +166,6 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Field value that can be "listindex" or a constant.
-    /// 1:1 port from Python FieldValueListIndex
     /// </summary>
     public class FieldValueListIndex : FieldValueConstant
     {
@@ -200,7 +188,6 @@ namespace KPatcher.Core.Mods.GFF
 
     /// <summary>
     /// Field value from 2DA memory.
-    /// 1:1 port from Python FieldValue2DAMemory
     /// </summary>
     public class FieldValue2DAMemory : FieldValue
     {
@@ -213,20 +200,17 @@ namespace KPatcher.Core.Mods.GFF
 
         public override object Value(PatcherMemory memory, GFFFieldType fieldType)
         {
-            // Python: memory_val: str | PureWindowsPath | None = memory.memory_2da.get(self.token_id, None)
             // In C#, Memory2DA is Dictionary<int, string> - paths are stored as strings
             if (!memory.Memory2DA.TryGetValue(TokenId, out string memoryVal))
             {
                 throw new Common.KeyError($"2DAMEMORY{TokenId} was not defined before use");
             }
-            // In C#, memory values are stored as strings (paths are string values containing '/' or '\')
             return Validate(memoryVal, fieldType);
         }
     }
 
     /// <summary>
     /// Field value from TLK memory.
-    /// 1:1 port from Python FieldValueTLKMemory
     /// </summary>
     public class FieldValueTLKMemory : FieldValue
     {

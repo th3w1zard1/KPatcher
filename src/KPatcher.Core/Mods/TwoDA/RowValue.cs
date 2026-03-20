@@ -1,16 +1,15 @@
 using System;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.NSS;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.TwoDA
 {
 
     /// <summary>
     /// Abstract base for row values that can be constants or memory references.
-    /// 1:1 port from Python RowValue in pykotor/kpatcher/mods/twoda.py
     /// </summary>
     public abstract class RowValue
     {
@@ -19,7 +18,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value that stores a constant string.
-    /// 1:1 port from Python RowValueConstant
     /// </summary>
     public class RowValueConstant : RowValue
     {
@@ -40,7 +38,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value from 2DA memory.
-    /// 1:1 port from Python RowValue2DAMemory
     /// </summary>
     public class RowValue2DAMemory : RowValue
     {
@@ -65,7 +62,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value from TLK memory.
-    /// 1:1 port from Python RowValueTLKMemory
     /// </summary>
     public class RowValueTLKMemory : RowValue
     {
@@ -79,7 +75,7 @@ namespace KPatcher.Core.Mods.TwoDA
         public override string Value(PatcherMemory memory, Formats.TwoDA.TwoDA twoda, [CanBeNull] TwoDARow row)
         {
             // When TLK token was not defined before use (e.g. 2DA references StrRef before TLK list ran, or mod typo),
-            // return "0" (strref 0) so the patch continues instead of throwing. Matches PyKotor/HoloPatcher behavior.
+            // return "0" (strref 0) so the patch continues instead of throwing.
             if (!memory.MemoryStr.ContainsKey(TokenId))
             {
                 return "0";
@@ -92,7 +88,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value that returns the highest value in a column or row label.
-    /// 1:1 port from Python RowValueHigh
     /// </summary>
     public class RowValueHigh : RowValue
     {
@@ -144,7 +139,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value that returns the row index.
-    /// 1:1 port from Python RowValueRowIndex
     /// </summary>
     public class RowValueRowIndex : RowValue
     {
@@ -161,7 +155,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value that returns the row label.
-    /// 1:1 port from Python RowValueRowLabel
     /// </summary>
     public class RowValueRowLabel : RowValue
     {
@@ -173,7 +166,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Row value that returns a cell value from the current row.
-    /// 1:1 port from Python RowValueRowCell
     /// </summary>
     public class RowValueRowCell : RowValue
     {

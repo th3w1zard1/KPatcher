@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Formats.RIM;
 using KPatcher.Core.Resources;
 using KPatcher.Core.Tests.Common;
-using FluentAssertions;
 using Xunit;
 using static global::KPatcher.Core.Formats.RIM.RIMAuto;
 
@@ -23,36 +23,36 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestBinaryIO()
         {
-            // Python: test_binary_io
+            // test_binary_io
             if (!File.Exists(BinaryTestFile))
             {
                 // Skip if test file doesn't exist
                 return;
             }
 
-            // Python: rim: RIM = RIMBinaryReader(BINARY_TEST_FILE).load()
+            // rim: RIM = RIMBinaryReader(BINARY_TEST_FILE).load()
             RIM rim = new RIMBinaryReader(BinaryTestFile).Load();
             ValidateIO(rim);
 
-            // Python: data: bytearray = bytearray()
-            // Python: write_rim(rim, data)
+            // data: bytearray = bytearray()
+            // write_rim(rim, data)
             byte[] data = BytesRim(rim);
 
-            // Python: rim = read_rim(data)
+            // rim = read_rim(data)
             rim = ReadRim(data);
             ValidateIO(rim);
         }
 
         private static void ValidateIO(RIM rim)
         {
-            // Python: validate_io
-            // Python: assert len(rim) == 3
+            // validate_io
+            // assert len(rim) == 3
             rim.Count.Should().Be(3);
-            // Python: assert rim.get("1", ResourceType.TXT) == b"abc"
+            // assert rim.get("1", ResourceType.TXT) == b"abc"
             rim.Get("1", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("abc"));
-            // Python: assert rim.get("2", ResourceType.TXT) == b"def"
+            // assert rim.get("2", ResourceType.TXT) == b"def"
             rim.Get("2", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("def"));
-            // Python: assert rim.get("3", ResourceType.TXT) == b"ghi"
+            // assert rim.get("3", ResourceType.TXT) == b"ghi"
             rim.Get("3", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("ghi"));
         }
 
@@ -60,7 +60,7 @@ namespace KPatcher.Core.Tests.Formats
         public void TestReadRaises()
         {
             // test_read_raises from Python
-            // Python: read_rim(".") raises PermissionError on Windows, IsADirectoryError on Unix
+            // read_rim(".") raises PermissionError on Windows, IsADirectoryError on Unix
             Action act1 = () => ReadRim(".");
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -71,11 +71,11 @@ namespace KPatcher.Core.Tests.Formats
                 act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
             }
 
-            // Python: read_rim(DOES_NOT_EXIST_FILE) raises FileNotFoundError
+            // read_rim(DOES_NOT_EXIST_FILE) raises FileNotFoundError
             Action act2 = () => ReadRim(DoesNotExistFile);
             act2.Should().Throw<FileNotFoundException>();
 
-            // Python: read_rim(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
+            // read_rim(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
             if (File.Exists(CorruptBinaryTestFile))
             {
                 Action act3 = () => ReadRim(CorruptBinaryTestFile);
@@ -90,7 +90,7 @@ namespace KPatcher.Core.Tests.Formats
             var rim = new RIM();
 
             // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // Python: write_rim(RIM(), ".", ResourceType.RIM)
+            // write_rim(RIM(), ".", ResourceType.RIM)
             Action act1 = () => WriteRim(rim, ".", ResourceType.RIM);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -102,7 +102,7 @@ namespace KPatcher.Core.Tests.Formats
             }
 
             // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // Python: write_rim(RIM(), ".", ResourceType.INVALID)
+            // write_rim(RIM(), ".", ResourceType.INVALID)
             Action act2 = () => WriteRim(rim, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }

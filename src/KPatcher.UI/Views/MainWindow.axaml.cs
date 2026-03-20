@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Threading;
 using AvRichTextBox;
+using KPatcher.Core.Common;
+using KPatcher.UI.Resources;
 using KPatcher.UI.Rte;
 using KPatcher.UI.ViewModels;
 using MsBox.Avalonia;
@@ -16,16 +21,18 @@ namespace KPatcher.UI.Views
 
     public partial class MainWindow : Window
     {
-        private readonly TextBox _logTextBox;
+        private readonly ScrollViewer _logScrollViewer;
         private RichTextBox _rtfRichTextBox;
+        private RichTextBox _logRichTextBox;
 
         public MainWindow()
         {
             AvaloniaXamlLoader.Load(this);
 
-            // Get reference to log TextBox and RichTextBox
-            _logTextBox = this.FindControl<TextBox>("LogTextBox");
+            // Get reference to log ScrollViewer and RichTextBoxes
+            _logScrollViewer = this.FindControl<ScrollViewer>("LogScrollViewer");
             _rtfRichTextBox = this.FindControl<RichTextBox>("RtfRichTextBox");
+            _logRichTextBox = this.FindControl<RichTextBox>("LogRichTextBox");
 
             // Subscribe to data context changes to set up auto-scroll and log formatting
             DataContextChanged += OnDataContextChanged;
@@ -59,14 +66,10 @@ namespace KPatcher.UI.Views
                     return;
                 }
 
-                var messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(
-                    "ALPHA VERSION WARNING",
-                    $"⚠️ WARNING: This is an ALPHA version ({Core.VersionLabel}) of KPatcher.NET\n\n" +
-                    "This version is for testing and demonstration purposes only.\n" +
-                    "It is NOT intended for production use.\n\n" +
-                    "Features may be incomplete, unstable, or contain bugs.\n" +
-                    "Use at your own risk.\n\n" +
-                    "For production use, please use the stable release.",
+                string message = string.Format(System.Globalization.CultureInfo.CurrentCulture, UIResources.AlphaWarningMessageFormat, Core.VersionLabel);
+                var messageBox = MessageBoxManager.GetMessageBoxStandard(
+                    UIResources.AlphaWarningTitle,
+                    message,
                     MsBox.Avalonia.Enums.ButtonEnum.Ok,
                     MsBox.Avalonia.Enums.Icon.Warning);
                 await messageBox.ShowAsync();
@@ -82,6 +85,9 @@ namespace KPatcher.UI.Views
                 // Subscribe to property changes to auto-scroll log and load RTF
                 viewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+                // Subscribe to log entries so colored log RichTextBox is updated when entries are added
+                viewModel.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
+
                 // Also check if RTF content is already set
                 if (viewModel.IsRtfContent && !string.IsNullOrEmpty(viewModel.RtfContent))
                 {
@@ -91,7 +97,16 @@ namespace KPatcher.UI.Views
                         LoadRtfContent();
                     }, DispatcherPriority.Normal);
                 }
+                else if (!viewModel.IsRtfContent)
+                {
+                    Dispatcher.UIThread.Post(() => RefreshLogContent(), DispatcherPriority.Background);
+                }
             }
+        }
+
+        private void LogEntries_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            Dispatcher.UIThread.Post(() => RefreshLogContent(), DispatcherPriority.Background);
         }
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -99,13 +114,10 @@ namespace KPatcher.UI.Views
             Console.WriteLine($"[RTF] PropertyChanged: {e.PropertyName}");
             if (e.PropertyName == nameof(MainWindowViewModel.LogText))
             {
-                // Log text is bound to TextBox; scroll to end so latest entry is visible
+                // Scroll log to end so latest entry is visible
                 Dispatcher.UIThread.Post(() =>
                 {
-                    if (_logTextBox != null && _logTextBox.Text != null)
-                    {
-                        _logTextBox.CaretIndex = _logTextBox.Text.Length;
-                    }
+                    _logScrollViewer?.ScrollToEnd();
                 }, DispatcherPriority.Background);
             }
             else if (e.PropertyName == nameof(MainWindowViewModel.RtfContent))
@@ -129,6 +141,77 @@ namespace KPatcher.UI.Views
                         LoadRtfContent();
                     }, DispatcherPriority.Normal);
                 }
+                else if (DataContext is MainWindowViewModel vm2 && !vm2.IsRtfContent)
+                {
+                    Dispatcher.UIThread.Post(() => RefreshLogContent(), DispatcherPriority.Background);
+                }
+            }
+            else if (e.PropertyName == nameof(MainWindowViewModel.DisplayedPlainText) ||
+                     e.PropertyName == nameof(MainWindowViewModel.IsShowingConfigurationSummary))
+            {
+                Dispatcher.UIThread.Post(() => RefreshLogContent(), DispatcherPriority.Background);
+            }
+        }
+
+        private static string BrushToHex(IBrush brush)
+        {
+            if (brush is SolidColorBrush scb)
+            {
+                return scb.Color.ToString();
+            }
+            return "#000000";
+        }
+
+        private void RefreshLogContent()
+        {
+            if (_logRichTextBox == null)
+            {
+                _logRichTextBox = this.FindControl<RichTextBox>("LogRichTextBox");
+            }
+            if (_logRichTextBox == null)
+            {
+                return;
+            }
+            var vm = DataContext as MainWindowViewModel;
+            if (vm == null)
+            {
+                return;
+            }
+
+            RteDocument doc;
+            if (vm.IsShowingConfigurationSummary)
+            {
+                string text = vm.DisplayedPlainText ?? string.Empty;
+                var ranges = new List<(int Start, int End, string ForegroundColor)>();
+                if (text.Length > 0)
+                {
+                    ranges.Add((0, text.Length, "#000000"));
+                }
+                doc = RteDocumentConverter.FromColoredLines(text, ranges);
+            }
+            else
+            {
+                System.Collections.ObjectModel.ObservableCollection<FormattedLogEntry> entries = vm.LogEntries;
+                string content = string.Join("\n", entries.Select(e => e.Message));
+                int offset = 0;
+                var ranges = new List<(int Start, int End, string ForegroundColor)>();
+                foreach (FormattedLogEntry entry in entries)
+                {
+                    int start = offset;
+                    int end = offset + entry.Message.Length;
+                    ranges.Add((start, end, BrushToHex(entry.EntryBrush)));
+                    offset = end + 1;
+                }
+                doc = RteDocumentConverter.FromColoredLines(content, ranges);
+            }
+
+            try
+            {
+                RteDocumentConverter.ApplyToRichTextBox(_logRichTextBox, doc);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Log] RefreshLogContent ApplyToRichTextBox failed: {ex.Message}");
             }
         }
 
@@ -166,13 +249,6 @@ namespace KPatcher.UI.Views
             if (!(DataContext is MainWindowViewModel viewModel))
             {
                 Console.WriteLine("[RTF] ERROR: DataContext is not MainWindowViewModel!");
-                return;
-            }
-
-            if (viewModel.ActiveRteDocument != null)
-            {
-                Console.WriteLine("[RTF] Rendering RTE document via FlowDocument");
-                RteDocumentConverter.ApplyToRichTextBox(_rtfRichTextBox, viewModel.ActiveRteDocument);
                 return;
             }
 
@@ -215,7 +291,7 @@ namespace KPatcher.UI.Views
                 var flowDocProperty = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                 if (flowDocProperty != null)
                 {
-                    var flowDoc = flowDocProperty.GetValue(_rtfRichTextBox);
+                    object flowDoc = flowDocProperty.GetValue(_rtfRichTextBox);
                     if (flowDoc is null)
                     {
                         Console.WriteLine("[RTF] WARNING: FlowDoc is null, waiting for initialization...");
@@ -252,8 +328,8 @@ namespace KPatcher.UI.Views
                 if (rtfDomParserType is null)
                 {
                     // Try loading from the executing directory
-                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                    var assemblyPath = Path.Combine(baseDir, "RtfDomParserAv.dll");
+                    string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    string assemblyPath = Path.Combine(baseDir, "RtfDomParserAv.dll");
                     if (File.Exists(assemblyPath))
                     {
                         Console.WriteLine($"[RTF] Found RtfDomParserAv.dll at {assemblyPath}, loading...");
@@ -263,19 +339,19 @@ namespace KPatcher.UI.Views
                     else
                     {
                         // Try to find it in the NuGet packages cache
-                        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                        var nugetPackages = Path.Combine(userProfile, ".nuget", "packages");
+                        string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                        string nugetPackages = Path.Combine(userProfile, ".nuget", "packages");
 
                         // Search for RtfDomParserAv in NuGet cache
                         if (Directory.Exists(nugetPackages))
                         {
-                            var rtfDomDirs = Directory.GetDirectories(nugetPackages, "*RtfDomParserAv*", SearchOption.TopDirectoryOnly);
-                            foreach (var dir in rtfDomDirs)
+                            string[] rtfDomDirs = Directory.GetDirectories(nugetPackages, "*RtfDomParserAv*", SearchOption.TopDirectoryOnly);
+                            foreach (string dir in rtfDomDirs)
                             {
-                                var libDirs = Directory.GetDirectories(dir, "lib", SearchOption.AllDirectories);
-                                foreach (var libDir in libDirs)
+                                string[] libDirs = Directory.GetDirectories(dir, "lib", SearchOption.AllDirectories);
+                                foreach (string libDir in libDirs)
                                 {
-                                    var dllPath = Path.Combine(libDir, "RtfDomParserAv.dll");
+                                    string dllPath = Path.Combine(libDir, "RtfDomParserAv.dll");
                                     if (File.Exists(dllPath))
                                     {
                                         Console.WriteLine($"[RTF] Found RtfDomParserAv.dll in NuGet cache at {dllPath}, loading...");
@@ -317,7 +393,7 @@ namespace KPatcher.UI.Views
                     using (var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(rtfContent)))
                     {
                         // Try to find a LoadRtf method that accepts Stream
-                        var loadRtfStreamMethod = _rtfRichTextBox.GetType().GetMethod("LoadRtf", new[] { typeof(Stream) });
+                        MethodInfo loadRtfStreamMethod = _rtfRichTextBox.GetType().GetMethod("LoadRtf", new[] { typeof(Stream) });
                         if (loadRtfStreamMethod != null)
                         {
                             Console.WriteLine("[RTF] Found LoadRtf(Stream) method, attempting to use it");
@@ -359,7 +435,7 @@ namespace KPatcher.UI.Views
                     var flowDocProperty = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                     if (flowDocProperty != null)
                     {
-                        var flowDoc = flowDocProperty.GetValue(_rtfRichTextBox);
+                        object flowDoc = flowDocProperty.GetValue(_rtfRichTextBox);
                         if (flowDoc is null)
                         {
                             Console.WriteLine("[RTF] WARNING: FlowDoc is null, cannot load RTF");
@@ -371,7 +447,7 @@ namespace KPatcher.UI.Views
                         var selectionProperty = flowDoc.GetType().GetProperty("Selection");
                         if (selectionProperty != null)
                         {
-                            var selection = selectionProperty.GetValue(flowDoc);
+                            object selection = selectionProperty.GetValue(flowDoc);
                             if (selection is null)
                             {
                                 Console.WriteLine("[RTF] WARNING: Selection is null, waiting a bit longer...");
@@ -388,14 +464,14 @@ namespace KPatcher.UI.Views
                     var flowDocProperty2 = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                     if (flowDocProperty2 != null)
                     {
-                        var flowDoc = flowDocProperty2.GetValue(_rtfRichTextBox);
+                        object flowDoc = flowDocProperty2.GetValue(_rtfRichTextBox);
                         if (flowDoc != null)
                         {
                             // Ensure Selection is initialized - check if it exists and is not null
                             var selectionProperty = flowDoc.GetType().GetProperty("Selection");
                             if (selectionProperty != null)
                             {
-                                var selection = selectionProperty.GetValue(flowDoc);
+                                object selection = selectionProperty.GetValue(flowDoc);
                                 if (selection is null)
                                 {
                                     Console.WriteLine("[RTF] WARNING: Selection is null, attempting to create new document first...");
@@ -412,10 +488,10 @@ namespace KPatcher.UI.Views
                     }
 
                     // Set minimal padding on FlowDocument for better fit in narrow window
-                    var flowDocPropertyForPadding = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
+                    PropertyInfo flowDocPropertyForPadding = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                     if (flowDocPropertyForPadding != null)
                     {
-                        var flowDoc = flowDocPropertyForPadding.GetValue(_rtfRichTextBox);
+                        object flowDoc = flowDocPropertyForPadding.GetValue(_rtfRichTextBox);
                         if (flowDoc != null)
                         {
                             // Set minimal padding (left, top, right, bottom) - default is 0 but RTF might set it
@@ -437,7 +513,7 @@ namespace KPatcher.UI.Views
                     // After loading, ensure padding is still minimal (RTF might override it)
                     if (flowDocPropertyForPadding != null)
                     {
-                        var flowDoc = flowDocPropertyForPadding.GetValue(_rtfRichTextBox);
+                        object flowDoc = flowDocPropertyForPadding.GetValue(_rtfRichTextBox);
                         if (flowDoc != null)
                         {
                             var pagePaddingProperty = flowDoc.GetType().GetProperty("PagePadding");
@@ -475,10 +551,10 @@ namespace KPatcher.UI.Views
                 Console.WriteLine($"[RTF] Temp file written, size: {new FileInfo(tempFile).Length} bytes");
 
                 // Set minimal padding on FlowDocument before loading
-                var flowDocPropertyForPadding3 = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
+                PropertyInfo flowDocPropertyForPadding3 = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                 if (flowDocPropertyForPadding3 != null)
                 {
-                    var flowDoc = flowDocPropertyForPadding3.GetValue(_rtfRichTextBox);
+                    object flowDoc = flowDocPropertyForPadding3.GetValue(_rtfRichTextBox);
                     if (flowDoc != null)
                     {
                         var pagePaddingProperty = flowDoc.GetType().GetProperty("PagePadding");
@@ -497,7 +573,7 @@ namespace KPatcher.UI.Views
                 // Ensure padding stays minimal after loading
                 if (flowDocPropertyForPadding3 != null)
                 {
-                    var flowDoc = flowDocPropertyForPadding3.GetValue(_rtfRichTextBox);
+                    object flowDoc = flowDocPropertyForPadding3.GetValue(_rtfRichTextBox);
                     if (flowDoc != null)
                     {
                         var pagePaddingProperty = flowDoc.GetType().GetProperty("PagePadding");
@@ -510,10 +586,10 @@ namespace KPatcher.UI.Views
                 }
 
                 // Verify content was loaded
-                var flowDocPropertyCheck = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
+                PropertyInfo flowDocPropertyCheck = _rtfRichTextBox.GetType().GetProperty("FlowDoc");
                 if (flowDocPropertyCheck != null)
                 {
-                    var flowDoc = flowDocPropertyCheck.GetValue(_rtfRichTextBox);
+                    object flowDoc = flowDocPropertyCheck.GetValue(_rtfRichTextBox);
                     Console.WriteLine($"[RTF] FlowDoc property value: {(flowDoc != null ? "not null" : "null")}");
                 }
 
@@ -564,7 +640,7 @@ namespace KPatcher.UI.Views
                 {
                     Console.WriteLine($"[RTF] ERROR: Failed to strip RTF: {stripEx.Message}");
                     viewModel.IsRtfContent = false;
-                    viewModel.AddLogEntry("Failed to load RTF content. Please check the console for details.", KPatcher.Core.Logger.LogType.Error);
+                    viewModel.AddLogEntry(UIResources.FailedToLoadRtfContent, KPatcher.Core.Logger.LogType.Error);
                 }
             }
         }

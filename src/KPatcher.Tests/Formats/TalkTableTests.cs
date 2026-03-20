@@ -1,8 +1,8 @@
 using System;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Tests.Common;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Formats

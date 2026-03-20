@@ -31,7 +31,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
         public override DynamicDataType Compile(NCS ncs, CodeRoot root, CodeBlock block)
         {
-            // Python: Only add to temp_stack if the expression didn't already add it
+            // Only add to temp_stack if the expression didn't already add it
             int tempStackBeforeExpr1 = block.TempStack;
             DynamicDataType leftType = Left.Compile(ncs, root, block);
             int type1Size = leftType.Size(root);
@@ -62,7 +62,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
             ncs.Add(mapping.Instruction, new List<object>());
 
-            // Python: block.temp_stack -= (type1_size + type2_size - result_size)
+            // block.temp_stack -= (type1_size + type2_size - result_size)
             DynamicDataType resultType = new DynamicDataType(mapping.Result);
             int resultSize = resultType.Size(root);
             // Binary operation consumed both operands and left result on stack

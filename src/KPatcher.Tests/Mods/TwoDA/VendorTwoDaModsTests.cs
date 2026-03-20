@@ -8,7 +8,7 @@ namespace KPatcher.Core.Tests.Mods.TwoDA
 {
 
     /// <summary>
-    /// Port of vendor/PyKotor/Libraries/PyKotor/tests/kpatcher/mods/test_vendor_twoda_mods.py.
+    /// C# Reference: src/KPatcher.Tests/Mods/TwoDA/VendorTwoDaModsTests.cs
     /// </summary>
     public class VendorTwoDaModsTests
     {

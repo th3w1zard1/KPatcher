@@ -1,16 +1,15 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.GFF
 {
 
     /// <summary>
     /// Container for GFF file modifications.
-    /// 1:1 port from Python ModificationsGFF in pykotor/kpatcher/mods/gff.py
     /// </summary>
     public class ModificationsGFF : PatcherModifications
     {
@@ -25,7 +24,6 @@ namespace KPatcher.Core.Mods.GFF
             [CanBeNull] List<ModifyGFF> modifiers = null)
             : base(filename, replace)
         {
-            // Python: self.modifiers: list[ModifyGFF] = [] if modifiers is None else modifiers
             Modifiers = modifiers ?? new List<ModifyGFF>();
         }
 
@@ -48,7 +46,6 @@ namespace KPatcher.Core.Mods.GFF
             PatchLogger logger,
             Game game)
         {
-            // Python: for change_field in self.modifiers: change_field.apply(mutable_data.root, memory, logger)
             if (mutableData is Formats.GFF.GFF gff)
             {
                 foreach (ModifyGFF changeField in Modifiers)

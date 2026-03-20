@@ -6,7 +6,7 @@ namespace KPatcher.Core.Tests.Formats
 {
 
     /// <summary>
-    /// Port of vendor/PyKotor/Libraries/PyKotor/tests/kpatcher/diff/test_vendor_twoda_diff.py: TestVendorTwoDAComparison.
+    /// C# Reference: src/KPatcher.Tests/Formats/TwoDaVendorCompareTests.cs
     /// </summary>
     public class TwoDaVendorCompareTests
     {

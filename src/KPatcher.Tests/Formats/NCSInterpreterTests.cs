@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS.Compiler;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Formats
@@ -16,7 +16,7 @@ namespace KPatcher.Core.Tests.Formats
     public class NCSInterpreterTests
     {
         /// <summary>
-        /// Python: test_peek_past_vector (from TestStack)
+        /// test_peek_past_vector (from TestStack)
         /// </summary>
         [Fact]
         public void TestPeekPastVector()
@@ -26,13 +26,13 @@ namespace KPatcher.Core.Tests.Formats
             stack.Add(DataType.Vector, new Vector3(2.0f, 3.0f, 4.0f)); // -16
             stack.Add(DataType.Float, 5.0); // -4
             StackObject result = stack.Peek(-20);
-            // Python: print(stack.peek(-20))
+            // print(stack.peek(-20))
             // This test just verifies peek works, no assertion in Python
             result.Should().NotBeNull();
         }
 
         /// <summary>
-        /// Python: test_move_negative (from TestStack)
+        /// test_move_negative (from TestStack)
         /// </summary>
         [Fact]
         public void TestMoveNegative()
@@ -54,7 +54,7 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         /// <summary>
-        /// Python: test_move_zero (from TestStack)
+        /// test_move_zero (from TestStack)
         /// </summary>
         [Fact]
         public void TestMoveZero()
@@ -79,7 +79,7 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         /// <summary>
-        /// Python: test_copy_down_single (from TestStack)
+        /// test_copy_down_single (from TestStack)
         /// </summary>
         [Fact]
         public void TestCopyDownSingle()
@@ -98,7 +98,7 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         /// <summary>
-        /// Python: test_copy_down_many (from TestStack)
+        /// test_copy_down_many (from TestStack)
         /// </summary>
         [Fact]
         public void TestCopyDownMany()
@@ -112,7 +112,7 @@ namespace KPatcher.Core.Tests.Formats
             stack.Add(DataType.Float, 6); // -4
 
             stack.CopyDown(-24, 12);
-            // Python: print(stack.state())
+            // print(stack.state())
 
             stack.Peek(-24).Value.Should().Be(4.0);
             stack.Peek(-20).Value.Should().Be(5.0);

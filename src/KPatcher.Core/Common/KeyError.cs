@@ -6,7 +6,6 @@ namespace KPatcher.Core.Common
 
     /// <summary>
     /// Exception thrown when a required key is not found in memory or a dictionary.
-    /// Equivalent to Python's KeyError.
     /// </summary>
     public class KeyError : KeyNotFoundException
     {

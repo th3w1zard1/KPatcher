@@ -25,7 +25,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             if (constant != null)
             {
                 // Emit constant value
-                // Python: IdentifierExpression.compile does NOT add to temp_stack for constants
+                // IdentifierExpression.compile does NOT add to temp_stack for constants
                 // The caller (BinaryOperatorExpression, ExpressionStatement, etc.) will track it
                 switch (constant.DataType)
                 {
@@ -44,7 +44,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Otherwise, it's a variable - look up in scope
-            // Python: IdentifierExpression.compile does NOT add to temp_stack for variables
+            // IdentifierExpression.compile does NOT add to temp_stack for variables
             // The caller (BinaryOperatorExpression, ExpressionStatement, etc.) will track it
             // Let GetScoped handle temp_stack; do not override offset here.
             GetScopedResult scoped = block.GetScoped(Identifier, root);
@@ -55,7 +55,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             NCSInstructionType instructionType = isGlobal ? NCSInstructionType.CPTOPBP : NCSInstructionType.CPTOPSP;
 
             ncs.Add(instructionType, new List<object> { offset, dataType.Size(root) });
-            // Python: FieldAccess.compile does NOT add to temp_stack
+            // FieldAccess.compile does NOT add to temp_stack
             // The caller (BinaryOperatorExpression, ExpressionStatement, etc.) will track it
 
             return dataType;

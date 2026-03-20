@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:287-529
-    // Original: class Color:
     public class Color : IEquatable<Color>
     {
         public float R;
@@ -168,8 +166,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:528-572
-    // Original: class WrappedInt:
     public class WrappedInt : IEquatable<WrappedInt>
     {
         private int _value;
@@ -227,8 +223,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:574-604
-    // Original: class InventoryItem:
     public class InventoryItem : IEquatable<InventoryItem>
     {
         public ResRef ResRef { get; }
@@ -273,8 +267,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:606-624
-    // Original: class EquipmentSlot(Enum):
     [Flags]
     public enum EquipmentSlot
     {
@@ -296,8 +288,6 @@ namespace KPatcher.Core.Common
         LEFT_HAND_2 = 524288
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:626-713
-    // Original: class CaseInsensitiveHashSet(set, Generic[T]):
     public class CaseInsensitiveHashSet<T> : HashSet<T>
     {
         private static IEqualityComparer<T> BuildComparer()

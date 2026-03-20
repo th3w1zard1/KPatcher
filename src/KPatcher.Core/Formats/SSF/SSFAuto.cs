@@ -1,20 +1,18 @@
 using System;
 using System.IO;
-using KPatcher.Core.Resources;
 using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Formats.SSF
 {
 
     /// <summary>
     /// Auto-detection and convenience functions for SSF files.
-    /// 1:1 port of Python ssf_auto.py from pykotor/resource/formats/ssf/ssf_auto.py
     /// </summary>
     public static class SSFAuto
     {
         /// <summary>
         /// Writes the SSF data to the target location with the specified format (SSF or SSF_XML).
-        /// 1:1 port of Python write_ssf function.
         /// </summary>
         public static void WriteSsf(SSF ssf, string target, ResourceType fileFormat)
         {
@@ -32,7 +30,6 @@ namespace KPatcher.Core.Formats.SSF
 
         /// <summary>
         /// Returns the SSF data as a byte array.
-        /// 1:1 port of Python bytes_ssf function.
         /// </summary>
         public static byte[] BytesSsf(SSF ssf, [CanBeNull] ResourceType fileFormat = null)
         {
@@ -42,7 +39,6 @@ namespace KPatcher.Core.Formats.SSF
 
         /// <summary>
         /// Reads an SSF file from a file path or byte array.
-        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ssf/ssf_auto.py
         /// </summary>
         public static SSF ReadSsf(object source)
         {

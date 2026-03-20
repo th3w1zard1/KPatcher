@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using KPatcher.Core.Namespaces;
-using KPatcher.Core.Reader;
 using FluentAssertions;
 using IniParser.Model;
+using KPatcher.Core.Namespaces;
+using KPatcher.Core.Reader;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader
@@ -194,6 +194,79 @@ Description=Ustanovite russkuyu versiyu K1CP
             translationRussian.DataFolderPath.Should().BeEmpty();
             translationRussian.Name.Should().Be("K1CP v1.10 (Russkogo Perevoda)");
             translationRussian.Description.Should().Be("Ustanovite russkuyu versiyu K1CP");
+        }
+
+        [Fact]
+        public void FromFilePath_WhenYamlFile_LoadsSameStructureAsIni()
+        {
+            // Arrange - namespaces.yaml in ConfigReaderYaml format (section -> list of Key/Value)
+            string yamlPath = Path.Combine(_tempDir, "namespaces.yaml");
+            string yamlContent = @"Namespaces:
+  - Key: Namespace1
+    Value: Base_English
+  - Key: Namespace2
+    Value: Translation_French
+  - Key: Namespace3
+    Value: Translation_Russian
+Base_English:
+  - Key: IniName
+    Value: changes.ini
+  - Key: InfoName
+    Value: info.rtf
+  - Key: DataPath
+    Value: ''
+  - Key: Name
+    Value: K1CP v1.10 (English)
+  - Key: Description
+    Value: Installs the English version of K1CP (default)
+Translation_French:
+  - Key: IniName
+    Value: ../tslpatchdata/translation_french/changes.ini
+  - Key: InfoName
+    Value: ../tslpatchdata/translation_french/info.rtf
+  - Key: DataPath
+    Value: ''
+  - Key: Name
+    Value: K1CP v1.10 (Traduction en Francais)
+  - Key: Description
+    Value: Installe la version francaise de K1CP
+Translation_Russian:
+  - Key: IniName
+    Value: ../tslpatchdata/translation_russian/changes.ini
+  - Key: InfoName
+    Value: ../tslpatchdata/translation_russian/info.rtf
+  - Key: DataPath
+    Value: ''
+  - Key: Name
+    Value: K1CP v1.10 (Russkogo Perevoda)
+  - Key: Description
+    Value: Ustanovite russkuyu versiyu K1CP
+";
+            File.WriteAllText(yamlPath, yamlContent);
+
+            // Act
+            List<PatcherNamespace> namespaces = NamespaceReader.FromFilePath(yamlPath);
+
+            // Assert - same structure as INI
+            namespaces.Should().NotBeNull();
+            namespaces.Should().HaveCount(3);
+
+            PatcherNamespace baseEnglish = namespaces.FirstOrDefault(n => n.NamespaceId == "Base_English");
+            baseEnglish.Should().NotBeNull();
+            baseEnglish.IniFilename.Should().Be("changes.ini");
+            baseEnglish.InfoFilename.Should().Be("info.rtf");
+            baseEnglish.DataFolderPath.Should().BeEmpty();
+            baseEnglish.Name.Should().Be("K1CP v1.10 (English)");
+
+            PatcherNamespace translationFrench = namespaces.FirstOrDefault(n => n.NamespaceId == "Translation_French");
+            translationFrench.Should().NotBeNull();
+            translationFrench.IniFilename.Should().Be("../tslpatchdata/translation_french/changes.ini");
+            translationFrench.Name.Should().Be("K1CP v1.10 (Traduction en Francais)");
+
+            PatcherNamespace translationRussian = namespaces.FirstOrDefault(n => n.NamespaceId == "Translation_Russian");
+            translationRussian.Should().NotBeNull();
+            translationRussian.IniFilename.Should().Be("../tslpatchdata/translation_russian/changes.ini");
+            translationRussian.Name.Should().Be("K1CP v1.10 (Russkogo Perevoda)");
         }
 
         [Fact]

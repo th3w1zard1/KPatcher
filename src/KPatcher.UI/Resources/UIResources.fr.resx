@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <data name="AlignCenter" xml:space="preserve"><value>Centrer</value></data>
+  <data name="AlignLeft" xml:space="preserve"><value>Aligner à gauche</value></data>
+  <data name="AlignRight" xml:space="preserve"><value>Aligner à droite</value></data>
+  <data name="AllUpdateMirrorsFailed" xml:space="preserve"><value>Tous les miroirs de mise à jour ont échoué.</value></data>
+  <data name="AlphaBannerText" xml:space="preserve"><value>⚠️ VERSION ALPHA - NE PAS UTILISER EN PRODUCTION ⚠️</value></data>
+  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ ATTENTION : Ceci est une version ALPHA ({0}) de KPatcher.NET
+
+Cette version est destinée aux tests et démonstrations uniquement.
+Elle ne doit PAS être utilisée en production.
+
+Les fonctionnalités peuvent être incomplètes, instables ou contenir des bugs.
+Utilisez à vos risques et périls.
+
+Pour un usage en production, utilisez la version stable.</value></data>
+  <data name="AlphaWarningTitle" xml:space="preserve"><value>AVERTISSEMENT VERSION ALPHA</value></data>
+  <data name="ArchiveExtracted" xml:space="preserve"><value>Archive extraite.</value></data>
+  <data name="AtLeastOneOptionRequired" xml:space="preserve"><value>Au moins une option est requise.</value></data>
+  <data name="AutoOpeningModFromFormat" xml:space="preserve"><value>Ouverture automatique du mod depuis : {0}</value></data>
+  <data name="BackupMismatchMessageFormat" xml:space="preserve"><value>Cette sauvegarde ne correspond pas à votre installation KOTOR. Fichiers manquants ou modifiés.{0}Désinstallez tous les mods dans l'ordre d'installation.{0}Vérifiez que vous avez sélectionné le bon mod et le bon dossier KOTOR.{0}Continuer quand même ?</value></data>
+  <data name="BackupOutOfDateOrMismatched" xml:space="preserve"><value>Sauvegarde obsolète ou non correspondante</value></data>
+  <data name="Bold" xml:space="preserve"><value>Gras</value></data>
+  <data name="Browse" xml:space="preserve"><value>Parcourir</value></data>
+  <data name="ByteB" xml:space="preserve"><value>B</value></data>
+  <data name="ByteGB" xml:space="preserve"><value>Go</value></data>
+  <data name="ByteKB" xml:space="preserve"><value>Ko</value></data>
+  <data name="ByteMB" xml:space="preserve"><value>Mo</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="CheckForUpdates" xml:space="preserve"><value>Rechercher les mises à jour</value></data>
+  <data name="ColorBlack" xml:space="preserve"><value>Noir</value></data>
+  <data name="ColorBlue" xml:space="preserve"><value>Bleu</value></data>
+  <data name="ColorGray" xml:space="preserve"><value>Gris</value></data>
+  <data name="ColorGreen" xml:space="preserve"><value>Vert</value></data>
+  <data name="ColorLightBlue" xml:space="preserve"><value>Bleu clair</value></data>
+  <data name="ColorLightGreen" xml:space="preserve"><value>Vert clair</value></data>
+  <data name="ColorRed" xml:space="preserve"><value>Rouge</value></data>
+  <data name="ColorTransparent" xml:space="preserve"><value>Transparent</value></data>
+  <data name="ColorYellow" xml:space="preserve"><value>Jaune</value></data>
+  <data name="ConfigReaderTestComplete" xml:space="preserve"><value>Test du lecteur de configuration terminé.</value></data>
+  <data name="Confirmation" xml:space="preserve"><value>Confirmation</value></data>
+  <data name="CouldNotAcquirePermission" xml:space="preserve"><value>Impossible d'obtenir la permission !</value></data>
+  <data name="CouldNotFindModAtFolderFormat" xml:space="preserve"><value>Aucun mod trouvé dans le dossier indiqué.{0}{1}</value></data>
+  <data name="CreateInfoRte" xml:space="preserve"><value>Créer info.rte...</value></data>
+  <data name="DeadlyStream" xml:space="preserve"><value>DeadlyStream</value></data>
+  <data name="DefaultInstallation" xml:space="preserve"><value>Installation par défaut</value></data>
+  <data name="DetectedKotorInstallationsFormat" xml:space="preserve"><value>{0} installation(s) KOTOR détectée(s).</value></data>
+  <data name="Discord" xml:space="preserve"><value>Discord</value></data>
+  <data name="DownloadComplete" xml:space="preserve"><value>Téléchargement terminé.</value></data>
+  <data name="DownloadFailedFromFormat" xml:space="preserve"><value>Échec du téléchargement depuis {0} : {1}</value></data>
+  <data name="Downloaded" xml:space="preserve"><value>téléchargé</value></data>
+  <data name="DownloadingKPatcherFormat" xml:space="preserve"><value>Téléchargement de KPatcher {0}...</value></data>
+  <data name="Error" xml:space="preserve"><value>Erreur</value></data>
+  <data name="EstimatedTimeRemainingFormat" xml:space="preserve"><value>Temps restant estimé : {0}</value></data>
+  <data name="Exit" xml:space="preserve"><value>Quitter</value></data>
+  <data name="ExtractingUpdatePackage" xml:space="preserve"><value>Extraction du paquet de mise à jour...</value></data>
+  <data name="FailedToFixCaseSensitivityFormat" xml:space="preserve"><value>Échec de la correction de la casse : {0}</value></data>
+  <data name="FailedToFixPermissionsFormat" xml:space="preserve"><value>Échec de la correction des permissions : {0}</value></data>
+  <data name="FailedToLoadModFormat" xml:space="preserve"><value>Échec du chargement du mod : {0}</value></data>
+  <data name="FailedToLoadNamespaceConfigFormat" xml:space="preserve"><value>Échec du chargement de la configuration de l'espace de noms : {0}</value></data>
+  <data name="FailedToLoadRteContentFormat" xml:space="preserve"><value>Échec du chargement du contenu RTF : {0}</value></data>
+  <data name="FailedToLoadRtfContent" xml:space="preserve"><value>Impossible de charger le contenu RTF. Consultez la console pour plus de détails.</value></data>
+  <data name="FailedToOpenUrlFormat" xml:space="preserve"><value>Échec de l'ouverture de l'URL : {0}</value></data>
+  <data name="FailedToRestoreBackupFormat" xml:space="preserve"><value>Échec de la restauration de la sauvegarde (exception).{0}{0}{1}</value></data>
+  <data name="FilesAndFoldersProcessedFormat" xml:space="preserve"><value>{0} fichiers et {1} dossiers traités.</value></data>
+  <data name="FinalizingUpdate" xml:space="preserve"><value>Finalisation de la mise à jour...</value></data>
+  <data name="FixIOSCaseSensitivity" xml:space="preserve"><value>Corriger la casse iOS</value></data>
+  <data name="FixPermissionsToFileFolder" xml:space="preserve"><value>Corriger les permissions fichier/dossier...</value></data>
+  <data name="GainingPermissionPleaseWait" xml:space="preserve"><value>Obtention des permissions, veuillez patienter...</value></data>
+  <data name="GitHubSource" xml:space="preserve"><value>Code source GitHub</value></data>
+  <data name="HelpWindowTitle" xml:space="preserve"><value>Aide</value></data>
+  <data name="IOSCaseRenameTaskCompleted" xml:space="preserve"><value>Renommage de casse iOS terminé.</value></data>
+  <data name="InstallationCancelled" xml:space="preserve"><value>Installation annulée.</value></data>
+  <data name="InstallationCompleteWithErrorsAndWarningsFormat" xml:space="preserve"><value>L'installation s'est terminée avec {0} erreurs et {1} avertissements.{2}Durée totale : {3}{2}Patches au total : {4}</value></data>
+  <data name="InstallationFailedFormat" xml:space="preserve"><value>Échec de l'installation : {0}</value></data>
+  <data name="InvalidGameFolder" xml:space="preserve"><value>Dossier de jeu invalide</value></data>
+  <data name="Italic" xml:space="preserve"><value>Italique</value></data>
+  <data name="KOTOR1" xml:space="preserve"><value>KOTOR 1</value></data>
+  <data name="KOTOR2TSL" xml:space="preserve"><value>KOTOR 2: TSL</value></data>
+  <data name="KOTORCommunityPortal" xml:space="preserve"><value>Portail communautaire KOTOR</value></data>
+  <data name="KOTORPatcherUpdate" xml:space="preserve"><value>Mise à jour KOTORPatcher</value></data>
+  <data name="KPatcherHome" xml:space="preserve"><value>Accueil KPatcher</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageFrench" xml:space="preserve"><value>Français</value></data>
+  <data name="LanguageGerman" xml:space="preserve"><value>Deutsch</value></data>
+  <data name="LanguagePolish" xml:space="preserve"><value>Polski</value></data>
+  <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
+  <data name="LanguageSpanish" xml:space="preserve"><value>Español</value></data>
+  <data name="LoadedNamespacesCountFormat" xml:space="preserve"><value>{0} espace(s) de noms chargé(s).</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>TSLPatcher</value></data>
+  <data name="ManualDownloadButton" xml:space="preserve"><value>Téléchargement manuel</value></data>
+  <data name="MenuAbout" xml:space="preserve"><value>À propos</value></data>
+  <data name="MenuClose" xml:space="preserve"><value>_Fermer</value></data>
+  <data name="MenuFile" xml:space="preserve"><value>_Fichier</value></data>
+  <data name="MenuHelp" xml:space="preserve"><value>Aide</value></data>
+  <data name="MenuLanguage" xml:space="preserve"><value>Langue</value></data>
+  <data name="MenuNew" xml:space="preserve"><value>_Nouveau</value></data>
+  <data name="MenuOpen" xml:space="preserve"><value>_Ouvrir...</value></data>
+  <data name="MenuSave" xml:space="preserve"><value>_Enregistrer</value></data>
+  <data name="MenuSaveAs" xml:space="preserve"><value>Enregistrer _sous...</value></data>
+  <data name="MenuTools" xml:space="preserve"><value>Outils</value></data>
+  <data name="NoBackupDirectoryFoundFormat" xml:space="preserve"><value>Aucun dossier de sauvegarde trouvé dans {0}.</value></data>
+  <data name="NoBackupsFoundMessageFormat" xml:space="preserve"><value>Aucune sauvegarde trouvée dans '{0}' !{1}KPatcher ne peut pas désinstaller les installations KPatcher.exe.</value></data>
+  <data name="NoBackupsFoundTitle" xml:space="preserve"><value>Aucune sauvegarde trouvée !</value></data>
+  <data name="NoDescriptionAvailable" xml:space="preserve"><value>Aucune description disponible.</value></data>
+  <data name="NoGameFolder" xml:space="preserve"><value>Aucun dossier de jeu</value></data>
+  <data name="NoModChosen" xml:space="preserve"><value>Aucun mod choisi</value></data>
+  <data name="NoNamespaceSelected" xml:space="preserve"><value>Aucun espace de noms sélectionné</value></data>
+  <data name="NoUpdatesFound" xml:space="preserve"><value>Aucune mise à jour</value></data>
+  <data name="NoUpdatesFoundMessageFormat" xml:space="preserve"><value>Vous utilisez déjà la dernière version de KPatcher ({0}).</value></data>
+  <data name="NothingToChangeCase" xml:space="preserve"><value>Rien à modifier – tous les fichiers/dossiers ont déjà la bonne casse.</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="OpenInfoRte" xml:space="preserve"><value>Ouvrir info.rte</value></data>
+  <data name="OperationSuccessfulFormat" xml:space="preserve"><value>L'opération a réussi. {0}</value></data>
+  <data name="PCGamingWiki" xml:space="preserve"><value>PCGamingWiki</value></data>
+  <data name="PatcherFinishedTitle" xml:space="preserve"><value>Patcheur terminé</value></data>
+  <data name="PermissionErrorTitle" xml:space="preserve"><value>Erreur de permission</value></data>
+  <data name="PermissionsDeniedCheckLogsFormat" xml:space="preserve"><value>Permission refusée ! Consultez les journaux pour plus de détails.{0}{1}</value></data>
+  <data name="PermissionsFixerTaskCompleted" xml:space="preserve"><value>Réparation des permissions fichier/dossier terminée.</value></data>
+  <data name="PlaceholderSelectKotor" xml:space="preserve"><value>Sélectionnez le dossier d'installation de KOTOR</value></data>
+  <data name="PlaceholderSelectMod" xml:space="preserve"><value>Sélectionnez le mod à installer</value></data>
+  <data name="PleaseSelectModAndGameDirectory" xml:space="preserve"><value>Veuillez sélectionner un mod et le dossier du jeu.</value></data>
+  <data name="PleaseSelectNamespaceFirst" xml:space="preserve"><value>Veuillez d'abord sélectionner un espace de noms.</value></data>
+  <data name="PleaseWaitMayTakeAWhile" xml:space="preserve"><value>Veuillez patienter, cela peut prendre un moment...</value></data>
+  <data name="PreparingUpdate" xml:space="preserve"><value>Préparation de la mise à jour...</value></data>
+  <data name="ReallyUninstallConfirmFormat" xml:space="preserve"><value>Vraiment désinstaller {0} fichiers et restaurer la sauvegarde la plus récente ({1} fichiers, {2} dossiers) ?{3}Ceci utilise la sauvegarde la plus récente du mod.</value></data>
+  <data name="ReinstallButton" xml:space="preserve"><value>Réinstaller</value></data>
+  <data name="RestartingToCompleteUpdate" xml:space="preserve"><value>Redémarrage pour terminer la mise à jour...</value></data>
+  <data name="RteEditorTitle" xml:space="preserve"><value>Éditeur RTE</value></data>
+  <data name="RteFileFilter" xml:space="preserve"><value>Éditeur de texte enrichi (*.rte)</value></data>
+  <data name="SaveInfoRte" xml:space="preserve"><value>Enregistrer info.rte</value></data>
+  <data name="SelectDirectoryFixCaseSensitivity" xml:space="preserve"><value>Sélectionner le dossier pour corriger la casse</value></data>
+  <data name="SelectDirectoryFixPermissions" xml:space="preserve"><value>Sélectionner le dossier pour corriger les permissions</value></data>
+  <data name="SelectKotorDirectory" xml:space="preserve"><value>Sélectionner le dossier KOTOR</value></data>
+  <data name="SelectModAndKotorToBegin" xml:space="preserve"><value>Sélectionnez un mod et votre dossier KOTOR pour commencer.</value></data>
+  <data name="SelectModDirectory" xml:space="preserve"><value>Sélectionner le dossier du mod</value></data>
+  <data name="SelectModDirectoryFirst" xml:space="preserve"><value>Sélectionnez d'abord le dossier du mod.</value></data>
+  <data name="StartPatchingButtonLabel" xml:space="preserve"><value>&amp;Démarrer le patch</value></data>
+  <data name="StartingInstallation" xml:space="preserve"><value>Démarrage de l'installation...</value></data>
+  <data name="Strike" xml:space="preserve"><value>Barré</value></data>
+  <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Permission obtenue avec succès</value></data>
+  <data name="TaskAlreadyRunning" xml:space="preserve"><value>Une tâche est déjà en cours</value></data>
+  <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>Ce mod nécessite une confirmation</value></data>
+  <data name="UnableToDeleteBackupPermissionFormat" xml:space="preserve"><value>Impossible de supprimer la sauvegarde restaurée (permissions). Voulez-vous demander les permissions et réessayer ?</value></data>
+  <data name="UnableToFetchUpdateInfo" xml:space="preserve"><value>Impossible de récupérer les informations de mise à jour. Réessayez plus tard.</value></data>
+  <data name="UnableToLocateWindowForUpdater" xml:space="preserve"><value>Impossible de localiser la fenêtre pour la mise à jour.</value></data>
+  <data name="UnableToOpenRteEditorWindow" xml:space="preserve"><value>Impossible d'ouvrir l'éditeur RTE : fenêtre non disponible.</value></data>
+  <data name="Underline" xml:space="preserve"><value>Souligné</value></data>
+  <data name="UnexpectedErrorDuringInstallationFormat" xml:space="preserve"><value>Une erreur inattendue s'est produite et l'installation a été interrompue.{0}{0}{1}</value></data>
+  <data name="UninstallCompletedDeleteBackupFormat" xml:space="preserve"><value>{0} fichiers supprimés, sauvegarde du {1} restaurée.{2}{2}Supprimer la sauvegarde du {1} ?</value></data>
+  <data name="UninstallCompletedTitle" xml:space="preserve"><value>Désinstallation terminée !</value></data>
+  <data name="UninstallFailedFormat" xml:space="preserve"><value>Désinstallation échouée : {0}</value></data>
+  <data name="UninstallModRestoreBackup" xml:space="preserve"><value>Désinstaller le mod / Restaurer la sauvegarde</value></data>
+  <data name="UninstallProcessFinished" xml:space="preserve"><value>Désinstallation terminée.</value></data>
+  <data name="UnsavedChanges" xml:space="preserve"><value>Modifications non enregistrées</value></data>
+  <data name="UnsavedChangesDiscardPrompt" xml:space="preserve"><value>Vous avez des modifications non enregistrées. Voulez-vous les abandonner ?</value></data>
+  <data name="Untitled" xml:space="preserve"><value>Sans titre</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Mise à jour disponible</value></data>
+  <data name="UpdateAvailableMessageFormat" xml:space="preserve"><value>Une version plus récente de KPatcher ({0}) est disponible.{1}{1}{2}</value></data>
+  <data name="UpdateButton" xml:space="preserve"><value>Mettre à jour</value></data>
+  <data name="UpdateError" xml:space="preserve"><value>Erreur de mise à jour</value></data>
+  <data name="ValidateIni" xml:space="preserve"><value>Valider INI</value></data>
+  <data name="ValidationFailedFormat" xml:space="preserve"><value>Échec de la validation : {0}</value></data>
+  <data name="WaitForPreviousTask" xml:space="preserve"><value>Attendez la fin de la tâche précédente.</value></data>
+  <data name="WarningNotAToy" xml:space="preserve"><value>Ce n'est pas un jouet. Continuer quand même ?</value></data>
+  <data name="WarningTitle" xml:space="preserve"><value>Attention !</value></data>
+  <data name="Website" xml:space="preserve"><value>Site web</value></data>
+  <data name="WelcomeToKPatcher" xml:space="preserve"><value>Bienvenue dans KPatcher !</value></data>
+  <data name="WindowTitleAlphaSuffix" xml:space="preserve"><value> [ALPHA - NE PAS UTILISER EN PRODUCTION]</value></data>
+  <data name="WindowTitleFormat" xml:space="preserve"><value>KOTORPatcher {0}</value></data>
+</root>

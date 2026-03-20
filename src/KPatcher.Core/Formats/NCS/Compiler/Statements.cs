@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using KPatcher.Core.Common.Script;
 using JetBrains.Annotations;
+using KPatcher.Core.Common.Script;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -50,17 +50,17 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
             block.AddScoped(Identifier, declaredType);
 
-            // Handle initializer - Python uses VariableInitializer which creates an Assignment
+            // Handle initializer
             if (Initializer != null)
             {
-                // Python VariableInitializer.compile: Save temp_stack before compiling expression
+                // Save temp_stack before compiling expression
                 int initialTempStack = block.TempStack;
 
                 // Compile expression - expressions may or may not add to temp_stack themselves
                 DynamicDataType initType = Initializer.Compile(ncs, root, block);
                 int tempStackAfter = block.TempStack;
 
-                // Python Assignment.compile: Only add to temp_stack if the expression didn't already add it
+                // Only add to temp_stack if the expression didn't already add it
                 if (tempStackAfter == initialTempStack)
                 {
                     // Expression didn't add to temp_stack, so we need to add it
@@ -75,11 +75,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 // Get variable location - get_scoped uses temp_stack (including expression result) in its calculation
                 GetScopedResult scoped = block.GetScoped(Identifier, root);
                 NCSInstructionType instruction = scoped.IsGlobal ? NCSInstructionType.CPDOWNBP : NCSInstructionType.CPDOWNSP;
-                // Python: get_scoped() already accounts for temp_stack, so stack_index points to the correct variable location
+                // get_scoped() already accounts for temp_stack, so stack_index points to the correct variable location
                 // We use scoped.Offset directly, not scoped.Offset - size
                 ncs.Add(instruction, new List<object> { scoped.Offset, initType.Size(root) });
 
-                // Python VariableInitializer: Assignment leaves result on stack, but VariableInitializer is NOT in ExpressionStatement,
+                // Assignment leaves result on stack, but VariableDeclarator is NOT in ExpressionStatement,
                 // so we need to clean it up ourselves
                 int resultSize = initType.Size(root);
                 if (block.TempStack > initialTempStack)
@@ -105,7 +105,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             ElseBlock = elseBlock;
         }
 
-        // Matching PyKotor classes.py lines 2510-2562: ConditionalBlock.compile
         public override object Compile(
             NCS ncs,
             [CanBeNull] CodeRoot root,
@@ -125,21 +124,17 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 ConditionAndBlock branch = IfBlocks[i];
                 // Save temp_stack state before condition
-                // Matching PyKotor classes.py line 2524
                 int initialTempStack = block.TempStack;
                 branch.Condition.Compile(ncs, root, block);
                 // JZ consumes the condition value from stack
-                // Matching PyKotor classes.py lines 2527-2530
                 ncs.Add(NCSInstructionType.JZ, jump: jumpTargets[i]);
                 // Decrement temp_stack since JZ consumed the condition
                 block.TempStack = initialTempStack;
 
                 // Save temp_stack before compiling block
-                // Matching PyKotor classes.py line 2533
                 int blockTempStackBefore = block.TempStack;
                 branch.Block.Compile(ncs, root, block, returnInstruction, breakInstruction, continueInstruction);
                 // Block should clear its own temp_stack, restore parent's temp_stack
-                // Matching PyKotor classes.py line 2543
                 block.TempStack = blockTempStackBefore;
                 ncs.Add(NCSInstructionType.JMP, jump: jumpTargets[jumpTargets.Count - 1]);
 
@@ -149,11 +144,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             if (ElseBlock != null)
             {
                 // Save temp_stack before compiling else block
-                // Matching PyKotor classes.py line 2550
                 int elseTempStackBefore = block.TempStack;
                 ElseBlock.Compile(ncs, root, block, returnInstruction, breakInstruction, continueInstruction);
                 // Else block should clear its own temp_stack, restore parent's temp_stack
-                // Matching PyKotor classes.py line 2560
                 block.TempStack = elseTempStackBefore;
             }
 
@@ -187,7 +180,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             Block = block;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:2596-2631
         public override object Compile(NCS ncs, [CanBeNull] CodeRoot root, CodeBlock block, NCSInstruction returnInstruction, NCSInstruction breakInstruction, [CanBeNull] NCSInstruction continueInstruction)
         {
             block.MarkBreakScope();
@@ -196,7 +188,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             var loopEnd = new NCSInstruction(NCSInstructionType.NOP);
 
             // Save temp_stack before condition (condition pushes a value, JZ consumes it)
-            // Matching PyKotor classes.py line 2612
             int initialTempStack = block.TempStack;
             DynamicDataType conditionType = Condition.Compile(ncs, root, block);
 
@@ -208,10 +199,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // JZ consumes the condition value from stack
-            // Matching PyKotor classes.py line 2623
             ncs.Add(NCSInstructionType.JZ, jump: loopEnd);
             // Restore temp_stack since JZ consumed the condition
-            // Matching PyKotor classes.py line 2625
             block.TempStack = initialTempStack;
 
             Block.Compile(ncs, root, block, returnInstruction, loopEnd, loopStart);
@@ -233,7 +222,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             Block = block;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:2639-2683
         public override object Compile(NCS ncs, [CanBeNull] CodeRoot root, CodeBlock block, NCSInstruction returnInstruction, NCSInstruction breakInstruction, [CanBeNull] NCSInstruction continueInstruction)
         {
             block.MarkBreakScope();
@@ -246,7 +234,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             ncs.Instructions.Add(conditionStart);
 
             // Save temp_stack before condition (condition pushes a value, JZ consumes it)
-            // Matching PyKotor classes.py line 2667
             int initialTempStack = block.TempStack;
             DynamicDataType conditionType = Condition.Compile(ncs, root, block);
             if (conditionType != DynamicDataType.INT)
@@ -257,10 +244,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // JZ consumes the condition value from stack
-            // Matching PyKotor classes.py line 2677
             ncs.Add(NCSInstructionType.JZ, jump: loopEnd);
             // Restore temp_stack since JZ consumed the condition
-            // Matching PyKotor classes.py line 2679
             block.TempStack = initialTempStack;
 
             ncs.Add(NCSInstructionType.JMP, jump: loopStart);
@@ -285,13 +270,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             Block = block;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:2699-2761
         public override object Compile(NCS ncs, [CanBeNull] CodeRoot root, CodeBlock block, NCSInstruction returnInstruction, NCSInstruction breakInstruction, [CanBeNull] NCSInstruction continueInstruction)
         {
             block.MarkBreakScope();
 
-            // Handle initializer - PyKotor supports both Statement and Expression
-            // Matching PyKotor classes.py lines 2711-2725
+            // Handle initializer
             if (Initializer != null)
             {
                 // For now, we only support Expression initializers in C#
@@ -314,7 +297,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             var loopEnd = new NCSInstruction(NCSInstructionType.NOP);
 
             // Save temp_stack before condition (condition pushes a value, JZ consumes it)
-            // Matching PyKotor classes.py line 2732
             int initialTempStack = block.TempStack;
             DynamicDataType conditionType = Condition.Compile(ncs, root, block);
             if (conditionType != DynamicDataType.INT)
@@ -325,16 +307,13 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // JZ consumes the condition value from stack
-            // Matching PyKotor classes.py line 2742
             ncs.Add(NCSInstructionType.JZ, jump: loopEnd);
             // Restore temp_stack since JZ consumed the condition
-            // Matching PyKotor classes.py line 2744
             block.TempStack = initialTempStack;
 
             Block.Compile(ncs, root, block, returnInstruction, loopEnd, updateStart);
             ncs.Instructions.Add(updateStart);
 
-            // Matching PyKotor classes.py lines 2749-2757
             int tempStackBeforeIteration = block.TempStack;
             DynamicDataType iterType = Iteration.Compile(ncs, root, block);
             int tempStackAfterIteration = block.TempStack;

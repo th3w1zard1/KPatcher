@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Mods.GFF;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Integration

@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Resources;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Integration

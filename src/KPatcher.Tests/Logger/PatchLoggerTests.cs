@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KPatcher.Core.Logger;
 using FluentAssertions;
+using KPatcher.Core.Logger;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Logger

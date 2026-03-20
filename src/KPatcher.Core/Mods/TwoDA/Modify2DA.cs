@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.TwoDA
 {
 
     /// <summary>
     /// Abstract base for 2DA modifications.
-    /// 1:1 port from Python Modify2DA in pykotor/kpatcher/mods/twoda.py
     /// </summary>
     public abstract class Modify2DA
     {
@@ -41,61 +40,11 @@ namespace KPatcher.Core.Mods.TwoDA
             Formats.TwoDA.TwoDA twoda,
             TwoDARow row)
         {
-            // Python: return {column: value.value(memory, twoda, row) for column, value in cells.items()}
-            // Python evaluates all cells first, then update_values sets them all at once.
-            // However, RowValueRowCell needs to access other cell values that are being set in the same unpack.
-            // Python's dict comprehension evaluates all values before creating the dict, so RowValueRowCell
-            // can't access other cell values during unpack because they haven't been set in the row yet.
-            //
-            // The test expects RowValueRowCell to work, so we need to do a two-pass evaluation:
-            // First pass: evaluate all non-RowValueRowCell values and store them
-            // Second pass: evaluate RowValueRowCell values using the already-evaluated values
             var result = new Dictionary<string, string>();
-            var evaluatedValues = new Dictionary<string, string>();
-
-            // First pass: evaluate all non-RowValueRowCell values
             foreach ((string column, RowValue value) in cells)
             {
-                if (!(value is RowValueRowCell))
-                {
-                    string cellValue = value.Value(memory, twoda, row);
-                    result[column] = cellValue;
-                    evaluatedValues[column] = cellValue;
-                }
+                result[column] = value.Value(memory, twoda, row);
             }
-
-            // Second pass: evaluate RowValueRowCell values using the already-evaluated values
-            // We need to process RowValueRowCell values iteratively, updating evaluatedValues as we go
-            // so that RowValueRowCell values that reference other RowValueRowCell values can access them
-            bool changed = true;
-            while (changed)
-            {
-                changed = false;
-                foreach ((string column, RowValue value) in cells)
-                {
-                    if (value is RowValueRowCell rowCell && !result.ContainsKey(column))
-                    {
-                        // Check if the referenced column has been evaluated
-                        if (evaluatedValues.TryGetValue(rowCell.Column, out string cellValue))
-                        {
-                            result[column] = cellValue;
-                            evaluatedValues[column] = cellValue; // Update evaluatedValues so other RowValueRowCell can access it
-                            changed = true;
-                        }
-                        else
-                        {
-                            // The column doesn't exist yet, so RowValueRowCell returns ""
-                            result[column] = rowCell.Value(memory, twoda, row);
-                            if (!string.IsNullOrEmpty(result[column]))
-                            {
-                                evaluatedValues[column] = result[column];
-                                changed = true;
-                            }
-                        }
-                    }
-                }
-            }
-
             return result;
         }
 
@@ -109,7 +58,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Changes an existing row in a 2DA.
-    /// 1:1 port from Python ChangeRow2DA
     /// </summary>
     public class ChangeRow2DA : Modify2DA, IRowTracking2DA
     {
@@ -164,7 +112,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Adds a new row to a 2DA.
-    /// 1:1 port from Python AddRow2DA
     /// </summary>
     public class AddRow2DA : Modify2DA, IRowTracking2DA
     {
@@ -248,7 +195,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Copies an existing row in a 2DA.
-    /// 1:1 port from Python CopyRow2DA
     /// </summary>
     public class CopyRow2DA : Modify2DA, IRowTracking2DA
     {
@@ -349,7 +295,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Adds a new column to a 2DA.
-    /// 1:1 port from Python AddColumn2DA
     /// </summary>
     public class AddColumn2DA : Modify2DA
     {
@@ -407,7 +352,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
             foreach ((int tokenId, string value) in Store2DA)
             {
-                // Python: value should start with "I" (index) or "L" (label), otherwise raises WarningError
                 if (value.StartsWith("I"))
                 {
                     int rowIndex = int.Parse(value.Substring(1));
@@ -423,7 +367,7 @@ namespace KPatcher.Core.Mods.TwoDA
                 }
                 else
                 {
-                    // Python: msg = f"store_2da dict has an invalid value at {token_id}: '{value}'"
+                    // msg = f"store_2da dict has an invalid value at {token_id}: '{value}'"
                     throw new WarningError($"store_2da dict has an invalid value at {tokenId}: '{value}'");
                 }
             }

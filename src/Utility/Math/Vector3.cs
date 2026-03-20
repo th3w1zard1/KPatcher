@@ -77,8 +77,6 @@ namespace KPatcher.Core.Common
             return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
         }
 
-        // Matching PyKotor implementation - cross product for ray-triangle intersection
-        // Original: def cross(a: Vector3, b: Vector3) -> Vector3
         public static Vector3 Cross(Vector3 a, Vector3 b)
         {
             return new Vector3(
@@ -123,8 +121,6 @@ namespace KPatcher.Core.Common
         public static bool operator !=(Vector3 left, Vector3 right)
             => !left.Equals(right);
 
-        // Matching PyKotor implementation - indexer for accessing components by index
-        // Original: def __getitem__(self, item: int) -> float
         public float this[int index]
         {
             get
@@ -150,8 +146,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation - extension method for checking if vector is in list by identity
-    // Original: def within(self, container: list) -> bool
     public static class Vector3Extensions
     {
         public static bool Within(this Vector3 vector, System.Collections.Generic.IList<Vector3> container)

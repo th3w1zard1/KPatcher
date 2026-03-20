@@ -7,7 +7,6 @@ namespace KPatcher.Core.Formats.SSF
 
     /// <summary>
     /// Writes SSF (Sound Set File) binary data.
-    /// Matches Python SSFBinaryWriter class.
     /// </summary>
     public class SSFBinaryWriter
     {
@@ -69,7 +68,7 @@ namespace KPatcher.Core.Formats.SSF
         }
 
         /// <summary>
-        /// Writes an int32, converting -1 to 0xFFFFFFFF (matches Python max_neg1 behavior).
+        /// Writes an int32, converting -1 to 0xFFFFFFFF.
         /// </summary>
         private static void WriteInt32MaxNeg1(BinaryWriter writer, int? value)
         {

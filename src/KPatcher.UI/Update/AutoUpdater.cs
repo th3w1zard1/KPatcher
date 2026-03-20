@@ -10,39 +10,31 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using KPatcher.UI.Views.Dialogs;
 using JetBrains.Annotations;
+using KPatcher.UI.Resources;
+using KPatcher.UI.Views.Dialogs;
 
 namespace KPatcher.UI.Update
 {
     /// <summary>
     /// Handles downloading, extracting, and scheduling the self-update process.
-    /// Mirrors kpatcher/app.py::_run_autoupdate.
+    /// Mirrors src/KPatcher.UI/App.axaml.cs::_run_autoupdate.
+    /// (version check, mirrors, extract, apply, chmod +x on executable, restart).
+    /// C# Reference: src/KPatcher.UI/Update/AutoUpdater.cs
     /// </summary>
     internal sealed class AutoUpdater
     {
-        private readonly RemoteUpdateInfo _info;
-        private readonly Window _owner;
-        private readonly bool _useBetaChannel;
-
-        public AutoUpdater(RemoteUpdateInfo info, Window owner, bool useBetaChannel)
-        {
-            _info = info ?? throw new ArgumentNullException(nameof(info));
-            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
-            _useBetaChannel = useBetaChannel;
-        }
-
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             var progressWindow = new UpdateProgressWindow
             {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            progressWindow.Show(_owner);
+            progressWindow.Show();
 
             try
             {
-                var tempRoot = CreateTempDirectory();
+                string tempRoot = CreateTempDirectory();
                 string archivePath = await DownloadUpdateAsync(tempRoot, progressWindow.ViewModel, cancellationToken);
                 string payloadRoot = await ExtractArchiveAsync(archivePath, progressWindow.ViewModel, cancellationToken);
                 await ApplyUpdateAsync(payloadRoot, progressWindow.ViewModel, cancellationToken);
@@ -56,25 +48,26 @@ namespace KPatcher.UI.Update
 
         private async Task<string> DownloadUpdateAsync(string tempRoot, UpdateProgressViewModel progress, CancellationToken token)
         {
-            string version = _info.GetChannelVersion(_useBetaChannel);
-            progress.ReportStatus($"Downloading KPatcher {version}...");
+            string version = Config.CurrentVersion;
+            progress.ReportStatus(string.Format(CultureInfo.CurrentCulture, UIResources.DownloadingKPatcherFormat, version));
 
-            var mirrors = _info.GetPlatformMirrors(_useBetaChannel);
+            var mirrors = await Config.GetRemoteKPatcherUpdateInfoAsync();
             Exception lastError = null;
 
             using (HttpClient client = CreateHttpClient())
             {
-                foreach (string mirror in mirrors)
+                foreach (var mirror in mirrors)
                 {
+                    string mirrorUrl = mirror.Value.ToString() ?? string.Empty;
                     try
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var uri = new Uri(mirror);
+                        var uri = new Uri(mirrorUrl);
                         string fileName = Path.GetFileName(string.IsNullOrWhiteSpace(uri.AbsolutePath) ? $"kpatcher_{version}.zip" : uri.AbsolutePath);
                         string destination = Path.Combine(tempRoot, fileName);
 
-                        using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri))
+                        using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                         using (HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                         {
                             response.EnsureSuccessStatusCode();
@@ -88,7 +81,7 @@ namespace KPatcher.UI.Update
 #endif
                             using (FileStream fileStream = File.Create(destination))
                             {
-                                var buffer = new byte[81920];
+                                byte[] buffer = new byte[81920];
                                 long downloaded = 0;
                                 var sw = Stopwatch.StartNew();
 
@@ -129,7 +122,7 @@ namespace KPatcher.UI.Update
                                     throw new IOException("The download ended prematurely.");
                                 }
 
-                                progress.ReportStatus("Download complete.");
+                                progress.ReportStatus(UIResources.DownloadComplete);
                                 return destination;
                             }
                         }
@@ -141,12 +134,12 @@ namespace KPatcher.UI.Update
                     catch (Exception ex)
                     {
                         lastError = ex;
-                        progress.ReportStatus($"Download failed from {mirror}: {ex.Message}");
+                        progress.ReportStatus(string.Format(CultureInfo.CurrentCulture, UIResources.DownloadFailedFromFormat, mirror, ex.Message));
                     }
                 }
             }
 
-            throw new InvalidOperationException("All update mirrors failed.", lastError);
+            throw new InvalidOperationException(UIResources.AllUpdateMirrorsFailed, lastError);
         }
 
         private static string CreateTempDirectory()
@@ -166,7 +159,7 @@ namespace KPatcher.UI.Update
 
         private async Task<string> ExtractArchiveAsync(string archivePath, UpdateProgressViewModel progress, CancellationToken token)
         {
-            progress.ReportStatus("Extracting update package...");
+            progress.ReportStatus(UIResources.ExtractingUpdatePackage);
             string extractRoot = Path.Combine(Path.GetDirectoryName(archivePath) ?? Path.GetTempPath(), "extracted");
             Directory.CreateDirectory(extractRoot);
 
@@ -188,7 +181,7 @@ namespace KPatcher.UI.Update
                 throw new NotSupportedException($"Unsupported archive format: {Path.GetExtension(archivePath)}");
             }
 
-            progress.ReportStatus("Archive extracted.");
+            progress.ReportStatus(UIResources.ArchiveExtracted);
             return LocatePayloadRoot(extractRoot);
         }
 
@@ -291,9 +284,9 @@ namespace KPatcher.UI.Update
 #endif
             }
 
-            progress.ReportStatus("Finalizing update...");
+            progress.ReportStatus(UIResources.FinalizingUpdate);
             LaunchScript(scriptPath);
-            progress.ReportStatus("Restarting to complete the update...");
+            progress.ReportStatus(UIResources.RestartingToCompleteUpdate);
 
             await Task.Delay(TimeSpan.FromSeconds(2), token);
             Environment.Exit((int)Core.ExitCode.CloseForUpdateProcess);

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -51,21 +51,17 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // JZ consumes the condition value from stack
-            // Matching PyKotor classes.py line 2623: ncs.add(NCSInstructionType.JZ, jump=loopend)
             ncs.Add(NCSInstructionType.JZ, jump: loopEnd);
             // Restore temp_stack since JZ consumed the condition
             block.TempStack = initialTempStack;
 
             // Compile loop body
-            // Matching PyKotor classes.py line 2627: self.block.compile(ncs, root, block, return_instruction, loopend, loopstart)
             Body.Compile(ncs, root, block, returnInstruction, loopEnd, loopStart);
 
             // Jump back to loop start
-            // Matching PyKotor classes.py line 2628: ncs.add(NCSInstructionType.JMP, jump=loopstart)
             ncs.Add(NCSInstructionType.JMP, jump: loopStart);
 
             // Loop end marker
-            // Matching PyKotor classes.py line 2630: ncs.instructions.append(loopend)
             ncs.Instructions.Add(loopEnd);
 
             return DynamicDataType.VOID;

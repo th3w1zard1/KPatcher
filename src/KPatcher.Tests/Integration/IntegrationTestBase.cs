@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using IniParser.Model;
+using IniParser.Parser;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.TLK;
@@ -9,8 +11,6 @@ using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Reader;
-using IniParser.Model;
-using IniParser.Parser;
 
 namespace KPatcher.Core.Tests.Integration
 {

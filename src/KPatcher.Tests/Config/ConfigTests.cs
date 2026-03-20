@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
-using KPatcher.Core.Formats.Capsule;
+using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Resources;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Config

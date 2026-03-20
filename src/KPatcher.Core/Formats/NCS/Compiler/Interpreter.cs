@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Script;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -19,7 +19,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
     ///     vendor/KotOR.js/src/odyssey/controllers/ (Runtime script execution)
     ///     vendor/reone/src/libs/script/format/ncsreader.cpp (NCS instruction reading)
     ///     vendor/xoreos-tools/src/nwscript/decompiler.cpp (NCS instruction semantics)
-    ///     Note: Interpreter is PyKotor-specific for testing, not a full runtime implementation
+    ///     Note: Interpreter is KPatcher-specific for testing, not a full runtime implementation
     /// </summary>
     public class Interpreter
     {
@@ -47,8 +47,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             _cursor = ncs.Instructions.Count > 0 ? ncs.Instructions[0] : null;
             _cursorIndex = 0;
             _functions = GetFunctionsForGame(game);
-            // Python: self._instruction_indices: dict[int, int] = {id(instruction): idx for idx, instruction in enumerate(ncs.instructions)}
-            // Matching PyKotor interpreter.py line 60-62: use object identity (id) as key
+            // self._instruction_indices: dict[int, int] = {id(instruction): idx for idx, instruction in enumerate(ncs.instructions)}
             _instructionIndices = new Dictionary<NCSInstruction, int>(new ReferenceInstructionComparer());
             for (int idx = 0; idx < ncs.Instructions.Count; idx++)
             {
@@ -56,7 +55,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 _instructionIndices[inst] = idx;
             }
 
-            // Validate all jump targets are in the instruction list (matching PyKotor validation)
             // This helps catch issues early during interpreter construction
             for (int idx = 0; idx < ncs.Instructions.Count; idx++)
             {
@@ -130,14 +128,14 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 object jumpValue = null;
 
                 // Execute instruction based on type
-                // For JZ/JNZ, pop value during execution (Python does this)
+                // For JZ/JNZ, pop value during execution
                 if (cursor.InsType == NCSInstructionType.JZ || cursor.InsType == NCSInstructionType.JNZ)
                 {
                     if (_stack.State().Count > 0)
                     {
                         StackObject top = _stack.Pop();
-                        // Python: jump_value = self._stack.pop(), then compares jump_value == 0 or jump_value != 0
-                        // Python's StackObject.__eq__ compares self.value == other, so jump_value == 0 means jump_value.value == 0
+                        // jump_value = self._stack.pop(), then compares jump_value == 0 or jump_value != 0
+                        // jump_value == 0 means jump_value.value == 0
                         jumpValue = top.Value;
                     }
                 }
@@ -147,7 +145,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 // Take stack snapshot after executing instruction
                 StackSnapshots.Add(new StackSnapshot(cursor, _stack.State()));
 
-                // Handle RETN separately (Python does this before jump handling)
+                // Handle RETN separately (before jump handling)
                 if (cursor.InsType == NCSInstructionType.RETN)
                 {
                     if (_returns.Count > 0)
@@ -179,13 +177,12 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
                 else if (cursor.InsType == NCSInstructionType.JZ)
                 {
-                    // JZ: jump if value is zero (Python: jump_value == 0)
-                    // Python compares the value directly, so we compare jumpValue to 0
+                    // JZ: jump if value is zero, we compare jumpValue directly to 0
                     shouldJump = (jumpValue != null && IsValueZero(jumpValue));
                 }
                 else if (cursor.InsType == NCSInstructionType.JNZ)
                 {
-                    // JNZ: jump if value is non-zero (Python: jump_value != 0)
+                    // JNZ: jump if value is non-zero
                     shouldJump = (jumpValue != null && !IsValueZero(jumpValue));
                 }
 
@@ -603,7 +600,40 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         private void StoreState(NCSInstruction instruction)
         {
             _stack.StoreState();
-            // Python implementation stores action queue - simplified for now
+
+            int index = _cursorIndex;
+            
+            // Get instruction at index + 2 (skip the next instruction after STORE_STATE)
+            int tempIndex = index + 2;
+            if (tempIndex >= _ncs.Instructions.Count)
+            {
+                throw new InvalidOperationException(
+                    $"STORE_STATE at index {index}: cannot access instruction at index {tempIndex} " +
+                    $"(instruction list has {_ncs.Instructions.Count} instructions)");
+            }
+
+            NCSInstruction tempCursor = _ncs.Instructions[tempIndex];
+
+            // Collect block of instructions until RETN is found
+            var block = new List<NCSInstruction>();
+            while (tempCursor.InsType != NCSInstructionType.RETN)
+            {
+                block.Add(tempCursor);
+                tempIndex++;
+                if (tempIndex >= _ncs.Instructions.Count)
+                {
+                    throw new InvalidOperationException(
+                        $"STORE_STATE at index {index}: reached end of instructions without finding RETN " +
+                        $"(collected {block.Count} instructions)");
+                }
+                tempCursor = _ncs.Instructions[tempIndex];
+            }
+
+            // Create ActionStackValue with the block and current stack state
+            var actionStackValue = new ActionStackValue(block, _stack.State());
+
+            // Add to stack with DataType.Action
+            _stack.Add(DataType.Action, actionStackValue);
         }
 
         private void ExecuteAction(NCSInstruction instruction)
@@ -674,7 +704,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             // We need to reverse to match function.Params order (first parameter at index 0).
             argsSnap.Reverse();
 
-            // Validate argument types (match PyKotor coercion rules: ints can satisfy floats, floats can satisfy ints)
+            // Validate argument types (coercion rules: ints can satisfy floats, floats can satisfy ints)
             for (int i = 0; i < paramCount; i++)
             {
                 DataType expected = function.Params[i].DataType;
@@ -785,7 +815,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new ArgumentException($"Function '{functionName}' does not exist.");
             }
 
-            // Python validates parameter count using signature(mock).parameters
+            // Validates parameter count using signature(mock).parameters
             // For C#, we can't easily inspect the Func signature, so we'll validate at call time
             _mocks[functionName] = mock;
         }
@@ -860,6 +890,22 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             FunctionName = functionName;
             ArgValues = argValues;
             ReturnValue = returnValue;
+        }
+    }
+
+    /// <summary>
+    /// Represents an action stack value containing a block of instructions and stack state.
+    /// Used by STORE_STATE instruction to store delayed action execution blocks.
+    /// </summary>
+    public class ActionStackValue
+    {
+        public List<NCSInstruction> Block { get; }
+        public List<StackObject> Stack { get; }
+
+        public ActionStackValue(List<NCSInstruction> block, List<StackObject> stack)
+        {
+            Block = block ?? throw new ArgumentNullException(nameof(block));
+            Stack = stack ?? throw new ArgumentNullException(nameof(stack));
         }
     }
 }

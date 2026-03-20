@@ -3,7 +3,6 @@ namespace KPatcher.Core.Formats.SSF
 
     /// <summary>
     /// Represents the different types of sounds in an SSF file.
-    /// Matches Python SSFSound enum exactly.
     /// </summary>
     public enum SSFSound
     {

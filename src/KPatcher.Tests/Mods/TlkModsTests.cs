@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TLK;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Mods

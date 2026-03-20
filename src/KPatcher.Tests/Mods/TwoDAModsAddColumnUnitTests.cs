@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TwoDA;
-using FluentAssertions;
 using Xunit;
 using TwoDAFile = global::KPatcher.Core.Formats.TwoDA.TwoDA;
 
@@ -202,7 +202,7 @@ namespace KPatcher.Core.Tests.Mods
                 { 1, new RowValueConstant("Y") }
                 },
                 new Dictionary<string, RowValue>(),
-                new Dictionary<int, string> { { 0, "I0" } } // Python: store_2da={0: "I0"}
+                new Dictionary<int, string> { { 0, "I0" } } // store_2da={0: "I0"}
             );
             config.Modifiers.Add(addColumn);
 
@@ -211,7 +211,7 @@ namespace KPatcher.Core.Tests.Mods
             twoda.GetColumn("Col1").Should().Equal("a", "c");
             twoda.GetColumn("Col2").Should().Equal("b", "d");
             twoda.GetColumn("Col3").Should().Equal("X", "Y");
-            // Python: assert memory.memory_2da[0] == "X" (from row index 0, column Col3)
+            // assert memory.memory_2da[0] == "X" (from row index 0, column Col3)
             memory.Memory2DA[0].Should().Be("X");
         }
 

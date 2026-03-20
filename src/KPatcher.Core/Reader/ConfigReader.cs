@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using IniParser;
+using IniParser.Model;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.GFF;
@@ -15,22 +19,16 @@ using KPatcher.Core.Mods.NSS;
 using KPatcher.Core.Mods.SSF;
 using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Mods.TwoDA;
-using IniParser;
-using IniParser.Model;
-using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Reader
 {
 
     /// <summary>
     /// Reads and parses KPatcher configuration files (changes.ini).
-    /// Complete implementation matching Python reader.py exactly, including all comments.
     /// </summary>
     public class ConfigReader
     {
-        private const string SectionNotFoundError = "The [{0}] section was not found in the ini";
-        private const string ReferencesTracebackMsg = ", referenced by '{0}={1}' in [{2}]";
-
         private readonly HashSet<string> _previouslyParsedSections = new HashSet<string>();
         private readonly IniData _ini;
         private readonly string _modPath;
@@ -110,7 +108,7 @@ namespace KPatcher.Core.Reader
             catch (Exception ex)
             {
                 string errorPath = sourcePath ?? "provided text";
-                throw new InvalidOperationException($"Error parsing INI file: {errorPath}", ex);
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, PatcherResources.ErrorParsingIniFile, errorPath), ex);
             }
         }
 
@@ -168,25 +166,8 @@ namespace KPatcher.Core.Reader
         }
 
         /// <summary>
-        /// Load PatcherConfig from an INI file path.
-        ///
-        /// Args:
-        /// ----
-        ///     file_path: The path to the INI file.
-        ///     logger: Optional logger instance.
-        ///     tslpatchdata_path: Optional path to the tslpatchdata directory.
-        ///
-        /// Returns:
-        /// -------
-        ///     A PatcherConfig instance loaded from the file.
-        ///
-        /// Processing Logic:
-        /// ----------------
-        ///     - Resolve the file path and load its contents
-        ///     - Parse the INI text into a ConfigParser
-        ///     - Initialize a PatcherConfig instance
-        ///     - Populate its config attribute from the ConfigParser
-        ///     - Return the initialized instance
+        /// Load PatcherConfig from an INI or YAML file path.
+        /// Supports .ini (changes.ini-style) and .yaml/.yml (equivalent format).
         /// </summary>
         public static ConfigReader FromFilePath(
             string filePath,
@@ -194,13 +175,26 @@ namespace KPatcher.Core.Reader
             [CanBeNull] string tslPatchDataPath = null)
         {
             string resolvedFilePath = Path.GetFullPath(filePath);
+            string extension = Path.GetExtension(resolvedFilePath);
+            bool isYaml = extension.Equals(".yaml", StringComparison.OrdinalIgnoreCase)
+                         || extension.Equals(".yml", StringComparison.OrdinalIgnoreCase);
 
-            // Use unified INI loader (case-sensitive for changes.ini files)
-            IniData ini = LoadAndParseIni(resolvedFilePath, caseInsensitive: false);
+            IniData ini = isYaml
+                ? ConfigReaderYaml.LoadAndParseYaml(resolvedFilePath)
+                : LoadAndParseIni(resolvedFilePath, caseInsensitive: false);
 
             var instance = new ConfigReader(ini, Path.GetDirectoryName(resolvedFilePath) ?? string.Empty, logger, tslPatchDataPath);
             instance.Config = new PatcherConfig();
             return instance;
+        }
+
+        /// <summary>
+        /// Writes the current INI data to an equivalent YAML file (e.g. changes.yaml).
+        /// Call after loading from INI when you want to create/update the .yaml alongside the .ini.
+        /// </summary>
+        public void WriteEquivalentYaml(string yamlFilePath)
+        {
+            ConfigReaderYaml.WriteIniDataToYaml(_ini, yamlFilePath);
         }
 
         /// <summary>
@@ -219,13 +213,13 @@ namespace KPatcher.Core.Reader
             LoadCompileList();
             LoadHackList();
             LoadSSFList();
-            _log.AddNote("The ConfigReader finished loading the INI");
+            _log.AddNote(PatcherResources.ConfigReaderFinishedLoadingIni);
             var allSectionsSet = _ini.Sections.Select(s => s.SectionName).ToHashSet();
             var orphanedSections = allSectionsSet.Except(_previouslyParsedSections).ToHashSet();
             if (orphanedSections.Count > 0)
             {
                 string orphanedSectionsStr = string.Join("\n", orphanedSections);
-                _log.AddNote($"There are some orphaned ini sections found in the changes:\n{orphanedSectionsStr}");
+                _log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.OrphanedIniSectionsFormat, orphanedSectionsStr));
             }
 
             return Config;
@@ -256,11 +250,11 @@ namespace KPatcher.Core.Reader
             string settingsSection = GetSectionName("settings");
             if (settingsSection is null)
             {
-                _log.AddWarning("[Settings] section missing from ini.");
+                _log.AddWarning(PatcherResources.SettingsSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [Settings] section from ini...");
+            _log.AddNote(PatcherResources.LoadingSettingsSection);
             Dictionary<string, string> settingsIni = SectionToDictionary(_ini[settingsSection]);
 
             Config.WindowTitle = settingsIni.GetValueOrDefault("WindowCaption", "");
@@ -334,16 +328,16 @@ namespace KPatcher.Core.Reader
             string installListSection = GetSectionName("InstallList");
             if (installListSection is null)
             {
-                _log.AddNote("[InstallList] section missing from ini.");
+                _log.AddNote(PatcherResources.InstallListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [InstallList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingInstallListPatches);
             foreach ((string folderKey, string foldername) in _ini[installListSection].Select(k => (k.KeyName, k.Value)))
             {
                 // Can be null if section not found
                 string foldernameSection = GetSectionName(folderKey)
-                    ?? throw new KeyNotFoundException(string.Format(SectionNotFoundError, foldername) + string.Format(ReferencesTracebackMsg, folderKey, foldername, installListSection));
+                    ?? throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, foldername) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, folderKey, foldername, installListSection));
                 Dictionary<string, string> folderSectionDict = SectionToDictionary(_ini[foldernameSection]);
                 // !SourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
                 // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
@@ -355,6 +349,11 @@ namespace KPatcher.Core.Reader
                 folderSectionDict.Remove("!SourceFolder");
                 foreach ((string fileKey, string filename) in folderSectionDict)
                 {
+                    if (string.IsNullOrWhiteSpace(filename))
+                    {
+                        _log.AddNote(PatcherResources.SkippingEmptyInstallListEntry);
+                        continue;
+                    }
                     var fileInstall = new InstallFile(
                         filename,
                         fileKey.ToLower().StartsWith("replace"))
@@ -392,11 +391,11 @@ namespace KPatcher.Core.Reader
             string tlkListSection = GetSectionName("tlklist");
             if (tlkListSection is null)
             {
-                _log.AddNote("[TLKList] section missing from ini.");
+                _log.AddNote(PatcherResources.TlkListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [TLKList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingTlkListPatches);
             Dictionary<string, string> tlkListEdits = SectionToDictionary(_ini[tlkListSection]);
 
             // Can be null if key not found
@@ -459,7 +458,7 @@ namespace KPatcher.Core.Reader
                         if (nextSectionName is null)
                         {
                             syntaxErrorCaught = true;
-                            throw new InvalidOperationException(string.Format(SectionNotFoundError, value) + string.Format(ReferencesTracebackMsg, key, value, tlkListSection));
+                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, value) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, key, value, tlkListSection));
                         }
 
                         Dictionary<string, string> nextSectionDict = SectionToDictionary(_ini[nextSectionName]);
@@ -537,11 +536,11 @@ namespace KPatcher.Core.Reader
             string twodaSectionName = GetSectionName("2DAList");
             if (twodaSectionName is null)
             {
-                _log.AddNote("[2DAList] section missing from ini.");
+                _log.AddNote(PatcherResources.TwoDAListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [2DAList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingTwoDAListPatches);
 
             KeyDataCollection twodaSectionData = _ini[twodaSectionName];
             string defaultDestination = twodaSectionData["!DefaultDestination"] ?? Modifications2DA.DefaultDestination;
@@ -560,7 +559,7 @@ namespace KPatcher.Core.Reader
                 string fileSection = GetSectionName(file);
                 if (fileSection is null)
                 {
-                    throw new KeyNotFoundException(string.Format(SectionNotFoundError, file) + string.Format(ReferencesTracebackMsg, identifier, file, twodaSectionName));
+                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, file) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, file, twodaSectionName));
                 }
 
                 var modifications = new Modifications2DA(file);
@@ -573,7 +572,7 @@ namespace KPatcher.Core.Reader
                     string keyLower = kv.KeyName.ToLower();
                     if (keyLower.StartsWith("2damemory") && kv.KeyName.Length > 9 && kv.KeyName.Substring(9).All(char.IsDigit))
                     {
-                        int tokenId = ParseIntValue(kv.KeyName.Substring(9));
+                        int tokenId = Parse2DAMemoryTokenId(kv.KeyName.Substring(9));
                         modifications.FileStore2DA[tokenId] = ParseStoreRowValue(kv.Value);
                     }
                     else if (keyLower.StartsWith("strref") && kv.KeyName.Length > 6 && kv.KeyName.Substring(6).All(char.IsDigit))
@@ -604,7 +603,7 @@ namespace KPatcher.Core.Reader
                     string nextSectionName = GetSectionName(modificationId);
                     if (nextSectionName is null)
                     {
-                        throw new KeyNotFoundException(string.Format(SectionNotFoundError, modificationId) + string.Format(ReferencesTracebackMsg, key, modificationId, fileSection));
+                        throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, modificationId) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, key, modificationId, fileSection));
                     }
 
                     Dictionary<string, string> modificationIdsDict = SectionToDictionary(_ini[modificationId]);
@@ -645,11 +644,11 @@ namespace KPatcher.Core.Reader
             string ssfListSection = GetSectionName("SSFList");
             if (ssfListSection is null)
             {
-                _log.AddNote("[SSFList] section missing from ini.");
+                _log.AddNote(PatcherResources.SsfListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [SSFList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingSsfListPatches);
 
             Dictionary<string, string> ssfSectionDict = SectionToDictionary(_ini[ssfListSection]);
             // Can be null if key not found
@@ -670,7 +669,7 @@ namespace KPatcher.Core.Reader
                 string ssfFileSection = GetSectionName(file);
                 if (ssfFileSection is null)
                 {
-                    throw new KeyNotFoundException(string.Format(SectionNotFoundError, file) + string.Format(ReferencesTracebackMsg, identifier, file, ssfListSection));
+                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, file) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, file, ssfListSection));
                 }
 
                 bool replace = identifier.ToLower().StartsWith("replace");
@@ -686,7 +685,7 @@ namespace KPatcher.Core.Reader
                     string lowerValue = value.ToLower();
                     if (lowerValue.StartsWith("2damemory"))
                     {
-                        int tokenId = ParseIntValue(value.Substring(9));
+                        int tokenId = Parse2DAMemoryTokenId(value.Substring(9));
                         newValue = new TokenUsage2DA(tokenId);
                     }
                     else if (lowerValue.StartsWith("strref"))
@@ -727,11 +726,11 @@ namespace KPatcher.Core.Reader
             string gffListSection = GetSectionName("GFFList");
             if (gffListSection is null)
             {
-                _log.AddNote("[GFFList] section missing from ini.");
+                _log.AddNote(PatcherResources.GffListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [GFFList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingGffListPatches);
             Dictionary<string, string> gffSectionDict = SectionToDictionary(_ini[gffListSection]);
             // Can be null if key not found
             string defaultDestination = gffSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsGFF.DefaultDestination;
@@ -751,7 +750,7 @@ namespace KPatcher.Core.Reader
                 string fileSectionName = GetSectionName(file);
                 if (fileSectionName is null)
                 {
-                    throw new KeyNotFoundException(string.Format(SectionNotFoundError, file) + string.Format(ReferencesTracebackMsg, identifier, file, gffListSection));
+                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, file) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, file, gffListSection));
                 }
 
                 bool replace = identifier.ToLower().StartsWith("replace");
@@ -773,7 +772,7 @@ namespace KPatcher.Core.Reader
                         string nextGffSection = GetSectionName(value);
                         if (nextGffSection is null)
                         {
-                            throw new KeyNotFoundException(string.Format(SectionNotFoundError, value) + string.Format(ReferencesTracebackMsg, key, value, fileSectionName));
+                            throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, value) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, key, value, fileSectionName));
                         }
 
                         Dictionary<string, string> nextSectionDict = SectionToDictionary(_ini[nextGffSection]);
@@ -783,7 +782,7 @@ namespace KPatcher.Core.Reader
                     {
                         if (value.ToLower() == "!fieldpath")
                         {
-                            // Python: When value is "!FieldPath", check if there's a [!FieldPath] section with Path=
+                            // When value is "!FieldPath", check if there's a [!FieldPath] section with Path=
                             // Can be null if section not found
                             string fieldPathSectionName = GetSectionName(value);
                             string path = string.Empty;
@@ -793,8 +792,8 @@ namespace KPatcher.Core.Reader
                                 // Can be null if key not found
                                 if (fieldPathSection.TryGetValue("Path", out string pathValue))
                                 {
-                                    // Python: raw_path: str = ini_data.pop("Path", "").strip()
-                                    // Python: path: PureWindowsPath = PureWindowsPath(raw_path)
+                                    // raw_path: str = ini_data.pop("Path", "").strip()
+                                    // path: PureWindowsPath = PureWindowsPath(raw_path)
                                     // Python's ConfigParser reads values as-is, but C# IniParser may escape backslashes
                                     // Unescape double backslashes to match Python's behavior
                                     path = pathValue.Replace("\\\\", "\\");
@@ -803,15 +802,15 @@ namespace KPatcher.Core.Reader
                             modifier = new Memory2DAModifierGFF(
                                 file,
                                 path,
-                                ParseIntValue(key.Substring(9)));
+                                Parse2DAMemoryTokenId(key.Substring(9)));
                         }
                         else if (value.ToLower().StartsWith("2damemory"))
                         {
                             modifier = new Memory2DAModifierGFF(
                                 file,
                                 string.Empty,
-                                ParseIntValue(key.Substring(9)),
-                                ParseIntValue(value.Substring(9)));
+                                Parse2DAMemoryTokenId(key.Substring(9)),
+                                Parse2DAMemoryTokenId(value.Substring(9)));
                         }
                         else
                         {
@@ -847,11 +846,11 @@ namespace KPatcher.Core.Reader
             string compilelistSection = GetSectionName("CompileList");
             if (compilelistSection is null)
             {
-                _log.AddNote("[CompileList] section missing from ini.");
+                _log.AddNote(PatcherResources.CompileListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [CompileList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingCompileListPatches);
             Dictionary<string, string> compilelistSectionDict = SectionToDictionary(_ini[compilelistSection]);
             // Can be null if key not found
             string defaultDestination = compilelistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsNSS.DefaultDestination;
@@ -920,11 +919,11 @@ namespace KPatcher.Core.Reader
             string hacklistSection = GetSectionName("HACKList");
             if (hacklistSection is null)
             {
-                _log.AddNote("[HACKList] section missing from ini.");
+                _log.AddNote(PatcherResources.HackListSectionMissing);
                 return;
             }
 
-            _log.AddNote("Loading [HACKList] patches from ini...");
+            _log.AddNote(PatcherResources.LoadingHackListPatches);
             Dictionary<string, string> hacklistSectionDict = SectionToDictionary(_ini[hacklistSection]);
             // Can be null if key not found
             string defaultDestination = hacklistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : "Override";
@@ -949,7 +948,7 @@ namespace KPatcher.Core.Reader
                 string fileSectionName = GetSectionName(filename);
                 if (fileSectionName is null)
                 {
-                    throw new KeyNotFoundException(string.Format(SectionNotFoundError, filename) + string.Format(ReferencesTracebackMsg, identifier, filename, hacklistSection));
+                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, filename) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, filename, hacklistSection));
                 }
 
                 Dictionary<string, string> fileSectionDict = SectionToDictionary(_ini[fileSectionName]);
@@ -1029,7 +1028,7 @@ namespace KPatcher.Core.Reader
                 else if (lowerValue.StartsWith("2damemory"))
                 {
                     // 2DA memory token reference
-                    tokenIdOrValue = ParseIntValue(parsedValue.Substring(9).Trim());
+                    tokenIdOrValue = Parse2DAMemoryTokenId(parsedValue.Substring(9).Trim());
                     // Check if it's 32-bit (2damemory32) or 16-bit (2damemory)
                     tokenType = typeSpecifier.ToLower() == "u32" || typeSpecifier.ToLower() == "i32"
                         ? NCSTokenType.MEMORY_2DA32
@@ -1103,6 +1102,19 @@ namespace KPatcher.Core.Reader
             {
                 throw new FormatException($"The value '{valueStr}' is not in a valid format for an integer.", ex);
             }
+        }
+
+        /// <summary>
+        /// Parses a 2DAMEMORY token id (e.g. from "2DAMEMORY0" -> 0, "2DAMEMORY1" -> 1). Token indexes are non-negative (0-based).
+        /// </summary>
+        private static int Parse2DAMemoryTokenId(string valueStr)
+        {
+            int tokenId = ParseIntValue(valueStr);
+            if (tokenId < 0)
+            {
+                throw new InvalidOperationException(TSLPatcherMessages.Invalid2DAMemoryToken);
+            }
+            return tokenId;
         }
 
         /// <summary>
@@ -1193,7 +1205,7 @@ namespace KPatcher.Core.Reader
                 throw new KeyNotFoundException($"FieldType missing in [{identifier}]");
             }
             iniData.Remove("FieldType");
-            // Python: label: str = ini_data.pop("Label").strip() - raises KeyError if missing
+            // label: str = ini_data.pop("Label").strip() - raises KeyError if missing
             // Can be null if key not found
             if (!iniData.TryGetValue("Label", out string labelRaw))
             {
@@ -1202,7 +1214,7 @@ namespace KPatcher.Core.Reader
             string label = labelRaw.Trim();
             iniData.Remove("Label");
 
-            // Resolve KPatcher -> PyKotor GFFFieldType
+            // Resolve KPatcher -> TSLPatcher GFFFieldType
             GFFFieldType fieldType = ResolveTslPatcherGFFFieldType(rawFieldType);
 
             // Handle current GFF path
@@ -1214,8 +1226,8 @@ namespace KPatcher.Core.Reader
             {
                 path = currentPath;
             }
-            // Python: if field_type == GFFFieldType.Struct:
-            // Python:     path /= ">>##INDEXINLIST##<<"
+            // if field_type == GFFFieldType.Struct:
+            //     path /= ">>##INDEXINLIST##<<"
             // Note: Python appends this BEFORE checking if label is empty, so it's appended to ALL Struct paths
             // However, when label is set, AddFieldGFF.apply will use the full path (including >>##INDEXINLIST##<<)
             // which won't exist. This seems like a Python bug, but we match it exactly.
@@ -1236,20 +1248,20 @@ namespace KPatcher.Core.Reader
                     string lowerIteratedValue = iteratedValue.ToLower();
                     if (lowerIteratedValue == "listindex")
                     {
-                        indexInListToken = ParseIntValue(iteratedKey.Substring(9));
+                        indexInListToken = Parse2DAMemoryTokenId(iteratedKey.Substring(9));
                     }
                     else if (lowerIteratedValue == "!fieldpath")
                     {
-                        // Python: modifier = Memory2DAModifierGFF(identifier, dst_token_id=int(key[9:]), path=path / label)
+                        // modifier = Memory2DAModifierGFF(identifier, dst_token_id=int(key[9:]), path=path / label)
                         // Python uses PureWindowsPath path concatenation which uses backslashes
                         string combinedPath = string.IsNullOrEmpty(path) ? label : $"{path}\\{label}";
-                        var modifier = new Memory2DAModifierGFF(identifier, combinedPath, ParseIntValue(iteratedKey.Substring(9))); // Assign current path to 2damemory.
+                        var modifier = new Memory2DAModifierGFF(identifier, combinedPath, Parse2DAMemoryTokenId(iteratedKey.Substring(9))); // Assign current path to 2damemory.
                         modifiers.Insert(0, modifier);
                     }
                     else if (lowerIteratedValue.StartsWith("2damemory"))
                     {
                         var modifier = new Memory2DAModifierGFF(
-                            identifier, Path.Combine(path, label).Replace("\\", "/"), ParseIntValue(iteratedKey.Substring(9)), ParseIntValue(iteratedValue.Substring(9))); // Assign field at path to a value or (path to field's value)
+                            identifier, Path.Combine(path, label).Replace("\\", "/"), Parse2DAMemoryTokenId(iteratedKey.Substring(9)), Parse2DAMemoryTokenId(iteratedValue.Substring(9))); // Assign field at path to a value or (path to field's value)
                         modifiers.Insert(0, modifier);
                     }
                 }
@@ -1261,7 +1273,7 @@ namespace KPatcher.Core.Reader
                     string nextSectionName = GetSectionName(iteratedValue);
                     if (nextSectionName is null)
                     {
-                        throw new KeyNotFoundException(string.Format(SectionNotFoundError, iteratedValue) + string.Format(ReferencesTracebackMsg, iteratedKey, iteratedValue, identifier));
+                        throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, iteratedValue) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, iteratedKey, iteratedValue, identifier));
                     }
 
                     Dictionary<string, string> nextNestedSection = SectionToDictionary(_ini[nextSectionName]);
@@ -1313,7 +1325,7 @@ namespace KPatcher.Core.Reader
         /// ----------------
         ///     - Parses the "Value" key to get a raw value and parses it based on field type
         ///     - For LocalizedString, see field_value_from_localized_string
-        ///     - For GFFList and GFFStruct, constructs empty instances to be filled in later - see pykotor/kpatcher/mods/gff.py
+        ///     - For GFFList and GFFStruct, constructs empty instances to be filled in later
         ///     - Returns None if value cannot be parsed or field type not supported (config err)
         /// </summary>
         private static FieldValue GetAddFieldValue(
@@ -1488,7 +1500,7 @@ namespace KPatcher.Core.Reader
 
             if (lowerValue.StartsWith("2damemory"))
             {
-                int tokenId = ParseIntValue(rawValue.Substring(9));
+                int tokenId = Parse2DAMemoryTokenId(rawValue.Substring(9));
                 return new FieldValue2DAMemory(tokenId);
             }
 
@@ -1882,12 +1894,12 @@ namespace KPatcher.Core.Reader
                 }
                 else if (lowerRawValue.StartsWith("2damemory") && rawValue.Length > 9 && rawValue.Substring(9).All(char.IsDigit))
                 {
-                    int tokenId = ParseIntValue(rawValue.Substring(9));
+                    int tokenId = Parse2DAMemoryTokenId(rawValue.Substring(9));
                     return new Target(targetType, new RowValue2DAMemory(tokenId));
                 }
                 else
                 {
-                    // Python: value = int(raw_value) if is_int else raw_value
+                    // value = int(raw_value) if is_int else raw_value
                     // For ROW_INDEX, store int directly; for others, store string
                     object value = isInt ? ParseIntValue(rawValue) : (object)rawValue;
                     return new Target(targetType, value);
@@ -1907,7 +1919,7 @@ namespace KPatcher.Core.Reader
                 return GetTarget(TargetType.LABEL_COLUMN, "LabelIndex", isInt: false);
             }
 
-            _log.AddWarning($"No line set to be modified in [{identifier}].");
+            _log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.NoLineSetToBeModifiedFormat, identifier));
             return null;
         }
 
@@ -1951,7 +1963,7 @@ namespace KPatcher.Core.Reader
                 RowValue rowValue = null;
                 if (lowerValue.StartsWith("2damemory"))
                 {
-                    int tokenId = ParseIntValue(value.Substring(9));
+                    int tokenId = Parse2DAMemoryTokenId(value.Substring(9));
                     rowValue = new RowValue2DAMemory(tokenId);
                 }
                 else if (lowerValue.StartsWith("strref"))
@@ -1982,7 +1994,7 @@ namespace KPatcher.Core.Reader
 
                 if (isStore2da)
                 {
-                    int tokenId = ParseIntValue(modifier.Substring(9));
+                    int tokenId = Parse2DAMemoryTokenId(modifier.Substring(9));
                     // Store tokens support RowIndex, RowLabel, specific column via RowValueRowCell, or memory references
                     if (lowerValue == "rowindex")
                     {
@@ -1994,7 +2006,7 @@ namespace KPatcher.Core.Reader
                     }
                     else if (lowerValue.StartsWith("2damemory"))
                     {
-                        int token = ParseIntValue(value.Substring(9));
+                        int token = Parse2DAMemoryTokenId(value.Substring(9));
                         store2da[tokenId] = new RowValue2DAMemory(token);
                     }
                     else if (lowerValue.StartsWith("strref"))
@@ -2012,7 +2024,7 @@ namespace KPatcher.Core.Reader
                     int tokenId = ParseIntValue(modifier.Substring(6));
                     if (lowerValue.StartsWith("2damemory"))
                     {
-                        int token = ParseIntValue(value.Substring(9));
+                        int token = Parse2DAMemoryTokenId(value.Substring(9));
                         storeTlk[tokenId] = new RowValue2DAMemory(token);
                     }
                     else if (lowerValue.StartsWith("strref"))
@@ -2039,7 +2051,7 @@ namespace KPatcher.Core.Reader
             string lowerValue = value.ToLower();
             if (lowerValue.StartsWith("2damemory"))
             {
-                int tokenId = ParseIntValue(value.Substring(9));
+                int tokenId = Parse2DAMemoryTokenId(value.Substring(9));
                 return new RowValue2DAMemory(tokenId);
             }
             if (lowerValue.StartsWith("strref"))
@@ -2139,7 +2151,7 @@ namespace KPatcher.Core.Reader
                 RowValue rowValue = null;
                 if (isStore2da)
                 {
-                    int tokenId = ParseIntValue(value.Substring(9));
+                    int tokenId = Parse2DAMemoryTokenId(value.Substring(9));
                     rowValue = new RowValue2DAMemory(tokenId);
                 }
                 else if (isStoreTlk)
@@ -2164,7 +2176,7 @@ namespace KPatcher.Core.Reader
                 }
                 else if (modifierLowercase.StartsWith("2damemory"))
                 {
-                    int tokenId = ParseIntValue(modifier.Substring(9));
+                    int tokenId = Parse2DAMemoryTokenId(modifier.Substring(9));
                     store2da[tokenId] = value;
                 }
             }
@@ -2262,9 +2274,9 @@ namespace KPatcher.Core.Reader
         }
 
         /// <summary>
-        /// Resolves a KPatcher GFF field type to a PyKotor GFFFieldType enum.
+        /// Resolves a KPatcher GFF field type to a GFFFieldType enum.
         ///
-        /// Use this function to work with the ini's FieldType= values in PyKotor.
+        /// Use this function to work with the ini's FieldType= values.
         ///
         /// Args:
         /// ----

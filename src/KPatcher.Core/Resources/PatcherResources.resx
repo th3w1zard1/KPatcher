@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value>
+  </resheader>
+  <data name="StartPatchingButton" xml:space="preserve">
+    <value>Start patching</value>
+  </data>
+  <data name="StartPatchingConfirmation" xml:space="preserve">
+    <value>This will start patching the necessary game files. Do you want to do this?</value>
+  </data>
+  <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve">
+    <value>Invalid game folder specified, dialog.tlk file not found! Make sure you have selected the correct game directory.</value>
+  </data>
+  <data name="NoValidGameFolderSelected" xml:space="preserve">
+    <value>Error! No valid game folder selected! Installation aborted.</value>
+  </data>
+  <data name="SkippingFileNoOverwriteDialogTlk" xml:space="preserve">
+    <value>Skipping file {0}, this Installer will not overwrite dialog.tlk directly.</value>
+  </data>
+  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve">
+    <value>Could not locate nwnnsscomp.exe in the TSLPatchData folder! Unable to compile script.</value>
+  </data>
+  <data name="Invalid2DAMemoryToken" xml:space="preserve">
+    <value>Invalid 2DAMEMORY token found! Token indexes must be non-negative (0, 1, 2, ...).</value>
+  </data>
+  <data name="PatcherFinished" xml:space="preserve">
+    <value>The Patcher is finished. Please check the progress log for details about what was installed.</value>
+  </data>
+  <data name="PatcherFinishedWithWarnings" xml:space="preserve">
+    <value>The Patcher is finished, but {0} warnings were encountered! The Mod may or may not work correctly.</value>
+  </data>
+  <data name="PatcherFinishedWithErrors" xml:space="preserve">
+    <value>The Patcher is finished, but {0} errors were encountered! The Mod has likely not been installed correctly.</value>
+  </data>
+  <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve">
+    <value>The Patcher is finished, but {0} errors and {1} warnings were encountered! The Mod has likely not been installed correctly.</value>
+  </data>
+  <data name="StrRefTokenNotInTLK" xml:space="preserve">
+    <value>StrRef token "{0}" in modifier list that was not present in the TLK.</value>
+  </data>
+  <data name="NoNewEntriesAppendedToTlk" xml:space="preserve">
+    <value>Warning: No new entries appended to {0}. Possible missing entries in append.tlk.</value>
+  </data>
+  <data name="NoTLKFileLoaded" xml:space="preserve">
+    <value>No TLK file loaded. Unable to proceed.</value>
+  </data>
+  <data name="UnableToLocateTLKFileToPatch" xml:space="preserve">
+    <value>Error! Unable to locate TLK file to patch, "{0}" file not found!</value>
+  </data>
+  <data name="UnableToFind2DAFileToModify" xml:space="preserve">
+    <value>Unable to find 2DA file "{0}" to modify! Skipping file...</value>
+  </data>
+  <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve">
+    <value>Error looking up row label for row index {0}.</value>
+  </data>
+  <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve">
+    <value>Error looking up column label for column index {0}.</value>
+  </data>
+  <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve">
+    <value>{0} used as index when changing line in modifier "{1}" but 2DA file has no label for that index.</value>
+  </data>
+  <data name="FailedToCopyLine2DA" xml:space="preserve">
+    <value>Error! Failed to copy line in 2DA! Skipping...</value>
+  </data>
+  <data name="UnableToLoad2DAFileSkipping" xml:space="preserve">
+    <value>Unable to load the 2DA file {0}! Skipping it...</value>
+  </data>
+  <data name="NoValueAssignedColumn2DA" xml:space="preserve">
+    <value>No value has been assigned to column {0} for new 2DA line in modifier "{1}"...</value>
+  </data>
+  <data name="ErrorAddingNewLine2DA" xml:space="preserve">
+    <value>An error occured while trying to add new line to 2DA in modifier "{0}"!</value>
+  </data>
+  <data name="InternalErrorInvalidTLKFileType" xml:space="preserve">
+    <value>Internal error, invalid TLK file type specified.</value>
+  </data>
+  <data name="CriticalErrorUnableToLocateFileToPatch" xml:space="preserve">
+    <value>Critical error: Unable to locate file to patch, "{0}" file not found!</value>
+  </data>
+  <data name="NoFileToInstallSpecified" xml:space="preserve">
+    <value>Error! No file to install is specified!</value>
+  </data>
+  <data name="NoInstallPathSet" xml:space="preserve">
+    <value>Error! No install path has been set!</value>
+  </data>
+  <data name="FileSetToPatchDoesNotExist" xml:space="preserve">
+    <value>Error! File "{0}" set to be patched does not exist!</value>
+  </data>
+  <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve">
+    <value>Unable to load the instructions text! Make sure the "tslpatchdata" folder contains the "info.rtf" file!</value>
+  </data>
+  <data name="FilePatcherDescription" xml:space="preserve">
+    <value>2DA/TLK/GFF/NSS/SSF/ERF/RIM file patcher for KotOR/TSL.</value>
+  </data>
+  <data name="SectionNotFoundError" xml:space="preserve">
+    <value>The [{0}] section was not found in the ini</value>
+  </data>
+  <data name="ReferencesTracebackMsg" xml:space="preserve">
+    <value>, referenced by '{0}={1}' in [{2}]</value>
+  </data>
+  <data name="ErrorParsingIniFile" xml:space="preserve">
+    <value>Error parsing INI file: {0}</value>
+  </data>
+  <data name="IniFileNotFound" xml:space="preserve">
+    <value>INI file not found: {0}</value>
+  </data>
+  <data name="IniTextCannotBeNullOrEmpty" xml:space="preserve">
+    <value>INI text cannot be null or empty</value>
+  </data>
+  <data name="LanguageIntegerNotKnown" xml:space="preserve">
+    <value>Language integer not known: {0}</value>
+  </data>
+  <data name="NoEncodingDefinedForLanguage" xml:space="preserve">
+    <value>No encoding defined for language: {0}</value>
+  </data>
+  <data name="NoLineSetToBeModifiedFormat" xml:space="preserve">
+    <value>No line set to be modified in [{0}].</value>
+  </data>
+  <data name="OrphanedIniSectionsFormat" xml:space="preserve">
+    <value>There are some orphaned ini sections found in the changes:&#xA;{0}</value>
+  </data>
+  <data name="InstallationLogHeader" xml:space="preserve">
+    <value>KPatcher Installation Log</value>
+  </data>
+  <data name="InstallationLogHeaderSeparator" xml:space="preserve">
+    <value>===========================</value>
+  </data>
+  <data name="InstallationDate" xml:space="preserve">
+    <value>Installation Date: {0}</value>
+  </data>
+  <data name="ModPath" xml:space="preserve">
+    <value>Mod Path: {0}</value>
+  </data>
+  <data name="GamePath" xml:space="preserve">
+    <value>Game Path: {0}</value>
+  </data>
+  <data name="GameDetected" xml:space="preserve">
+    <value>Game Detected: {0}</value>
+  </data>
+  <data name="FileOperationFormat" xml:space="preserve">
+    <value>{0}: {1} -&gt; {2}</value>
+  </data>
+  <data name="FileOperationErrorFormat" xml:space="preserve">
+    <value>Failed to {0} {1} to {2}</value>
+  </data>
+  <data name="FileOperationErrorWithMessageFormat" xml:space="preserve">
+    <value>Failed to {0} {1} to {2}: {3}</value>
+  </data>
+  <data name="PatchOperationFormat" xml:space="preserve">
+    <value>Patching {0}: {1} - {2}</value>
+  </data>
+  <data name="CouldNotFindChangesIniFile" xml:space="preserve">
+    <value>Could not find the changes ini file on disk.</value>
+  </data>
+  <data name="CouldNotCreateInstallLogFile" xml:space="preserve">
+    <value>Could not create install log file: {0}</value>
+  </data>
+  <data name="ChangesConfigFileNotFound" xml:space="preserve">
+    <value>Changes config file not found: {0}</value>
+  </data>
+  <data name="CouldNotDetermineEncoding" xml:space="preserve">
+    <value>Could not determine encoding of '{0}'. Attempting to force load...</value>
+  </data>
+  <data name="CouldNotWriteEquivalentYaml" xml:space="preserve">
+    <value>Could not write equivalent YAML: {0}</value>
+  </data>
+  <data name="CouldNotInitializeUninstallDirectory" xml:space="preserve">
+    <value>Could not initialize uninstall directory: {0}</value>
+  </data>
+  <data name="CouldNotCreateBackupFolder" xml:space="preserve">
+    <value>Could not create backup folder: {0}</value>
+  </data>
+  <data name="UsingBackupDirectory" xml:space="preserve">
+    <value>Using backup directory: '{0}'</value>
+  </data>
+  <data name="InvalidKotorDirectory" xml:space="preserve">
+    <value>Chosen KOTOR directory is not a valid installation - cannot initialize ModInstaller.</value>
+  </data>
+  <data name="StartingInstallation" xml:space="preserve">
+    <value>Starting installation...</value>
+  </data>
+  <data name="LoadingConfigurationFrom" xml:space="preserve">
+    <value>Loading configuration from {0}</value>
+  </data>
+  <data name="FoundPatchesToApply" xml:space="preserve">
+    <value>Found {0} patches to apply</value>
+  </data>
+  <data name="InstallationTerminationRequest" xml:space="preserve">
+    <value>ModInstaller.Install() received termination request, cancelling...</value>
+  </data>
+  <data name="ProcessingInstallListEntries" xml:space="preserve">
+    <value>Processing InstallList entries...</value>
+  </data>
+  <data name="ProcessingTlkPatches" xml:space="preserve">
+    <value>Processing TLK patches...</value>
+  </data>
+  <data name="Processing2DAPatches" xml:space="preserve">
+    <value>Processing 2DA patches...</value>
+  </data>
+  <data name="ProcessingGffPatches" xml:space="preserve">
+    <value>Processing GFF patches...</value>
+  </data>
+  <data name="ProcessingNssScriptPatches" xml:space="preserve">
+    <value>Processing NSS script patches...</value>
+  </data>
+  <data name="ProcessingNcsScriptPatches" xml:space="preserve">
+    <value>Processing NCS script patches...</value>
+  </data>
+  <data name="ProcessingSsfSoundPatches" xml:space="preserve">
+    <value>Processing SSF sound patches...</value>
+  </data>
+  <data name="FileHasNoContent" xml:space="preserve">
+    <value>'{0}' has no content/data and is completely empty.</value>
+  </data>
+  <data name="SkippingFilePatchResource" xml:space="preserve">
+    <value>Skipping '{0}' - patch_resource determined that this file can be skipped.</value>
+  </data>
+  <data name="CleaningTemporaryScriptFolder" xml:space="preserve">
+    <value>Cleaning temporary script folder at '{0}' (hint: use 'SaveProcessedScripts=1' in [Settings] to keep these scripts)</value>
+  </data>
+  <data name="SuccessfullyCompletedFormat" xml:space="preserve">
+    <value>Successfully completed {0} {1}.</value>
+  </data>
+  <data name="InstallationCompletedSuccessfully" xml:space="preserve">
+    <value>Installation completed successfully</value>
+  </data>
+  <data name="InstallationFailedFormat" xml:space="preserve">
+    <value>Installation failed: {0}</value>
+  </data>
+  <data name="PatchingRimFileWarning" xml:space="preserve">
+    <value>This mod is patching RIM file Modules/{0}!
+Patching RIMs is highly incompatible, not recommended, and widely considered bad practice. Please request the mod developer to fix this.</value>
+  </data>
+  <data name="ModuleDidNotExistBuilding" xml:space="preserve">
+    <value>IMPORTANT! The module at path '{0}' did not exist, building one in the 'Modules' folder immediately from the following files:</value>
+  </data>
+  <data name="FailedToBuildModule" xml:space="preserve">
+    <value>Failed to build module '{0}': {1}</value>
+  </data>
+  <data name="CapsuleNotFoundOrPermission" xml:space="preserve">
+    <value>The capsule '{0}' did not exist, or permission issues occurred, when attempting to {1} '{2}'. Skipping file...</value>
+  </data>
+  <data name="BackingUpFile" xml:space="preserve">
+    <value>Backing up '{0}'...</value>
+  </data>
+  <data name="FailedToCreateBackup" xml:space="preserve">
+    <value>Failed to create backup of '{0}': {1}</value>
+  </data>
+  <data name="CouldNotLoadSourceFileMissing" xml:space="preserve">
+    <value>Could not load source file to {0}: SourceFile is missing or empty (fix or remove this InstallList / patch row in changes.ini).</value>
+  </data>
+  <data name="CouldNotLoadFileSaveAsMissing" xml:space="preserve">
+    <value>Could not load file to {0}: SaveAs is missing or empty.</value>
+  </data>
+  <data name="CouldNotLoadResourceFromCapsule" xml:space="preserve">
+    <value>Could not load resource from capsule to {0}: SaveAs is missing or empty.</value>
+  </data>
+  <data name="CouldNotLoadSourceFileFormat" xml:space="preserve">
+    <value>Could not load source file to {0}:{1}{2}</value>
+  </data>
+  <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve">
+    <value>The capsule '{0}' did not exist when attempting to {1} '{2}'. Skipping file...</value>
+  </data>
+  <data name="RenamedExistingOverrideFile" xml:space="preserve">
+    <value>Renamed existing Override file '{0}' to '{1}' to prevent shadowing.</value>
+  </data>
+  <data name="CouldNotRenameInOverrideFolder" xml:space="preserve">
+    <value>Could not rename '{0}' to '{1}' in the Override folder: {2}</value>
+  </data>
+  <data name="ResourceShadowingModChanges" xml:space="preserve">
+    <value>A resource located at '{0}' is shadowing this mod's changes in {1}!</value>
+  </data>
+  <data name="ModOvershadowedByExisting" xml:space="preserve">
+    <value>This mod intends to install '{0}' into '{1}', but is overshadowed by the existing '{2}'!</value>
+  </data>
+  <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve">
+    <value>The ConfigReader finished loading the INI</value>
+  </data>
+  <data name="SettingsSectionMissing" xml:space="preserve">
+    <value>[Settings] section missing from ini.</value>
+  </data>
+  <data name="LoadingSettingsSection" xml:space="preserve">
+    <value>Loading [Settings] section from ini...</value>
+  </data>
+  <data name="InstallListSectionMissing" xml:space="preserve">
+    <value>[InstallList] section missing from ini.</value>
+  </data>
+  <data name="LoadingInstallListPatches" xml:space="preserve">
+    <value>Loading [InstallList] patches from ini...</value>
+  </data>
+  <data name="SkippingEmptyInstallListEntry" xml:space="preserve">
+    <value>Skipping empty InstallList entry (blank line or empty key in changes.ini [InstallList] section).</value>
+  </data>
+  <data name="TlkListSectionMissing" xml:space="preserve">
+    <value>[TLKList] section missing from ini.</value>
+  </data>
+  <data name="LoadingTlkListPatches" xml:space="preserve">
+    <value>Loading [TLKList] patches from ini...</value>
+  </data>
+  <data name="TwoDAListSectionMissing" xml:space="preserve">
+    <value>[2DAList] section missing from ini.</value>
+  </data>
+  <data name="LoadingTwoDAListPatches" xml:space="preserve">
+    <value>Loading [2DAList] patches from ini...</value>
+  </data>
+  <data name="SsfListSectionMissing" xml:space="preserve">
+    <value>[SSFList] section missing from ini.</value>
+  </data>
+  <data name="LoadingSsfListPatches" xml:space="preserve">
+    <value>Loading [SSFList] patches from ini...</value>
+  </data>
+  <data name="GffListSectionMissing" xml:space="preserve">
+    <value>[GFFList] section missing from ini.</value>
+  </data>
+  <data name="LoadingGffListPatches" xml:space="preserve">
+    <value>Loading [GFFList] patches from ini...</value>
+  </data>
+  <data name="CompileListSectionMissing" xml:space="preserve">
+    <value>[CompileList] section missing from ini.</value>
+  </data>
+  <data name="LoadingCompileListPatches" xml:space="preserve">
+    <value>Loading [CompileList] patches from ini...</value>
+  </data>
+  <data name="HackListSectionMissing" xml:space="preserve">
+    <value>[HACKList] section missing from ini.</value>
+  </data>
+  <data name="LoadingHackListPatches" xml:space="preserve">
+    <value>Loading [HACKList] patches from ini...</value>
+  </data>
+  <data name="CliErrorNoModPath" xml:space="preserve">
+    <value>[Error] No mod path specified. Use --tslpatchdata &lt;path&gt;</value>
+  </data>
+  <data name="CliErrorFailedToLoadMod" xml:space="preserve">
+    <value>[Error] Failed to load mod: {0}</value>
+  </data>
+  <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve">
+    <value>[Error] Namespace index {0} out of range (max: {1})</value>
+  </data>
+  <data name="CliErrorNoGameDirectory" xml:space="preserve">
+    <value>[Error] No game directory specified. Use --game-dir &lt;path&gt;</value>
+  </data>
+  <data name="CliErrorInvalidGameDirectory" xml:space="preserve">
+    <value>[Error] Invalid game directory: {0}: {1}</value>
+  </data>
+  <data name="CliErrorInvalidModOrGamePaths" xml:space="preserve">
+    <value>[Error] Invalid mod or game paths</value>
+  </data>
+  <data name="CliErrorCannotRunMultipleOperations" xml:space="preserve">
+    <value>[Error] Cannot run more than one of [--install, --uninstall, --validate]</value>
+  </data>
+  <data name="CliErrorMustSpecifyOperation" xml:space="preserve">
+    <value>[Error] Must specify one of [--install, --uninstall, --validate] for CLI mode</value>
+  </data>
+  <data name="CliInfoInstallingMod" xml:space="preserve">
+    <value>[Info] Installing mod from {0} to {1}</value>
+  </data>
+  <data name="CliInfoInstallCompleted" xml:space="preserve">
+    <value>[Info] Install completed: {0} errors, {1} warnings, {2} patches</value>
+  </data>
+  <data name="CliInfoInstallTime" xml:space="preserve">
+    <value>[Info] Install time: {0}</value>
+  </data>
+  <data name="CliInfoUninstallingMod" xml:space="preserve">
+    <value>[Info] Uninstalling mod from {0}</value>
+  </data>
+  <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve">
+    <value>[Info] Uninstall completed successfully</value>
+  </data>
+  <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve">
+    <value>[Warning] Uninstall completed with warnings</value>
+  </data>
+  <data name="CliInfoValidatingMod" xml:space="preserve">
+    <value>[Info] Validating mod configuration</value>
+  </data>
+  <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve">
+    <value>[Info] Validation completed successfully</value>
+  </data>
+  <data name="CliErrorFormat" xml:space="preserve">
+    <value>[Error] {0}: {1}</value>
+  </data>
+  <data name="CliInnerException" xml:space="preserve">
+    <value>Inner Exception: {0}</value>
+  </data>
+  <data name="UnknownException" xml:space="preserve">
+    <value>Unknown exception</value>
+  </data>
+  <data name="CouldNotFindFile" xml:space="preserve">
+    <value>Could not find the file: '{0}'</value>
+  </data>
+  <data name="CouldNotFindDirectory" xml:space="preserve">
+    <value>Could not find the directory: '{0}'</value>
+  </data>
+  <data name="PermissionDenied" xml:space="preserve">
+    <value>Permission Denied: {0}</value>
+  </data>
+  <data name="OperationTimedOut" xml:space="preserve">
+    <value>Operation timed out: {0}</value>
+  </data>
+  <data name="OperationWasCancelled" xml:space="preserve">
+    <value>Operation was cancelled: {0}</value>
+  </data>
+  <data name="IOError" xml:space="preserve">
+    <value>I/O Error: {0}</value>
+  </data>
+  <data name="ExceptionInformationHeader" xml:space="preserve">
+    <value>  Information:</value>
+  </data>
+  <data name="RemovedFormat" xml:space="preserve">
+    <value>Removed {0}...</value>
+  </data>
+  <data name="RestoringBackupOf" xml:space="preserve">
+    <value>Restoring backup of '{0}' to '{1}'...</value>
+  </data>
+  <data name="UsingBackupFolder" xml:space="preserve">
+    <value>Using backup folder '{0}'</value>
+  </data>
+  <data name="WouldRestoreFile" xml:space="preserve">
+    <value>Would restore file '{0}'</value>
+  </data>
+  <data name="DeletedRestoredBackup" xml:space="preserve">
+    <value>Deleted restored backup '{0}'</value>
+  </data>
+  <data name="ExpectedGffStructButGot" xml:space="preserve">
+    <value>Expected GFFStruct but got {0}</value>
+  </data>
+  <data name="DoesNotExist" xml:space="preserve">
+    <value>Does not exist</value>
+  </data>
+  <data name="PathPointsToExpectedGffList" xml:space="preserve">
+    <value>Path points to a '{0}', expected a GFFList.</value>
+  </data>
+  <data name="UnableToAddStructToList" xml:space="preserve">
+    <value>Unable to add struct to list '{0}': {1}</value>
+  </data>
+  <data name="IniSectionThrewException" xml:space="preserve">
+    <value>INI section [{0}] threw an exception: {1}</value>
+  </data>
+  <data name="FailedToAddNewStructToList" xml:space="preserve">
+    <value>Failed to add a new struct to list '{0}' in [{1}]. Reason: Expected GFFStruct but got '{2}' ({3}) of type {4} Skipping...</value>
+  </data>
+  <data name="Set2DAMemory" xml:space="preserve">
+    <value>Set 2DAMEMORY{0}={1}</value>
+  </data>
+  <data name="UnexpectedModifierType" xml:space="preserve">
+    <value>Unexpected modifier type: {0}: {1}</value>
+  </data>
+  <data name="ResolvedGffListPath" xml:space="preserve">
+    <value>Resolved GFFList path of [{0}] from '{1}' --&gt; '{2}'</value>
+  </data>
+  <data name="ApplyPatchFromIniSection" xml:space="preserve">
+    <value>Apply patch from INI section [{0}] FieldType: {1} GFF Path: '{2}'</value>
+  </data>
+  <data name="UnableToAddNewGffField" xml:space="preserve">
+    <value>Unable to add new GFF Field '{0}' at GFF Path '{1}'! This {2}</value>
+  </data>
+  <data name="InstructionJumpsToNotInList" xml:space="preserve">
+    <value>Instruction #{0} ({1}) jumps to instruction not in list. Jump target hash: {2}</value>
+  </data>
+  <data name="InstructionLimitExceeded" xml:space="preserve">
+    <value>Instruction limit exceeded: {0} instructions executed</value>
+  </data>
+  <data name="InfiniteLoopDetectedExecuted" xml:space="preserve">
+    <value>Infinite loop detected: instruction at index {0} ({1}) has been executed {2} times</value>
+  </data>
+  <data name="JumpInstructionNoTarget" xml:space="preserve">
+    <value>Jump instruction {0} at index {1} has no jump target</value>
+  </data>
+  <data name="JumpTargetNotFound" xml:space="preserve">
+    <value>Jump target for instruction {0} not found in instruction table</value>
+  </data>
+  <data name="InfiniteLoopJumpsToItself" xml:space="preserve">
+    <value>Infinite loop detected: {0} at index {1} jumps to itself</value>
+  </data>
+  <data name="CannotAdvanceSameInstruction" xml:space="preserve">
+    <value>Cannot advance: next instruction at index {0} is the same as current at index {1}</value>
+  </data>
+  <data name="InstructionNotPresentInTable" xml:space="preserve">
+    <value>Instruction not present in current instruction table</value>
+  </data>
+  <data name="InstructionNotImplemented" xml:space="preserve">
+    <value>Instruction {0} not implemented</value>
+  </data>
+  <data name="StoreStateCannotAccessInstruction" xml:space="preserve">
+    <value>STORE_STATE at index {0}: cannot access instruction at index {1}</value>
+  </data>
+  <data name="StoreStateReachedEndWithoutRetn" xml:space="preserve">
+    <value>STORE_STATE at index {0}: reached end of instructions without finding RETN</value>
+  </data>
+  <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve">
+    <value>ACTION instruction requires at least 2 arguments</value>
+  </data>
+  <data name="ActionIdOutOfRange" xml:space="preserve">
+    <value>Action ID {0} is out of range (0-{1})</value>
+  </data>
+  <data name="StackUnderflowPoppingVector" xml:space="preserve">
+    <value>Stack underflow while popping vector for '{0}'</value>
+  </data>
+  <data name="StackUnderflowPoppingArgument" xml:space="preserve">
+    <value>Stack underflow while popping argument for '{0}'</value>
+  </data>
+  <data name="FileHasNoEntryPoint" xml:space="preserve">
+    <value>This file has no entry point and cannot be compiled (Most likely an include file).</value>
+  </data>
+</root>

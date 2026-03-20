@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Uninstall;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Uninstall

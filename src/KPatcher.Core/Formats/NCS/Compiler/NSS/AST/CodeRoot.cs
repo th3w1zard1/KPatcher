@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS.Compiler.NSS;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -45,7 +45,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             StructMap = new Dictionary<string, Struct>();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:537-538
         public void AddScoped(Identifier identifier, DynamicDataType datatype, bool isConst = false)
         {
             _globalScope.Insert(0, new ScopedValue(identifier, datatype, isConst));
@@ -76,7 +75,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new NSS.CompileError(msg);
             }
 
-            // Matching PyKotor classes.py line 556
             return new GetScopedResult(true, found.DataType, offset, found.IsConst);
         }
 
@@ -102,7 +100,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 .Concat(Objects.OfType<StructDefinition>())
                 .ToList();
             List<TopLevelObject> others = Objects.Where(obj => !included.Contains(obj) && !scriptGlobals.Contains(obj)).ToList();
-            
+
             // The external compiler (nwnnsscomp) always places the entry stub at the BEGINNING (index 0)
             // When there are globals: JSR jumps to first global, RETN, then globals, SAVEBP, then RESTOREBP, MOVSP, RETN after SAVEBP
             // When there are no globals: JSR jumps to main, RETN
@@ -131,7 +129,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
                 ncs.Add(NCSInstructionType.SAVEBP, new List<object>());
             }
-            
+
             // Compile functions
             foreach (TopLevelObject obj in others)
             {
@@ -159,14 +157,14 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 NCSInstruction mainStart = FirstNonNop(FunctionMap["main"].Instruction, ncs);
                 FunctionMap["main"] = new FunctionReference(mainStart, FunctionMap["main"].Definition);
-                
+
                 // The external compiler (nwnnsscomp) always places entry stub at BEGINNING (index 0)
                 // Insert RETN first, then JSR at the same index, so JSR comes first in final order
                 NCSInstruction entryJsrTarget = hasGlobals ? (firstGlobalInstruction ?? mainStart) : mainStart;
                 ncs.Add(NCSInstructionType.RETN, new List<object>(), null, 0);
                 NCSInstruction entryJsr = ncs.Add(NCSInstructionType.JSR, new List<object>(), entryJsrTarget, 0);
                 entryJsr.Jump = entryJsrTarget;
-                
+
                 if (hasGlobals)
                 {
                     // After SAVEBP, the external compiler adds: JSR (to main), RESTOREBP, MOVSP, RETN
@@ -210,8 +208,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 NCSInstruction scStart = FirstNonNop(FunctionMap["StartingConditional"].Instruction, ncs);
                 FunctionMap["StartingConditional"] = new FunctionReference(scStart, FunctionMap["StartingConditional"].Definition);
-                // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:417-423
-                // Original: ncs.add(NCSInstructionType.RETN, args=[], index=entry_index) then JSR then RSADDI, all at entry_index
                 // Adding RETN first, then JSR, then RSADDI at the same index, so final order is RSADDI, JSR, RETN
                 // The external compiler places entry stub at BEGINNING (index 0) for StartingConditional too
                 ncs.Add(NCSInstructionType.RETN, new List<object>(), null, 0);
@@ -262,7 +258,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             object definition = funcMap.Definition;
             NCSInstruction startInstruction = funcMap.Instruction;
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:428-536
             DynamicDataType returnType = GetReturnType(definition);
             int returnTypeSize = 0;
             if (returnType == DynamicDataType.INT)
@@ -334,7 +329,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Track return value space in temp_stack
-            // Matching PyKotor classes.py line 490
             block.TempStack += returnTypeSize;
 
             List<FunctionParameter> parameters = GetParameters(definition);
@@ -360,7 +354,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 argsList.Add(defaultExpr);
             }
 
-            // Matching PyKotor classes.py lines 514-532
             // Push arguments in declaration order so the last parameter ends up deepest on the stack.
             int offset = 0;
             for (int i = 0; i < parameters.Count; i++)
@@ -629,8 +622,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             Parameters = parameters;
             Body = body;
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:731-732
-            // Original: for param in parameters: block.add_scoped(param.identifier, param.data_type)
             // Parameters are added in forward order; add_scoped uses insert(0, ...) which reverses them
             foreach (FunctionParameter param in parameters)
             {

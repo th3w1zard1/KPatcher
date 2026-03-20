@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:12-145
-    // Original: class Language(IntEnum):
     /// <summary>
     /// Language IDs recognized by both KOTOR games.
     /// Found in the TalkTable header, and CExoLocStrings (LocalizedStrings) within GFFs.
@@ -103,17 +101,9 @@ namespace KPatcher.Core.Common
         Maori = 95,
         MoldovanLatin = 96,
         Samoan = 97,
-        Somali = 98,
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:140-145
-        // Original: KOREAN = 128 / CHINESE_TRADITIONAL = 129 / CHINESE_SIMPLIFIED = 130 / JAPANESE = 131
-        Korean = 128,
-        ChineseTraditional = 129,
-        ChineseSimplified = 130,
-        Japanese = 131
+        Somali = 98
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:422-426
-    // Original: class Gender(IntEnum):
     /// <summary>
     /// Gender for localized strings.
     /// </summary>
@@ -160,6 +150,7 @@ namespace KPatcher.Core.Common
             Language.Italian,
             Language.Spanish,
             Language.Afrikaans,
+            Language.Aymara,
             Language.Basque,
             Language.Breton,
             Language.Catalan,
@@ -185,8 +176,10 @@ namespace KPatcher.Core.Common
             Language.Irish,
             Language.Interlingua,
             Language.JavaneseLatin,
+            Language.Kinyarwanda,
             Language.Latin,
             Language.Luxembourgish,
+            Language.Malagasy,
             Language.Maltese,
             Language.Maori,
             Language.Norwegian,
@@ -224,8 +217,6 @@ namespace KPatcher.Core.Common
             Language.Lithuanian
         };
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:147-155
-        // Original: def _missing_(cls, value: Any) -> Language:
         public static Language FromValue(int value)
         {
             if (Enum.IsDefined(typeof(Language), value))
@@ -241,20 +232,11 @@ namespace KPatcher.Core.Common
             return Language.English;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:156-165
-        // Original: def is_8bit_encoding(self) -> bool:
         public static bool Is8BitEncoding(this Language language)
         {
-            return language != Language.Unknown
-                   && language != Language.Korean
-                   && language != Language.Japanese
-                   && language != Language.ChineseSimplified
-                   && language != Language.ChineseTraditional
-                   && language != Language.Thai;
+            return language != Language.Unknown;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:166-318
-        // Original: def get_encoding(self) -> str | None:
         public static string GetEncoding(this Language language)
         {
             if (Cp1250Languages.Contains(language))
@@ -314,9 +296,7 @@ namespace KPatcher.Core.Common
                 return "ISO-8859-1";
             }
 
-            if (language == Language.Aymara
-                || language == Language.Esperanto
-                || language == Language.Malagasy)
+            if (language == Language.Esperanto)
             {
                 return "ISO-8859-3";
             }
@@ -324,31 +304,6 @@ namespace KPatcher.Core.Common
             if (language == Language.KurdishLatin)
             {
                 return "ISO-8859-9";
-            }
-
-            if (language == Language.Kinyarwanda)
-            {
-                return "ISO-8859-10";
-            }
-
-            if (language == Language.Korean)
-            {
-                return "cp949";
-            }
-
-            if (language == Language.ChineseTraditional)
-            {
-                return "cp950";
-            }
-
-            if (language == Language.ChineseSimplified)
-            {
-                return "cp936";
-            }
-
-            if (language == Language.Japanese)
-            {
-                return "cp932";
             }
 
             if (language == Language.Unknown)
@@ -359,8 +314,6 @@ namespace KPatcher.Core.Common
             throw new ArgumentException("No encoding defined for language: " + language);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/language.py:319-419
-        // Original: def get_bcp47_code(self):
         public static string GetBcp47Code(this Language language)
         {
             Dictionary<Language, string> langMap = new Dictionary<Language, string>
@@ -381,7 +334,7 @@ namespace KPatcher.Core.Common
                 { Language.Danish, "da" },
                 { Language.Dutch, "nl" },
                 { Language.Faroese, "fo" },
-                { Language.Filipino, "filipino" },
+                { Language.Filipino, "fil" },
                 { Language.Finnish, "fi" },
                 { Language.Flemish, "nl-BE" },
                 { Language.Frisian, "fy" },
@@ -454,13 +407,9 @@ namespace KPatcher.Core.Common
                 { Language.Malagasy, "mg" },
                 { Language.MalayLatin, "ms" },
                 { Language.Maori, "mi" },
-                { Language.MoldovanLatin, "mo" },
+                { Language.MoldovanLatin, "ro" },
                 { Language.Samoan, "sm" },
-                { Language.Somali, "so" },
-                { Language.Korean, "ko" },
-                { Language.ChineseTraditional, "zh-TW" },
-                { Language.ChineseSimplified, "zh-CN" },
-                { Language.Japanese, "ja" }
+                { Language.Somali, "so" }
             };
 
             string code;

@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Tests.Common;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Formats
@@ -18,7 +18,7 @@ namespace KPatcher.Core.Tests.Formats
         private const int ExpectedInstructionCount = 1541;
 
         /// <summary>
-        /// Python: test_binary_io
+        /// test_binary_io
         /// Ensure binary NCS IO produces byte-identical output.
         /// </summary>
         [Fact]
@@ -30,7 +30,7 @@ namespace KPatcher.Core.Tests.Formats
                 return;
             }
 
-            // Python: ncs = NCSBinaryReader(BINARY_TEST_FILE).load()
+            // ncs = NCSBinaryReader(BINARY_TEST_FILE).load()
             NCS ncs;
             using (var reader = new NCSBinaryReader(BinaryTestFile))
             {
@@ -38,16 +38,16 @@ namespace KPatcher.Core.Tests.Formats
             }
             ValidateIO(ncs);
 
-            // Python: write_ncs(ncs, file_path)
+            // write_ncs(ncs, file_path)
             string tempPath = Path.Combine(Path.GetTempPath(), $"output_{Guid.NewGuid()}.ncs");
             try
             {
                 NCSAuto.WriteNcs(ncs, tempPath);
 
-                // Python: data = bytes_ncs(ncs)
+                // data = bytes_ncs(ncs)
                 byte[] data = NCSAuto.BytesNcs(ncs);
 
-                // Python: ncs = read_ncs(data)
+                // ncs = read_ncs(data)
                 NCS ncs2 = NCSAuto.ReadNcs(data);
                 ValidateIO(ncs2);
 
@@ -66,10 +66,10 @@ namespace KPatcher.Core.Tests.Formats
 
         private static void ValidateIO(NCS ncs)
         {
-            // Python: self.assertEqual(EXPECTED_INSTRUCTION_COUNT, len(ncs.instructions))
+            // self.assertEqual(EXPECTED_INSTRUCTION_COUNT, len(ncs.instructions))
             ncs.Instructions.Count.Should().Be(ExpectedInstructionCount);
 
-            // Python: self.assertEqual(BinaryReader.load_file(BINARY_TEST_FILE), bytes_ncs(ncs))
+            // self.assertEqual(BinaryReader.load_file(BINARY_TEST_FILE), bytes_ncs(ncs))
             // This validates byte-identical output - now implemented in TestBinaryIO
         }
     }

@@ -1,5 +1,5 @@
-using KPatcher.Core.Namespaces;
 using FluentAssertions;
+using KPatcher.Core.Namespaces;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Namespaces

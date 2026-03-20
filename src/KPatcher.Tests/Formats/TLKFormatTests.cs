@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Resources;
-using FluentAssertions;
 using Xunit;
 using static global::KPatcher.Core.Formats.TLK.TLKAuto;
 
@@ -63,19 +63,19 @@ namespace KPatcher.Core.Tests.Formats
 
         private static void ValidateIO(TLK tlk)
         {
-            // Python: validate_io - matches BASE_TLK from test_tlk.py
+            // validate_io - matches BASE_TLK from test_tlk.py
             tlk.Language.Should().Be(Language.English);
             tlk.Count.Should().Be(3);
 
-            // Python: assert TLKEntry("abcdef", ResRef("resref01")) == tlk[0]
+            // assert TLKEntry("abcdef", ResRef("resref01")) == tlk[0]
             tlk[0].Text.Should().Be("abcdef");
             tlk[0].Voiceover.ToString().Should().Be("resref01");
 
-            // Python: assert TLKEntry("ghijklmnop", ResRef("resref02")) == tlk[1]
+            // assert TLKEntry("ghijklmnop", ResRef("resref02")) == tlk[1]
             tlk[1].Text.Should().Be("ghijklmnop");
             tlk[1].Voiceover.ToString().Should().Be("resref02");
 
-            // Python: assert TLKEntry("qrstuvwxyz", ResRef("")) == tlk[2]
+            // assert TLKEntry("qrstuvwxyz", ResRef("")) == tlk[2]
             tlk[2].Text.Should().Be("qrstuvwxyz");
             tlk[2].Voiceover.ToString().Should().Be("");
         }
@@ -83,7 +83,7 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestResize()
         {
-            // Python: test_resize
+            // test_resize
             var baseTlk = new TLK(Language.English);
             baseTlk.Add("abcdef", "resref01");
             baseTlk.Add("ghijklmnop", "resref02");
@@ -120,7 +120,7 @@ namespace KPatcher.Core.Tests.Formats
             var tlk = new TLK(Language.English);
 
             // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // Python: write_tlk(TLK(), ".", ResourceType.TLK)
+            // write_tlk(TLK(), ".", ResourceType.TLK)
             Action act1 = () => WriteTlk(tlk, ".", ResourceType.TLK);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -132,7 +132,7 @@ namespace KPatcher.Core.Tests.Formats
             }
 
             // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // Python: write_tlk(TLK(), ".", ResourceType.INVALID)
+            // write_tlk(TLK(), ".", ResourceType.INVALID)
             Action act2 = () => WriteTlk(tlk, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }

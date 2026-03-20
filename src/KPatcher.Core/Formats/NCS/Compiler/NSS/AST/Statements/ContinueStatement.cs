@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using KPatcher.Core.Formats.NCS;
 using JetBrains.Annotations;
+using KPatcher.Core.Formats.NCS;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {

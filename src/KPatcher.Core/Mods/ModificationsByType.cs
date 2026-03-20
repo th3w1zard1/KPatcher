@@ -1,5 +1,3 @@
-// Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:128-143
-// Original: @dataclass class ModificationsByType: ...
 using System.Collections.Generic;
 using KPatcher.Core.Mods.GFF;
 using KPatcher.Core.Mods.NCS;
@@ -10,8 +8,6 @@ using KPatcher.Core.Mods.TwoDA;
 
 namespace KPatcher.Core.Mods
 {
-    // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:128-143
-    // Original: @dataclass class ModificationsByType: ...
     public class ModificationsByType
     {
         public List<ModificationsTLK> Tlk { get; set; } = new List<ModificationsTLK>();
@@ -22,8 +18,6 @@ namespace KPatcher.Core.Mods
         public List<ModificationsNCS> Ncs { get; set; } = new List<ModificationsNCS>();
         public List<ModificationsNSS> Nss { get; set; } = new List<ModificationsNSS>();
 
-        // Matching PyKotor implementation at vendor/PyKotor/Libraries/PyKotor/src/pykotor/kpatcher/writer.py:140-143
-        // Original: @classmethod def create_empty(cls) -> ModificationsByType: ...
         public static ModificationsByType CreateEmpty()
         {
             return new ModificationsByType

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
+using IniParser.Model;
+using IniParser.Parser;
 using KPatcher.Core.Config;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Mods.TwoDA;
 using KPatcher.Core.Reader;
-using FluentAssertions;
-using IniParser.Model;
-using IniParser.Parser;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader

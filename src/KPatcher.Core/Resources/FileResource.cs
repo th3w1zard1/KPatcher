@@ -1,17 +1,15 @@
 using System;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Extract;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Resources
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:269-561
-    // Original: class FileResource:
     /// <summary>
     /// Stores information for a resource regarding its name, type and where the data can be loaded from.
     /// Represents a resource entry with metadata (name, type, size, offset) and file location.
-    /// Used throughout PyKotor for resource abstraction and lazy loading.
+    /// Used throughout for resource abstraction and lazy loading.
     /// </summary>
     public class FileResource : IEquatable<FileResource>
     {
@@ -39,18 +37,12 @@ namespace KPatcher.Core.Resources
             _filepath = filepath;
             _identifier = new ResourceIdentifier(resname, restype);
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:303-313
-            // Original: filepath_str = str(self._filepath).lower()
-            // Original: self.inside_capsule: bool = filepath_str.endswith(_CAPSULE_EXTENSIONS)
-            // Original: self.inside_bif: bool = filepath_str.endswith(".bif")
             string filepathStr = filepath.ToLowerInvariant();
             _insideCapsule = filepathStr.EndsWith(".erf") || filepathStr.EndsWith(".mod") ||
                            filepathStr.EndsWith(".rim") || filepathStr.EndsWith(".sav") ||
                            filepathStr.EndsWith(".hak");
             _insideBif = filepathStr.EndsWith(".bif");
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:309-313
-            // Original: self._path_ident_obj: Path = (self._filepath / str(self._identifier) if self.inside_capsule or self.inside_bif else self._filepath)
             if (_insideCapsule || _insideBif)
             {
                 _pathIdentifier = Path.Combine(filepath, _identifier.ToString());
@@ -61,41 +53,29 @@ namespace KPatcher.Core.Resources
             }
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:356-406
-        // Python uses methods, but C# codebase uses properties - keeping properties for compatibility
-        // Original: def identifier(self) -> ResourceIdentifier:
+        // uses methods, but C# codebase uses properties - keeping properties for compatibility
         public ResourceIdentifier Identifier => _identifier;
 
-        // Original: def resname(self) -> str:
         public string ResName => _resname;
 
-        // Original: def resref(self) -> ResRef:
         public ResRef ResRef() => new ResRef(_resname);
 
-        // Original: def restype(self) -> ResourceType:
         public ResourceType ResType => _restype;
 
-        // Original: def size(self) -> int:
         public int Size => _size;
 
-        // Original: def filename(self) -> str:
         public string Filename() => _identifier.ToString();
 
-        // Original: def filepath(self) -> Path:
         public string FilePath => _filepath;
 
-        // Original: def path_ident(self) -> Path:
         public string PathIdent() => _pathIdentifier;
 
-        // Original: def offset(self) -> int:
         public int Offset => _offset;
 
         // Properties for C# style access
         public bool InsideCapsule => _insideCapsule;
         public bool InsideBif => _insideBif;
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:408-458
-        // Original: def _index_resource(self):
         private void IndexResource()
         {
             // Fast path: check if the file exists directly on the filesystem
@@ -103,7 +83,7 @@ namespace KPatcher.Core.Resources
             {
                 if (_insideCapsule)
                 {
-                    var capsule = new Formats.Capsule.LazyCapsule(_filepath);
+                    var capsule = new Common.Capsule.LazyCapsule(_filepath);
                     var res = capsule.GetResourceInfo(_resname, _restype);
                     if (res == null && _identifier.ToString() == Path.GetFileName(_filepath))
                     {
@@ -148,8 +128,6 @@ namespace KPatcher.Core.Resources
             _size = 0; // Size will be determined during extraction
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:460-497
-        // Original: def exists(self) -> bool:
         public bool Exists()
         {
             try
@@ -162,7 +140,7 @@ namespace KPatcher.Core.Resources
                         return true;
                     }
                     // It's a capsule file that exists - verify the resource is inside it
-                    var capsule = new Formats.Capsule.LazyCapsule(_filepath);
+                    var capsule = new Common.Capsule.LazyCapsule(_filepath);
                     return capsule.GetResourceInfo(_resname, _restype) != null;
                 }
 
@@ -198,13 +176,10 @@ namespace KPatcher.Core.Resources
             }
             catch (Exception)
             {
-                // Matching PyKotor: RobustLogger().exception("Failed to check existence of FileResource.")
                 return false;
             }
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:499-556
-        // Original: def data(self, *, reload: bool = False) -> bytes:
         public byte[] Data(bool reload = false)
         {
             if (reload)
@@ -263,8 +238,6 @@ namespace KPatcher.Core.Resources
             return Data();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:344-354
-        // Original: @classmethod def from_path(cls, path: os.PathLike | str) -> Self:
         public static FileResource FromPath(string path)
         {
             FileInfo fileInfo = new FileInfo(path);
@@ -278,8 +251,6 @@ namespace KPatcher.Core.Resources
             );
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:558-560
-        // Original: def as_file_resource(self) -> Self:
         public FileResource AsFileResource() => this;
 
         public override bool Equals(object obj)

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TwoDA;
-using FluentAssertions;
 using Xunit;
 using TwoDAFile = global::KPatcher.Core.Formats.TwoDA.TwoDA;
 
@@ -13,7 +13,6 @@ namespace KPatcher.Core.Tests.Mods
 
     /// <summary>
     /// Tests for 2DA modification functionality
-    /// 1:1 port from tests/kpatcher/test_mods.py (TestManipulate2DA)
     /// </summary>
     public class TwoDaModsTests
     {
@@ -22,7 +21,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_ExistingRowByIndex()
         {
-            // Python test: test_change_existing_rowindex
             // Modifies row at index 1, changes Col1 from "d" to "X"
 
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
@@ -45,7 +43,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_ExistingRowByLabel()
         {
-            // Python test: test_change_existing_rowlabel
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -66,7 +63,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_ExistingRowByLabelColumn()
         {
-            // Python test: test_change_existing_labelindex
             var twoda = new TwoDAFile(new List<string> { "label", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "label", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "label", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -87,7 +83,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_AssignFromTLKMemory()
         {
-            // Python test: test_change_assign_tlkmemory
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -113,7 +108,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_AssignFrom2DAMemory()
         {
-            // Python test: test_change_assign_2damemory
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -136,7 +130,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_AssignHigh()
         {
-            // Python test: test_change_assign_high
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", " " }, { "Col2", "3" }, { "Col3", "5" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "2" }, { "Col2", "4" }, { "Col3", "6" } });
@@ -159,7 +152,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_Store2DAMemoryRowIndex()
         {
-            // Python test: test_set_2damemory_rowindex
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -179,7 +171,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_Store2DAMemoryRowLabel()
         {
-            // Python test: test_set_2damemory_rowlabel
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("r1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -199,7 +190,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void ChangeRow_Store2DAMemoryColumnCell()
         {
-            // Python test: test_set_2damemory_columnlabel
             var twoda = new TwoDAFile(new List<string> { "label", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "label", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "label", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -223,7 +213,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void AddRow_UseMaxRowLabel()
         {
-            // Python test: test_add_rowlabel_use_maxrowlabel
             var twoda = new TwoDAFile(new List<string> { "Col1" });
             twoda.AddRow("0", new Dictionary<string, object>());
 
@@ -244,7 +233,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void AddRow_UseConstantLabel()
         {
-            // Python test: test_add_rowlabel_use_constant
             var twoda = new TwoDAFile(new List<string> { "Col1" });
 
             var memory = new PatcherMemory();
@@ -261,7 +249,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void AddRow_ExclusiveColumnNotExists()
         {
-            // Python test: test_add_exclusive_notexists
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -289,7 +276,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void AddRow_ExclusiveColumnExists()
         {
-            // Python test: test_add_exclusive_exists
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });
@@ -317,7 +303,6 @@ namespace KPatcher.Core.Tests.Mods
         [Fact]
         public void AddRow_ExclusiveColumnNone()
         {
-            // Python test: test_add_exclusive_none
             var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
             twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "a" }, { "Col2", "b" }, { "Col3", "c" } });
             twoda.AddRow("1", new Dictionary<string, object> { { "Col1", "d" }, { "Col2", "e" }, { "Col3", "f" } });

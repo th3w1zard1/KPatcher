@@ -1,14 +1,21 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace KPatcher.Core.Common
 {
 
     public static class SystemHelpers
     {
+        private const int UnixModeFile = 0x1A4;   // 0o644
+        private const int UnixModeDirectory = 0x1ED; // 0o755
+
         /// <summary>
-        /// Attempts to gain write access to a directory and its contents by removing ReadOnly attributes.
+        /// Attempts to gain write access to a directory and its contents.
+        /// On Windows: removes ReadOnly attributes from files and directories.
+        /// On Unix/Linux/macOS: applies chmod 0o644 to files and 0o755 to directories.
         /// </summary>
         public static void FixPermissions(string directoryPath, Action<string> logAction)
         {
@@ -18,7 +25,18 @@ namespace KPatcher.Core.Common
                 return;
             }
 
-            // Process files
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                FixPermissionsWindows(dirInfo, logAction);
+            }
+            else
+            {
+                FixPermissionsUnix(dirInfo, logAction);
+            }
+        }
+
+        private static void FixPermissionsWindows(DirectoryInfo dirInfo, Action<string> logAction)
+        {
             foreach (FileInfo file in dirInfo.GetFiles("*", SearchOption.AllDirectories))
             {
                 try
@@ -35,7 +53,6 @@ namespace KPatcher.Core.Common
                 }
             }
 
-            // Process directories
             foreach (DirectoryInfo dir in dirInfo.GetDirectories("*", SearchOption.AllDirectories))
             {
                 try
@@ -49,6 +66,82 @@ namespace KPatcher.Core.Common
                 catch (Exception ex)
                 {
                     logAction($"Failed to fix permissions for directory {dir.FullName}: {ex.Message}");
+                }
+            }
+        }
+
+        private static void FixPermissionsUnix(DirectoryInfo dirInfo, Action<string> logAction)
+        {
+            foreach (FileInfo file in dirInfo.GetFiles("*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    Chmod(file.FullName, UnixModeFile);
+                    logAction($"Fixed permissions for file: {file.FullName}");
+                }
+                catch (Exception ex)
+                {
+                    logAction($"Failed to fix permissions for file {file.FullName}: {ex.Message}");
+                }
+            }
+
+            foreach (DirectoryInfo dir in dirInfo.GetDirectories("*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    Chmod(dir.FullName, UnixModeDirectory);
+                    logAction($"Fixed permissions for directory: {dir.FullName}");
+                }
+                catch (Exception ex)
+                {
+                    logAction($"Failed to fix permissions for directory {dir.FullName}: {ex.Message}");
+                }
+            }
+
+            // Root directory itself
+            try
+            {
+                Chmod(dirInfo.FullName, UnixModeDirectory);
+                logAction($"Fixed permissions for directory: {dirInfo.FullName}");
+            }
+            catch (Exception ex)
+            {
+                logAction($"Failed to fix permissions for directory {dirInfo.FullName}: {ex.Message}");
+            }
+        }
+
+        private static void Chmod(string path, int mode)
+        {
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            string modeOctal = Convert.ToString(mode, 8);
+            string args = $"{modeOctal} \"{path.Replace("\"", "\\\"")}\"";
+
+            foreach (string chmodPath in new[] { "chmod", "/usr/bin/chmod" })
+            {
+                try
+                {
+                    using (var process = new Process())
+                    {
+                        process.StartInfo.FileName = chmodPath;
+                        process.StartInfo.Arguments = args;
+                        process.StartInfo.UseShellExecute = false;
+                        process.StartInfo.CreateNoWindow = true;
+                        process.StartInfo.RedirectStandardError = true;
+                        process.StartInfo.RedirectStandardOutput = true;
+                        process.Start();
+                        string stderr = process.StandardError.ReadToEnd();
+                        process.WaitForExit(10000);
+                        if (process.ExitCode != 0 && !string.IsNullOrEmpty(stderr))
+                            throw new InvalidOperationException($"chmod failed: {stderr}");
+                        return;
+                    }
+                }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                    if (chmodPath == "/usr/bin/chmod")
+                        throw;
                 }
             }
         }
@@ -125,9 +218,7 @@ namespace KPatcher.Core.Common
         public static void FixCaseSensitivityRecursive(string rootPath, Action<string> logAction)
         {
             // We use a custom walker to ensure we handle renames correctly.
-            // Python uses os.walk(topdown=False) which is perfect for this.
-
-            // In C#, we can simulate this.
+            // In C#, we can simulate something like os.walk
             var dir = new DirectoryInfo(rootPath);
             if (!dir.Exists)
             {

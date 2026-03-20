@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using KPatcher.Core.Common;
 using FluentAssertions;
+using KPatcher.Core.Common;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Common

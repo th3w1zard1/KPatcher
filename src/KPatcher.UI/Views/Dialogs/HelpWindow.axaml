@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:KPatcher.UI.Resources"
+        xmlns:core="clr-namespace:KPatcher.Core.Common;assembly=KPatcher.Core"
+        x:Class="KPatcher.UI.Views.Dialogs.HelpWindow"
+        Title="{x:Static ui:UIResources.HelpWindowTitle}"
+        Width="440"
+        Height="200"
+        MinWidth="360"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="20" Spacing="16">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                       VerticalScrollBarVisibility="Auto"
+                       MaxHeight="320">
+            <TextBlock Text="{x:Static core:TSLPatcherMessages.FilePatcherDescription}"
+                       TextWrapping="Wrap"
+                       FontSize="13"
+                       LineHeight="20"/>
+        </ScrollViewer>
+        <Button Content="{x:Static ui:UIResources.OK}"
+                Click="OnOkClick"
+                HorizontalAlignment="Center"
+                MinWidth="80"
+                Padding="16,8"/>
+    </StackPanel>
+</Window>

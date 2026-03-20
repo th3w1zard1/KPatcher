@@ -1,34 +1,19 @@
 using System;
 using System.IO;
-using System.Linq;
 using KPatcher.Core.Common;
 
 namespace KPatcher.Core.Tools
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/heuristics.py:12-227
-    // Original: def determine_game(path: os.PathLike | str) -> Game | None:
     /// <summary>
-    /// Determines the game based on files and folders.
+    /// Game/path heuristics: detect KotOR 1 vs 2 and installation type from directory contents.
     /// </summary>
     public static class Heuristics
     {
         /// <summary>
-        /// Determines the game based on files and folders.
+        /// Determines the game based on files and folders under the given path.
         /// </summary>
-        /// <param name="path">Path to game directory</param>
-        /// <returns>Game enum or null</returns>
-        /// <remarks>
-        /// References:
-        /// - vendor/KOTOR_Registry_Install_Path_Editor (Registry path detection)
-        /// - vendor/KPatcher.NET/src/KPatcher/Utils (Game detection logic)
-        /// Note: File and folder heuristics vary between Steam, GOG, and disc releases
-        ///
-        /// Processing Logic:
-        /// 1. Normalize the path and check for existence of game files
-        /// 2. Define checks for each game
-        /// 3. Run checks and score games
-        /// 4. Return game with highest score or None if scores are equal or all checks fail
-        /// </remarks>
+        /// <param name="path">Path to game directory.</param>
+        /// <returns>Game enum with highest score, or null if scores are equal or all checks fail.</returns>
         public static Game? DetermineGame(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -36,239 +21,178 @@ namespace KPatcher.Core.Tools
                 return null;
             }
 
-            string rPath = Path.GetFullPath(path);
+            string basePath = Path.GetFullPath(path);
+            bool Check(string relative) => File.Exists(Path.Combine(basePath, relative)) || Directory.Exists(Path.Combine(basePath, relative));
 
-            bool Check(string fileName)
-            {
-                string checkPath = Path.Combine(rPath, fileName);
-                return File.Exists(checkPath) || Directory.Exists(checkPath);
-            }
+            // K1 PC
+            int game1Pc = 0;
+            if (Check("streamwaves")) game1Pc++;
+            if (Check("swkotor.exe")) game1Pc++;
+            if (Check("swkotor.ini")) game1Pc++;
+            if (Check("rims")) game1Pc++;
+            if (Check("utils")) game1Pc++;
+            if (Check("32370_install.vdf")) game1Pc++;
+            if (Check("miles/mssds3d.m3d")) game1Pc++;
+            if (Check("miles/msssoft.m3d")) game1Pc++;
+            if (Check("data/party.bif")) game1Pc++;
+            if (Check("data/player.bif")) game1Pc++;
+            if (Check("modules/global.mod")) game1Pc++;
+            if (Check("modules/legal.mod")) game1Pc++;
+            if (Check("modules/mainmenu.mod")) game1Pc++;
 
-            // Checks for each game
-            bool[] game1PcChecks = new[]
-            {
-                Check("streamwaves"),
-                Check("swkotor.exe"),
-                Check("swkotor.ini"),
-                Check("rims"),
-                Check("utils"),
-                Check("32370_install.vdf"),
-                Check("miles/mssds3d.m3d"),
-                Check("miles/msssoft.m3d"),
-                Check("data/party.bif"),
-                Check("data/player.bif"),
-                Check("modules/global.mod"),
-                Check("modules/legal.mod"),
-                Check("modules/mainmenu.mod"),
-            };
+            // K1 Xbox
+            int game1Xbox = 0;
+            if (Check("01_SS_Repair01.ini")) game1Xbox++;
+            if (Check("swpatch.ini")) game1Xbox++;
+            if (Check("dataxbox/_newbif.bif")) game1Xbox++;
+            if (Check("rimsxbox")) game1Xbox++;
+            if (Check("players.erf")) game1Xbox++;
+            if (Check("downloader.xbe")) game1Xbox++;
+            if (Check("rimsxbox/manm28ad_adx.rim")) game1Xbox++;
+            if (Check("rimsxbox/miniglobal.rim")) game1Xbox++;
+            if (Check("rimsxbox/miniglobaldx.rim")) game1Xbox++;
+            if (Check("rimsxbox/STUNT_56a_a.rim")) game1Xbox++;
+            if (Check("rimsxbox/STUNT_56a_adx.rim")) game1Xbox++;
+            if (Check("rimsxbox/STUNT_57_adx.rim")) game1Xbox++;
+            if (Check("rimsxbox/subglobal.rim")) game1Xbox++;
+            if (Check("rimsxbox/subglobaldx.rim")) game1Xbox++;
+            if (Check("rimsxbox/unk_m44ac_adx.rim")) game1Xbox++;
+            if (Check("rimsxbox/M12ab_adx.rim")) game1Xbox++;
+            if (Check("rimsxbox/mainmenu.rim")) game1Xbox++;
+            if (Check("rimsxbox/mainmenudx.rim")) game1Xbox++;
+            if (Check("rimsxbox/manm28ad_adx.rim")) game1Xbox++;
 
-            bool[] game1XboxChecks = new[]
-            {
-                Check("01_SS_Repair01.ini"),
-                Check("swpatch.ini"),
-                Check("dataxbox/_newbif.bif"),
-                Check("rimsxbox"),
-                Check("players.erf"),
-                Check("downloader.xbe"),
-                Check("rimsxbox/manm28ad_adx.rim"),
-                Check("rimsxbox/miniglobal.rim"),
-                Check("rimsxbox/miniglobaldx.rim"),
-                Check("rimsxbox/STUNT_56a_a.rim"),
-                Check("rimsxbox/STUNT_56a_adx.rim"),
-                Check("rimsxbox/STUNT_57_adx.rim"),
-                Check("rimsxbox/subglobal.rim"),
-                Check("rimsxbox/subglobaldx.rim"),
-                Check("rimsxbox/unk_m44ac_adx.rim"),
-                Check("rimsxbox/M12ab_adx.rim"),
-                Check("rimsxbox/mainmenu.rim"),
-                Check("rimsxbox/mainmenudx.rim"),
-                Check("rimsxbox/manm28ad_adx.rim"),
-            };
+            // K1 iOS
+            int game1Ios = 0;
+            if (Check("override/ios_action_bg.tga")) game1Ios++;
+            if (Check("override/ios_action_bg2.tga")) game1Ios++;
+            if (Check("override/ios_action_x.tga")) game1Ios++;
+            if (Check("override/ios_action_x2.tga")) game1Ios++;
+            if (Check("override/ios_button_a.tga")) game1Ios++;
+            if (Check("override/ios_button_x.tga")) game1Ios++;
+            if (Check("override/ios_button_y.tga")) game1Ios++;
+            if (Check("override/ios_edit_box.tga")) game1Ios++;
+            if (Check("override/ios_enemy_plus.tga")) game1Ios++;
+            if (Check("override/ios_gpad_bg.tga")) game1Ios++;
+            if (Check("override/ios_gpad_gen.tga")) game1Ios++;
+            if (Check("override/ios_gpad_gen2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_help.tga")) game1Ios++;
+            if (Check("override/ios_gpad_help2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_map.tga")) game1Ios++;
+            if (Check("override/ios_gpad_map2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_save.tga")) game1Ios++;
+            if (Check("override/ios_gpad_save2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_solo.tga")) game1Ios++;
+            if (Check("override/ios_gpad_solo2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_solox.tga")) game1Ios++;
+            if (Check("override/ios_gpad_solox2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_ste.tga")) game1Ios++;
+            if (Check("override/ios_gpad_ste2.tga")) game1Ios++;
+            if (Check("override/ios_gpad_ste3.tga")) game1Ios++;
+            if (Check("override/ios_help.tga")) game1Ios++;
+            if (Check("override/ios_help2.tga")) game1Ios++;
+            if (Check("override/ios_help_1.tga")) game1Ios++;
+            if (Check("KOTOR")) game1Ios++;
+            if (Check("KOTOR.entitlements")) game1Ios++;
+            if (Check("kotorios-Info.plist")) game1Ios++;
+            if (Check("AppIcon29x29.png")) game1Ios++;
+            if (Check("AppIcon50x50@2x~ipad.png")) game1Ios++;
+            if (Check("AppIcon50x50~ipad.png")) game1Ios++;
 
-            bool[] game1IosChecks = new[]
-            {
-                Check("override/ios_action_bg.tga"),
-                Check("override/ios_action_bg2.tga"),
-                Check("override/ios_action_x.tga"),
-                Check("override/ios_action_x2.tga"),
-                Check("override/ios_button_a.tga"),
-                Check("override/ios_button_x.tga"),
-                Check("override/ios_button_y.tga"),
-                Check("override/ios_edit_box.tga"),
-                Check("override/ios_enemy_plus.tga"),
-                Check("override/ios_gpad_bg.tga"),
-                Check("override/ios_gpad_gen.tga"),
-                Check("override/ios_gpad_gen2.tga"),
-                Check("override/ios_gpad_help.tga"),
-                Check("override/ios_gpad_help2.tga"),
-                Check("override/ios_gpad_map.tga"),
-                Check("override/ios_gpad_map2.tga"),
-                Check("override/ios_gpad_save.tga"),
-                Check("override/ios_gpad_save2.tga"),
-                Check("override/ios_gpad_solo.tga"),
-                Check("override/ios_gpad_solo2.tga"),
-                Check("override/ios_gpad_solox.tga"),
-                Check("override/ios_gpad_solox2.tga"),
-                Check("override/ios_gpad_ste.tga"),
-                Check("override/ios_gpad_ste2.tga"),
-                Check("override/ios_gpad_ste3.tga"),
-                Check("override/ios_help.tga"),
-                Check("override/ios_help2.tga"),
-                Check("override/ios_help_1.tga"),
-                Check("KOTOR"),
-                Check("KOTOR.entitlements"),
-                Check("kotorios-Info.plist"),
-                Check("AppIcon29x29.png"),
-                Check("AppIcon50x50@2x~ipad.png"),
-                Check("AppIcon50x50~ipad.png"),
-            };
+            // K1 Android: TODO (empty in Python)
 
-            bool[] game1AndroidChecks = new bool[0]; // TODO: Implement
+            // K2 PC
+            int game2Pc = 0;
+            if (Check("streamvoice")) game2Pc++;
+            if (Check("swkotor2.exe")) game2Pc++;
+            if (Check("swkotor2.ini")) game2Pc++;
+            if (Check("LocalVault")) game2Pc++;
+            if (Check("LocalVault/test.bic")) game2Pc++;
+            if (Check("LocalVault/testold.bic")) game2Pc++;
+            if (Check("miles/binkawin.asi")) game2Pc++;
+            if (Check("miles/mssds3d.flt")) game2Pc++;
+            if (Check("miles/mssdolby.flt")) game2Pc++;
+            if (Check("miles/mssogg.asi")) game2Pc++;
+            if (Check("data/Dialogs.bif")) game2Pc++;
 
-            bool[] game2PcChecks = new[]
-            {
-                Check("streamvoice"),
-                Check("swkotor2.exe"),
-                Check("swkotor2.ini"),
-                Check("LocalVault"),
-                Check("LocalVault/test.bic"),
-                Check("LocalVault/testold.bic"),
-                Check("miles/binkawin.asi"),
-                Check("miles/mssds3d.flt"),
-                Check("miles/mssdolby.flt"),
-                Check("miles/mssogg.asi"),
-                Check("data/Dialogs.bif"),
-            };
+            // K2 Xbox (Republic Commando layout)
+            int game2Xbox = 0;
+            if (Check("combat.erf")) game2Xbox++;
+            if (Check("effects.erf")) game2Xbox++;
+            if (Check("footsteps.erf")) game2Xbox++;
+            if (Check("footsteps.rim")) game2Xbox++;
+            if (Check("SWRC")) game2Xbox++;
+            if (Check("weapons.ERF")) game2Xbox++;
+            if (Check("SuperModels/smseta.erf")) game2Xbox++;
+            if (Check("SuperModels/smsetb.erf")) game2Xbox++;
+            if (Check("SuperModels/smsetc.erf")) game2Xbox++;
+            if (Check("SWRC/System/Subtitles_Epilogue.int")) game2Xbox++;
+            if (Check("SWRC/System/Subtitles_YYY_06.int")) game2Xbox++;
+            if (Check("SWRC/System/SWRepublicCommando.int")) game2Xbox++;
+            if (Check("SWRC/System/System.ini")) game2Xbox++;
+            if (Check("SWRC/System/UDebugMenu.u")) game2Xbox++;
+            if (Check("SWRC/System/UnrealEd.int")) game2Xbox++;
+            if (Check("SWRC/System/UnrealEd.u")) game2Xbox++;
+            if (Check("SWRC/System/User.ini")) game2Xbox++;
+            if (Check("SWRC/System/UWeb.int")) game2Xbox++;
+            if (Check("SWRC/System/Window.int")) game2Xbox++;
+            if (Check("SWRC/System/WinDrv.int")) game2Xbox++;
+            if (Check("SWRC/System/Xbox")) game2Xbox++;
+            if (Check("SWRC/System/XboxLive.int")) game2Xbox++;
+            if (Check("SWRC/System/XGame.u")) game2Xbox++;
+            if (Check("SWRC/System/XGameList.int")) game2Xbox++;
+            if (Check("SWRC/System/XGames.int")) game2Xbox++;
+            if (Check("SWRC/System/XInterface.u")) game2Xbox++;
+            if (Check("SWRC/System/XInterfaceMP.u")) game2Xbox++;
+            if (Check("SWRC/System/XMapList.int")) game2Xbox++;
+            if (Check("SWRC/System/XMaps.int")) game2Xbox++;
+            if (Check("SWRC/System/YYY_TitleCard.int")) game2Xbox++;
+            if (Check("SWRC/System/Xbox/Engine.int")) game2Xbox++;
+            if (Check("SWRC/System/Xbox/XboxLive.int")) game2Xbox++;
+            if (Check("SWRC/Textures/GUIContent.utx")) game2Xbox++;
 
-            bool[] game2XboxChecks = new[]
-            {
-                Check("combat.erf"),
-                Check("effects.erf"),
-                Check("footsteps.erf"),
-                Check("footsteps.rim"),
-                Check("SWRC"),
-                Check("weapons.ERF"),
-                Check("SuperModels/smseta.erf"),
-                Check("SuperModels/smsetb.erf"),
-                Check("SuperModels/smsetc.erf"),
-                Check("SWRC/System/Subtitles_Epilogue.int"),
-                Check("SWRC/System/Subtitles_YYY_06.int"),
-                Check("SWRC/System/SWRepublicCommando.int"),
-                Check("SWRC/System/System.ini"),
-                Check("SWRC/System/UDebugMenu.u"),
-                Check("SWRC/System/UnrealEd.int"),
-                Check("SWRC/System/UnrealEd.u"),
-                Check("SWRC/System/User.ini"),
-                Check("SWRC/System/UWeb.int"),
-                Check("SWRC/System/Window.int"),
-                Check("SWRC/System/WinDrv.int"),
-                Check("SWRC/System/Xbox"),
-                Check("SWRC/System/XboxLive.int"),
-                Check("SWRC/System/XGame.u"),
-                Check("SWRC/System/XGameList.int"),
-                Check("SWRC/System/XGames.int"),
-                Check("SWRC/System/XInterface.u"),
-                Check("SWRC/System/XInterfaceMP.u"),
-                Check("SWRC/System/XMapList.int"),
-                Check("SWRC/System/XMaps.int"),
-                Check("SWRC/System/YYY_TitleCard.int"),
-                Check("SWRC/System/Xbox/Engine.int"),
-                Check("SWRC/System/Xbox/XboxLive.int"),
-                Check("SWRC/Textures/GUIContent.utx"),
-            };
+            // K2 iOS
+            int game2Ios = 0;
+            if (Check("override/ios_mfi_deu.tga")) game2Ios++;
+            if (Check("override/ios_mfi_eng.tga")) game2Ios++;
+            if (Check("override/ios_mfi_esp.tga")) game2Ios++;
+            if (Check("override/ios_mfi_fre.tga")) game2Ios++;
+            if (Check("override/ios_mfi_ita.tga")) game2Ios++;
+            if (Check("override/ios_self_box_r.tga")) game2Ios++;
+            if (Check("override/ios_self_expand2.tga")) game2Ios++;
+            if (Check("override/ipho_forfeit.tga")) game2Ios++;
+            if (Check("override/ipho_forfeit2.tga")) game2Ios++;
+            if (Check("override/kotor2logon.tga")) game2Ios++;
+            if (Check("override/lbl_miscroll_open_f.tga")) game2Ios++;
+            if (Check("override/lbl_miscroll_open_f2.tga")) game2Ios++;
+            if (Check("override/ydialog.gui")) game2Ios++;
+            if (Check("KOTOR II")) game2Ios++;
+            if (Check("KOTOR2-Icon-20-Apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-29-Apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-40-Apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-58-apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-60-apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-76-apple.png")) game2Ios++;
+            if (Check("KOTOR2-Icon-80-apple.png")) game2Ios++;
+            if (Check("KOTOR2_LaunchScreen.storyboardc")) game2Ios++;
+            if (Check("KOTOR2_LaunchScreen.storyboardc/Info.plist")) game2Ios++;
+            if (Check("GoogleService-Info.plist")) game2Ios++;
 
-            bool[] game2IosChecks = new[]
-            {
-                Check("override/ios_mfi_deu.tga"),
-                Check("override/ios_mfi_eng.tga"),
-                Check("override/ios_mfi_esp.tga"),
-                Check("override/ios_mfi_fre.tga"),
-                Check("override/ios_mfi_ita.tga"),
-                Check("override/ios_self_box_r.tga"),
-                Check("override/ios_self_expand2.tga"),
-                Check("override/ipho_forfeit.tga"),
-                Check("override/ipho_forfeit2.tga"),
-                Check("override/kotor2logon.tga"),
-                Check("override/lbl_miscroll_open_f.tga"),
-                Check("override/lbl_miscroll_open_f2.tga"),
-                Check("override/ydialog.gui"),
-                Check("KOTOR II"),
-                Check("KOTOR2-Icon-20-Apple.png"),
-                Check("KOTOR2-Icon-29-Apple.png"),
-                Check("KOTOR2-Icon-40-Apple.png"),
-                Check("KOTOR2-Icon-58-apple.png"),
-                Check("KOTOR2-Icon-60-apple.png"),
-                Check("KOTOR2-Icon-76-apple.png"),
-                Check("KOTOR2-Icon-80-apple.png"),
-                Check("KOTOR2_LaunchScreen.storyboardc"),
-                Check("KOTOR2_LaunchScreen.storyboardc/Info.plist"),
-                Check("GoogleService-Info.plist"),
-            };
+            // K2 Android: TODO
 
-            bool[] game2AndroidChecks = new bool[0]; // TODO: Implement
+            // Highest score wins
+            Game? bestGame = null;
+            int bestScore = 0;
 
-            // Determine the game with the most checks passed
-            int game1Score = game1PcChecks.Count(x => x);
-            int game2Score = game2PcChecks.Count(x => x);
-            int game1XboxScore = game1XboxChecks.Count(x => x);
-            int game2XboxScore = game2XboxChecks.Count(x => x);
-            int game1IosScore = game1IosChecks.Count(x => x);
-            int game2IosScore = game2IosChecks.Count(x => x);
-            int game1AndroidScore = game1AndroidChecks.Count(x => x);
-            int game2AndroidScore = game2AndroidChecks.Count(x => x);
+            if (game1Pc > bestScore) { bestScore = game1Pc; bestGame = Game.K1; }
+            if (game2Pc > bestScore) { bestScore = game2Pc; bestGame = Game.K2; }
+            if (game1Xbox > bestScore) { bestScore = game1Xbox; bestGame = Game.K1_XBOX; }
+            if (game2Xbox > bestScore) { bestScore = game2Xbox; bestGame = Game.K2_XBOX; }
+            if (game1Ios > bestScore) { bestScore = game1Ios; bestGame = Game.K1_IOS; }
+            if (game2Ios > bestScore) { bestScore = game2Ios; bestGame = Game.K2_IOS; }
+            // K1_ANDROID, K2_ANDROID have 0 checks; no need to compare
 
-            Game? highestScoringGame = null;
-            int highestScore = 0;
-
-            if (game1Score > highestScore)
-            {
-                highestScore = game1Score;
-                highestScoringGame = Game.K1;
-            }
-
-            if (game2Score > highestScore)
-            {
-                highestScore = game2Score;
-                highestScoringGame = Game.K2;
-            }
-
-            if (game1XboxScore > highestScore)
-            {
-                highestScore = game1XboxScore;
-                highestScoringGame = Game.K1_XBOX;
-            }
-
-            if (game2XboxScore > highestScore)
-            {
-                highestScore = game2XboxScore;
-                highestScoringGame = Game.K2_XBOX;
-            }
-
-            if (game1IosScore > highestScore)
-            {
-                highestScore = game1IosScore;
-                highestScoringGame = Game.K1_IOS;
-            }
-
-            if (game2IosScore > highestScore)
-            {
-                highestScore = game2IosScore;
-                highestScoringGame = Game.K2_IOS;
-            }
-
-            if (game1AndroidScore > highestScore)
-            {
-                highestScore = game1AndroidScore;
-                highestScoringGame = Game.K1_ANDROID;
-            }
-
-            if (game2AndroidScore > highestScore)
-            {
-                highestScore = game2AndroidScore;
-                highestScoringGame = Game.K2_ANDROID;
-            }
-
-            return highestScoringGame;
+            return bestGame;
         }
     }
 }

@@ -1,6 +1,6 @@
 using System;
-using KPatcher.Core.Common;
 using JetBrains.Annotations;
+using KPatcher.Core.Common;
 
 namespace KPatcher.Core.Resources
 {

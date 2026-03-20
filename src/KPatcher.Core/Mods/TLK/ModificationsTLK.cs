@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.TLK
 {
@@ -15,16 +15,10 @@ namespace KPatcher.Core.Mods.TLK
     ///
     /// This module implements TLK modification logic for applying patches from changes.ini files.
     /// Handles string additions, modifications, and memory token resolution.
-    ///
-    /// References:
-    /// ----------
-    ///     vendor/KPatcher/KPatcher.pl - Perl TLK modification logic (unfinished)
-    ///     vendor/Kotor.NET/Kotor.NET.Patcher/ - Incomplete C# patcher
     /// </summary>
 
     /// <summary>
     /// Container for TLK (talk table) modifications.
-    /// 1:1 port from Python ModificationsTLK in pykotor/kpatcher/mods/tlk.py
     /// </summary>
     public class ModificationsTLK : PatcherModifications
     {
@@ -115,24 +109,39 @@ namespace KPatcher.Core.Mods.TLK
             PatchLogger logger,
             Game game)
         {
-            if (mutableData is Formats.TLK.TLK dialog)
+            if (!(mutableData is Formats.TLK.TLK dialog))
             {
-                foreach (ModifyTLK modifier in Modifiers)
+                logger.AddError($"Expected TLK object for ModificationsTLK, but got {mutableData.GetType().Name}");
+                return;
+            }
+
+            int countBefore = dialog.Count;
+            int appendModifierCount = 0;
+
+            foreach (ModifyTLK modifier in Modifiers)
+            {
+                try
                 {
+                    if (!modifier.IsReplacement)
+                        appendModifierCount++;
                     modifier.Apply(dialog, memory);
                     logger.CompletePatch();
                 }
+                catch (IndexOutOfRangeException ex)
+                {
+                    // TSLPatcher: "StrRef token \"%s\" in modifier list that was not present in the TL..."
+                    logger.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.StrRefTokenNotInTLK, modifier.TokenId));
+                }
             }
-            else
-            {
-                logger.AddError($"Expected TLK object for ModificationsTLK, but got {mutableData.GetType().Name}");
-            }
+
+            int appended = dialog.Count - countBefore;
+            if (appendModifierCount > 0 && appended == 0)
+                logger.AddWarning(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.NoNewEntriesAppendedToTlk, SaveAs ?? "TLK"));
         }
     }
 
     /// <summary>
     /// Represents a single TLK string modification.
-    /// 1:1 port from Python ModifyTLK in pykotor/kpatcher/mods/tlk.py
     /// </summary>
     public class ModifyTLK
     {
@@ -159,10 +168,10 @@ namespace KPatcher.Core.Mods.TLK
             Load();
             if (IsReplacement)
             {
-                // For replacements, replace the entry at TokenId (Python line 146)
-                // Python: dialog.replace(self.token_id, self.text, str(self.sound))
+                // For replacements, replace the entry at TokenId
+                // dialog.replace(self.token_id, self.text, str(self.sound))
                 dialog.Replace(TokenId, Text ?? "", Sound ?? "");
-                // Replace operations do NOT store memory tokens (Python line 154-155)
+                // Replace operations do NOT store memory tokens
             }
             else
             {

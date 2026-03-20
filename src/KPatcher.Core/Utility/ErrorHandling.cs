@@ -1,12 +1,12 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Utility
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/utility/error_handling.py:21-87
-    // Original: def universal_simplify_exception(e: BaseException) -> tuple[str, str]:
     /// <summary>
     /// Simplify exceptions into a standardized format.
     /// </summary>
@@ -26,7 +26,7 @@ namespace KPatcher.Core.Utility
         {
             if (e == null)
             {
-                return ("Exception", "Unknown exception");
+                return ("Exception", PatcherResources.UnknownException);
             }
 
             string errorName = e.GetType().Name;
@@ -37,25 +37,25 @@ namespace KPatcher.Core.Utility
                 string filename = fnf.FileName;
                 if (!string.IsNullOrEmpty(filename))
                 {
-                    return (errorName, $"Could not find the file: '{filename}'");
+                    return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotFindFile, filename));
                 }
                 if (e.Data.Count > 0)
                 {
-                    return (errorName, $"Could not find the file: '{e.Data.Values.Cast<object>().FirstOrDefault()}'");
+                    return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotFindFile, e.Data.Values.Cast<object>().FirstOrDefault()));
                 }
-                return (errorName, $"Could not find the file: '{e.Message}'");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotFindFile, e.Message));
             }
 
             // Handle DirectoryNotFoundException
             if (e is DirectoryNotFoundException)
             {
-                return (errorName, $"Could not find the directory: '{e.Message}'");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotFindDirectory, e.Message));
             }
 
             // Handle PermissionError/UnauthorizedAccessException
             if (e is UnauthorizedAccessException uae)
             {
-                return (errorName, $"Permission Denied: {uae.Message}");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.PermissionDenied, uae.Message));
             }
 
             // Handle TimeoutError/TimeoutException
@@ -67,13 +67,13 @@ namespace KPatcher.Core.Utility
             // Handle OperationCanceledException
             if (e is OperationCanceledException)
             {
-                return (errorName, $"Operation was cancelled: {e.Message}");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.OperationWasCancelled, e.Message));
             }
 
             // Handle IOException
             if (e is IOException io)
             {
-                return (errorName, $"I/O Error: {io.Message}");
+                return (errorName, string.Format(CultureInfo.CurrentCulture, PatcherResources.IOError, io.Message));
             }
 
             // Try to extract error details from common exception attributes
@@ -112,7 +112,7 @@ namespace KPatcher.Core.Utility
             string errStr = e.Message;
             if (e.Data.Count > 0)
             {
-                errStr += "\n  Information:";
+                errStr += "\n" + PatcherResources.ExceptionInformationHeader;
                 foreach (var key in e.Data.Keys)
                 {
                     errStr += $"\n    {key}: {e.Data[key]}";

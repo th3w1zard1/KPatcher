@@ -7,12 +7,8 @@ namespace KPatcher.Core.Common
 {
 
     /// <summary>
-    /// Binary writer with enhanced functionality matching Python's RawBinaryWriter.
     /// Provides file and memory-based writing with encoding support.
     /// </summary>
-    /// <remarks>
-    /// Python Reference: g:/GitHub/PyKotor/Libraries/PyKotor/src/utility/common/stream.py
-    /// </remarks>
     public abstract class RawBinaryWriter : IDisposable
     {
         // Static initializer to ensure CodePages encoding provider is registered
@@ -76,7 +72,6 @@ namespace KPatcher.Core.Common
             if (source is RawBinaryWriterFile fileWriter)
             {
                 // Preserve the original stream connection and apply the new offset
-                // Matching PyKotor implementation: preserve stream connection when creating from existing file writer
                 Stream originalStream = fileWriter.GetStream();
                 int originalOffset = fileWriter.GetOffset();
                 // The new offset is relative to the original stream position
@@ -390,8 +385,6 @@ namespace KPatcher.Core.Common
             _stream.Write(bytes, 0, bytes.Length);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:85-143
-        // Original: def write_locstring(self, value: LocalizedString, *, big: bool = False):
         public override void WriteLocalizedString(LocalizedString value, bool bigEndian = false)
         {
             using (var ms = new MemoryStream())
@@ -747,19 +740,13 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:46-143
-    // Original: class BinaryWriter(RawBinaryWriter, ABC):
     /// <summary>
     /// Abstract binary writer that adds localized string writing capability.
     /// </summary>
     public abstract class BinaryWriter : RawBinaryWriter
     {
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:48-53
-        // Original: @abstractmethod def write_locstring(self, value: LocalizedString, *, big: bool = False): ...
         public abstract void WriteLocString(LocalizedString value, bool big = false);
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:56-75
-        // Original: @classmethod def to_bytearray(cls, data: bytearray | None = None) -> BinaryWriterBytearray:
         public static BinaryWriterBytearray ToByteArray(byte[] data = null)
         {
             if (data != null && !(data is byte[]))
@@ -769,16 +756,12 @@ namespace KPatcher.Core.Common
             return new BinaryWriterBytearray(data ?? new byte[0]);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:78-82
-        // Original: @classmethod def to_file(cls, path: str | os.PathLike) -> BinaryWriterFile:
         public static BinaryWriterFile ToFile(string path)
         {
             return new BinaryWriterFile(path);
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:85-113
-    // Original: class BinaryWriterFile(BinaryWriter, RawBinaryWriterFile):
     public class BinaryWriterFile : BinaryWriter
     {
         private readonly RawBinaryWriterFile _fileWriter;
@@ -793,8 +776,6 @@ namespace KPatcher.Core.Common
             _fileWriter = RawBinaryWriter.ToStream(stream, offset);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:86-112
-        // Original: def write_locstring(self, value: LocalizedString, *, big: bool = False):
         public override void WriteLocString(LocalizedString value, bool big = false)
         {
             RawBinaryWriterMemory bw = RawBinaryWriter.ToByteArray(null) as RawBinaryWriterMemory;
@@ -840,8 +821,6 @@ namespace KPatcher.Core.Common
         public override void Dispose() => _fileWriter.Dispose();
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:115-143
-    // Original: class BinaryWriterBytearray(BinaryWriter, RawBinaryWriterBytearray):
     public class BinaryWriterBytearray : BinaryWriter
     {
         private readonly RawBinaryWriterMemory _memoryWriter;
@@ -851,8 +830,6 @@ namespace KPatcher.Core.Common
             _memoryWriter = RawBinaryWriter.ToByteArray(data) as RawBinaryWriterMemory;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:116-142
-        // Original: def write_locstring(self, value: LocalizedString, *, big: bool = False):
         public override void WriteLocString(LocalizedString value, bool big = false)
         {
             RawBinaryWriterMemory bw = RawBinaryWriter.ToByteArray(null) as RawBinaryWriterMemory;

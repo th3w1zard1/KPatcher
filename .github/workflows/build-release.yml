@@ -55,3 +55,63 @@ jobs:
       version: ${{ needs.determine-version.outputs.version }}
       tag_name: ${{ needs.determine-version.outputs.tag_name || format('v{0}', needs.determine-version.outputs.version) }}
     secrets: inherit
+
+  kcompiler-packages:
+    name: Build and Pack KCompiler
+    needs: determine-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.determine-version.outputs.tag_name || github.ref }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Update version in KCompiler.Core
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          CSPROJ="src/KCompiler.Core/KCompiler.Core.csproj"
+          sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/g" "$CSPROJ"
+        shell: bash
+
+      - name: Update version in KCompiler.NET
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          CSPROJ="src/KCompiler.NET/KCompiler.NET.csproj"
+          sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/g" "$CSPROJ"
+        shell: bash
+
+      - name: Restore dependencies
+        run: dotnet restore src/KCompiler.Core/KCompiler.Core.csproj
+
+      - name: Build KCompiler.Core
+        run: dotnet build src/KCompiler.Core/KCompiler.Core.csproj --no-restore -c Release
+
+      - name: Pack KCompiler.Core
+        run: dotnet pack src/KCompiler.Core/KCompiler.Core.csproj --no-build -c Release
+
+      - name: Build KCompiler.NET
+        run: dotnet build src/KCompiler.NET/KCompiler.NET.csproj --no-restore -c Release
+
+      - name: Pack KCompiler.NET
+        run: dotnet pack src/KCompiler.NET/KCompiler.NET.csproj --no-build -c Release
+
+      - name: Upload KCompiler.Core NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: KCompiler.Core-${{ needs.determine-version.outputs.version }}-nupkg
+          path: src/KCompiler.Core/bin/Release/*.nupkg
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload KCompiler.NET tool package
+        uses: actions/upload-artifact@v4
+        with:
+          name: KCompiler.NET-${{ needs.determine-version.outputs.version }}-nupkg
+          path: src/KCompiler.NET/bin/Release/*.nupkg
+          retention-days: 90
+          if-no-files-found: error

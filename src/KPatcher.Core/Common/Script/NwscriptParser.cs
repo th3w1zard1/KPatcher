@@ -81,14 +81,14 @@ namespace KPatcher.Core.Common.Script
         private static string PreprocessNss(string content)
         {
             // Remove preprocessor directives and comments for parsing
-            var lines = content.Split('\n');
+            string[] lines = content.Split('\n');
             var processed = new List<string>();
             bool inBlockComment = false;
 
             foreach (string line in lines)
             {
                 string processedLine = line;
-                
+
                 // Handle block comments
                 if (inBlockComment)
                 {
@@ -419,11 +419,11 @@ namespace KPatcher.Core.Common.Script
                     string name = paramName.Identifier;
                     string defaultValue = null;
 
-                if (cleanGroup.Count > 3 && cleanGroup[2] is NssOperator assignOp && assignOp.Operator == NssOperators.Assignment)
-                {
-                    var defaultTokens = cleanGroup.Skip(3).ToList();
-                    defaultValue = string.Join("", defaultTokens.Select(t => t.ToString()));
-                }
+                    if (cleanGroup.Count > 3 && cleanGroup[2] is NssOperator assignOp && assignOp.Operator == NssOperators.Assignment)
+                    {
+                        var defaultTokens = cleanGroup.Skip(3).ToList();
+                        defaultValue = string.Join("", defaultTokens.Select(t => t.ToString()));
+                    }
 
                     @params.Add(new ParamInfo
                     {

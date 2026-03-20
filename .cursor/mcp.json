@@ -6,12 +6,17 @@
       "args": [
         "--refresh",
         "--from",
-        "git+https://github.com/bolabaden/agentdecompile.git",
-        "agentdecompile-server"
+        "C:\\GitHub\\agentdecompile",
+        "--with-editable",
+        "C:\\GitHub\\agentdecompile",
+        "agentdecompile-server",
+        "--port",
+        "8076"
       ],
       "env": {
+        "AGENTDECOMPILE_AUTO_CHECKIN": "1",
         "AGENT_DECOMPILE_PROJECT_PATH": "C:\\GitHub\\KPatcher\\tslpatcher",
-        "AGENT_DECOMPILE_MCP_SERVER_URL": "http://127.0.0.1:8080/mcp",
+        "AGENT_DECOMPILE_PROJECT_NAME": "KPatcher",
         "GHIDRA_INSTALL_DIR": "C:\\ghidra12\\GHIDRA_12.0_PUBLIC"
       }
     }

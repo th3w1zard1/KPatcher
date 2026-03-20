@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using KPatcher.Core.Common;
 using JetBrains.Annotations;
+using KPatcher.Core.Common;
 
 namespace KPatcher.Core.Formats.GFF
 {

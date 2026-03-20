@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.RIM
 {
@@ -128,7 +128,7 @@ namespace KPatcher.Core.Formats.RIM
 
         public IEnumerator<RIMResource> GetEnumerator()
         {
-            // Return copies like Python does
+            // Return copies
             foreach (RIMResource resource in _resources)
             {
                 yield return new RIMResource(resource.ResRef, resource.ResType, resource.Data);

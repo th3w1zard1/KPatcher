@@ -50,7 +50,7 @@ namespace KPatcher.UI
         /// <summary>
         /// Gets remote KPatcher update information from GitHub.
         /// </summary>
-        public static async Task<Dictionary<string, object>> GetRemoteHolopatcherUpdateInfoAsync(bool useBetaChannel = false, bool silent = false)
+        public static async Task<Dictionary<string, object>> GetRemoteKPatcherUpdateInfoAsync(bool useBetaChannel = false, bool silent = false)
         {
             string updateInfoLink = useBetaChannel
                 ? (string)LocalProgramInfo["updateBetaInfoLink"]

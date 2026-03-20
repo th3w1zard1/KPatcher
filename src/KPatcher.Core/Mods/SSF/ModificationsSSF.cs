@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.SSF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.SSF
 {
 
     /// <summary>
     /// Represents a single SSF sound modification.
-    /// 1:1 port from Python ModifySSF in pykotor/kpatcher/mods/ssf.py
     /// </summary>
     public class ModifySSF
     {
@@ -35,16 +34,6 @@ namespace KPatcher.Core.Mods.SSF
     /// 
     /// This module implements SSF modification logic for applying patches from changes.ini files.
     /// Handles sound set entry modifications and memory token resolution.
-    /// 
-    /// References:
-    /// ----------
-    ///     vendor/KPatcher/KPatcher.pl - Perl SSF modification logic (likely unfinished)
-    ///     vendor/Kotor.NET/Kotor.NET.Patcher/ - Incomplete C# patcher
-    /// </summary>
-
-    /// <summary>
-    /// Container for SSF (sound set file) modifications.
-    /// 1:1 port from Python ModificationsSSF in pykotor/kpatcher/mods/ssf.py
     /// </summary>
     public class ModificationsSSF : PatcherModifications
     {

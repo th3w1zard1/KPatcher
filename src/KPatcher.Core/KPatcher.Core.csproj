@@ -34,7 +34,7 @@
       $(TargetFrameworks);net9.0
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '8.0.0'))">
-      $(TargetFrameworks);net8.0
+      $(TargetFrameworks);net9.0
     </TargetFrameworks>
     <!-- === .NET 7 SDK: include net7.0 + net6.0 (legacy support) === -->
     <TargetFrameworks Condition="$([System.String]::new('$(NETCoreSdkVersion)').StartsWith('7.'))">
@@ -51,7 +51,7 @@
       $(TargetFrameworks);net462
     </TargetFrameworks>
     <!-- Ensure we always have at least one framework to avoid empty TargetFrameworks -->
-      <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0</TargetFrameworks>
+      <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net9.0</TargetFrameworks>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <Nullable>disable</Nullable>
   </PropertyGroup>
@@ -98,6 +98,8 @@
   <!-- Default to Library -->
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <RootNamespace>KPatcher.Core</RootNamespace>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <!-- NuGet Package Configuration -->
@@ -125,6 +127,7 @@
   <!-- Package References - Use versions compatible with .NET Framework 4.8 -->
   <ItemGroup>
     <PackageReference Include="ini-parser-netstandard" Version="2.5.3" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -133,14 +136,32 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
     <!-- System.Text.Json: Use version compatible with net48 -->
     <PackageReference Include="System.Text.Json" Version="10.0.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
-    <Compile Remove="Tools\Archives.cs" />
   </ItemGroup>
 
+  <!-- NSS/NCS compiler + Game + ResourceType are built into KCompiler.Core (same on-disk sources via link). -->
+  <!-- StringUtilFunctions (StripRtf delegates to Common.RtfStripper) -->
   <ItemGroup>
+    <Compile Include="..\Utility\MiscString\StringUtilFunctions.cs" Link="Utility\MiscString\StringUtilFunctions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
+    <Compile Remove="Formats\NCS\**\*.cs" />
+    <Compile Include="Formats\NCS\Compiler\NCSCompiler.cs" />
+    <Compile Remove="Common\Script\**\*.cs" />
+    <Compile Remove="Common\Game.cs" />
+    <Compile Remove="Common\Language.cs" />
+    <Compile Remove="Common\LocalizedString.cs" />
+    <Compile Remove="Common\BinaryReader.cs" />
+    <Compile Remove="Common\Vector2.cs" />
+    <Compile Remove="Common\Vector3.cs" />
+    <Compile Remove="Common\Vector4.cs" />
+    <Compile Remove="Common\Quaternion.cs" />
+    <Compile Remove="Resources\ResourceType.cs" />
   </ItemGroup>
 
 </Project>

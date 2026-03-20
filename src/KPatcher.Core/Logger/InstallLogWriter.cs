@@ -1,8 +1,10 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
-using KPatcher.Core.Common;
 using JetBrains.Annotations;
+using KPatcher.Core.Common;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Logger
 {
@@ -74,12 +76,12 @@ namespace KPatcher.Core.Logger
         {
             lock (_lockObject)
             {
-                _writer.WriteLine("KPatcher Installation Log");
-                _writer.WriteLine("===========================");
-                _writer.WriteLine($"Installation Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                _writer.WriteLine($"Mod Path: {modPath}");
-                _writer.WriteLine($"Game Path: {gamePath}");
-                _writer.WriteLine($"Game Detected: {(game.HasValue ? game.Value.ToString() : "Unknown")}");
+                _writer.WriteLine(PatcherResources.InstallationLogHeader);
+                _writer.WriteLine(PatcherResources.InstallationLogHeaderSeparator);
+                _writer.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.InstallationDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture)));
+                _writer.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.ModPath, modPath));
+                _writer.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.GamePath, gamePath));
+                _writer.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.GameDetected, game.HasValue ? game.Value.ToString() : "Unknown"));
                 _writer.WriteLine();
                 _writer.Flush();
             }
@@ -150,13 +152,13 @@ namespace KPatcher.Core.Logger
         {
             if (success)
             {
-                WriteInfo($"{operation}: {source} -> {destination}");
+                WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FileOperationFormat, operation, source, destination));
             }
             else
             {
                 string errorMsg = string.IsNullOrEmpty(errorMessage)
-                    ? $"Failed to {operation.ToLower()} {source} to {destination}"
-                    : $"Failed to {operation.ToLower()} {source} to {destination}: {errorMessage}";
+                    ? string.Format(CultureInfo.CurrentCulture, PatcherResources.FileOperationErrorFormat, operation.ToLower(), source, destination)
+                    : string.Format(CultureInfo.CurrentCulture, PatcherResources.FileOperationErrorWithMessageFormat, operation.ToLower(), source, destination, errorMessage);
                 WriteError(errorMsg);
             }
         }
@@ -169,7 +171,7 @@ namespace KPatcher.Core.Logger
         /// <param name="description">Description of the patch operation</param>
         public void WritePatchOperation(string patchType, string filename, string description)
         {
-            WriteInfo($"Patching {patchType}: {filename} - {description}");
+            WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.PatchOperationFormat, patchType, filename, description));
         }
 
         /// <summary>

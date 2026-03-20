@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using KPatcher.Core.Formats;
 using JetBrains.Annotations;
+using KPatcher.Core.Formats;
 
 namespace KPatcher.Core.Formats.TwoDA
 {
 
     /// <summary>
     /// Reads TwoDA binary data.
-    /// 1:1 port of Python TwoDABinaryReader from pykotor/resource/formats/twoda/io_twoda.py
     /// </summary>
     public class TwoDABinaryReader : BinaryFormatReaderBase
     {

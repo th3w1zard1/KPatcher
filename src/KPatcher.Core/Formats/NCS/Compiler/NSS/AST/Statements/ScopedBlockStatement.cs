@@ -25,7 +25,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             NCSInstruction breakInstruction,
             NCSInstruction continueInstruction)
         {
-            // Python: self._parent = block (set parent to the outer block, not the inner block)
+            // self._parent = block (set parent to the outer block, not the inner block)
             Block.Parent = block;
             // Pass the outer block as the parent parameter, not the inner Block
             Block.Compile(ncs, root, block, returnInstruction, breakInstruction, continueInstruction);

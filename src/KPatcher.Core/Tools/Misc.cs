@@ -4,8 +4,6 @@ using JetBrains.Annotations;
 
 namespace KPatcher.Core.Tools
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py
-    // Original: def normalize_ext(str_repr: os.PathLike | str) -> os.PathLike | str:
     public static class FileHelpers
     {
         public static string NormalizeExt(string strRepr)
@@ -25,8 +23,6 @@ namespace KPatcher.Core.Tools
             return strRepr;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:23-33
-        // Original: def normalize_stem(str_repr: os.PathLike | str) -> os.PathLike | str:
         public static string NormalizeStem(string strRepr)
         {
             if (string.IsNullOrEmpty(strRepr))
@@ -44,8 +40,6 @@ namespace KPatcher.Core.Tools
             return strRepr;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:36-40
-        // Original: def is_nss_file(filepath: os.PathLike | str) -> bool:
         public static bool IsNssFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -55,8 +49,6 @@ namespace KPatcher.Core.Tools
             return Path.GetExtension(NormalizeExt(filepath)).Equals(".nss", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:43-47
-        // Original: def is_mod_file(filepath: os.PathLike | str) -> bool:
         public static bool IsModFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -66,8 +58,6 @@ namespace KPatcher.Core.Tools
             return Path.GetExtension(NormalizeExt(filepath)).Equals(".mod", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:50-54
-        // Original: def is_erf_file(filepath: os.PathLike | str) -> bool:
         public static bool IsErfFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -77,8 +67,6 @@ namespace KPatcher.Core.Tools
             return Path.GetExtension(NormalizeExt(filepath)).Equals(".erf", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:57-61
-        // Original: def is_sav_file(filepath: os.PathLike | str) -> bool:
         public static bool IsSavFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -88,8 +76,6 @@ namespace KPatcher.Core.Tools
             return Path.GetExtension(NormalizeExt(filepath)).Equals(".sav", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:64-68
-        // Original: def is_any_erf_type_file(filepath: os.PathLike | str) -> bool:
         public static bool IsAnyErfTypeFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -100,8 +86,6 @@ namespace KPatcher.Core.Tools
             return ext == ".erf" || ext == ".mod" || ext == ".sav";
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:71-75
-        // Original: def is_rim_file(filepath: os.PathLike | str) -> bool:
         public static bool IsRimFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -111,8 +95,6 @@ namespace KPatcher.Core.Tools
             return Path.GetExtension(NormalizeExt(filepath)).Equals(".rim", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:78-87
-        // Original: def is_bif_file(filepath: os.PathLike | str) -> bool:
         public static bool IsBifFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -124,8 +106,6 @@ namespace KPatcher.Core.Tools
             return lowerPath.EndsWith(".bif", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:90-97
-        // Original: def is_bzf_file(filepath: os.PathLike | str) -> bool:
         public static bool IsBzfFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -136,8 +116,6 @@ namespace KPatcher.Core.Tools
             return filepath.ToLowerInvariant().EndsWith(".bzf", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:100-111
-        // Original: def is_capsule_file(filepath: os.PathLike | str) -> bool:
         public static bool IsCapsuleFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))
@@ -153,8 +131,6 @@ namespace KPatcher.Core.Tools
                    lowerPath.EndsWith(".sav", StringComparison.OrdinalIgnoreCase);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/tools/misc.py:114-118
-        // Original: def is_storage_file(filepath: os.PathLike | str) -> bool:
         public static bool IsStorageFile(string filepath)
         {
             if (string.IsNullOrEmpty(filepath))

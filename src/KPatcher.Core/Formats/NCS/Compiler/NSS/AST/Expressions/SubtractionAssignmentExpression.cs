@@ -22,11 +22,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:1714-1780
         public override DynamicDataType Compile(NCS ncs, CodeRoot root, CodeBlock block)
         {
             // Copy the variable to the top of the stack
-            // Matching PyKotor classes.py lines 1721-1727
             GetScopedResult scoped = FieldAccess.GetScoped(block, root);
             bool isGlobal = scoped.IsGlobal;
             DynamicDataType variableType = scoped.Datatype;
@@ -41,7 +39,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             block.TempStack += variableType.Size(root);
 
             // Add the result of the expression to the stack
-            // Matching PyKotor classes.py lines 1733-1739
             int tempStackBeforeExpr = block.TempStack;
             DynamicDataType expressionType = Value.Compile(ncs, root, block);
             // Only add to temp_stack if the expression didn't already add it
@@ -52,7 +49,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Determine what instruction to apply to the two values
-            // Matching PyKotor classes.py lines 1741-1761
             NCSInstructionType arithmeticInstruction;
             if (variableType == DynamicDataType.INT && expressionType == DynamicDataType.INT)
             {
@@ -85,13 +81,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Subtract the expression from our temp variable copy
-            // Matching PyKotor classes.py line 1764
             ncs.Add(arithmeticInstruction, new List<object>());
 
             // Copy the result to the original variable in the stack
             // The arithmetic operation consumed both operands and left the result on stack
             // After CPDOWNSP, the result is still on stack (for ExpressionStatement to clean up)
-            // Matching PyKotor classes.py lines 1766-1772
             NCSInstructionType insCpDown = isGlobal ? NCSInstructionType.CPDOWNBP : NCSInstructionType.CPDOWNSP;
             // Result (variable_type size) is on stack; offset to original variable accounts for this
             int offsetCpDown = isGlobal ? stackIndex : stackIndex - variableType.Size(root);
@@ -102,10 +96,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             // temp_stack currently = variable_size + expression_size
             // After operation: stack has 1 result of variable_type size
             // Net change: both operands consumed, result pushed
-            // Matching PyKotor classes.py line 1779
             block.TempStack = block.TempStack - variableType.Size(root) - expressionType.Size(root) + variableType.Size(root);
             // Return variable_type (the result type) so ExpressionStatement knows what size to clean up
-            // Matching PyKotor classes.py line 1780
             return variableType;
         }
 

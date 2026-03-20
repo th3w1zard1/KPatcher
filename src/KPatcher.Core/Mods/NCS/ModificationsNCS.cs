@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.NCS
 {
@@ -17,13 +17,11 @@ namespace KPatcher.Core.Mods.NCS
     ///
     /// References:
     /// ----------
-    ///     vendor/KPatcher/KPatcher.pl - Perl NCS modification logic (likely unfinished)
     ///     vendor/Kotor.NET/Kotor.NET.Patcher/ - Incomplete C# patcher
     /// </summary>
 
     /// <summary>
     /// Token types for NCS bytecode modifications.
-    /// 1:1 port from Python NCSTokenType enum
     /// </summary>
     public enum NCSTokenType
     {
@@ -45,7 +43,6 @@ namespace KPatcher.Core.Mods.NCS
 
     /// <summary>
     /// Represents a single NCS bytecode modification operation.
-    /// 1:1 port from Python ModifyNCS class
     /// </summary>
     public class ModifyNCS
     {
@@ -219,7 +216,6 @@ namespace KPatcher.Core.Mods.NCS
 
     /// <summary>
     /// Container for NCS (compiled NWScript) modifications.
-    /// 1:1 port from Python ModificationsNCS in pykotor/kpatcher/mods/ncs.py
     /// </summary>
     public class ModificationsNCS : PatcherModifications
     {

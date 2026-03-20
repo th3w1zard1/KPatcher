@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.TLK
 {
 
     /// <summary>
     /// Reads TLK (Talk Table) binary data.
-    /// 1:1 port of Python TLKBinaryReader from pykotor/resource/formats/tlk/io_tlk.py
+    /// C# Reference: src/KPatcher.Core/Formats/TLK/TLKBinaryReader.cs
     /// </summary>
     public class TLKBinaryReader : BinaryFormatReaderBase
     {
@@ -151,14 +151,6 @@ namespace KPatcher.Core.Formats.TLK
                     return Encoding.GetEncoding("windows-1252"); // cp1252
                 case Language.Polish:
                     return Encoding.GetEncoding("windows-1250"); // cp1250
-                case Language.Korean:
-                    return Encoding.GetEncoding("euc-kr");
-                case Language.ChineseTraditional:
-                    return Encoding.GetEncoding("big5");
-                case Language.ChineseSimplified:
-                    return Encoding.GetEncoding("gb2312");
-                case Language.Japanese:
-                    return Encoding.GetEncoding("shift_jis");
                 default:
                     return Encoding.GetEncoding("windows-1252"); // default to cp1252
             }

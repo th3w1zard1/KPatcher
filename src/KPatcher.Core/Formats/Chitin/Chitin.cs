@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.Chitin
 {

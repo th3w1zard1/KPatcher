@@ -6,14 +6,10 @@ using JetBrains.Annotations;
 
 namespace KPatcher.Core.Utility.MiscString
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:13-353
-    // Original: class CaseInsensImmutableStr(WrappedStr):
     public class CaseInsensImmutableStr : WrappedStr
     {
         private readonly string _casefoldContent;
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:16-25
-        // Original: @classmethod def _coerce_str(cls, item: Any) -> str:
         private static string CoerceStr(object item)
         {
             if (item is WrappedStr wrapped)
@@ -27,8 +23,6 @@ namespace KPatcher.Core.Utility.MiscString
             return item?.ToString();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:27-32
-        // Original: def __init__(self, content: str | WrappedStr):
         public CaseInsensImmutableStr(string content) : base(content)
         {
             _casefoldContent = content?.ToLowerInvariant() ?? "";
@@ -39,15 +33,11 @@ namespace KPatcher.Core.Utility.MiscString
             _casefoldContent = content != null ? ((string)content).ToLowerInvariant() : "";
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:34-38
-        // Original: def __contains__(self, __key):
         public bool Contains(object key)
         {
             return _casefoldContent.Contains(CoerceStr(key));
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:40-46
-        // Original: def __eq__(self, __value):
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(this, obj))
@@ -62,8 +52,6 @@ namespace KPatcher.Core.Utility.MiscString
             return _casefoldContent.GetHashCode();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:48-52
-        // Original: def __ne__(self, __value):
         public static bool operator !=(CaseInsensImmutableStr left, object right)
         {
             return !(left == right);
@@ -78,12 +66,8 @@ namespace KPatcher.Core.Utility.MiscString
             return left.Equals(right);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:54-55
-        // Original: def __hash__(self):
         // Already implemented in GetHashCode()
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:57-63
-        // Original: def find(self, sub, start=0, end=None):
         public int Find(string sub, int start = 0, int? end = null)
         {
             string target = CoerceStr(sub);
@@ -91,8 +75,6 @@ namespace KPatcher.Core.Utility.MiscString
             return _casefoldContent.IndexOf(target, start, endIndex - start);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:65-82
-        // Original: def partition(self, __sep):
         public Tuple<string, string, string> Partition(string sep)
         {
             string sepStr = CoerceStr(sep);
@@ -113,8 +95,6 @@ namespace KPatcher.Core.Utility.MiscString
             );
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:84-100
-        // Original: def rpartition(self, __sep):
         public Tuple<string, string, string> RPartition(string sep)
         {
             string sepStr = CoerceStr(sep);
@@ -135,8 +115,6 @@ namespace KPatcher.Core.Utility.MiscString
             );
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:102-113
-        // Original: def endswith(self, __suffix: WrappedStr | str | tuple[WrappedStr | str, ...], ...):
         public bool Endswith(object suffix, int? start = null, int? end = null)
         {
             if (suffix is IEnumerable<object> tuple)
@@ -152,8 +130,6 @@ namespace KPatcher.Core.Utility.MiscString
             return _casefoldContent.Substring(startIndex, endIndex - startIndex).EndsWith(parsedSuffix);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:115-130
-        // Original: def rfind(self, __sub, __start=None, __end=None):
         public int RFind(string sub, int? start = null, int? end = null)
         {
             int startIdx = start ?? 0;
@@ -164,8 +140,6 @@ namespace KPatcher.Core.Utility.MiscString
             return result == -1 ? -1 : (start ?? 0) + result;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:132-148
-        // Original: def split(self, sep=None, maxsplit: int = -1) -> list[str]:
         public List<string> Split(string sep = null, int maxsplit = -1)
         {
             if (sep == null)
@@ -185,8 +159,6 @@ namespace KPatcher.Core.Utility.MiscString
             return parts.ToList();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:211-216
-        // Original: def count(self, x: WrappedStr | str, ...):
         public int Count(object x, int? start = null, int? end = null)
         {
             string target = CoerceStr(x);
@@ -203,8 +175,6 @@ namespace KPatcher.Core.Utility.MiscString
             return count;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:219-225
-        // Original: def index(self, __sub: WrappedStr | str, ...):
         public int Index(string sub, int? start = null, int? end = null)
         {
             int result = Find(sub, start ?? 0, end);
@@ -215,8 +185,6 @@ namespace KPatcher.Core.Utility.MiscString
             return result;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:227-231
-        // Original: def __lt__(self, __value: str | WrappedStr):
         public static bool operator <(CaseInsensImmutableStr left, object right)
         {
             return string.Compare(left?._casefoldContent, CoerceStr(right), StringComparison.OrdinalIgnoreCase) < 0;
@@ -237,8 +205,6 @@ namespace KPatcher.Core.Utility.MiscString
             return string.Compare(left?._casefoldContent, CoerceStr(right), StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:239-246
-        // Original: def removeprefix(self, __prefix: WrappedStr | str) -> Self:
         public new CaseInsensImmutableStr RemovePrefix(string prefix)
         {
             string prefixStr = prefix;
@@ -249,8 +215,6 @@ namespace KPatcher.Core.Utility.MiscString
             return new CaseInsensImmutableStr(_content);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:248-255
-        // Original: def removesuffix(self, __suffix: WrappedStr | str) -> Self:
         public new CaseInsensImmutableStr RemoveSuffix(string suffix)
         {
             string suffixStr = suffix;
@@ -261,8 +225,6 @@ namespace KPatcher.Core.Utility.MiscString
             return new CaseInsensImmutableStr(_content);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:257-301
-        // Original: def replace(self, __old: WrappedStr | str, __new: WrappedStr | str, __count: int = -1) -> Self:
         public CaseInsensImmutableStr Replace(string old, string new_, int count = -1)
         {
             if (old == "")
@@ -325,8 +287,6 @@ namespace KPatcher.Core.Utility.MiscString
             return new CaseInsensImmutableStr(newContent);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:303-331
-        // Original: def rsplit(self, __sep=None, __maxsplit=-1) -> list[str]:
         public List<string> RSplit(string sep = null, int maxsplit = -1)
         {
             if (sep == null)
@@ -367,8 +327,6 @@ namespace KPatcher.Core.Utility.MiscString
             return parts;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:333-343
-        // Original: def rindex(self, __sub: WrappedStr | str, ...):
         public int RIndex(string sub, int? start = null, int? end = null)
         {
             int value = RFind(sub, start, end);
@@ -379,8 +337,6 @@ namespace KPatcher.Core.Utility.MiscString
             return value;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/case_insens_str.py:345-352
-        // Original: def startswith(self, __prefix: WrappedStr | str | tuple[WrappedStr | str, ...], ...):
         public bool Startswith(object prefix, int? start = null, int? end = null)
         {
             if (prefix is IEnumerable<object> tuple)

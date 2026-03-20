@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -27,7 +27,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
         /// <summary>
         /// Get scoped variable information for this field access.
-        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:974-1029
         /// </summary>
         public GetScopedResult GetScoped([CanBeNull] CodeBlock block, CodeRoot root)
         {
@@ -36,8 +35,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new CompileError("Internal error: FieldAccess has no identifiers");
             }
 
-            // Matching PyKotor classes.py line 995
-            // Original: scoped: GetScopedResult = block.get_scoped(first_ident, root)
             Identifier first = Identifiers[0];
             GetScopedResult scoped = block.GetScoped(first, root);
             bool isGlobal = scoped.IsGlobal;
@@ -46,7 +43,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             bool isConst = scoped.IsConst; // Get is_const from the first call
 
             // Process remaining identifiers as member accesses
-            // Matching PyKotor classes.py lines 1002-1028
             foreach (Identifier nextIdent in Identifiers.Skip(1))
             {
                 if (dataType.Builtin == DataType.Vector)
@@ -96,7 +92,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
             }
 
-            // Matching PyKotor classes.py line 1029
             return new GetScopedResult(isGlobal, dataType, offset, isConst);
         }
 
@@ -109,7 +104,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             NCSInstructionType instructionType = isGlobal ? NCSInstructionType.CPTOPBP : NCSInstructionType.CPTOPSP;
 
             ncs.Add(instructionType, new List<object> { stackIndex, variableType.Size(root) });
-            // Python: FieldAccess.compile does NOT add to temp_stack
+            // FieldAccess.compile does NOT add to temp_stack
             // The caller (BinaryOperatorExpression, ExpressionStatement, etc.) will track it
 
             return variableType;

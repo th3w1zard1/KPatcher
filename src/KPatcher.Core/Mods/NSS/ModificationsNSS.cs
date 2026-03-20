@@ -4,19 +4,18 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.NSS
 {
 
     /// <summary>
     /// Mutable string wrapper for token replacement in NSS files.
-    /// 1:1 port from Python MutableString in pykotor/kpatcher/mods/nss.py
     /// </summary>
     public class MutableString
     {
@@ -32,7 +31,6 @@ namespace KPatcher.Core.Mods.NSS
 
     /// <summary>
     /// Container for NSS (script source) modifications.
-    /// 1:1 port from Python ModificationsNSS in pykotor/kpatcher/mods/nss.py
     /// </summary>
     public class ModificationsNSS : PatcherModifications
     {
@@ -109,7 +107,7 @@ namespace KPatcher.Core.Mods.NSS
                     bool nwnnsscompExists = !string.IsNullOrEmpty(NwnnsscompPath) && File.Exists(NwnnsscompPath);
                     if (!nwnnsscompExists)
                     {
-                        logger.AddNote("nwnnsscomp.exe was not found in the 'tslpatchdata' folder, using the built-in compilers...");
+                        logger.AddError(TSLPatcherMessages.NwnnsscompNotFoundInTslPatchData);
                     }
                     else
                     {
@@ -135,8 +133,8 @@ namespace KPatcher.Core.Mods.NSS
                             {
                                 logger.AddWarning(
                                     "The nwnnsscomp.exe in the tslpatchdata folder is not the expected KPatcher version.\n" +
-                                    $"PyKotor has detected that the provided nwnnsscomp.exe is the '{detectedCompiler}' version.\n" +
-                                    "PyKotor will compile regardless, but this may not yield the expected result.");
+                                    $"KPatcher has detected that the provided nwnnsscomp.exe is the '{detectedCompiler}' version.\n" +
+                                    "KPatcher will compile regardless, but this may not yield the expected result.");
                             }
 
                             compiledBytes = CompileWithExternal(tempScriptFile, externalCompiler, logger, game);

@@ -138,3 +138,12 @@ pykotor_resource_formats.txt
 test-full-output.txt
 test-output.txt
 tslpatcher/
+docs/LOCALIZATION_AUDIT.md
+docs/LOCALIZED_CONFIG_FILES.md
+docs/README_TODO_IMPLEMENTATION_RESEARCH.md
+docs/TSLPATCHER_RE.md
+docs/TSLPATCHER_UI_LAYOUT_EXACT.md
+docs/brainstorms
+docs/tslpatcher_forms
+.cursor/plans
+SIMPLIFIED_IMPLEMENTATIONS.md

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using KPatcher.Core.Common.Script;
 using JetBrains.Annotations;
+using KPatcher.Core.Common.Script;
 
 namespace KPatcher.Core.Formats.NCS.Compiler.NSS
 {
@@ -15,7 +15,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private readonly List<string> _lookupPaths;
         private List<NssTokenBase> _tokens;
         private int _tokenIndex;
-        private List<string> _errors;
+        private readonly List<string> _errors;
 
         public NssParser(
             List<ScriptFunction> functions,
@@ -136,10 +136,23 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     {
                         var t = _tokens[i];
                         string v = "";
-                        if (t is NssIdentifier id) v = id.Identifier;
-                        else if (t is NssKeyword k) v = k.Keyword.ToString();
-                        else if (t is NssSeparator s) v = s.Separator.ToString();
-                        else v = t.GetType().Name;
+                        if (t is NssIdentifier id)
+                        {
+                            v = id.Identifier;
+                        }
+                        else if (t is NssKeyword k)
+                        {
+                            v = k.Keyword.ToString();
+                        }
+                        else if (t is NssSeparator s)
+                        {
+                            v = s.Separator.ToString();
+                        }
+                        else
+                        {
+                            v = t.GetType().Name;
+                        }
+
                         context += $"\n  [{i}] {t.GetType().Name}: {v}";
                     }
 
@@ -295,8 +308,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 }
                 Advance(); // Now consume the struct keyword
 
-                // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/parser.py:162-183
-                // Original: struct_definition : STRUCT IDENTIFIER '{' struct_members '}' ';'
                 SkipWhitespaceAndComments();
                 // Parse struct name
                 NssIdentifier structName = ConsumeToken<NssIdentifier>("Expected struct name after 'struct'");
@@ -419,7 +430,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 // Check if it's an initialization or just declaration
                 if (MatchOperator(NssOperators.Assignment))
                 {
-                    // Matching PyKotor parser.py line 201: GlobalVariableInitialization with is_const
                     // It's an initialization
                     Expression initExpr = ParseExpression();
                     ConsumeSeparator(NssSeparators.Semicolon, "Expected ';' after variable initialization");
@@ -427,7 +437,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 }
                 else
                 {
-                    // Matching PyKotor parser.py line 213: GlobalVariableDeclaration with is_const
                     // Just a declaration
                     ConsumeSeparator(NssSeparators.Semicolon, "Expected ';' after variable declaration");
                     return new GlobalVariableDeclaration(new Identifier(varName.Identifier), type, isConst);
@@ -589,7 +598,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private DynamicDataType ParseDataType()
         {
             // Don't skip whitespace here - callers should have already skipped it
-            // This matches PyKotor's grammar parser behavior where whitespace is handled by the grammar rules
+            // whitespace is handled by the grammar rules
             NssTokenBase token = CurrentToken();
             if (token is null)
             {
@@ -601,13 +610,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             if (keyword == null)
             {
                 // Not a keyword - check if it's an identifier (struct type)
-                // In PyKotor's grammar parser, data_type : IDENTIFIER accepts any identifier as a struct type
-                // The grammar parser will backtrack if the declaration fails
-                // We need to match this behavior: accept identifier as struct type, let caller handle failure
                 NssIdentifier identifier = token as NssIdentifier;
                 if (identifier != null)
                 {
-                    // Match PyKotor: accept identifier as struct type (grammar will backtrack if wrong)
+                    // accept identifier as struct type (grammar will backtrack if wrong)
                     Advance(); // consume identifier
                     return new DynamicDataType(DataType.Struct, identifier.Identifier);
                 }
@@ -650,7 +656,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     NssIdentifier structName = ConsumeToken<NssIdentifier>("Expected struct type name");
                     type = new DynamicDataType(DataType.Struct, structName.Identifier);
                     break;
-                // Matching PyKotor parser.py line 648: LOCATION_TYPE
                 case NssKeywords.Location:
                     Advance(); // consume keyword
                     type = DynamicDataType.LOCATION;
@@ -714,84 +719,82 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             int savedIndex = _tokenIndex;
             SkipWhitespaceAndComments();
 
-            // Matching PyKotor parser.py line 308-321: statement grammar rule order
             // Empty statement
             if (MatchSeparator(NssSeparators.Semicolon))
             {
                 return new EmptyStatement();
             }
 
-            // Declaration statement (second in PyKotor grammar)
+            // Declaration statement (second in grammar)
             Statement declStmt = TryParseDeclarationStatement();
             if (declStmt != null)
             {
                 return declStmt;
             }
 
-            // Condition statement (if) - third in PyKotor grammar
+            // Condition statement (if) - third in grammar
             Statement ifStmt = TryParseIfStatement();
             if (ifStmt != null)
             {
                 return ifStmt;
             }
 
-            // Return statement - fourth in PyKotor grammar
+            // Return statement - fourth in grammar
             Statement returnStmt = TryParseReturnStatement();
             if (returnStmt != null)
             {
                 return returnStmt;
             }
 
-            // While loop - fifth in PyKotor grammar
+            // While loop - fifth in grammar
             Statement whileStmt = TryParseWhileStatement();
             if (whileStmt != null)
             {
                 return whileStmt;
             }
 
-            // Do-while loop - sixth in PyKotor grammar
+            // Do-while loop - sixth in grammar
             Statement doWhileStmt = TryParseDoWhileStatement();
             if (doWhileStmt != null)
             {
                 return doWhileStmt;
             }
 
-            // For loop - seventh in PyKotor grammar
+            // For loop - seventh in grammar
             Statement forStmt = TryParseForStatement();
             if (forStmt != null)
             {
                 return forStmt;
             }
 
-            // Switch statement - eighth in PyKotor grammar
+            // Switch statement - eighth in grammar
             Statement switchStmt = TryParseSwitchStatement();
             if (switchStmt != null)
             {
                 return switchStmt;
             }
 
-            // Break statement - ninth in PyKotor grammar
+            // Break statement - ninth in grammar
             Statement breakStmt = TryParseBreakStatement();
             if (breakStmt != null)
             {
                 return breakStmt;
             }
 
-            // Continue statement - tenth in PyKotor grammar
+            // Continue statement - tenth in grammar
             Statement continueStmt = TryParseContinueStatement();
             if (continueStmt != null)
             {
                 return continueStmt;
             }
 
-            // NOP statement - matching PyKotor parser.py line 327
             Statement nopStmt = TryParseNopStatement();
             if (nopStmt != null)
             {
                 return nopStmt;
             }
 
-            // Scoped block - eleventh in PyKotor grammar
+            // Scoped block - eleventh in grammar
             Statement scopedBlock = TryParseScopedBlock();
             if (scopedBlock != null)
             {
@@ -814,7 +817,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         {
             // Don't skip whitespace here - ParseStatement() already did it
             // Save index before trying to parse - this is where we'll restore to if parsing fails
-            // This matches PyKotor's grammar parser behavior where backtracking restores to before the rule was tried
+            // backtracking restores to before the rule was tried
             int savedIndex = _tokenIndex;
             try
             {
@@ -996,8 +999,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             }
         }
 
-        // Matching PyKotor parser.py line 327: p_nop_statement
-        // Original: statement : NOP STRING_VALUE ';'
         private Statement TryParseNopStatement()
         {
             int savedIndex = _tokenIndex;
@@ -1014,7 +1015,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 Advance(); // Consume NOP
                 SkipWhitespaceAndComments();
 
-                // Consume string value - matching PyKotor parser.py line 332: string_expr = p[2]
                 NssLiteral stringLiteral = ConsumeToken<NssLiteral>("Expected string value after NOP");
                 if (stringLiteral.LiteralType != NssLiteralType.String)
                 {
@@ -1045,7 +1045,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             }
         }
 
-        // Matching PyKotor parser.py lines 461-522: condition_statement structure
         private Statement TryParseIfStatement()
         {
             int savedIndex = _tokenIndex;
@@ -1059,7 +1058,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 }
 
                 // Parse if_statement: IF_CONTROL '(' expression ')' '{' code_block '}' or IF_CONTROL '(' expression ')' statement
-                // Matching PyKotor parser.py lines 468-480
                 Advance();
                 ConsumeSeparator(NssSeparators.OpenParen, "Expected '(' after if");
                 Expression condition = ParseExpression();
@@ -1067,7 +1065,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 {
                     throw new CompileError("Expected expression after '(' in if statement");
                 }
-                // Matching PyKotor parser.py line 470: expression is p[3], closing paren is consumed by grammar
                 // In recursive descent, we need to consume it explicitly after parsing the expression
                 SkipWhitespaceAndComments();
                 if (!CheckSeparator(NssSeparators.CloseParen))
@@ -1098,7 +1095,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 ConditionAndBlock ifBlock = new ConditionAndBlock(condition, thenBlock);
 
                 // Parse else_if_statements: zero or more else-if statements
-                // Matching PyKotor parser.py lines 511-520
                 List<ConditionAndBlock> elseIfBlocks = new List<ConditionAndBlock>();
                 while (true)
                 {
@@ -1123,7 +1119,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     }
 
                     // Parse else_if_statement: ELSE_CONTROL IF_CONTROL '(' expression ')' '{' code_block '}' or ELSE_CONTROL IF_CONTROL '(' expression ')' statement
-                    // Matching PyKotor parser.py lines 497-509
                     Advance();
                     ConsumeSeparator(NssSeparators.OpenParen, "Expected '(' after else if");
                     Expression elseIfCondition = ParseExpression();
@@ -1150,7 +1145,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                 }
 
                 // Parse else_statement: ELSE_CONTROL '{' code_block '}' or ELSE_CONTROL statement or empty
-                // Matching PyKotor parser.py lines 482-495
                 CodeBlock elseBlock = null;
                 SkipWhitespaceAndComments();
                 if (CheckToken<NssKeyword>())
@@ -1178,7 +1172,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     }
                 }
 
-                // Create ConditionalBlock matching PyKotor parser.py line 465
                 List<ConditionAndBlock> allIfBlocks = new List<ConditionAndBlock> { ifBlock };
                 allIfBlocks.AddRange(elseIfBlocks);
                 return new ConditionalBlock(allIfBlocks, elseBlock);
@@ -1525,7 +1518,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseAssignmentExpression()
         {
             Expression left = ParseTernaryExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             SkipWhitespaceAndComments();
             int savedIndex = _tokenIndex;
@@ -1612,7 +1608,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseTernaryExpression()
         {
             Expression condition = ParseLogicalOrExpression();
-            if (condition == null) return null;
+            if (condition == null)
+            {
+                return null;
+            }
 
             SkipWhitespaceAndComments();
             if (MatchOperator(NssOperators.TernaryQuestionMark))
@@ -1633,7 +1632,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseLogicalOrExpression()
         {
             Expression left = ParseLogicalAndExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1664,7 +1666,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseLogicalAndExpression()
         {
             Expression left = ParseBitwiseOrExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1695,7 +1700,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseBitwiseOrExpression()
         {
             Expression left = ParseBitwiseXorExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1729,7 +1737,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseBitwiseXorExpression()
         {
             Expression left = ParseBitwiseAndExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1749,7 +1760,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseBitwiseAndExpression()
         {
             Expression left = ParseEqualityExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1783,14 +1797,15 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseEqualityExpression()
         {
             Expression left = ParseRelationalExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
                 SkipWhitespaceAndComments();
-                // Matching PyKotor parser.py line 538: expression EQUALS expression
-                // In PyKotor, == is tokenized as a single EQUALS token (lexer.py line 506-507)
-                // In our lexer, == is also tokenized as NssOperators.Equals (NssLexer.cs line 465-472)
+                // == is tokenized as NssOperators.Equals (NssLexer.cs line 465-472)
                 if (MatchOperator(NssOperators.Equals))
                 {
                     // == operator (single token, not two = tokens)
@@ -1805,8 +1820,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     left = new BinaryOperatorExpression(left, right, Operator.EQUAL, OperatorMappings.Equal);
                     continue;
                 }
-                // Matching PyKotor parser.py line 537: expression NOT_EQUALS expression
-                // In PyKotor, != is tokenized as a single NOT_EQUALS token (lexer.py line 519-520)
+                // != is tokenized as a single NOT_EQUALS token (lexer.py line 519-520)
                 if (MatchOperator(NssOperators.NotEqual))
                 {
                     // != operator (single token)
@@ -1828,14 +1842,15 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseRelationalExpression()
         {
             Expression left = ParseShiftExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
                 SkipWhitespaceAndComments();
-                // Matching PyKotor parser.py line 535: expression LESS_THAN_OR_EQUALS expression
-                // In PyKotor, <= is tokenized as a single LESS_THAN_OR_EQUALS token (lexer.py line 532-533)
-                // In our lexer, <= is also tokenized as NssOperators.LessThanOrEqual (NssLexer.cs line 447-454)
+                //  In our lexer, <= is tokenized as NssOperators.LessThanOrEqual (NssLexer.cs line 447-454)
                 if (MatchOperator(NssOperators.LessThanOrEqual))
                 {
                     // <= operator (single token)
@@ -1848,7 +1863,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     left = new BinaryOperatorExpression(left, right, Operator.LESS_THAN_OR_EQUAL, OperatorMappings.LessThanOrEqual);
                     continue;
                 }
-                // Matching PyKotor parser.py line 534: expression LESS_THAN expression
                 if (MatchOperator(NssOperators.LessThan))
                 {
                     // Check for << operator (bitwise left shift)
@@ -1869,9 +1883,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     left = new BinaryOperatorExpression(left, right, Operator.LESS_THAN, OperatorMappings.LessThan);
                     continue;
                 }
-                // Matching PyKotor parser.py line 533: expression GREATER_THAN_OR_EQUALS expression
-                // In PyKotor, >= is tokenized as a single GREATER_THAN_OR_EQUALS token (lexer.py line 532-533)
-                // In our lexer, >= is also tokenized as NssOperators.GreaterThanOrEqual (NssLexer.cs line 456-461)
+                // In our lexer, >= is tokenized as NssOperators.GreaterThanOrEqual (NssLexer.cs line 456-461)
                 if (MatchOperator(NssOperators.GreaterThanOrEqual))
                 {
                     // >= operator (single token)
@@ -1884,7 +1896,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     left = new BinaryOperatorExpression(left, right, Operator.GREATER_THAN_OR_EQUAL, OperatorMappings.GreaterThanOrEqual);
                     continue;
                 }
-                // Matching PyKotor parser.py line 532: expression GREATER_THAN expression
                 if (MatchOperator(NssOperators.GreaterThan))
                 {
                     // Check for >> or >>> operators (bitwise right shift)
@@ -1914,7 +1925,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseShiftExpression()
         {
             Expression left = ParseAdditiveExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1971,7 +1985,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseAdditiveExpression()
         {
             Expression left = ParseMultiplicativeExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -1997,7 +2014,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParseMultiplicativeExpression()
         {
             Expression left = ParseUnaryExpression();
-            if (left == null) return null;
+            if (left == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -2031,7 +2051,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             SkipWhitespaceAndComments();
 
             // Prefix increment (++) - must check BEFORE unary plus
-            // Matching PyKotor implementation order: multi-character operators first
             {
                 int savedIndex = _tokenIndex;
                 if (MatchOperator(NssOperators.Addition))
@@ -2050,7 +2069,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             }
 
             // Prefix decrement (--) - must check BEFORE unary minus
-            // Matching PyKotor implementation order: multi-character operators first
             {
                 int savedIndex = _tokenIndex;
                 if (MatchOperator(NssOperators.Subtraction))
@@ -2095,7 +2113,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private Expression ParsePostfixExpression()
         {
             Expression expr = ParsePrimaryExpression();
-            if (expr == null) return null;
+            if (expr == null)
+            {
+                return null;
+            }
 
             while (true)
             {
@@ -2362,8 +2383,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
             switch (lit.LiteralType)
             {
                 case NssLiteralType.Int:
-                    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/lexer.py:327-335
-                    // Original: def t_INT_HEX_VALUE(self, t): "0x[0-9a-fA-F]+" / def t_INT_VALUE(self, t): "[0-9]+"
                     string literalText = lit.Literal;
                     if (!string.IsNullOrEmpty(literalText) &&
                         literalText.Length > 2 &&
@@ -2398,11 +2417,132 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     if (strVal.Length >= 2 && strVal[0] == '"' && strVal[strVal.Length - 1] == '"')
                     {
                         strVal = strVal.Substring(1, strVal.Length - 2);
-                        // TODO: unescape string
+                        strVal = UnescapeString(strVal);
                     }
                     return new StringExpression(strVal);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Unescapes a string literal by processing escape sequences.
+        /// Handles: \\, \", \n, \r, \t, \0, and other common C-style escapes.
+        /// </summary>
+        private string UnescapeString(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            var result = new System.Text.StringBuilder(str.Length);
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == '\\' && i + 1 < str.Length)
+                {
+                    char next = str[i + 1];
+                    switch (next)
+                    {
+                        case '\\':
+                            result.Append('\\');
+                            i++; // Skip the second backslash
+                            break;
+                        case '"':
+                            result.Append('"');
+                            i++; // Skip the quote
+                            break;
+                        case 'n':
+                            result.Append('\n');
+                            i++; // Skip the 'n'
+                            break;
+                        case 'r':
+                            result.Append('\r');
+                            i++; // Skip the 'r'
+                            break;
+                        case 't':
+                            result.Append('\t');
+                            i++; // Skip the 't'
+                            break;
+                        case '0':
+                            result.Append('\0');
+                            i++; // Skip the '0'
+                            break;
+                        case 'a':
+                            result.Append('\a'); // Alert/bell
+                            i++;
+                            break;
+                        case 'b':
+                            result.Append('\b'); // Backspace
+                            i++;
+                            break;
+                        case 'f':
+                            result.Append('\f'); // Form feed
+                            i++;
+                            break;
+                        case 'v':
+                            result.Append('\v'); // Vertical tab
+                            i++;
+                            break;
+                        case 'u':
+                            // Unicode escape: \uXXXX (4 hex digits)
+                            if (i + 5 < str.Length)
+                            {
+                                string hex = str.Substring(i + 2, 4);
+                                if (int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out int unicode))
+                                {
+                                    result.Append((char)unicode);
+                                    i += 5; // Skip \uXXXX
+                                    break;
+                                }
+                            }
+                            // Fall through if invalid
+                            result.Append('\\');
+                            break;
+                        case 'x':
+                            // Hex escape: \xXX (1-2 hex digits)
+                            if (i + 2 < str.Length)
+                            {
+                                int hexLen = 0;
+                                // Try 2 digits first
+                                if (i + 3 < str.Length && IsHexDigit(str[i + 2]) && IsHexDigit(str[i + 3]))
+                                {
+                                    hexLen = 2;
+                                }
+                                // Try 1 digit
+                                else if (IsHexDigit(str[i + 2]))
+                                {
+                                    hexLen = 1;
+                                }
+
+                                if (hexLen > 0)
+                                {
+                                    string hex = str.Substring(i + 2, hexLen);
+                                    if (int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out int hexVal))
+                                    {
+                                        result.Append((char)hexVal);
+                                        i += 1 + hexLen; // Skip \x and hex digits
+                                        break;
+                                    }
+                                }
+                            }
+                            // Fall through if invalid
+                            result.Append('\\');
+                            break;
+                        default:
+                            // Unknown escape sequence, keep the backslash and continue
+                            result.Append('\\');
+                            break;
+                    }
+                }
+                else
+                {
+                    result.Append(str[i]);
+                }
+            }
+            return result.ToString();
+        }
+
+        private static bool IsHexDigit(char c)
+        {
+            return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
         }
 
         private bool MatchSeparator(NssSeparators sep)

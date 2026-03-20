@@ -1,13 +1,15 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using Avalonia;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
+using KPatcher.Core.Resources;
 using KPatcher.UI;
 using KPatcher.UI.ViewModels;
-using JetBrains.Annotations;
 using AppCore = KPatcher.UI.Core;
 
 namespace KPatcher
@@ -29,8 +31,8 @@ namespace KPatcher
                 try
                 {
                     // Try to find the DLL in multiple locations
-                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                    var dllPath = Path.Combine(baseDir, "RtfDomParserAv.dll");
+                    string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    string dllPath = Path.Combine(baseDir, "RtfDomParserAv.dll");
 
                     if (File.Exists(dllPath))
                     {
@@ -38,10 +40,10 @@ namespace KPatcher
                     }
 
                     // Try to find it next to AvRichTextBox.dll (same directory)
-                    var avRichTextBoxPath = Path.Combine(baseDir, "AvRichTextBox.dll");
+                    string avRichTextBoxPath = Path.Combine(baseDir, "AvRichTextBox.dll");
                     if (File.Exists(avRichTextBoxPath))
                     {
-                        var candidateNextToAvRich = Path.Combine(Path.GetDirectoryName(avRichTextBoxPath), "RtfDomParserAv.dll");
+                        string candidateNextToAvRich = Path.Combine(Path.GetDirectoryName(avRichTextBoxPath), "RtfDomParserAv.dll");
                         if (File.Exists(candidateNextToAvRich))
                         {
                             return System.Reflection.Assembly.LoadFrom(candidateNextToAvRich);
@@ -50,13 +52,13 @@ namespace KPatcher
 
                     // Try to find it in the cloned repository (if available)
                     // Search multiple possible repository locations
-                    var possibleRepoPaths = new[]
+                    string[] possibleRepoPaths = new[]
                     {
                         Path.Combine(baseDir, "..", "..", "..", "temp_avrichtextbox", "AvRichTextBox", "RtfDomParserAv.dll"),
                         Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? baseDir, "..", "..", "..", "temp_avrichtextbox", "AvRichTextBox", "RtfDomParserAv.dll"),
                     };
 
-                    foreach (var repoPath in possibleRepoPaths)
+                    foreach (string repoPath in possibleRepoPaths)
                     {
                         if (File.Exists(repoPath))
                         {
@@ -79,20 +81,20 @@ namespace KPatcher
                     }
 
                     // Try to find it in NuGet package cache
-                    var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    var nugetPackages = Path.Combine(userProfile, ".nuget", "packages");
+                    string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                    string nugetPackages = Path.Combine(userProfile, ".nuget", "packages");
 
                     if (Directory.Exists(nugetPackages))
                     {
                         // Search in Simplecto package folder
-                        var simplectoFolders = Directory.GetDirectories(nugetPackages, "simplecto.avalon*", SearchOption.TopDirectoryOnly);
-                        foreach (var folder in simplectoFolders)
+                        string[] simplectoFolders = Directory.GetDirectories(nugetPackages, "simplecto.avalon*", SearchOption.TopDirectoryOnly);
+                        foreach (string folder in simplectoFolders)
                         {
                             // Search in lib folders
                             string[] libDirs = Directory.GetDirectories(folder, "lib", SearchOption.AllDirectories);
-                            foreach (var libDir in libDirs)
+                            foreach (string libDir in libDirs)
                             {
-                                var candidatePath = Path.Combine(libDir, "RtfDomParserAv.dll");
+                                string candidatePath = Path.Combine(libDir, "RtfDomParserAv.dll");
                                 if (File.Exists(candidatePath))
                                 {
                                     // Copy to output directory for future use
@@ -111,8 +113,8 @@ namespace KPatcher
                             }
 
                             // Also search directly in the package folder (sometimes DLLs are at the root)
-                            var allDlls = Directory.GetFiles(folder, "RtfDomParserAv.dll", SearchOption.AllDirectories);
-                            foreach (var dllFile in allDlls)
+                            string[] allDlls = Directory.GetFiles(folder, "RtfDomParserAv.dll", SearchOption.AllDirectories);
+                            foreach (string dllFile in allDlls)
                             {
                                 if (File.Exists(dllFile))
                                 {
@@ -130,7 +132,7 @@ namespace KPatcher
                     }
 
                     // Last resort: Try using RtfDomParser.dll as fallback (not ideal but might work)
-                    var fallbackPath = Path.Combine(baseDir, "RtfDomParser.dll");
+                    string fallbackPath = Path.Combine(baseDir, "RtfDomParser.dll");
                     if (File.Exists(fallbackPath))
                     {
                         Console.WriteLine($"[AssemblyResolve] Attempting to use RtfDomParser.dll as fallback for RtfDomParserAv");
@@ -266,7 +268,7 @@ namespace KPatcher
             }
             catch (FileNotFoundException ex)
             {
-                Console.Error.WriteLine($"[Error] Failed to load mod: {ex.Message}");
+                Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFailedToLoadMod, ex.Message));
                 Environment.Exit((int)AppCore.ExitCode.NamespacesIniNotFound);
                 return;
             }
@@ -277,7 +279,7 @@ namespace KPatcher
             {
                 if (args.NamespaceOptionIndex.Value >= modInfo.Namespaces.Count)
                 {
-                    Console.Error.WriteLine($"[Error] Namespace index {args.NamespaceOptionIndex.Value} out of range (max: {modInfo.Namespaces.Count - 1})");
+                    Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorNamespaceIndexOutOfRange, args.NamespaceOptionIndex.Value, modInfo.Namespaces.Count - 1));
                     Environment.Exit((int)AppCore.ExitCode.NamespaceIndexOutOfRange);
                     return;
                 }
@@ -291,7 +293,7 @@ namespace KPatcher
             // Validate game path
             if (string.IsNullOrEmpty(args.GameDir))
             {
-                Console.Error.WriteLine("[Error] No game directory specified. Use --game-dir <path>");
+                Console.Error.WriteLine(PatcherResources.CliErrorNoGameDirectory);
                 Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
                 return;
             }
@@ -311,7 +313,7 @@ namespace KPatcher
             // Validate paths
             if (!AppCore.ValidateInstallPaths(modInfo.ModPath, gamePath))
             {
-                Console.Error.WriteLine("[Error] Invalid mod or game paths");
+                Console.Error.WriteLine(PatcherResources.CliErrorInvalidModOrGamePaths);
                 Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
                 return;
             }
@@ -320,13 +322,13 @@ namespace KPatcher
             int numActions = (args.Install ? 1 : 0) + (args.Uninstall ? 1 : 0) + (args.Validate ? 1 : 0);
             if (numActions > 1)
             {
-                Console.Error.WriteLine("[Error] Cannot run more than one of [--install, --uninstall, --validate]");
+                Console.Error.WriteLine(PatcherResources.CliErrorCannotRunMultipleOperations);
                 Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
                 return;
             }
             if (numActions == 0)
             {
-                Console.Error.WriteLine("[Error] Must specify one of [--install, --uninstall, --validate] for CLI mode");
+                Console.Error.WriteLine(PatcherResources.CliErrorMustSpecifyOperation);
                 Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
                 return;
             }
@@ -336,7 +338,7 @@ namespace KPatcher
             {
                 if (args.Install)
                 {
-                    Console.WriteLine($"[Info] Installing mod from {modInfo.ModPath} to {gamePath}");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallingMod, modInfo.ModPath, gamePath));
                     var cancellationToken = new CancellationToken();
                     AppCore.InstallResult result = AppCore.InstallMod(
                         modInfo.ModPath,
@@ -357,32 +359,32 @@ namespace KPatcher
                 }
                 else if (args.Uninstall)
                 {
-                    Console.WriteLine($"[Info] Uninstalling mod from {gamePath}");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoUninstallingMod, gamePath));
                     bool fullyRan = AppCore.UninstallMod(modInfo.ModPath, gamePath, logger);
                     if (fullyRan)
                     {
-                        Console.WriteLine("[Info] Uninstall completed successfully");
+                        Console.WriteLine(PatcherResources.CliInfoUninstallCompletedSuccessfully);
                     }
                     else
                     {
-                        Console.WriteLine("[Warning] Uninstall completed with warnings");
+                        Console.WriteLine(PatcherResources.CliWarningUninstallCompletedWithWarnings);
                     }
                     Environment.Exit((int)AppCore.ExitCode.Success);
                 }
                 else if (args.Validate)
                 {
-                    Console.WriteLine("[Info] Validating mod configuration");
+                    Console.WriteLine(PatcherResources.CliInfoValidatingMod);
                     AppCore.ValidateConfig(modInfo.ModPath, modInfo.Namespaces, selectedNamespace, logger);
-                    Console.WriteLine("[Info] Validation completed successfully");
+                    Console.WriteLine(PatcherResources.CliInfoValidationCompletedSuccessfully);
                     Environment.Exit((int)AppCore.ExitCode.Success);
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[Error] {ex.GetType().Name}: {ex.Message}");
+                Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFormat, ex.GetType().Name, ex.Message));
                 if (ex.InnerException != null)
                 {
-                    Console.Error.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                    Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInnerException, ex.InnerException.Message));
                 }
                 Environment.Exit((int)AppCore.ExitCode.ExceptionDuringInstall);
             }

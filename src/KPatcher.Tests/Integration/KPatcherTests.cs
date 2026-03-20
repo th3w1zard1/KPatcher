@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.GFF;
@@ -11,7 +12,6 @@ using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TwoDA;
 using KPatcher.Core.Reader;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Integration

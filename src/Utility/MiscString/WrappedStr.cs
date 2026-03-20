@@ -4,8 +4,6 @@ using JetBrains.Annotations;
 
 namespace KPatcher.Core.Utility.MiscString
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:9-15
-    // Original: def is_string_like(obj: Any) -> bool:
     public static class StringUtil
     {
         public static bool IsStringLike(object obj)
@@ -22,14 +20,10 @@ namespace KPatcher.Core.Utility.MiscString
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:18-94
-    // Original: class WrappedStr(str):
     public class WrappedStr
     {
         protected string _content;
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:21-30
-        // Original: def __init__(self, content: Self | str = ""):
         public WrappedStr(string content = "")
         {
             if (content == null)
@@ -39,8 +33,6 @@ namespace KPatcher.Core.Utility.MiscString
             _content = content;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:21-30
-        // Original: def __init__(self, content: Self | str = ""):
         // Additional constructor to handle WrappedStr instances
         public WrappedStr(WrappedStr content)
         {
@@ -51,22 +43,16 @@ namespace KPatcher.Core.Utility.MiscString
             _content = content._content;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:32-33
-        // Original: def __repr__(self):
         public override string ToString()
         {
             return $"WrappedStr({_content})";
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:35-36
-        // Original: def __reduce__(self):
         public object GetReduce()
         {
             return new object[] { GetType(), new object[] { _content } };
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:59-69
-        // Original: @classmethod def _assert_str_or_none_type(cls: type[Self], var: Any) -> str:
         protected static string AssertStrOrNoneType(Type cls, object var)
         {
             if (var == null)
@@ -80,8 +66,6 @@ namespace KPatcher.Core.Utility.MiscString
             return var?.ToString();
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:72-80
-        // Original: def removeprefix(self, __prefix: WrappedStr | str) -> Self:
         public WrappedStr RemovePrefix(WrappedStr prefix)
         {
             return RemovePrefix(prefix?._content ?? prefix?.ToString() ?? "");
@@ -97,8 +81,6 @@ namespace KPatcher.Core.Utility.MiscString
             return (WrappedStr)Activator.CreateInstance(GetType(), _content);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:83-91
-        // Original: def removesuffix(self, __suffix: WrappedStr | str) -> Self:
         public WrappedStr RemoveSuffix(WrappedStr suffix)
         {
             return RemoveSuffix(suffix?._content ?? suffix?.ToString() ?? "");
@@ -114,8 +96,6 @@ namespace KPatcher.Core.Utility.MiscString
             return (WrappedStr)Activator.CreateInstance(GetType(), _content);
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/misc_string/mutable_str.py:92-93
-        // Original: def __getstate__(self) -> str:
         public string GetState()
         {
             return _content;

@@ -141,6 +141,58 @@ namespace KPatcher.UI.Rte
             return offset;
         }
 
+        /// <summary>
+        /// Builds an RteDocument from plain content and per-range foreground colors.
+        /// Used for the install log: each line (or segment) can have a different color while remaining selectable/copyable.
+        /// </summary>
+        /// <param name="content">Full text with \n line breaks.</param>
+        /// <param name="ranges">Character-offset ranges (Start, End) and foreground color (hex, e.g. "#DC143C").</param>
+        public static RteDocument FromColoredLines(string content, IReadOnlyList<(int Start, int End, string ForegroundColor)> ranges)
+        {
+            if (content is null)
+            {
+                content = string.Empty;
+            }
+
+            string normalized = NormalizeToTkContent(content);
+            var doc = new RteDocument { Content = normalized };
+
+            if (ranges is null || ranges.Count == 0)
+            {
+                return doc;
+            }
+
+            foreach (var (start, end, foregroundColor) in ranges)
+            {
+                if (string.IsNullOrWhiteSpace(foregroundColor) || start >= end)
+                {
+                    continue;
+                }
+
+                string tagKey = foregroundColor;
+                if (!doc.TagConfigs.ContainsKey(tagKey))
+                {
+                    doc.TagConfigs[tagKey] = new Dictionary<string, string>(StringComparer.Ordinal) { ["foreground"] = foregroundColor };
+                    doc.Tags[tagKey] = new List<RteRange>();
+                }
+
+                int clampedStart = Clamp(start, 0, normalized.Length);
+                int clampedEnd = Clamp(end, 0, normalized.Length);
+                if (clampedStart >= clampedEnd)
+                {
+                    continue;
+                }
+
+                doc.Tags[tagKey].Add(new RteRange
+                {
+                    Start = OffsetToTkIndex(normalized, clampedStart),
+                    End = OffsetToTkIndex(normalized, clampedEnd)
+                });
+            }
+
+            return doc;
+        }
+
         public static void ApplyToRichTextBox(RichTextBox richTextBox, RteDocument document)
         {
             if (richTextBox is null)
@@ -527,7 +579,7 @@ namespace KPatcher.UI.Rte
                 return 0;
             }
 
-            var parts = index.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = index.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             int line, column;
             if (parts.Length != 2 ||
                 !int.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out line) ||
@@ -556,8 +608,16 @@ namespace KPatcher.UI.Rte
 
         private static int Clamp(int value, int min, int max)
         {
-            if (value < min) return min;
-            if (value > max) return max;
+            if (value < min)
+            {
+                return min;
+            }
+
+            if (value > max)
+            {
+                return max;
+            }
+
             return value;
         }
     }

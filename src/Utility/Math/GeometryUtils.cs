@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/geometry_utils.py
-    // Original: compute_per_vertex_tangent_space, determine_vertex_format_requirements
     public static class GeometryUtils
     {
         public static Dictionary<int, Tuple<Vector3, Vector3>> ComputePerVertexTangentSpace(IMdlMesh mesh)

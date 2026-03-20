@@ -1,7 +1,12 @@
 using System;
+using System.Globalization;
+using System.Threading;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using KPatcher.Core.Resources;
+using KPatcher.UI.Resources;
 using KPatcher.UI.ViewModels;
 using KPatcher.UI.Views;
 
@@ -26,12 +31,34 @@ namespace KPatcher.UI
 
         public override void OnFrameworkInitializationCompleted()
         {
+            // Set UI and thread culture: saved preference first, then OS, then fallback to English
+            string[] supported = LanguageSettings.GetSupportedCodes();
+            CultureInfo culture;
+            string saved = LanguageSettings.GetSavedLanguage();
+            if (!string.IsNullOrEmpty(saved))
+            {
+                culture = new CultureInfo(saved);
+            }
+            else
+            {
+                CultureInfo ui = CultureInfo.CurrentUICulture;
+                string twoLetter = ui.TwoLetterISOLanguageName;
+                culture = Array.IndexOf(supported, twoLetter) >= 0 ? ui : new CultureInfo("en");
+            }
+
+            PatcherResources.Culture = culture;
+            UIResources.Culture = culture;
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                string title = $"KPatcher {Core.VersionLabel}";
-                if (Core.IsAlphaVersion(Core.VersionLabel))
+                string title = string.Format(culture, UIResources.WindowTitleFormat, Core.VersionLabel);
+                if (Core.IsAlphaVersionOrLowerThanV1_0_0(Core.VersionLabel))
                 {
-                    title += " [ALPHA - NOT FOR PRODUCTION USE]";
+                    title += UIResources.WindowTitleAlphaSuffix;
                 }
                 desktop.MainWindow = new MainWindow
                 {
@@ -52,6 +79,54 @@ namespace KPatcher.UI
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        /// <summary>
+        /// Applies a new UI language: saves preference, sets resource/thread culture, and replaces the main window
+        /// so all bindings re-evaluate with the new culture. Call from Language menu command.
+        /// </summary>
+        public static void RequestLanguageChange(string twoLetterCode)
+        {
+            if (string.IsNullOrEmpty(twoLetterCode))
+            {
+                return;
+            }
+
+            string[] supported = LanguageSettings.GetSupportedCodes();
+            if (Array.IndexOf(supported, twoLetterCode) < 0)
+            {
+                return;
+            }
+
+            LanguageSettings.SaveLanguage(twoLetterCode);
+            CultureInfo culture = new CultureInfo(twoLetterCode);
+
+            PatcherResources.Culture = culture;
+            UIResources.Culture = culture;
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                Window oldWindow = desktop.MainWindow;
+                if (oldWindow?.DataContext is MainWindowViewModel oldVm && !string.IsNullOrEmpty(oldVm.ModPath))
+                {
+                    Core.LastLoadedModPathForLanguageChange = oldVm.ModPath;
+                }
+                string title = string.Format(culture, UIResources.WindowTitleFormat, Core.VersionLabel);
+                if (Core.IsAlphaVersionOrLowerThanV1_0_0(Core.VersionLabel))
+                {
+                    title += UIResources.WindowTitleAlphaSuffix;
+                }
+                desktop.MainWindow = new MainWindow
+                {
+                    Title = title,
+                    DataContext = new MainWindowViewModel(),
+                };
+                oldWindow?.Close();
+            }
         }
 
         private void OnShutdownRequested(object sender, ShutdownRequestedEventArgs e)

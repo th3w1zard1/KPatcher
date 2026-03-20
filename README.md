@@ -44,15 +44,16 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
   - Target resolution (RowIndex, RowLabel, LabelColumn)
   - ChangeRow2DA, AddRow2DA, CopyRow2DA, AddColumn2DA
   - Modifications2DA container
-- ✅ Comprehensive unit tests (xUnit + FluentAssertions)
+- ✅ Comprehensive unit tests (xUnit + Fluent Assertions 7.x, Apache 2.0)
+- ✅ **Localized config files**: optional `changes.<lang>.ini` / `changes.<lang>.yaml` and `namespaces.<lang>.ini` (e.g. `changes.de.ini` for German UI); see [docs/LOCALIZED_CONFIG_FILES.md](docs/LOCALIZED_CONFIG_FILES.md).
 
 ### TODO
 
-- ⏳ Permission fixing tools
-- ⏳ iOS case sensitivity fixing
-- ⏳ Auto-update system
-- ⏳ RTF file handling
-- ⏳ Complete test coverage
+- ✅ Permission fixing tools (Windows ReadOnly + Unix chmod)
+- ✅ iOS case sensitivity fixing (Tools menu uses full recursive rename)
+- ✅ Auto-update system (Help → Check for updates; NetSparkle disabled on .NET 5+)
+- ✅ RTF file handling (single RtfStripper in Core; InstallLogWriter tests)
+- ✅ Test coverage (SystemHelpers, RtfStripper, InstallLogWriter)
 
 ## Requirements
 
@@ -89,8 +90,13 @@ Current test coverage includes:
 - ✅ GFF modifications
 - ✅ TLK modifications
 - ✅ SSF modifications
-- 🚧 NSS/NCS modifications
+- 🚧 NSS/NCS modifications (roundtrip tests may require `nwnnsscomp.exe` on Windows)
 - ✅ Config reader/INI parsing
+- ✅ SystemHelpers (permission fixing, case sensitivity)
+- ✅ RtfStripper (RTF-to-plain-text)
+- ✅ InstallLogWriter (Error/Warning prefixes, log file creation)
+
+**Platform-specific notes:** Some tests are Windows-only (e.g. permission ReadOnly clearing). NCS roundtrip and external compiler tests may be skipped or fail when `nwnnsscomp.exe` is not available. See TESTING.md if present for details.
 
 ## Building
 

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <data name="MenuTools" xml:space="preserve"><value>Tools</value></data>
+  <data name="MenuHelp" xml:space="preserve"><value>Help</value></data>
+  <data name="HelpWindowTitle" xml:space="preserve"><value>Help</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="MenuAbout" xml:space="preserve"><value>About</value></data>
+  <data name="MenuLanguage" xml:space="preserve"><value>Language</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageSpanish" xml:space="preserve"><value>Español</value></data>
+  <data name="LanguageGerman" xml:space="preserve"><value>Deutsch</value></data>
+  <data name="LanguageFrench" xml:space="preserve"><value>Français</value></data>
+  <data name="LanguageRussian" xml:space="preserve"><value>Русский</value></data>
+  <data name="LanguagePolish" xml:space="preserve"><value>Polski</value></data>
+  <data name="ValidateIni" xml:space="preserve"><value>Validate INI</value></data>
+  <data name="UninstallModRestoreBackup" xml:space="preserve"><value>Uninstall Mod / Restore Backup</value></data>
+  <data name="FixPermissionsToFileFolder" xml:space="preserve"><value>Fix permissions to file/folder...</value></data>
+  <data name="FixIOSCaseSensitivity" xml:space="preserve"><value>Fix iOS Case Sensitivity</value></data>
+  <data name="DeadlyStream" xml:space="preserve"><value>DeadlyStream</value></data>
+  <data name="Discord" xml:space="preserve"><value>Discord</value></data>
+  <data name="Website" xml:space="preserve"><value>Website</value></data>
+  <data name="KOTORCommunityPortal" xml:space="preserve"><value>KOTOR Community Portal</value></data>
+  <data name="PCGamingWiki" xml:space="preserve"><value>PCGamingWiki</value></data>
+  <data name="KOTOR1" xml:space="preserve"><value>KOTOR 1</value></data>
+  <data name="KOTOR2TSL" xml:space="preserve"><value>KOTOR 2: TSL</value></data>
+  <data name="CheckForUpdates" xml:space="preserve"><value>Check for Updates</value></data>
+  <data name="KPatcherHome" xml:space="preserve"><value>KPatcher Home</value></data>
+  <data name="GitHubSource" xml:space="preserve"><value>GitHub Source</value></data>
+  <data name="Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Browse" xml:space="preserve"><value>Browse</value></data>
+  <data name="PlaceholderSelectMod" xml:space="preserve"><value>Select the mod to install</value></data>
+  <data name="PlaceholderSelectKotor" xml:space="preserve"><value>Select your KOTOR directory path</value></data>
+  <data name="AlphaBannerText" xml:space="preserve"><value>⚠️ ALPHA VERSION - NOT FOR PRODUCTION USE ⚠️</value></data>
+  <data name="AlphaWarningTitle" xml:space="preserve"><value>ALPHA VERSION WARNING</value></data>
+  <data name="AlphaWarningMessageFormat" xml:space="preserve"><value>⚠️ WARNING: This is an ALPHA version ({0}) of KPatcher.NET
+
+This version is for testing and demonstration purposes only.
+It is NOT intended for production use.
+
+Features may be incomplete, unstable, or contain bugs.
+Use at your own risk.
+
+For production use, please use the stable release.</value></data>
+  <data name="MainWindowTitle" xml:space="preserve"><value>KOTORPatcher</value></data>
+  <data name="WindowTitleFormat" xml:space="preserve"><value>KOTORPatcher {0}</value></data>
+  <data name="WindowTitleAlphaSuffix" xml:space="preserve"><value> [ALPHA - NOT FOR PRODUCTION USE]</value></data>
+  <data name="KOTORPatcherUpdate" xml:space="preserve"><value>KOTORPatcher Update</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="WelcomeToKPatcher" xml:space="preserve"><value>Welcome to KPatcher!</value></data>
+  <data name="SelectModAndKotorToBegin" xml:space="preserve"><value>Select a mod and your KOTOR directory to begin.</value></data>
+  <data name="StartingInstallation" xml:space="preserve"><value>Starting installation...</value></data>
+  <data name="PatcherFinishedTitle" xml:space="preserve"><value>Patcher finished</value></data>
+  <data name="SelectModDirectory" xml:space="preserve"><value>Select Mod Directory</value></data>
+  <data name="SelectKotorDirectory" xml:space="preserve"><value>Select KOTOR Directory</value></data>
+  <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>This mod requires confirmation</value></data>
+  <data name="StartPatchingButtonLabel" xml:space="preserve"><value>Start patching</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="WarningTitle" xml:space="preserve"><value>Warning!</value></data>
+  <data name="WarningNotAToy" xml:space="preserve"><value>This is not a toy. Really continue?</value></data>
+  <data name="SelectDirectoryFixPermissions" xml:space="preserve"><value>Select Directory to Fix Permissions</value></data>
+  <data name="PleaseWaitMayTakeAWhile" xml:space="preserve"><value>Please wait, this may take awhile...</value></data>
+  <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Successfully acquired permission</value></data>
+  <data name="OperationSuccessfulFormat" xml:space="preserve"><value>The operation was successful. {0}</value></data>
+  <data name="FilesAndFoldersProcessedFormat" xml:space="preserve"><value>{0} files and {1} folders finished processing.</value></data>
+  <data name="CouldNotAcquirePermission" xml:space="preserve"><value>Could not acquire permission!</value></data>
+  <data name="PermissionsDeniedCheckLogsFormat" xml:space="preserve"><value>Permissions denied! Check the logs for more details.{0}{1}</value></data>
+  <data name="SelectDirectoryFixCaseSensitivity" xml:space="preserve"><value>Select Directory to Fix Case Sensitivity</value></data>
+  <data name="NothingToChangeCase" xml:space="preserve"><value>Nothing to change - all files/folders already correct case.</value></data>
+  <data name="IOSCaseRenameTaskCompleted" xml:space="preserve"><value>iOS case rename task completed.</value></data>
+  <data name="UpdateError" xml:space="preserve"><value>Update Error</value></data>
+  <data name="UnableToFetchUpdateInfo" xml:space="preserve"><value>Unable to fetch update information. Please try again later.</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Update Available</value></data>
+  <data name="UpdateAvailableMessageFormat" xml:space="preserve"><value>A newer version of KPatcher ({0}) is available.{1}{1}{2}</value></data>
+  <data name="UpdateButton" xml:space="preserve"><value>Update</value></data>
+  <data name="ManualDownloadButton" xml:space="preserve"><value>Manual Download</value></data>
+  <data name="NoUpdatesFound" xml:space="preserve"><value>No Updates Found</value></data>
+  <data name="NoUpdatesFoundMessageFormat" xml:space="preserve"><value>You are already running the latest version of KPatcher ({0}).</value></data>
+  <data name="ReinstallButton" xml:space="preserve"><value>Reinstall</value></data>
+  <data name="NoNamespaceSelected" xml:space="preserve"><value>No namespace selected</value></data>
+  <data name="PleaseSelectNamespaceFirst" xml:space="preserve"><value>Please select a namespace first.</value></data>
+  <data name="NoDescriptionAvailable" xml:space="preserve"><value>No description available.</value></data>
+  <data name="CouldNotFindModAtFolderFormat" xml:space="preserve"><value>Could not find a mod located at the given folder.{0}{1}</value></data>
+  <data name="TaskAlreadyRunning" xml:space="preserve"><value>Task already running</value></data>
+  <data name="WaitForPreviousTask" xml:space="preserve"><value>Wait for the previous task to finish.</value></data>
+  <data name="NoModChosen" xml:space="preserve"><value>No mod chosen</value></data>
+  <data name="SelectModDirectoryFirst" xml:space="preserve"><value>Select your mod directory first.</value></data>
+  <data name="NoGameFolder" xml:space="preserve"><value>No game folder</value></data>
+  <data name="InvalidGameFolder" xml:space="preserve"><value>Invalid game folder</value></data>
+  <data name="PreparingUpdate" xml:space="preserve"><value>Preparing update...</value></data>
+  <data name="EstimatedTimeRemainingFormat" xml:space="preserve"><value>Estimated time remaining: {0}</value></data>
+  <data name="Downloaded" xml:space="preserve"><value>downloaded</value></data>
+  <data name="ByteB" xml:space="preserve"><value>B</value></data>
+  <data name="ByteKB" xml:space="preserve"><value>KB</value></data>
+  <data name="ByteMB" xml:space="preserve"><value>MB</value></data>
+  <data name="ByteGB" xml:space="preserve"><value>GB</value></data>
+  <data name="DownloadingKPatcherFormat" xml:space="preserve"><value>Downloading KPatcher {0}...</value></data>
+  <data name="DownloadComplete" xml:space="preserve"><value>Download complete.</value></data>
+  <data name="ExtractingUpdatePackage" xml:space="preserve"><value>Extracting update package...</value></data>
+  <data name="ArchiveExtracted" xml:space="preserve"><value>Archive extracted.</value></data>
+  <data name="FinalizingUpdate" xml:space="preserve"><value>Finalizing update...</value></data>
+  <data name="RestartingToCompleteUpdate" xml:space="preserve"><value>Restarting to complete the update...</value></data>
+  <data name="DownloadFailedFromFormat" xml:space="preserve"><value>Download failed from {0}: {1}</value></data>
+  <data name="AllUpdateMirrorsFailed" xml:space="preserve"><value>All update mirrors failed.</value></data>
+  <data name="UnsavedChanges" xml:space="preserve"><value>Unsaved changes</value></data>
+  <data name="UnsavedChangesDiscardPrompt" xml:space="preserve"><value>You have unsaved changes. Do you want to discard them?</value></data>
+  <data name="FailedToLoadRtfContent" xml:space="preserve"><value>Failed to load RTF content. Please check the console for details.</value></data>
+  <data name="Untitled" xml:space="preserve"><value>Untitled</value></data>
+  <data name="MenuFile" xml:space="preserve"><value>_File</value></data>
+  <data name="MenuNew" xml:space="preserve"><value>_New</value></data>
+  <data name="MenuOpen" xml:space="preserve"><value>_Open...</value></data>
+  <data name="MenuSave" xml:space="preserve"><value>_Save</value></data>
+  <data name="MenuSaveAs" xml:space="preserve"><value>Save _As...</value></data>
+  <data name="MenuClose" xml:space="preserve"><value>_Close</value></data>
+  <data name="Bold" xml:space="preserve"><value>Bold</value></data>
+  <data name="Italic" xml:space="preserve"><value>Italic</value></data>
+  <data name="Underline" xml:space="preserve"><value>Underline</value></data>
+  <data name="Strike" xml:space="preserve"><value>Strike</value></data>
+  <data name="AlignLeft" xml:space="preserve"><value>Align Left</value></data>
+  <data name="AlignCenter" xml:space="preserve"><value>Align Center</value></data>
+  <data name="AlignRight" xml:space="preserve"><value>Align Right</value></data>
+  <data name="ColorBlack" xml:space="preserve"><value>Black</value></data>
+  <data name="ColorRed" xml:space="preserve"><value>Red</value></data>
+  <data name="ColorGreen" xml:space="preserve"><value>Green</value></data>
+  <data name="ColorBlue" xml:space="preserve"><value>Blue</value></data>
+  <data name="ColorGray" xml:space="preserve"><value>Gray</value></data>
+  <data name="ColorTransparent" xml:space="preserve"><value>Transparent</value></data>
+  <data name="ColorYellow" xml:space="preserve"><value>Yellow</value></data>
+  <data name="ColorLightBlue" xml:space="preserve"><value>LightBlue</value></data>
+  <data name="ColorLightGreen" xml:space="preserve"><value>LightGreen</value></data>
+  <data name="InstallationCompleteWithErrorsAndWarningsFormat" xml:space="preserve"><value>The installation is complete with {0} errors and {1} warnings.{2}Total install time: {3}{2}Total patches: {4}</value></data>
+  <data name="UnexpectedErrorDuringInstallationFormat" xml:space="preserve"><value>An unexpected error occurred during the installation and the installation was forced to terminate.{0}{0}{1}</value></data>
+  <data name="ConfigReaderTestComplete" xml:space="preserve"><value>Config reader test is complete.</value></data>
+  <data name="UninstallProcessFinished" xml:space="preserve"><value>Uninstall process finished.</value></data>
+  <data name="PermissionsFixerTaskCompleted" xml:space="preserve"><value>File/Folder permissions fixer task completed.</value></data>
+  <data name="AtLeastOneOptionRequired" xml:space="preserve"><value>At least one option is required.</value></data>
+  <data name="DefaultInstallation" xml:space="preserve"><value>Default installation</value></data>
+  <data name="LoadedNamespacesCountFormat" xml:space="preserve"><value>Loaded {0} namespace(s).</value></data>
+  <data name="DetectedKotorInstallationsFormat" xml:space="preserve"><value>Detected {0} KOTOR installation(s).</value></data>
+  <data name="AutoOpeningModFromFormat" xml:space="preserve"><value>Auto-opening mod from: {0}</value></data>
+  <data name="InstallationCancelled" xml:space="preserve"><value>Installation was cancelled.</value></data>
+  <data name="NoBackupDirectoryFoundFormat" xml:space="preserve"><value>No backup directory found at {0}</value></data>
+  <data name="UninstallFailedFormat" xml:space="preserve"><value>Uninstall failed: {0}</value></data>
+  <data name="UnableToLocateWindowForUpdater" xml:space="preserve"><value>Unable to locate window for updater UI.</value></data>
+  <data name="FailedToLoadModFormat" xml:space="preserve"><value>Failed to load mod: {0}</value></data>
+  <data name="FailedToLoadNamespaceConfigFormat" xml:space="preserve"><value>Failed to load namespace config: {0}</value></data>
+  <data name="PleaseSelectModAndGameDirectory" xml:space="preserve"><value>Please select both a mod and game directory.</value></data>
+  <data name="InstallationFailedFormat" xml:space="preserve"><value>Installation failed: {0}</value></data>
+  <data name="ValidationFailedFormat" xml:space="preserve"><value>Validation failed: {0}</value></data>
+  <data name="FailedToFixPermissionsFormat" xml:space="preserve"><value>Failed to fix permissions: {0}</value></data>
+  <data name="FailedToFixCaseSensitivityFormat" xml:space="preserve"><value>Failed to fix case sensitivity: {0}</value></data>
+  <data name="FailedToOpenUrlFormat" xml:space="preserve"><value>Failed to open URL: {0}</value></data>
+  <data name="NoBackupsFoundTitle" xml:space="preserve"><value>No backups found!</value></data>
+  <data name="NoBackupsFoundMessageFormat" xml:space="preserve"><value>No backups found at '{0}'!{1}KPatcher cannot uninstall TSLPatcher.exe installations.</value></data>
+  <data name="BackupOutOfDateOrMismatched" xml:space="preserve"><value>Backup out of date or mismatched</value></data>
+  <data name="BackupMismatchMessageFormat" xml:space="preserve"><value>This backup doesn't match your current KOTOR installation. Files are missing/changed in your KOTOR install.{0}It is important that you uninstall all mods in their installed order when utilizing this feature.{0}Also ensure you selected the right mod, and the right KOTOR folder.{0}Continue anyway?</value></data>
+  <data name="Confirmation" xml:space="preserve"><value>Confirmation</value></data>
+  <data name="ReallyUninstallConfirmFormat" xml:space="preserve"><value>Really uninstall {0} files and restore the most recent backup (containing {1} files and {2} folders)?{3}Note: This uses the most recent mod-specific backup, the namespace option displayed does not affect this tool.</value></data>
+  <data name="FailedToRestoreBackupFormat" xml:space="preserve"><value>Failed to restore backup because of exception.{0}{0}{1}</value></data>
+  <data name="UninstallCompletedTitle" xml:space="preserve"><value>Uninstall completed!</value></data>
+  <data name="UninstallCompletedDeleteBackupFormat" xml:space="preserve"><value>Deleted {0} files and successfully restored backup created on {1}{2}{2}Would you like to delete the backup created on {1} since it now has been restored?</value></data>
+  <data name="PermissionErrorTitle" xml:space="preserve"><value>Permission Error</value></data>
+  <data name="UnableToDeleteBackupPermissionFormat" xml:space="preserve"><value>Unable to delete the restored backup due to permission issues. Would you like to gain permission and try again?</value></data>
+  <data name="GainingPermissionPleaseWait" xml:space="preserve"><value>Gaining permission, please wait...</value></data>
+</root>

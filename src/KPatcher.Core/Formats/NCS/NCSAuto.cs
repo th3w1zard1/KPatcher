@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS.Compiler;
 using KPatcher.Core.Formats.NCS.Optimizers;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS
 {
@@ -174,8 +174,6 @@ namespace KPatcher.Core.Formats.NCS
             }
 
             var compiler = new NssCompiler(game, libraryLookup, debug, functions, constants);
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/ncs_auto.py:184
-            // Original: library=KOTOR_LIBRARY if game.is_k1() else TSL_LIBRARY
             // If library is not provided, use default game library
             if (library == null)
             {

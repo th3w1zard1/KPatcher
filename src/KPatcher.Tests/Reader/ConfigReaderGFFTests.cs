@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
+using IniParser.Model;
+using IniParser.Parser;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Mods.GFF;
 using KPatcher.Core.Reader;
-using FluentAssertions;
-using IniParser.Model;
-using IniParser.Parser;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader
@@ -380,7 +380,7 @@ TypeId=111
             mod_0.Should().NotBeNull();
             mod_0.Should().BeOfType<AddFieldGFF>();
             mod_0.Value.Should().BeOfType<FieldValueConstant>();
-            // Python: assert not mod_0.path.name - checks if path name is empty/falsy
+            // assert not mod_0.path.name - checks if path name is empty/falsy
             // When Path is empty and FieldType is List (not Struct), path should be empty
             // In Python, path.name is the last component - if path is empty, name is empty
             mod_0.Path.Should().BeEmpty("Path should be empty when Path= is empty and FieldType is List");

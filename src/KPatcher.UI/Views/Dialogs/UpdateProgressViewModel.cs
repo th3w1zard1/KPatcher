@@ -3,12 +3,13 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using Avalonia.Threading;
+using KPatcher.UI.Resources;
 
 namespace KPatcher.UI.Views.Dialogs
 {
     public sealed class UpdateProgressViewModel : INotifyPropertyChanged
     {
-        private string _statusText = "Preparing update...";
+        private string _statusText = UIResources.PreparingUpdate;
         private string _bytesText = string.Empty;
         private string _etaText = string.Empty;
         private double _progressMaximum = 100;
@@ -66,7 +67,7 @@ namespace KPatcher.UI.Views.Dialogs
         {
             Dispatcher.UIThread.Post(() =>
             {
-                StatusText = "Preparing update...";
+                StatusText = UIResources.PreparingUpdate;
                 BytesText = string.Empty;
                 EtaText = string.Empty;
                 ProgressMaximum = 100;
@@ -94,18 +95,18 @@ namespace KPatcher.UI.Views.Dialogs
                 else
                 {
                     IsIndeterminate = true;
-                    BytesText = $"{FormatBytes(downloadedBytes)} downloaded";
+                    BytesText = $"{FormatBytes(downloadedBytes)} {UIResources.Downloaded}";
                 }
 
                 EtaText = eta.HasValue && eta.Value > TimeSpan.Zero
-                    ? $"Estimated time remaining: {eta.Value:mm\\:ss}"
+                    ? string.Format(CultureInfo.CurrentCulture, UIResources.EstimatedTimeRemainingFormat, eta.Value.ToString(@"mm\:ss", CultureInfo.CurrentCulture))
                     : string.Empty;
             });
         }
 
         private static string FormatBytes(long bytes)
         {
-            string[] units = { "B", "KB", "MB", "GB" };
+            string[] units = { UIResources.ByteB, UIResources.ByteKB, UIResources.ByteMB, UIResources.ByteGB };
             double value = bytes;
             int unitIndex = 0;
             while (value >= 1024 && unitIndex < units.Length - 1)

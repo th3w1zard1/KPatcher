@@ -1,20 +1,18 @@
 using System;
 using System.IO;
-using KPatcher.Core.Resources;
 using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Formats.ERF
 {
 
     /// <summary>
     /// Auto-detection and convenience functions for ERF files.
-    /// 1:1 port of Python erf_auto.py from pykotor/resource/formats/erf/erf_auto.py
     /// </summary>
     public static class ERFAuto
     {
         /// <summary>
         /// Returns an ERF instance from the source.
-        /// 1:1 port of Python read_erf function.
         /// </summary>
         public static ERF ReadErf(string source, int offset = 0, int size = 0)
         {
@@ -31,7 +29,6 @@ namespace KPatcher.Core.Formats.ERF
 
         /// <summary>
         /// Writes the ERF data to the target location with the specified format (ERF or MOD).
-        /// 1:1 port of Python write_erf function.
         /// </summary>
         public static void WriteErf(ERF erf, string target, ResourceType fileFormat)
         {
@@ -49,7 +46,6 @@ namespace KPatcher.Core.Formats.ERF
 
         /// <summary>
         /// Returns the ERF data as a byte array.
-        /// 1:1 port of Python bytes_erf function.
         /// </summary>
         public static byte[] BytesErf(ERF erf, [CanBeNull] ResourceType fileFormat = null)
         {

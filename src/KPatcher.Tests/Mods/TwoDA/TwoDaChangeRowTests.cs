@@ -10,9 +10,6 @@ using TwoDAFile = global::KPatcher.Core.Formats.TwoDA.TwoDA;
 namespace KPatcher.Core.Tests.Mods.TwoDA
 {
 
-    /// <summary>
-    /// Tests for 2DA ChangeRow modifications (ported from test_mods.py - TestManipulate2DA)
-    /// </summary>
     public class TwoDaChangeRowTests
     {
         [Fact]

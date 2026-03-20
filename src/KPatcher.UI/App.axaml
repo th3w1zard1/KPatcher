@@ -2,10 +2,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="KPatcher.UI.App"
              RequestedThemeVariant="Light">
-             <!-- Use Light theme to match Python's tkinter default white appearance -->
+    <!-- Use Light theme to match Python's tkinter default white appearance -->
+
+    <Application.Resources>
+        <!-- Spacing and layout -->
+        <Thickness x:Key="SpacingXs">2</Thickness>
+        <Thickness x:Key="SpacingSm">6</Thickness>
+        <Thickness x:Key="SpacingMd">10</Thickness>
+        <Thickness x:Key="SpacingLg">16</Thickness>
+        <Thickness x:Key="SpacingXl">20</Thickness>
+        <!-- Accent: deep blue (KOTOR-friendly, works on light background) -->
+        <SolidColorBrush x:Key="AccentBrush" Color="#1a4d7a"/>
+        <SolidColorBrush x:Key="AccentBrushHover" Color="#256394"/>
+        <!-- Card/panel -->
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FAFAFA"/>
+        <CornerRadius x:Key="CardCornerRadius">6</CornerRadius>
+        <CornerRadius x:Key="LogCornerRadius">6</CornerRadius>
+    </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
+        <!-- Primary action button (e.g. Install / Start Patching) -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <!-- Card panel for grouped content -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{StaticResource CardCornerRadius}"/>
+            <Setter Property="Padding" Value="12,10"/>
+        </Style>
+        <!-- Log/output area -->
+        <Style Selector="Border.logPanel">
+            <Setter Property="Background" Value="#FFFEFC"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{StaticResource LogCornerRadius}"/>
+        </Style>
     </Application.Styles>
 </Application>
 

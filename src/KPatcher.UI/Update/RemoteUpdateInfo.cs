@@ -45,8 +45,8 @@ namespace KPatcher.UI.Update
         /// </summary>
         public IReadOnlyList<string> GetPlatformMirrors(bool useBetaChannel)
         {
-            var platformKey = DetectPlatformKey();
-            var archKey = DetectArchitectureKey();
+            string platformKey = DetectPlatformKey();
+            string archKey = DetectArchitectureKey();
             var table = useBetaChannel ? BetaDirectLinks : ReleaseDirectLinks;
 
             if (table is null ||
@@ -150,7 +150,7 @@ namespace KPatcher.UI.Update
             }
 
             // If the dictionary already contains the typed payload we can shortcut.
-            if (raw.TryGetValue("__typed", out var typed) && typed is RemoteUpdateInfo cached)
+            if (raw.TryGetValue("__typed", out object typed) && typed is RemoteUpdateInfo cached)
             {
                 return cached;
             }

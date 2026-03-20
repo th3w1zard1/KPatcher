@@ -1,15 +1,14 @@
 using System;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods.TwoDA
 {
 
     /// <summary>
     /// Target type for 2DA row operations.
-    /// 1:1 port from Python TargetType in pykotor/kpatcher/mods/twoda.py
     /// </summary>
     public enum TargetType
     {
@@ -20,7 +19,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Represents a target row in a 2DA file.
-    /// 1:1 port from Python Target in pykotor/kpatcher/mods/twoda.py
     /// </summary>
     public class Target
     {
@@ -32,7 +30,6 @@ namespace KPatcher.Core.Mods.TwoDA
             TargetType = targetType;
             Value = value;
 
-            // Allow RowValueConstant for ROW_INDEX (it will be resolved to int in Search)
             if (targetType == TargetType.ROW_INDEX && value is string && !(value is RowValue))
             {
                 throw new ArgumentException("Target value must be int or RowValue if type is row index.");
@@ -46,7 +43,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
         /// <summary>
         /// Searches a TwoDA for a row matching the target.
-        /// 1:1 port from Python Target.search()
         /// </summary>
         [CanBeNull]
         public TwoDARow Search(Formats.TwoDA.TwoDA twoda, PatcherMemory memory)
@@ -124,7 +120,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Warning exception for 2DA modifications.
-    /// 1:1 port from Python WarningError
     /// </summary>
     public class WarningError : Exception
     {
@@ -133,7 +128,6 @@ namespace KPatcher.Core.Mods.TwoDA
 
     /// <summary>
     /// Critical exception for 2DA modifications.
-    /// 1:1 port from Python CriticalError
     /// </summary>
     public class CriticalError : Exception
     {

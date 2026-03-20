@@ -1,7 +1,5 @@
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:45-53
-    // Original: class ArrayHead:
     /// <summary>
     /// Represents an offset/length pair for array data in binary streams.
     /// </summary>

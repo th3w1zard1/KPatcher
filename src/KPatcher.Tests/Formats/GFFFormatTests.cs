@@ -1,10 +1,10 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Resources;
 using KPatcher.Core.Tests.Common;
-using FluentAssertions;
 using Xunit;
 using static global::KPatcher.Core.Formats.GFF.GFFAuto;
 
@@ -88,7 +88,7 @@ namespace KPatcher.Core.Tests.Formats
             var gff = new GFF();
 
             // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // Python: write_gff(GFF(), ".", ResourceType.GFF)
+            // write_gff(GFF(), ".", ResourceType.GFF)
             Action act1 = () => WriteGff(gff, ".", ResourceType.GFF);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -100,7 +100,7 @@ namespace KPatcher.Core.Tests.Formats
             }
 
             // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // Python: write_gff(GFF(), ".", ResourceType.INVALID)
+            // write_gff(GFF(), ".", ResourceType.INVALID)
             Action act2 = () => WriteGff(gff, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }

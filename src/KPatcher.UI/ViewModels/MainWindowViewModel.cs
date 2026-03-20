@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,23 +10,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
-using KPatcher.Core.Installation;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Namespaces;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Reader;
 using KPatcher.Core.Uninstall;
-using KPatcher.UI;
-using KPatcher.UI.Rte;
+using KPatcher.UI.Resources;
 using KPatcher.UI.Update;
-using KPatcher.UI.Views;
 using KPatcher.UI.Views.Dialogs;
-using JetBrains.Annotations;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 
@@ -35,14 +33,18 @@ namespace KPatcher.UI.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         private readonly PatchLogger _logger = new PatchLogger();
-        private readonly RobustLogger _pykotorLogger;
+        private readonly RobustLogger _robustLogger;
         private readonly StringBuilder _logTextBuilder = new StringBuilder();
-        private readonly List<FormattedLogEntry> _logEntries = new List<FormattedLogEntry>();
+
+        /// <summary>
+        /// Observable list of log entries for colored display in the View.
+        /// </summary>
+        public ObservableCollection<FormattedLogEntry> LogEntries { get; } = new ObservableCollection<FormattedLogEntry>();
 
         /// <summary>
         /// Gets all log entries for formatting. Used by View to format log display.
         /// </summary>
-        public IReadOnlyList<FormattedLogEntry> GetLogEntries() => _logEntries.AsReadOnly();
+        public IReadOnlyList<FormattedLogEntry> GetLogEntries() => LogEntries;
 
         private string _logText = string.Empty;
         private bool _isTaskRunning;
@@ -57,11 +59,17 @@ namespace KPatcher.UI.ViewModels
         private bool _isRtfContent = false;
         private string _rtfContent = string.Empty;
         private bool _isModSelectionVisible = true;
-        private RteDocument _activeRteDocument;
+        private bool _isShowingConfigurationSummary;
+        private string _configurationSummaryText = string.Empty;
+        // Cached info.rtf content when user toggles to configuration summary (restore when toggling back; no disk read).
+        private string _cachedInfoRtfContent = string.Empty;
+        private bool _cachedInfoIsRtf = true;
 
         /// <summary>
-        /// Whether the mod selection UI (combobox, Browse button, ? button) should be visible.
-        /// Set to false when a mod is auto-opened from a tslpatchdata folder next to the executable.
+        /// Whether the mod selection UI (combobox, Browse button, ? button) is visible.
+        /// Only set to false at startup when the app was run from (or next to) a tslpatchdata folder
+        /// with namespaces.ini/changes.ini/changes.yaml (conditionally-loaded UI). When true, the
+        /// game installation combobox appears below; when false, the game combobox is in its place.
         /// </summary>
         public bool IsModSelectionVisible
         {
@@ -69,34 +77,30 @@ namespace KPatcher.UI.ViewModels
             set => SetProperty(ref _isModSelectionVisible, value);
         }
 
-        public RteDocument ActiveRteDocument
-        {
-            get => _activeRteDocument;
-            private set => SetProperty(ref _activeRteDocument, value);
-        }
-
         /// <summary>
         /// Whether the current version is an alpha/pre-release version.
         /// Used to conditionally show alpha warnings and disclaimers.
         /// </summary>
-        public bool IsAlphaVersion => Core.IsAlphaVersion(Core.VersionLabel);
+        public bool IsAlphaVersion => Core.IsAlphaVersionOrLowerThanV1_0_0(Core.VersionLabel);
 
         /// <summary>
-        /// Window title matching Python's format: "KOTORPatcher {VERSION_LABEL}"
-        /// Includes alpha disclaimer only if version is alpha.
+        /// Window title: "KOTORPatcher". Includes alpha disclaimer only if version is alpha.
         /// </summary>
         public string WindowTitle
         {
             get
             {
-                string title = $"KOTORPatcher {Core.VersionLabel}";
+                string title = UIResources.MainWindowTitle;
                 if (IsAlphaVersion)
                 {
-                    title += " [ALPHA - NOT FOR PRODUCTION USE]";
+                    title += UIResources.WindowTitleAlphaSuffix;
                 }
                 return title;
             }
         }
+
+        /// <summary>Start patching button label (TSLPatcher .rsrc 0x004a2ba8).</summary>
+        public string StartPatchingButtonText => TSLPatcherMessages.StartPatchingButton;
 
         public string LogText
         {
@@ -133,6 +137,26 @@ namespace KPatcher.UI.ViewModels
         /// Inverse of IsRtfContent for XAML binding
         /// </summary>
         public bool IsNotRtfContent => !_isRtfContent;
+
+        /// <summary>
+        /// True when the main area shows the configuration summary (dry-run report); false when showing info.rtf/content.
+        /// </summary>
+        public bool IsShowingConfigurationSummary
+        {
+            get => _isShowingConfigurationSummary;
+            private set
+            {
+                if (SetProperty(ref _isShowingConfigurationSummary, value))
+                {
+                    OnPropertyChanged(nameof(DisplayedPlainText));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Plain text shown in the main area: configuration summary when toggled, otherwise the log.
+        /// </summary>
+        public string DisplayedPlainText => IsShowingConfigurationSummary ? _configurationSummaryText : LogText;
 
         /// <summary>
         /// RTF content to display in RichTextBox
@@ -182,6 +206,7 @@ namespace KPatcher.UI.ViewModels
                 if (SetProperty(ref _selectedNamespace, value))
                 {
                     OnSelectedNamespaceChanged(value);
+                    OnPropertyChanged(nameof(CanShowConfigurationSummary));
                 }
             }
         }
@@ -210,7 +235,7 @@ namespace KPatcher.UI.ViewModels
                     if (!string.IsNullOrEmpty(value))
                     {
                         string logFilePath = Core.GetLogFilePath(value);
-                        _pykotorLogger.SetLogFilePath(logFilePath);
+                        _robustLogger.SetLogFilePath(logFilePath);
                     }
                 }
             }
@@ -231,6 +256,10 @@ namespace KPatcher.UI.ViewModels
                                   !string.IsNullOrEmpty(SelectedNamespace) &&
                                   !string.IsNullOrEmpty(SelectedGamePath);
 
+        /// <summary>True when configuration summary can be shown (mod and config loaded).</summary>
+        public bool CanShowConfigurationSummary => !string.IsNullOrEmpty(SelectedNamespace) &&
+                                                    _currentConfigReader?.Config != null;
+
         public ICommand BrowseModCommand { get; }
         public ICommand BrowseGamePathCommand { get; }
         public ICommand InstallCommand { get; }
@@ -242,13 +271,15 @@ namespace KPatcher.UI.ViewModels
         public ICommand OpenUrlCommand { get; }
         public ICommand CheckUpdatesCommand { get; }
         public ICommand ShowNamespaceInfoCommand { get; }
-        public ICommand CreateRteCommand { get; }
+        public ICommand ShowHelpCommand { get; }
+        public ICommand SetLanguageCommand { get; }
+        public ICommand ToggleConfigurationSummaryCommand { get; }
 
         public MainWindowViewModel()
         {
-            // Initialize RobustLogger for pykotor errors/exceptions/warnings/info
+            // Initialize RobustLogger for KPatcher errors/exceptions/warnings/info
             // Will set log file path when mod is loaded
-            _pykotorLogger = new RobustLogger();
+            _robustLogger = new RobustLogger();
 
             // Initialize commands
             BrowseModCommand = new AsyncRelayCommand(BrowseMod);
@@ -262,7 +293,9 @@ namespace KPatcher.UI.ViewModels
             OpenUrlCommand = new RelayCommand<string>(OpenUrl);
             CheckUpdatesCommand = new AsyncRelayCommand(CheckUpdates);
             ShowNamespaceInfoCommand = new AsyncRelayCommand(ShowNamespaceInfo);
-            CreateRteCommand = new AsyncRelayCommand(CreateRte);
+            ShowHelpCommand = new RelayCommand(ShowHelp);
+            SetLanguageCommand = new RelayCommand<string>(SetLanguage);
+            ToggleConfigurationSummaryCommand = new AsyncRelayCommand(ToggleConfigurationSummary);
 
             // Subscribe to logger events
             _logger.VerboseLogged += OnLogEntry;
@@ -271,14 +304,25 @@ namespace KPatcher.UI.ViewModels
             _logger.ErrorLogged += OnLogEntry;
 
             // Initialize with welcome message
-            AddLogEntry("Welcome to KPatcher!", LogType.Note);
-            AddLogEntry("Select a mod and your KOTOR directory to begin.", LogType.Note);
+            AddLogEntry(UIResources.WelcomeToKPatcher, LogType.Note);
+            AddLogEntry(UIResources.SelectModAndKotorToBegin, LogType.Note);
 
-            // Try to detect KOTOR installations
-            DetectGamePaths();
+            // Try to detect KOTOR installations on UI thread so second combobox binding sees the update
+            Avalonia.Threading.Dispatcher.UIThread.Post(DetectGamePaths, Avalonia.Threading.DispatcherPriority.Loaded);
 
-            // Try to auto-open mod from tslpatchdata folder next to executable
-            _ = TryAutoOpenMod();
+            // Auto-open mod from tslpatchdata (if present), or reload mod after language change
+            _ = InitializeModAsync();
+        }
+
+        private async Task InitializeModAsync()
+        {
+            await TryAutoOpenMod();
+            if (!string.IsNullOrEmpty(Core.LastLoadedModPathForLanguageChange))
+            {
+                string path = Core.LastLoadedModPathForLanguageChange;
+                Core.LastLoadedModPathForLanguageChange = null;
+                await LoadModFromPath(path);
+            }
         }
 
         private void OnLogEntry([CanBeNull] object sender, PatchLog log)
@@ -288,8 +332,8 @@ namespace KPatcher.UI.ViewModels
 
         private void WriteLogEntry(PatchLog log)
         {
-            // Write ALL logs to file regardless of log level - matches Python behavior
-            // Python: log_file.write(f"{log.formatted_message}\n") happens BEFORE filtering
+            // Write ALL logs to file regardless of log level
+            // log_file.write(f"{log.formatted_message}\n") happens BEFORE filtering
             try
             {
                 string logFilePath = Core.GetLogFilePath(ModPath);
@@ -306,7 +350,7 @@ namespace KPatcher.UI.ViewModels
             catch (Exception ex)
             {
                 // Log error but don't fail
-                _pykotorLogger.Error($"Failed to write log file: {ex.Message}");
+                _robustLogger.Error($"Failed to write log file: {ex.Message}");
                 Debug.WriteLine($"Failed to write log file: {ex.Message}");
             }
 
@@ -351,10 +395,9 @@ namespace KPatcher.UI.ViewModels
             {
                 // Store formatted log entry for styled rendering in View
                 var entry = new FormattedLogEntry(message, logType);
-                _logEntries.Add(entry);
+                LogEntries.Add(entry);
 
-                // Update plain text property to trigger PropertyChanged event
-                // The View's FormatLogText() uses _logEntries for actual rendering
+                // Keep plain text for scroll-to-end and any consumers
                 _logTextBuilder.AppendLine(message);
                 LogText = _logTextBuilder.ToString();
             });
@@ -388,7 +431,7 @@ namespace KPatcher.UI.ViewModels
             string message = $"{contextPrefix}EXCEPTION: {ex.GetType().Name}: {ex.Message}";
 
             // Write using RobustLogger (which writes to installlog.txt)
-            _pykotorLogger.Exception(message, ex);
+            _robustLogger.Exception(message, ex);
 
             Debug.WriteLine(message);
             Debug.WriteLine($"{contextPrefix}STACK TRACE:");
@@ -425,7 +468,7 @@ namespace KPatcher.UI.ViewModels
 
             IReadOnlyList<IStorageFolder> folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Select Mod Directory",
+                Title = UIResources.SelectModDirectory,
                 AllowMultiple = false
             });
 
@@ -446,7 +489,7 @@ namespace KPatcher.UI.ViewModels
 
             IReadOnlyList<IStorageFolder> folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Select KOTOR Directory",
+                Title = UIResources.SelectKotorDirectory,
                 AllowMultiple = false
             });
 
@@ -459,6 +502,43 @@ namespace KPatcher.UI.ViewModels
                 }
                 SelectedGamePath = path;
             }
+        }
+
+        /// <summary>
+        /// Toggles the main area between configuration summary (dry-run report) and cached info.rtf/content.
+        /// Caches info content when first switching to summary so we don't reload from disk when switching back.
+        /// </summary>
+        private async Task ToggleConfigurationSummary()
+        {
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (IsShowingConfigurationSummary)
+                {
+                    // Switch back to info: restore cached content (no disk read)
+                    IsShowingConfigurationSummary = false;
+                    RtfContent = _cachedInfoRtfContent ?? string.Empty;
+                    IsRtfContent = _cachedInfoIsRtf;
+                    OnPropertyChanged(nameof(DisplayedPlainText));
+                    return;
+                }
+
+                // Switch to configuration summary: cache current info, then show summary
+                PatcherNamespace selectedNs = _loadedNamespaces?.FirstOrDefault(ns => ns.Name == SelectedNamespace);
+                if (selectedNs is null || _currentConfigReader?.Config == null)
+                {
+                    return;
+                }
+
+                _cachedInfoRtfContent = RtfContent ?? string.Empty;
+                _cachedInfoIsRtf = IsRtfContent;
+
+                string changesFileName = selectedNs.ChangesFilePath();
+                string infoFileName = selectedNs.RtfFilePath();
+                _configurationSummaryText = Core.BuildConfigurationSummary(changesFileName, infoFileName, _currentConfigReader.Config);
+                IsRtfContent = false;
+                IsShowingConfigurationSummary = true;
+                OnPropertyChanged(nameof(DisplayedPlainText));
+            });
         }
 
         private async Task Install()
@@ -483,7 +563,7 @@ namespace KPatcher.UI.ViewModels
                 }
 
                 // Use Core.InstallMod which handles path resolution correctly (matches Python)
-                // Python: installer = ModInstaller(namespace_mod_path, game_path, ini_file_path, logger)
+                // installer = ModInstaller(namespace_mod_path, game_path, ini_file_path, logger)
                 // where namespace_mod_path = ini_file_path.parent (parent of the ini file)
                 string tslPatchDataPath = Path.Combine(ModPath, "tslpatchdata");
                 string iniFilePath = Path.Combine(tslPatchDataPath, selectedNs.ChangesFilePath());
@@ -493,7 +573,7 @@ namespace KPatcher.UI.ViewModels
                     throw new FileNotFoundException($"Changes INI file not found: {iniFilePath}");
                 }
 
-                // Python: namespace_mod_path: CaseAwarePath = ini_file_path.parent
+                // namespace_mod_path: CaseAwarePath = ini_file_path.parent
                 // The modPath for ModInstaller should be the parent of the ini file, not the mod root
                 string namespaceModPath = Path.GetDirectoryName(iniFilePath) ?? tslPatchDataPath;
 
@@ -502,13 +582,28 @@ namespace KPatcher.UI.ViewModels
                     TslPatchDataPath = tslPatchDataPath
                 };
 
-                // Check for confirmation message
-                // Can be null if no confirmation message
+                // TSLPatcher-style confirmation before starting (always shown unless one-shot)
+                if (!_oneShot)
+                {
+                    MsBox.Avalonia.Base.IMsBox<ButtonResult> confirmBox = MessageBoxManager.GetMessageBoxStandard(
+                        UIResources.StartPatchingButtonLabel,
+                        TSLPatcherMessages.StartPatchingConfirmation,
+                        ButtonEnum.YesNo,
+                        Icon.Question);
+                    ButtonResult result = await confirmBox.ShowAsync();
+                    if (result != ButtonResult.Yes)
+                    {
+                        IsTaskRunning = false;
+                        return;
+                    }
+                }
+
+                // Mod-specific confirmation message from changes.ini (if any)
                 string confirmMsg = Core.GetConfirmMessage(installer);
                 if (!string.IsNullOrEmpty(confirmMsg) && !_oneShot)
                 {
                     MsBox.Avalonia.Base.IMsBox<ButtonResult> confirmBox = MessageBoxManager.GetMessageBoxStandard(
-                        "This mod requires confirmation",
+                        UIResources.ThisModRequiresConfirmation,
                         confirmMsg,
                         ButtonEnum.OkCancel,
                         Icon.Question);
@@ -520,7 +615,7 @@ namespace KPatcher.UI.ViewModels
                     }
                 }
 
-                AddLogEntry("Starting installation...", LogType.Note);
+                AddLogEntry(UIResources.StartingInstallation, LogType.Note);
 
                 // Calculate total patches for progress
                 int totalPatches = Core.CalculateTotalPatches(installer);
@@ -548,53 +643,58 @@ namespace KPatcher.UI.ViewModels
 
                 string timeStr = Core.FormatInstallTime(installTime);
                 _logger.AddNote(
-                    $"The installation is complete with {numErrors} errors and {numWarnings} warnings.{Environment.NewLine}" +
-                    $"Total install time: {timeStr}{Environment.NewLine}" +
-                    $"Total patches: {numPatches}");
+                    string.Format(CultureInfo.CurrentCulture, UIResources.InstallationCompleteWithErrorsAndWarningsFormat, numErrors, numWarnings, Environment.NewLine, timeStr, numPatches));
 
                 ProgressValue = ProgressMaximum;
 
-                // Show completion message
-                if (numErrors > 0)
+                // Show TSLPatcher-style completion message (four variants)
+                string completionBody;
+                Icon completionIcon;
+                string completionTitle;
+                if (numErrors > 0 && numWarnings > 0)
                 {
-                    MsBox.Avalonia.Base.IMsBox<ButtonResult> errorBox = MessageBoxManager.GetMessageBoxStandard(
-                        "Install completed with errors!",
-                        $"The install completed with {numErrors} errors and {numWarnings} warnings! The installation may not have been successful, check the logs for more details.{Environment.NewLine}{Environment.NewLine}Total install time: {timeStr}{Environment.NewLine}Total patches: {numPatches}",
-                        ButtonEnum.Ok,
-                        Icon.Error);
-                    await errorBox.ShowAsync();
+                    completionTitle = UIResources.PatcherFinishedTitle;
+                    completionBody = string.Format(CultureInfo.CurrentCulture, TSLPatcherMessages.PatcherFinishedWithErrorsAndWarnings, numErrors, numWarnings);
+                    completionIcon = Icon.Error;
+                }
+                else if (numErrors > 0)
+                {
+                    completionTitle = UIResources.PatcherFinishedTitle;
+                    completionBody = string.Format(CultureInfo.CurrentCulture, TSLPatcherMessages.PatcherFinishedWithErrors, numErrors);
+                    completionIcon = Icon.Error;
                 }
                 else if (numWarnings > 0)
                 {
-                    MsBox.Avalonia.Base.IMsBox<ButtonResult> warningBox = MessageBoxManager.GetMessageBoxStandard(
-                        "Install completed with warnings",
-                        $"The install completed with {numWarnings} warnings! Review the logs for details. The script in the 'uninstall' folder of the mod directory will revert these changes.{Environment.NewLine}{Environment.NewLine}Total install time: {timeStr}{Environment.NewLine}Total patches: {numPatches}",
-                        ButtonEnum.Ok,
-                        Icon.Warning);
-                    await warningBox.ShowAsync();
+                    completionTitle = UIResources.PatcherFinishedTitle;
+                    completionBody = string.Format(CultureInfo.CurrentCulture, TSLPatcherMessages.PatcherFinishedWithWarnings, numWarnings);
+                    completionIcon = Icon.Warning;
                 }
                 else
                 {
-                    MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                        "Install complete!",
-                        $"Check the logs for details on what has been done. Utilize the script in the 'uninstall' folder of the mod directory to revert these changes.{Environment.NewLine}{Environment.NewLine}Total install time: {timeStr}{Environment.NewLine}Total patches: {numPatches}",
-                        ButtonEnum.Ok,
-                        Icon.Success);
-                    await infoBox.ShowAsync();
+                    completionTitle = UIResources.PatcherFinishedTitle;
+                    completionBody = TSLPatcherMessages.PatcherFinished;
+                    completionIcon = Icon.Success;
                 }
+                MsBox.Avalonia.Base.IMsBox<ButtonResult> completionBox = MessageBoxManager.GetMessageBoxStandard(
+                    completionTitle,
+                    completionBody,
+                    ButtonEnum.Ok,
+                    completionIcon);
+                await completionBox.ShowAsync();
             }
             catch (OperationCanceledException ex)
             {
                 LogExceptionToDebugConsole(ex, "Install (Cancelled)");
-                AddLogEntry("[WARNING] Installation was cancelled.");
+                AddLogEntry(UIResources.InstallationCancelled, LogType.Warning);
             }
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "Install");
-                AddLogEntry($"[ERROR] Installation failed: {ex.Message}");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.InstallationFailedFormat, ex.Message), LogType.Error);
+                string installErrorMsg = string.Format(CultureInfo.CurrentCulture, UIResources.UnexpectedErrorDuringInstallationFormat, Environment.NewLine, ex.Message);
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> errorBox = MessageBoxManager.GetMessageBoxStandard(
-                    ex.GetType().Name,
-                    $"An unexpected error occurred during the installation and the installation was forced to terminate.{Environment.NewLine}{Environment.NewLine}{ex.Message}",
+                    UIResources.Error,
+                    installErrorMsg,
                     ButtonEnum.Ok,
                     Icon.Error);
                 await errorBox.ShowAsync();
@@ -612,12 +712,10 @@ namespace KPatcher.UI.ViewModels
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
                 _logTextBuilder.Clear();
-                _logEntries.Clear(); // Clear formatted log entries too
+                LogEntries.Clear();
                 LogText = string.Empty;
                 RtfContent = string.Empty;
                 IsRtfContent = false;
-                ActiveRteDocument = null;
-                OnPropertyChanged(nameof(ActiveRteDocument));
             });
         }
 
@@ -625,6 +723,11 @@ namespace KPatcher.UI.ViewModels
         {
             Window window = GetMainWindow();
             window?.Close();
+        }
+
+        private void SetLanguage(string twoLetterCode)
+        {
+            App.RequestLanguageChange(twoLetterCode);
         }
 
         private async Task ValidateIni()
@@ -653,12 +756,12 @@ namespace KPatcher.UI.ViewModels
                 catch (Exception ex)
                 {
                     LogExceptionToDebugConsole(ex, "ValidateIni");
-                    AddLogEntry($"[ERROR] Validation failed: {ex.Message}");
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.ValidationFailedFormat, ex.Message), LogType.Error);
                 }
                 finally
                 {
                     IsTaskRunning = false;
-                    _logger.AddNote("Config reader test is complete.");
+                    _logger.AddNote(UIResources.ConfigReaderTestComplete);
                 }
             });
         }
@@ -684,7 +787,7 @@ namespace KPatcher.UI.ViewModels
 
                 if (!Directory.Exists(backupsLocation))
                 {
-                    AddLogEntry($"[ERROR] No backup directory found at {backupsLocation}");
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.NoBackupDirectoryFoundFormat, backupsLocation), LogType.Error);
                     return;
                 }
 
@@ -733,16 +836,17 @@ namespace KPatcher.UI.ViewModels
                                 }
                             }).Wait();
                             return result;
-                        }
+                        },
+                        ui: Core.CreateModUninstallerUiStrings()
                     );
                 });
 
-                AddLogEntry("Uninstall process finished.");
+                AddLogEntry(UIResources.UninstallProcessFinished);
             }
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "UninstallMod");
-                AddLogEntry($"[ERROR] Uninstall failed: {ex.Message}");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.UninstallFailedFormat, ex.Message), LogType.Error);
             }
             finally
             {
@@ -760,7 +864,7 @@ namespace KPatcher.UI.ViewModels
 
             IReadOnlyList<IStorageFolder> folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Select Directory to Fix Permissions",
+                Title = UIResources.SelectDirectoryFixPermissions,
                 AllowMultiple = false
             });
 
@@ -772,8 +876,8 @@ namespace KPatcher.UI.ViewModels
             string directory = folders[0].Path.LocalPath;
 
             MsBox.Avalonia.Base.IMsBox<ButtonResult> confirmBox = MessageBoxManager.GetMessageBoxStandard(
-                "Warning!",
-                "This is not a toy. Really continue?",
+                UIResources.WarningTitle,
+                UIResources.WarningNotAToy,
                 ButtonEnum.YesNo,
                 Icon.Warning);
             ButtonResult result = await confirmBox.ShowAsync();
@@ -784,7 +888,7 @@ namespace KPatcher.UI.ViewModels
 
             IsTaskRunning = true;
             ClearLogText();
-            AddLogEntry("Please wait, this may take awhile...");
+            AddLogEntry(UIResources.PleaseWaitMayTakeAWhile);
 
             await Task.Run(() =>
             {
@@ -800,14 +904,14 @@ namespace KPatcher.UI.ViewModels
                         numFolders = Directory.GetDirectories(directory, "*", SearchOption.AllDirectories).Length;
                     }
 
-                    string extraMsg = $"{numFiles} files and {numFolders} folders finished processing.";
+                    string extraMsg = string.Format(CultureInfo.CurrentCulture, UIResources.FilesAndFoldersProcessedFormat, numFiles, numFolders);
                     AddLogEntry(extraMsg);
 
                     Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
                     {
                         MsBox.Avalonia.Base.IMsBox<ButtonResult> successBox = MessageBoxManager.GetMessageBoxStandard(
-                            "Successfully acquired permission",
-                            $"The operation was successful. {extraMsg}",
+                            UIResources.SuccessfullyAcquiredPermission,
+                            string.Format(CultureInfo.CurrentCulture, UIResources.OperationSuccessfulFormat, extraMsg),
                             ButtonEnum.Ok,
                             Icon.Success);
                         await successBox.ShowAsync();
@@ -816,12 +920,13 @@ namespace KPatcher.UI.ViewModels
                 catch (Exception ex)
                 {
                     LogExceptionToDebugConsole(ex, "FixPermissions");
-                    AddLogEntry($"[ERROR] Failed to fix permissions: {ex.Message}");
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.FailedToFixPermissionsFormat, ex.Message), LogType.Error);
+                    string permErrorMsg = string.Format(CultureInfo.CurrentCulture, UIResources.PermissionsDeniedCheckLogsFormat, Environment.NewLine, ex.Message);
                     Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
                     {
                         MsBox.Avalonia.Base.IMsBox<ButtonResult> errorBox = MessageBoxManager.GetMessageBoxStandard(
-                            "Could not acquire permission!",
-                            $"Permissions denied! Check the logs for more details.{Environment.NewLine}{ex.Message}",
+                            UIResources.CouldNotAcquirePermission,
+                            permErrorMsg,
                             ButtonEnum.Ok,
                             Icon.Error);
                         await errorBox.ShowAsync();
@@ -830,7 +935,7 @@ namespace KPatcher.UI.ViewModels
                 finally
                 {
                     IsTaskRunning = false;
-                    _logger.AddNote("File/Folder permissions fixer task completed.");
+                    _logger.AddNote(UIResources.PermissionsFixerTaskCompleted);
                 }
             });
         }
@@ -845,7 +950,7 @@ namespace KPatcher.UI.ViewModels
 
             IReadOnlyList<IStorageFolder> folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Select Directory to Fix Case Sensitivity",
+                Title = UIResources.SelectDirectoryFixCaseSensitivity,
                 AllowMultiple = false
             });
 
@@ -858,14 +963,14 @@ namespace KPatcher.UI.ViewModels
 
             IsTaskRunning = true;
             ClearLogText();
-            AddLogEntry("Please wait, this may take awhile...");
+            AddLogEntry(UIResources.PleaseWaitMayTakeAWhile);
 
             await Task.Run(() =>
             {
                 try
                 {
                     bool madeChange = false;
-                    SystemHelpers.FixCaseSensitivity(directory, msg =>
+                    SystemHelpers.FixCaseSensitivityRecursive(directory, msg =>
                     {
                         AddLogEntry(msg);
                         madeChange = true;
@@ -873,14 +978,14 @@ namespace KPatcher.UI.ViewModels
 
                     if (!madeChange)
                     {
-                        AddLogEntry("Nothing to change - all files/folders already correct case.");
+                        AddLogEntry(UIResources.NothingToChangeCase);
                     }
-                    AddLogEntry("iOS case rename task completed.");
+                    AddLogEntry(UIResources.IOSCaseRenameTaskCompleted);
                 }
                 catch (Exception ex)
                 {
                     LogExceptionToDebugConsole(ex, "FixCaseSensitivity");
-                    AddLogEntry($"[ERROR] Failed to fix case sensitivity: {ex.Message}");
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.FailedToFixCaseSensitivityFormat, ex.Message), LogType.Error);
                 }
                 finally
                 {
@@ -902,7 +1007,7 @@ namespace KPatcher.UI.ViewModels
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "OpenUrl");
-                AddLogEntry($"[ERROR] Failed to open URL: {ex.Message}");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.FailedToOpenUrlFormat, ex.Message), LogType.Error);
             }
         }
 
@@ -911,10 +1016,10 @@ namespace KPatcher.UI.ViewModels
             try
             {
                 bool useBetaChannel = false;
-                Dictionary<string, object> updateInfo = await Config.GetRemoteHolopatcherUpdateInfoAsync(useBetaChannel);
+                Dictionary<string, object> updateInfo = await Config.GetRemoteKPatcherUpdateInfoAsync(useBetaChannel);
                 if (updateInfo.Count == 0)
                 {
-                    await ShowErrorAsync("Update Error", "Unable to fetch update information. Please try again later.");
+                    await ShowErrorAsync(UIResources.UpdateError, UIResources.UnableToFetchUpdateInfo);
                     return;
                 }
 
@@ -924,23 +1029,23 @@ namespace KPatcher.UI.ViewModels
                 if (Config.RemoteVersionNewer(Config.CurrentVersion, latestVersion))
                 {
                     string notes = remoteInfo.GetChannelNotes(useBetaChannel);
-                    string message = $"A newer version of KPatcher ({latestVersion}) is available.{Environment.NewLine}{Environment.NewLine}{notes}";
-                    string choice = await ShowChoiceDialogAsync("Update Available", message, "Update", "Manual Download");
+                    string message = string.Format(CultureInfo.CurrentCulture, UIResources.UpdateAvailableMessageFormat, latestVersion, Environment.NewLine, notes);
+                    string choice = await ShowChoiceDialogAsync(UIResources.UpdateAvailable, message, UIResources.UpdateButton, UIResources.ManualDownloadButton);
 
-                    if (choice == "Update")
+                    if (choice == UIResources.UpdateButton)
                     {
                         await RunAutoUpdate(remoteInfo, useBetaChannel);
                     }
-                    else if (choice == "Manual Download")
+                    else if (choice == UIResources.ManualDownloadButton)
                     {
                         OpenUrl(remoteInfo.GetDownloadPage(useBetaChannel));
                     }
                 }
                 else
                 {
-                    string message = $"You are already running the latest version of KPatcher ({Core.VersionLabel}).";
-                    string choice = await ShowChoiceDialogAsync("No Updates Found", message, "Reinstall");
-                    if (choice == "Reinstall")
+                    string message = string.Format(CultureInfo.CurrentCulture, UIResources.NoUpdatesFoundMessageFormat, Core.VersionLabel);
+                    string choice = await ShowChoiceDialogAsync(UIResources.NoUpdatesFound, message, UIResources.ReinstallButton);
+                    if (choice == UIResources.ReinstallButton)
                     {
                         await RunAutoUpdate(remoteInfo, useBetaChannel);
                     }
@@ -949,7 +1054,7 @@ namespace KPatcher.UI.ViewModels
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "CheckUpdates");
-                await ShowErrorAsync("Unable to fetch latest version", ex.Message);
+                await ShowErrorAsync(UIResources.UpdateError, ex.Message);
             }
         }
 
@@ -958,8 +1063,8 @@ namespace KPatcher.UI.ViewModels
             if (string.IsNullOrEmpty(SelectedNamespace))
             {
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                    "No namespace selected",
-                    "Please select a namespace first.",
+                    UIResources.NoNamespaceSelected,
+                    UIResources.PleaseSelectNamespaceFirst,
                     ButtonEnum.Ok,
                     Icon.Info);
                 await infoBox.ShowAsync();
@@ -969,10 +1074,25 @@ namespace KPatcher.UI.ViewModels
             string description = Core.GetNamespaceDescription(_loadedNamespaces, SelectedNamespace);
             MsBox.Avalonia.Base.IMsBox<ButtonResult> descBox = MessageBoxManager.GetMessageBoxStandard(
                 SelectedNamespace,
-                string.IsNullOrEmpty(description) ? "No description available." : description,
+                string.IsNullOrEmpty(description) ? UIResources.NoDescriptionAvailable : description,
                 ButtonEnum.Ok,
                 Icon.Info);
             await descBox.ShowAsync();
+        }
+
+        private void ShowHelp()
+        {
+            Window owner = GetMainWindow();
+            var helpWindow = new HelpWindow();
+            if (owner != null)
+            {
+                helpWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
+                helpWindow.Show(owner);
+            }
+            else
+            {
+                helpWindow.Show();
+            }
         }
 
         private async Task<string> ShowChoiceDialogAsync(string title, string message, params string[] options)
@@ -1002,62 +1122,19 @@ namespace KPatcher.UI.ViewModels
             Window window = GetMainWindow();
             if (window is null)
             {
-                AddLogEntry("[ERROR] Unable to locate window for updater UI.");
+                AddLogEntry(UIResources.UnableToLocateWindowForUpdater, LogType.Error);
                 return;
             }
 
-            var updater = new AutoUpdater(info, window, useBetaChannel);
+            var updater = new AutoUpdater();
             await updater.RunAsync();
         }
 
         /// <summary>
-        /// Opens RTE editor dialog - matches Python's create_rte_content functionality.
+        /// Loads a mod from a directory. Accepts either the mod root (folder containing tslpatchdata)
+        /// or the tslpatchdata folder itself; Core.LoadMod normalizes to the same internal mod path.
+        /// On success, hides the mod selector so the configuration summary UI is shown (TSLPatcher parity).
         /// </summary>
-        private async Task CreateRte()
-        {
-            Window window = GetMainWindow();
-            if (window is null)
-            {
-                AddLogEntry("[ERROR] Unable to open RTE editor: window not available.");
-                return;
-            }
-
-            var editor = new RteEditorWindow(ModPath);
-            await editor.ShowDialog(window);
-        }
-
-        /// <summary>
-        /// Loads and displays RTE (Rich Text Editor) content from JSON format.
-        /// Matches Python's load_rte_content function.
-        /// </summary>
-        /// <param name="rteContent">JSON-formatted RTE content string</param>
-        private void LoadRteContent(string rteContent)
-        {
-            try
-            {
-                ActiveRteDocument = RteDocument.Parse(rteContent);
-                OnPropertyChanged(nameof(ActiveRteDocument));
-                IsRtfContent = true;
-                RtfContent = string.Empty;
-            }
-            catch (Exception ex)
-            {
-                LogExceptionToDebugConsole(ex, "LoadRteContent");
-                AddLogEntry($"[ERROR] Failed to load RTE content: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// RTE document structure matching Python's JSON format.
-        /// This is a legacy structure - use KPatcher.Rte.RteDocument instead.
-        /// </summary>
-        private class LegacyRteDocument
-        {
-            public string Content { get; set; } = string.Empty;
-            public Dictionary<string, Dictionary<string, string>> TagConfigs { get; set; } = new Dictionary<string, Dictionary<string, string>>();
-            public Dictionary<string, List<string[]>> Tags { get; set; } = new Dictionary<string, List<string[]>>();
-        }
-
         private async Task LoadModFromPath(string path)
         {
             try
@@ -1067,11 +1144,12 @@ namespace KPatcher.UI.ViewModels
                 _loadedNamespaces = modInfo.Namespaces;
                 _currentConfigReader = modInfo.ConfigReader;
 
-                AddLogEntry($"Loaded {_loadedNamespaces.Count} namespace(s)");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.LoadedNamespacesCountFormat, _loadedNamespaces.Count));
 
-                // Update UI on main thread
+                // Update UI on main thread (mod selector visibility is only set on startup by TryAutoOpenMod)
                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
+                    OnPropertyChanged(nameof(CanShowConfigurationSummary));
                     Namespaces.Clear();
                     foreach (PatcherNamespace ns in _loadedNamespaces)
                     {
@@ -1089,10 +1167,10 @@ namespace KPatcher.UI.ViewModels
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "LoadModFromPath");
-                AddLogEntry($"[ERROR] Failed to load mod: {ex.Message}");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.FailedToLoadModFormat, ex.Message), LogType.Error);
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> errorBox = MessageBoxManager.GetMessageBoxStandard(
-                    "Error",
-                    $"Could not find a mod located at the given folder.{Environment.NewLine}{ex.Message}",
+                    UIResources.Error,
+                    string.Format(CultureInfo.CurrentCulture, UIResources.CouldNotFindModAtFolderFormat, Environment.NewLine, ex.Message),
                     ButtonEnum.Ok,
                     Icon.Error);
                 await errorBox.ShowAsync();
@@ -1111,10 +1189,10 @@ namespace KPatcher.UI.ViewModels
                 Core.NamespaceInfo namespaceInfo = Core.LoadNamespaceConfig(ModPath, _loadedNamespaces, SelectedNamespace, _currentConfigReader);
                 _logLevel = namespaceInfo.LogLevel;
 
-                // Update game paths based on namespace
-                if (namespaceInfo.GamePaths.Count > 0)
+                // Update game paths based on namespace (from FindKotorPathsFromDefault in Core)
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                    if (namespaceInfo.GamePaths.Count > 0)
                     {
                         GamePaths.Clear();
                         foreach (string gamePath in namespaceInfo.GamePaths)
@@ -1128,8 +1206,25 @@ namespace KPatcher.UI.ViewModels
                         {
                             SelectedGamePath = GamePaths[0];
                         }
-                    });
-                }
+                    }
+                    else
+                    {
+                        // No game number in mod config or no paths for that game: keep combobox populated from detected paths
+                        List<string> detected = Core.GetDetectedKotorPaths();
+                        if (detected.Count > 0)
+                        {
+                            GamePaths.Clear();
+                            foreach (string path in detected)
+                            {
+                                GamePaths.Add(path);
+                            }
+                            if (string.IsNullOrEmpty(SelectedGamePath))
+                            {
+                                SelectedGamePath = GamePaths[0];
+                            }
+                        }
+                    }
+                });
 
                 // Load and display info.rtf/rte content
                 if (!string.IsNullOrEmpty(namespaceInfo.InfoContent))
@@ -1139,7 +1234,6 @@ namespace KPatcher.UI.ViewModels
 
                     if (namespaceInfo.IsRtf)
                     {
-                        // RTF content - render directly using AvRichTextBox!
                         Console.WriteLine("[RTF] Setting IsRtfContent=true and RtfContent on UI thread");
                         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                         {
@@ -1148,15 +1242,9 @@ namespace KPatcher.UI.ViewModels
                             Console.WriteLine($"[RTF] Properties set: IsRtfContent={IsRtfContent}, RtfContent length={RtfContent?.Length ?? 0}");
                         }, Avalonia.Threading.DispatcherPriority.Normal);
                     }
-                    else if (namespaceInfo.InfoContent.TrimStart().StartsWith("{"))
-                    {
-                        // RTE (JSON) content
-                        Console.WriteLine("[RTF] Detected RTE (JSON) content");
-                        LoadRteContent(namespaceInfo.InfoContent);
-                    }
                     else
                     {
-                        // Plain text content
+                        // Plain text fallback (e.g. non-RTF file named info.rtf)
                         Console.WriteLine("[RTF] Detected plain text content");
                         IsRtfContent = false;
                         AddLogEntry(namespaceInfo.InfoContent);
@@ -1164,20 +1252,27 @@ namespace KPatcher.UI.ViewModels
                 }
                 else
                 {
-                    Console.WriteLine("[RTF] InfoContent is empty");
+                    // TSLPatcher parity: show exact error when info.rtf is missing (.rsrc 0x004a2a62)
+                    Console.WriteLine("[RTF] InfoContent is empty (info.rtf/rte missing)");
                     IsRtfContent = false;
+                    ClearLogText();
+                    AddLogEntry(TSLPatcherMessages.UnableToLoadInstructionsTslpatchdata, LogType.Error);
                 }
             }
             catch (Exception ex)
             {
                 LogExceptionToDebugConsole(ex, "OnNamespaceSelected");
-                AddLogEntry($"[ERROR] Failed to load namespace config: {ex.Message}");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.FailedToLoadNamespaceConfigFormat, ex.Message), LogType.Error);
             }
         }
 
         private void OnSelectedNamespaceChanged([CanBeNull] string value)
         {
             OnPropertyChanged(nameof(CanInstall));
+            if (IsShowingConfigurationSummary)
+            {
+                IsShowingConfigurationSummary = false;
+            }
             if (!string.IsNullOrEmpty(value))
             {
                 OnNamespaceSelected();
@@ -1197,7 +1292,7 @@ namespace KPatcher.UI.ViewModels
             if (GamePaths.Count > 0)
             {
                 SelectedGamePath = GamePaths[0];
-                AddLogEntry($"Detected {GamePaths.Count} KOTOR installation(s).");
+                AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.DetectedKotorInstallationsFormat, GamePaths.Count));
             }
         }
 
@@ -1225,8 +1320,8 @@ namespace KPatcher.UI.ViewModels
             if (IsTaskRunning)
             {
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                    "Task already running",
-                    "Wait for the previous task to finish.",
+                    UIResources.TaskAlreadyRunning,
+                    UIResources.WaitForPreviousTask,
                     ButtonEnum.Ok,
                     Icon.Info);
                 Avalonia.Threading.Dispatcher.UIThread.Post(async () => await infoBox.ShowAsync());
@@ -1236,8 +1331,8 @@ namespace KPatcher.UI.ViewModels
             if (string.IsNullOrEmpty(ModPath) || !Directory.Exists(ModPath))
             {
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                    "No mod chosen",
-                    "Select your mod directory first.",
+                    UIResources.NoModChosen,
+                    UIResources.SelectModDirectoryFirst,
                     ButtonEnum.Ok,
                     Icon.Info);
                 Avalonia.Threading.Dispatcher.UIThread.Post(async () => await infoBox.ShowAsync());
@@ -1247,8 +1342,8 @@ namespace KPatcher.UI.ViewModels
             if (string.IsNullOrEmpty(SelectedGamePath))
             {
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                    "No KOTOR directory chosen",
-                    "Select your KOTOR directory first.",
+                    UIResources.NoGameFolder,
+                    TSLPatcherMessages.NoValidGameFolderSelected,
                     ButtonEnum.Ok,
                     Icon.Info);
                 Avalonia.Threading.Dispatcher.UIThread.Post(async () => await infoBox.ShowAsync());
@@ -1259,8 +1354,20 @@ namespace KPatcher.UI.ViewModels
             if (!gamePath.IsDirectory())
             {
                 MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
-                    "Invalid KOTOR directory chosen",
-                    "Select a valid path to your KOTOR install.",
+                    UIResources.NoGameFolder,
+                    TSLPatcherMessages.NoValidGameFolderSelected,
+                    ButtonEnum.Ok,
+                    Icon.Info);
+                Avalonia.Threading.Dispatcher.UIThread.Post(async () => await infoBox.ShowAsync());
+                return false;
+            }
+
+            string dialogTlkPath = Path.Combine(SelectedGamePath, "dialog.tlk");
+            if (!File.Exists(dialogTlkPath))
+            {
+                MsBox.Avalonia.Base.IMsBox<ButtonResult> infoBox = MessageBoxManager.GetMessageBoxStandard(
+                    UIResources.InvalidGameFolder,
+                    TSLPatcherMessages.InvalidGameFolderDialogTlkNotFound,
                     ButtonEnum.Ok,
                     Icon.Info);
                 Avalonia.Threading.Dispatcher.UIThread.Post(async () => await infoBox.ShowAsync());
@@ -1279,59 +1386,47 @@ namespace KPatcher.UI.ViewModels
         {
             if (string.IsNullOrEmpty(ModPath) || string.IsNullOrEmpty(SelectedGamePath))
             {
-                AddLogEntry("[ERROR] Please select both a mod and game directory.");
+                AddLogEntry(UIResources.PleaseSelectModAndGameDirectory, LogType.Error);
                 return false;
             }
             return true;
         }
 
         /// <summary>
-        /// Attempts to auto-open a mod if a tslpatchdata folder exists next to the executable
-        /// that contains changes.ini and/or namespaces.ini.
+        /// Attempts to auto-open a mod when the app starts inside or next to a tslpatchdata folder.
+        /// Checks: (1) exe directory contains tslpatchdata with config, (2) exe directory is itself
+        /// tslpatchdata (has namespaces.ini/changes.ini/changes.yaml), (3) same for current working directory.
+        /// Uses the same summary UI (mod selector hidden) as when the user browses to a mod folder.
         /// </summary>
         private async Task TryAutoOpenMod()
         {
             try
             {
-                // Get the directory where the executable is located
-                string exeDirectory = AppContext.BaseDirectory;
-                if (string.IsNullOrEmpty(exeDirectory))
+                string exeDirectory = string.IsNullOrEmpty(AppContext.BaseDirectory)
+                    ? Directory.GetCurrentDirectory()
+                    : Path.GetFullPath(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                string cwd = Directory.GetCurrentDirectory();
+
+                // Try exe directory first (mod root, or exe running inside tslpatchdata)
+                if (Core.IsValidModPath(exeDirectory))
                 {
-                    // Fallback to current directory
-                    exeDirectory = Directory.GetCurrentDirectory();
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.AutoOpeningModFromFormat, exeDirectory));
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => { IsModSelectionVisible = false; });
+                    await LoadModFromPath(exeDirectory);
+                    return;
                 }
 
-                // Check for tslpatchdata folder next to executable
-                string tslPatchDataPath = Path.Combine(exeDirectory, "tslpatchdata");
-
-                // Check if tslpatchdata folder exists and contains the required files
-                if (Directory.Exists(tslPatchDataPath))
+                // Try current working directory if different (e.g. user cd'd into mod folder and ran app)
+                if (!string.Equals(exeDirectory, cwd, StringComparison.OrdinalIgnoreCase) && Core.IsValidModPath(cwd))
                 {
-                    string changesIniPath = Path.Combine(tslPatchDataPath, "changes.ini");
-                    string namespacesIniPath = Path.Combine(tslPatchDataPath, "namespaces.ini");
-
-                    // Check if at least one of the required files exists
-                    if (File.Exists(changesIniPath) || File.Exists(namespacesIniPath))
-                    {
-                        // Auto-open the mod using the parent directory (the mod root)
-                        string modPath = exeDirectory;
-                        AddLogEntry($"Auto-opening mod from: {modPath}");
-
-                        // Hide the mod selection UI since we're auto-opening
-                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                        {
-                            IsModSelectionVisible = false;
-                        });
-
-                        // Load the mod
-                        await LoadModFromPath(modPath);
-                        return;
-                    }
+                    AddLogEntry(string.Format(CultureInfo.CurrentCulture, UIResources.AutoOpeningModFromFormat, cwd));
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => { IsModSelectionVisible = false; });
+                    await LoadModFromPath(cwd);
+                    return;
                 }
             }
             catch (Exception ex)
             {
-                // Log error but don't fail - just continue normally
                 LogExceptionToDebugConsole(ex, "TryAutoOpenMod");
                 Debug.WriteLine($"Failed to auto-open mod: {ex.Message}");
             }
@@ -1340,36 +1435,42 @@ namespace KPatcher.UI.ViewModels
 
     /// <summary>
     /// Represents a formatted log entry with its log type for color/styling.
-    /// Matches Python's log tag system.
+    /// Uses idiomatic log-level colors: error=red, warning=dark golden yellow, verbose=light blue, note=default.
     /// </summary>
     public class FormattedLogEntry
     {
         public string Message { get; }
         public LogType LogType { get; }
         public string TagName { get; }
+        /// <summary>Brush for this log level (idiomatic colors).</summary>
+        public IBrush EntryBrush { get; }
 
         public FormattedLogEntry(string message, LogType logType)
         {
             Message = message;
             LogType = logType;
 
-            // Map LogType to tag name matching Python's log_to_tag function
             switch (logType)
             {
                 case LogType.Note:
                     TagName = "INFO";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#000000")); // default/info black
                     break;
                 case LogType.Verbose:
                     TagName = "DEBUG";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#87CEEB")); // light sky blue
                     break;
                 case LogType.Warning:
                     TagName = "WARNING";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#B8860B")); // dark goldenrod
                     break;
                 case LogType.Error:
                     TagName = "ERROR";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#DC143C")); // crimson red
                     break;
                 default:
                     TagName = "INFO";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#000000"));
                     break;
             }
         }

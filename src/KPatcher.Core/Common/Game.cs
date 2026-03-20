@@ -1,7 +1,5 @@
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:250-285
-    // Original: class Game(IntEnum):
     /// <summary>
     /// Represents which KOTOR game / platform variant.
     /// </summary>

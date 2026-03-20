@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using IniParser.Model;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
+using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Config;
-using KPatcher.Core.Formats.Capsule;
 using KPatcher.Core.Formats.ERF;
 using KPatcher.Core.Formats.RIM;
-using KPatcher.Core.Installation;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
@@ -21,8 +23,7 @@ using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Mods.TwoDA;
 using KPatcher.Core.Reader;
 using KPatcher.Core.Resources;
-using IniParser.Model;
-using JetBrains.Annotations;
+using KPatcher.Core.Tools;
 
 namespace KPatcher.Core.Patcher
 {
@@ -60,7 +61,7 @@ namespace KPatcher.Core.Patcher
             this.changesIniPath = changesIniPath ?? throw new ArgumentNullException(nameof(changesIniPath));
             log = logger ?? new PatchLogger();
 
-            Game = Installation.Installation.DetermineGame(this.gamePath);
+            Game = Heuristics.DetermineGame(this.gamePath);
 
             // Handle legacy syntax - look for changes.ini in various locations
             if (!File.Exists(this.changesIniPath))
@@ -76,7 +77,7 @@ namespace KPatcher.Core.Patcher
                 if (!File.Exists(this.changesIniPath))
                 {
                     throw new FileNotFoundException(
-                        "Could not find the changes ini file on disk.",
+                        PatcherResources.CouldNotFindChangesIniFile,
                         this.changesIniPath);
                 }
             }
@@ -94,7 +95,7 @@ namespace KPatcher.Core.Patcher
             catch (Exception ex)
             {
                 // Log error but don't fail installation if log file can't be created
-                log.AddWarning($"Could not create install log file: {ex.Message}");
+                log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCreateInstallLogFile, ex.Message));
             }
         }
 
@@ -132,7 +133,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Gets the patcher configuration, loading it if necessary.
-        /// Matches Python: def config(self) -> PatcherConfig
         /// </summary>
         public PatcherConfig Config()
         {
@@ -143,47 +143,63 @@ namespace KPatcher.Core.Patcher
 
             if (!File.Exists(changesIniPath))
             {
-                throw new FileNotFoundException($"Changes INI file not found: {changesIniPath}");
+                throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.ChangesConfigFileNotFound, changesIniPath));
             }
 
-            // Python: ini_file_bytes: bytes = self.changes_ini_path.read_bytes()
-            // Python: ini_text: str = decode_bytes_with_fallbacks(ini_file_bytes)
-            byte[] iniFileBytes = File.ReadAllBytes(changesIniPath);
-            string iniText;
-            try
+            string ext = Path.GetExtension(changesIniPath);
+            bool isYaml = ext.Equals(".yaml", StringComparison.OrdinalIgnoreCase) || ext.Equals(".yml", StringComparison.OrdinalIgnoreCase);
+            IniData ini;
+            if (isYaml)
             {
-                // Try UTF-8 first, then Windows-1252, then ASCII with error handling
-                iniText = Encoding.UTF8.GetString(iniFileBytes);
-                // Validate it's valid UTF-8 by checking for replacement characters
-                if (iniText.Contains('\uFFFD'))
-                {
-                    throw new DecoderFallbackException("UTF-8 decode failed");
-                }
+                ini = ConfigReaderYaml.LoadAndParseYaml(changesIniPath);
             }
-            catch (DecoderFallbackException)
+            else
             {
+                // ini_file_bytes: bytes = self.changes_ini_path.read_bytes()
+                // ini_text: str = decode_bytes_with_fallbacks(ini_file_bytes)
+                byte[] iniFileBytes = File.ReadAllBytes(changesIniPath);
+                string iniText;
                 try
                 {
-                    // Try Windows-1252 (common for INI files)
-                    Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-                    iniText = Encoding.GetEncoding("windows-1252").GetString(iniFileBytes);
-                }
-                catch
-                {
-                    // Fallback: force decode with error handling
-                    log.AddWarning($"Could not determine encoding of '{Path.GetFileName(changesIniPath)}'. Attempting to force load...");
                     iniText = Encoding.UTF8.GetString(iniFileBytes);
+                    if (iniText.Contains('\uFFFD'))
+                    {
+                        throw new DecoderFallbackException("UTF-8 decode failed");
+                    }
                 }
+                catch (DecoderFallbackException)
+                {
+                    try
+                    {
+                        Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+                        iniText = Encoding.GetEncoding("windows-1252").GetString(iniFileBytes);
+                    }
+                    catch
+                    {
+                        log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotDetermineEncoding, Path.GetFileName(changesIniPath)));
+                        iniText = Encoding.UTF8.GetString(iniFileBytes);
+                    }
+                }
+                ini = ConfigReader.ParseIniText(iniText, caseInsensitive: false, sourcePath: changesIniPath);
             }
-
-            // Parse INI with encoding fallback (matches Python decode_bytes_with_fallbacks)
-            // Use unified INI parser (case-sensitive for changes.ini files)
-            IniData ini = ConfigReader.ParseIniText(iniText, caseInsensitive: false, sourcePath: changesIniPath);
 
             ConfigReader reader = new ConfigReader(ini, modPath, log, TslPatchDataPath);
             config = reader.Load(new PatcherConfig());
 
-            // Check required files (Python: if self._config.required_files:)
+            // When loading from INI, create equivalent .yaml alongside (same dir, same base name)
+            if (!isYaml && changesIniPath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    reader.WriteEquivalentYaml(Path.ChangeExtension(changesIniPath, ".yaml"));
+                }
+                catch (Exception ex)
+                {
+                    log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotWriteEquivalentYaml, ex.Message));
+                }
+            }
+
+            // Check required files (if self._config.required_files:)
             if (config.RequiredFiles.Count > 0)
             {
                 for (int i = 0; i < config.RequiredFiles.Count; i++)
@@ -220,8 +236,8 @@ namespace KPatcher.Core.Patcher
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH.mm.ss");
 
             // Find the root directory containing tslpatchdata
-            // Python: while not backup_dir.joinpath("tslpatchdata").is_dir() and backup_dir.parent.name:
-            // Python checks backup_dir.parent.name (which is empty string for root), C# checks if GetDirectoryName is not null/empty
+            // while not backup_dir.joinpath("tslpatchdata").is_dir() and backup_dir.parent.name:
+            // then checks backup_dir.parent.name (which is empty string for root), C# checks if GetDirectoryName is not null/empty
             // Can be null if not found
             string parentDir = Path.GetDirectoryName(backupDir);
             while (!Directory.Exists(Path.Combine(backupDir, "tslpatchdata")) &&
@@ -241,7 +257,7 @@ namespace KPatcher.Core.Patcher
                 }
                 catch (Exception ex)
                 {
-                    log.AddWarning($"Could not initialize uninstall directory: {ex.Message}");
+                    log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotInitializeUninstallDirectory, ex.Message));
                 }
             }
 
@@ -253,10 +269,10 @@ namespace KPatcher.Core.Patcher
             }
             catch (Exception ex)
             {
-                log.AddWarning($"Could not create backup folder: {ex.Message}");
+                log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCreateBackupFolder, ex.Message));
             }
 
-            log.AddNote($"Using backup directory: '{backupDir}'");
+            log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.UsingBackupDirectory, backupDir));
             backup = backupDir;
 
             return (backup, processedBackupFiles);
@@ -264,7 +280,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Installs the mod by applying all patches.
-        /// Matches Python: def install(...)
         /// </summary>
         public void Install(
             CancellationToken? cancellationToken = null,
@@ -278,21 +293,20 @@ namespace KPatcher.Core.Patcher
                         "Chosen KOTOR directory is not a valid installation - cannot initialize ModInstaller.");
                 }
 
-                installLog?.WriteInfo("Starting installation...");
+                installLog?.WriteInfo(PatcherResources.StartingInstallation);
 
                 PatcherMemory memory = new PatcherMemory();
                 PatcherConfig cfg = Config();
 
-                installLog?.WriteInfo($"Loading configuration from {Path.GetFileName(changesIniPath)}");
-                installLog?.WriteInfo($"Found {cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count} patches to apply");
+                installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.LoadingConfigurationFrom, Path.GetFileName(changesIniPath)));
+                installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FoundPatchesToApply, cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count));
 
                 List<PatcherModifications> patchesList = new List<PatcherModifications>();
-                patchesList.AddRange(cfg.InstallList);
-                // Note: KPatcher executes [InstallList] after [TLKList]
+                // TSLPatcher patch order: TLK → InstallList → 2DA → GFF → NSS → NCS → SSF
                 patchesList.AddRange(GetTlkPatches(cfg));
+                patchesList.AddRange(cfg.InstallList);
                 patchesList.AddRange(cfg.Patches2DA);
                 patchesList.AddRange(cfg.PatchesGFF);
-                // Note: KPatcher runs [CompileList] *after* [HACKList], which is objectively bad, so KPatcher here will do the inverse.
                 patchesList.AddRange(cfg.PatchesNSS);
                 patchesList.AddRange(cfg.PatchesNCS);
                 patchesList.AddRange(cfg.PatchesSSF);
@@ -313,52 +327,52 @@ namespace KPatcher.Core.Patcher
                 {
                     cancellationToken?.ThrowIfCancellationRequested();
 
-                    // Python: if should_cancel is not None and should_cancel.is_set(): sys.exit()
+                    // if should_cancel is not None and should_cancel.is_set(): sys.exit()
                     if (cancellationToken?.IsCancellationRequested == true)
                     {
-                        log.AddNote("ModInstaller.Install() received termination request, cancelling...");
+                        log.AddNote(PatcherResources.InstallationTerminationRequest);
                         Environment.Exit(0);
                     }
 
                     // Log when we start processing different patch types
                     if (processingInstallList && patch is InstallFile)
                     {
-                        installLog?.WriteInfo("Processing InstallList entries...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingInstallListEntries);
                         processingInstallList = false;
                     }
                     else if (!processingTLK && patch is ModificationsTLK)
                     {
-                        installLog?.WriteInfo("Processing TLK patches...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingTlkPatches);
                         processingTLK = true;
                     }
                     else if (!processing2DA && patch is Modifications2DA)
                     {
-                        installLog?.WriteInfo("Processing 2DA patches...");
+                        installLog?.WriteInfo(PatcherResources.Processing2DAPatches);
                         processing2DA = true;
                     }
                     else if (!processingGFF && patch is ModificationsGFF)
                     {
-                        installLog?.WriteInfo("Processing GFF patches...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingGffPatches);
                         processingGFF = true;
                     }
                     else if (!processingNSS && patch is ModificationsNSS)
                     {
-                        installLog?.WriteInfo("Processing NSS script patches...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingNssScriptPatches);
                         processingNSS = true;
                     }
                     else if (!processingNCS && patch is ModificationsNCS)
                     {
-                        installLog?.WriteInfo("Processing NCS script patches...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingNcsScriptPatches);
                         processingNCS = true;
                     }
                     else if (!processingSSF && patch is ModificationsSSF)
                     {
-                        installLog?.WriteInfo("Processing SSF sound patches...");
+                        installLog?.WriteInfo(PatcherResources.ProcessingSsfSoundPatches);
                         processingSSF = true;
                     }
 
                     // Must run preprocessed scripts directly before GFFList so we don't interfere with !FieldPath assignments to 2DAMEMORY.
-                    // Python: if not finished_preprocessed_scripts and isinstance(patch, ModificationsNSS):
+                    // if not finished_preprocessed_scripts and isinstance(patch, ModificationsNSS):
                     //         self._prepare_compilelist(config, self.log, memory, self.game)
                     //         finished_preprocessed_scripts = True
                     if (!finishedPreprocessedScripts && patch is ModificationsNSS)
@@ -373,6 +387,13 @@ namespace KPatcher.Core.Patcher
                         string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
                         string outputContainerPath = Path.Combine(gamePath, destination);
 
+                        // TSLPatcher: do not overwrite dialog.tlk directly
+                        if (patch is ModificationsTLK && string.Equals(saveAs, "dialog.tlk", StringComparison.OrdinalIgnoreCase))
+                        {
+                            log.AddNote(string.Format(System.Globalization.CultureInfo.CurrentCulture, KPatcher.Core.Common.TSLPatcherMessages.SkippingFileNoOverwriteDialogTlk, saveAs));
+                            continue;
+                        }
+
                         HandleCapsuleResult result = HandleCapsuleAndBackup(patch, outputContainerPath, destination, saveAs);
 
                         if (!ShouldPatch(patch, result.Exists, result.Capsule))
@@ -385,13 +406,19 @@ namespace KPatcher.Core.Patcher
 
                         if (dataToPatch is null)
                         {
-                            log.AddError($"Could not locate resource to {patch.Action.ToLower().Trim()}: '{patch.SourceFile}'");
+                            // TSLPatcher parity: No TLK file loaded / Unable to locate TLK file
+                            if (patch is ModificationsTLK tlkPatch)
+                                log.AddError(string.Format(TSLPatcherMessages.UnableToLocateTLKFileToPatch, tlkPatch.SaveAs ?? tlkPatch.SourceFile ?? "dialog.tlk"));
+                            else if (patch is Modifications2DA twodaPatch)
+                                log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.UnableToFind2DAFileToModify, twodaPatch.SaveAs ?? patch.SourceFile ?? ""));
+                            else
+                                log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.CriticalErrorUnableToLocateFileToPatch, patch.SourceFile ?? patch.SaveAs ?? ""));
                             continue;
                         }
 
                         if (dataToPatch.Length == 0)
                         {
-                            log.AddNote($"'{patch.SourceFile}' has no content/data and is completely empty.");
+                            log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.FileHasNoContent, patch.SourceFile));
                         }
 
                         object patchedData = patch.PatchResource(dataToPatch, memory, log, Game.Value);
@@ -399,7 +426,7 @@ namespace KPatcher.Core.Patcher
                         // If PatchResource returns the boolean true, it means skip
                         if (patchedData is bool b && b)
                         {
-                            log.AddNote($"Skipping '{patch.SourceFile}' - patch_resource determined that this file can be skipped.");
+                            log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.SkippingFilePatchResource, patch.SourceFile));
                             continue;
                         }
 
@@ -416,7 +443,7 @@ namespace KPatcher.Core.Patcher
                             }
                             else
                             {
-                                // Python: output_container_path.mkdir(exist_ok=True, parents=True)
+                                // output_container_path.mkdir(exist_ok=True, parents=True)
                                 Directory.CreateDirectory(outputContainerPath);
                                 string destinationPath = Path.Combine(outputContainerPath, saveAs);
                                 File.WriteAllBytes(destinationPath, patchedDataBytes);
@@ -427,23 +454,23 @@ namespace KPatcher.Core.Patcher
                     }
                     catch (Exception ex)
                     {
-                        // Python: exc_type, exc_msg = universal_simplify_exception(e)
+                        // exc_type, exc_msg = universal_simplify_exception(e)
                         string excType = ex.GetType().Name;
                         string excMsg = ex.Message;
                         string fmtExcStr = $"{excType}: {excMsg}";
                         string msg = $"An error occurred in patchlist {patch.GetType().Name}:{Environment.NewLine}{fmtExcStr}{Environment.NewLine}";
                         log.AddError(msg);
-                        // Python: RobustLogger().exception(msg) - log to file/console
+                        // RobustLogger().exception(msg) - log to file/console
                         System.Diagnostics.Debug.WriteLine($"Exception: {msg}{ex}");
                     }
 
                     progressCallback?.Invoke(patchesList.IndexOf(patch) + 1);
                 }
 
-                // Python: if config.save_processed_scripts == 0 and temp_script_folder is not None and temp_script_folder.is_dir():
+                // if config.save_processed_scripts == 0 and temp_script_folder is not None and temp_script_folder.is_dir():
                 if (cfg.SaveProcessedScripts == 0 && tempScriptFolder != null && Directory.Exists(tempScriptFolder))
                 {
-                    log.AddNote($"Cleaning temporary script folder at '{tempScriptFolder}' (hint: use 'SaveProcessedScripts=1' in [Settings] to keep these scripts)");
+                    log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.CleaningTemporaryScriptFolder, tempScriptFolder));
                     try
                     {
                         Directory.Delete(tempScriptFolder, recursive: true);
@@ -454,15 +481,15 @@ namespace KPatcher.Core.Patcher
                     }
                 }
 
-                // Python: num_patches_completed: int = config.patch_count()
+                // num_patches_completed: int = config.patch_count()
                 int numPatchesCompleted = cfg.PatchCount();
-                log.AddNote($"Successfully completed {numPatchesCompleted} {(numPatchesCompleted == 1 ? "patch" : "total patches")}.");
-                installLog?.WriteInfo("Installation completed successfully");
+                log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.SuccessfullyCompletedFormat, numPatchesCompleted, numPatchesCompleted == 1 ? "patch" : "total patches"));
+                installLog?.WriteInfo(PatcherResources.InstallationCompletedSuccessfully);
             }
             catch (Exception ex)
             {
                 // Ensure errors are logged to install log even if installation fails
-                installLog?.WriteError($"Installation failed: {ex.Message}");
+                installLog?.WriteError(string.Format(CultureInfo.CurrentCulture, PatcherResources.InstallationFailedFormat, ex.Message));
                 throw;
             }
             finally
@@ -474,12 +501,11 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Prepares NSS compilation by copying scripts to temp folder and preprocessing tokens.
-        /// Matches Python: def _prepare_compilelist(...)
         /// </summary>
         [CanBeNull]
         private string PrepareCompileList(PatcherConfig config, PatcherMemory memory)
         {
-            // Python: tslpatchdata should be read-only, this allows us to replace memory tokens while ensuring include scripts work correctly.
+            // tslpatchdata should be read-only, this allows us to replace memory tokens while ensuring include scripts work correctly.
             if (config.PatchesNSS.Count == 0)
             {
                 return null;
@@ -554,9 +580,16 @@ namespace KPatcher.Core.Patcher
             return tempScriptFolder;
         }
 
+        private static string GetModuleRoot(string moduleFilePath)
+        {
+            string root = Path.GetFileNameWithoutExtension(moduleFilePath).ToLowerInvariant();
+            root = root.EndsWith("_s") ? root.Substring(0, root.Length - 2) : root;
+            root = root.EndsWith("_dlg") ? root.Substring(0, root.Length - 4) : root;
+            return root;
+        }
+
         /// <summary>
         /// Handle capsule file and create backup.
-        /// Matches Python: def handle_capsule_and_backup(...)
         /// </summary>
         private HandleCapsuleResult HandleCapsuleAndBackup(
             PatcherModifications patch,
@@ -570,25 +603,25 @@ namespace KPatcher.Core.Patcher
 
             if (IsCapsuleFile(destination))
             {
-                // Python: module_root: str = Installation.get_module_root(output_container_path)
-                string moduleRoot = Installation.Installation.GetModuleRoot(outputContainerPath);
+                // module_root: str = Installation.get_module_root(output_container_path)
+                string moduleRoot = GetModuleRoot(outputContainerPath);
                 string[] tslrcmOmittedRims = { "702KOR", "401DXN" };
 
-                // Python: if module_root.upper() not in tslrcm_omitted_rims and is_rim_file(output_container_path):
+                // if module_root.upper() not in tslrcm_omitted_rims and is_rim_file(output_container_path):
                 if (!tslrcmOmittedRims.Contains(moduleRoot.ToUpperInvariant()) && IsRimFile(outputContainerPath))
                 {
-                    log.AddWarning($"This mod is patching RIM file Modules/{Path.GetFileName(outputContainerPath)}!\nPatching RIMs is highly incompatible, not recommended, and widely considered bad practice. Please request the mod developer to fix this.");
+                    log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.PatchingRimFileWarning, Path.GetFileName(outputContainerPath)));
                 }
 
-                // Python: if not output_container_path.is_file():
+                // if not output_container_path.is_file():
                 if (!File.Exists(outputContainerPath))
                 {
-                    // Python: if is_mod_file(output_container_path):
+                    // if is_mod_file(output_container_path):
                     if (IsModFile(outputContainerPath))
                     {
-                        string modulesPath = Installation.Installation.GetModulesPath(gamePath);
+                        string modulesPath = Path.Combine(gamePath, "Modules");
                         log.AddNote(
-                            $"IMPORTANT! The module at path '{outputContainerPath}' did not exist, building one in the 'Modules' folder immediately from the following files:" +
+                            string.Format(CultureInfo.CurrentCulture, PatcherResources.ModuleDidNotExistBuilding, outputContainerPath) +
                             $"\n    Modules/{moduleRoot}.rim" +
                             $"\n    Modules/{moduleRoot}_s.rim" +
                             (Game != null && Game.Value == Common.Game.TSL ? $"\n    Modules/{moduleRoot}_dlg.erf" : "")
@@ -599,16 +632,16 @@ namespace KPatcher.Core.Patcher
                         }
                         catch (Exception ex)
                         {
-                            string msg = $"Failed to build module '{Path.GetFileName(outputContainerPath)}': {ex.Message}";
-                            log.AddError(msg);
+                            log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.FailedToBuildModule, Path.GetFileName(outputContainerPath), ex.Message));
                             throw;
                         }
                     }
                     else
                     {
-                        // Python: raise FileNotFoundError(errno.ENOENT, msg, str(output_container_path))
-                        string msg = $"The capsule '{destination}' did not exist, or permission issues occurred, when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...";
-                        throw new FileNotFoundException(msg, outputContainerPath);
+                        // raise FileNotFoundError(errno.ENOENT, msg, str(output_container_path))
+                        throw new FileNotFoundException(
+                            string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundOrPermission, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile),
+                            outputContainerPath);
                     }
                 }
 
@@ -616,18 +649,18 @@ namespace KPatcher.Core.Patcher
                 (string backupPath, HashSet<string> processedFiles) = GetBackup();
                 CreateBackupHelper(outputContainerPath, backupPath, processedFiles, Path.GetDirectoryName(destination) ?? "");
 
-                // Python: exists = capsule.contains(*ResourceIdentifier.from_path(patch.saveas).unpack())
+                // exists = capsule.contains(*ResourceIdentifier.from_path(patch.saveas).unpack())
                 (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                 exists = capsule.Contains(resName, resType);
             }
             else
             {
-                // Python: create_backup(self.log, output_container_path.joinpath(patch.saveas), *self.backup(), patch.destination)
+                // create_backup(self.log, output_container_path.joinpath(patch.saveas), *self.backup(), patch.destination)
                 string fullPath = Path.Combine(outputContainerPath, saveAs);
                 (string backupPath, HashSet<string> processedFiles) = GetBackup();
                 CreateBackupHelper(fullPath, backupPath, processedFiles, destination);
 
-                // Python: exists = output_container_path.joinpath(patch.saveas).is_file()
+                // exists = output_container_path.joinpath(patch.saveas).is_file()
                 exists = File.Exists(fullPath);
             }
 
@@ -643,7 +676,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Creates a backup of the provided file.
-        /// Matches Python: def create_backup(...) in mods/install.py
         /// </summary>
         private void CreateBackupHelper(string destinationFilePath, string backupFolderPath, HashSet<string> processedFiles, [CanBeNull] string subdirectoryPath = null)
         {
@@ -662,7 +694,7 @@ namespace KPatcher.Core.Patcher
                 backupFilepath = Path.Combine(backupFolderPath, Path.GetFileName(destinationFilePath));
             }
 
-            // Python: if destination_file_str_lower not in processed_files:
+            // if destination_file_str_lower not in processed_files:
             if (!processedFiles.Contains(destinationFileStrLower))
             {
                 // Write a list of files that should be removed in order to uninstall the mod
@@ -674,7 +706,7 @@ namespace KPatcher.Core.Patcher
                 {
                     Directory.CreateDirectory(uninstallFolder);
 
-                    // Python: game_folder: CaseAwarePath = destination_filepath.parents[len(subdir_temp.parts)] if subdir_temp else destination_filepath.parent
+                    // game_folder: CaseAwarePath = destination_filepath.parents[len(subdir_temp.parts)] if subdir_temp else destination_filepath.parent
                     string gameFolder;
                     if (!string.IsNullOrEmpty(subdirectoryPath))
                     {
@@ -696,7 +728,7 @@ namespace KPatcher.Core.Patcher
                     processedFiles.Add(uninstallStrLower);
                 }
 
-                // Python: if destination_filepath.is_file():
+                // if destination_filepath.is_file():
                 if (File.Exists(destinationFilePath))
                 {
                     // Check if the backup path exists and generate a new one if necessary
@@ -711,14 +743,14 @@ namespace KPatcher.Core.Patcher
                         i++;
                     }
 
-                    log.AddNote($"Backing up '{destinationFileStr}'...");
+                    log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.BackingUpFile, destinationFileStr));
                     try
                     {
                         File.Copy(destinationFilePath, backupFilepath, true);
                     }
                     catch (Exception ex)
                     {
-                        log.AddWarning($"Failed to create backup of '{destinationFileStr}': {ex.Message}");
+                        log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.FailedToCreateBackup, destinationFileStr, ex.Message));
                     }
                 }
                 else
@@ -735,12 +767,12 @@ namespace KPatcher.Core.Patcher
         }
 
         /// <summary>
-        /// Loads a resource file using BinaryReader (matches Python load_resource_file).
+        /// Loads a resource file using BinaryReader.
         /// </summary>
         [NotNull]
         private static byte[] LoadResourceFile(string sourcePath)
         {
-            // Python: with BinaryReader.from_auto(source) as reader: return reader.read_all()
+            // with BinaryReader.from_auto(source) as reader: return reader.read_all()
             using (var reader = RawBinaryReader.FromFile(sourcePath))
             {
                 return reader.ReadAll();
@@ -749,7 +781,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Looks up the file/resource that is expected to be patched.
-        /// Matches Python: def lookup_resource(...)
         /// </summary>
         [CanBeNull]
         public byte[] LookupResource(
@@ -763,14 +794,13 @@ namespace KPatcher.Core.Patcher
             {
                 string sourceFolder = patch.SourceFolder ?? "";
                 string sourceFile = patch.SourceFile ?? "";
-                // Python logic: if patch.replace_file or not exists_at_output_location:
+                // logic for loading the source file: if patch.replace_file or not exists_at_output_location:
                 //   return self.load_resource_file(self.mod_path / patch.sourcefolder / patch.sourcefile)
                 if (patch.ReplaceFile || !existsAtOutput)
                 {
                     if (string.IsNullOrWhiteSpace(sourceFile))
                     {
-                        log.AddError(
-                            $"Could not load source file to {patch.Action.ToLower().Trim()}: SourceFile is missing or empty (fix or remove this InstallList / patch row in changes.ini).");
+                        log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotLoadSourceFileMissing, patch.Action.ToLower().Trim()));
                         return null;
                     }
 
@@ -781,14 +811,13 @@ namespace KPatcher.Core.Patcher
                     return LoadResourceFile(sourcePath);
                 }
 
-                // Python: if capsule is None:
+                // if capsule is None:
                 //   return self.load_resource_file(output_container_path / patch.saveas)
                 if (capsule is null)
                 {
                     if (string.IsNullOrWhiteSpace(saveAs))
                     {
-                        log.AddError(
-                            $"Could not load file to {patch.Action.ToLower().Trim()}: SaveAs is missing or empty.");
+                        log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotLoadFileSaveAsMissing, patch.Action.ToLower().Trim()));
                         return null;
                     }
 
@@ -798,19 +827,18 @@ namespace KPatcher.Core.Patcher
 
                 if (string.IsNullOrWhiteSpace(saveAs))
                 {
-                    log.AddError(
-                        $"Could not load resource from capsule to {patch.Action.ToLower().Trim()}: SaveAs is missing or empty.");
+                    log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotLoadResourceFromCapsule, patch.Action.ToLower().Trim()));
                     return null;
                 }
 
-                // Python: return capsule.resource(*ResourceIdentifier.from_path(patch.saveas).unpack())
+                // return capsule.resource(*ResourceIdentifier.from_path(patch.saveas).unpack())
                 (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                 return capsule.GetResource(resName, resType);
             }
             catch (Exception ex)
             {
-                // Python: self.log.add_error(f"Could not load source file to {patch.action.lower().strip()}:{os.linesep}{universal_simplify_exception(e)}")
-                log.AddError($"Could not load source file to {patch.Action.ToLower().Trim()}:{Environment.NewLine}{ex.Message}");
+                // self.log.add_error(f"Could not load source file to {patch.action.lower().strip()}:{os.linesep}{universal_simplify_exception(e)}")
+                log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotLoadSourceFileFormat, patch.Action.ToLower().Trim(), Environment.NewLine, ex.Message));
                 return null;
             }
         }
@@ -824,16 +852,11 @@ namespace KPatcher.Core.Patcher
             string localFolder = destination == "." ? new DirectoryInfo(gamePath).Name : destination;
             string containerType = capsule is null ? "folder" : "archive";
 
-            // Python uses action[:-1] which removes last character, not just trailing whitespace
+            // action[:-1] which removes last character, not just trailing whitespace
             string actionBase = patch.Action.Length > 0 ? patch.Action.Substring(0, patch.Action.Length - 1) : patch.Action;
 
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
-            if (string.IsNullOrWhiteSpace(patch.SourceFile) && string.IsNullOrWhiteSpace(patch.SaveAs))
-            {
-                log.AddError(
-                    $"Skipping invalid {patch.Action.Trim()} entry: SourceFile and SaveAs are empty (often a blank line or bad key in changes.ini InstallList).");
-                return false;
-            }
+            // should_patch() should not check for empty sourcefile/saveas; parity: skip this validation.
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
@@ -853,15 +876,15 @@ namespace KPatcher.Core.Patcher
                 return false;
             }
 
-            // If capsule doesn't exist on disk, return false (matches Python: capsule.filepath().is_file())
+            // If capsule doesn't exist on disk, return false
             if (capsule != null && !capsule.Path.IsFile())
             {
-                log.AddError($"The capsule '{destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
+                log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundWhenAttempting, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile));
                 return false;
             }
             if (capsule != null && !capsule.ExistedOnDisk && !patch.ReplaceFile)
             {
-                log.AddError($"The capsule '{destination}' did not exist when attempting to {patch.Action.ToLower().TrimEnd()} '{patch.SourceFile}'. Skipping file...");
+                log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundWhenAttempting, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile));
                 return false;
             }
 
@@ -873,11 +896,10 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Handles the desired behavior set by the !OverrideType kpatcher var for the specified patch.
-        /// Matches Python: def handle_override_type(...)
         /// </summary>
         private void HandleOverrideType(PatcherModifications patch)
         {
-            // Python: override_type: str = patch.override_type.lower().strip()
+            // override_type: str = patch.override_type.lower().strip()
             string overrideType = patch.OverrideTypeValue.ToLowerInvariant().Trim();
             if (string.IsNullOrEmpty(overrideType) || overrideType == OverrideType.IGNORE)
             {
@@ -888,7 +910,7 @@ namespace KPatcher.Core.Patcher
             string overrideDir = Path.Combine(gamePath, "Override");
             string overrideResourcePath = Path.Combine(overrideDir, saveAs);
 
-            // Python: if override_resource_path.is_file():
+            // if override_resource_path.is_file():
             if (!File.Exists(overrideResourcePath))
             {
                 return;
@@ -896,15 +918,15 @@ namespace KPatcher.Core.Patcher
 
             if (overrideType == OverrideType.RENAME)
             {
-                // Python: renamed_file_path: CaseAwarePath = override_dir / f"old_{patch.saveas}"
+                // renamed_file_path: CaseAwarePath = override_dir / f"old_{patch.saveas}"
                 string renamedFilePath = Path.Combine(overrideDir, $"old_{saveAs}");
                 int i = 2;
                 string filestem = Path.GetFileNameWithoutExtension(renamedFilePath);
 
-                // Python: while renamed_file_path.is_file():
+                // while renamed_file_path.is_file():
                 while (File.Exists(renamedFilePath))
                 {
-                    // Python: renamed_file_path = renamed_file_path.parent / f"{filestem} ({i}){renamed_file_path.suffix}"
+                    // renamed_file_path = renamed_file_path.parent / f"{filestem} ({i}){renamed_file_path.suffix}"
                     string suffix = Path.GetExtension(renamedFilePath);
                     renamedFilePath = Path.Combine(overrideDir, $"{filestem} ({i}){suffix}");
                     i++;
@@ -912,43 +934,42 @@ namespace KPatcher.Core.Patcher
 
                 try
                 {
-                    // Python: shutil.move(str(override_resource_path), str(renamed_file_path))
+                    // shutil.move(str(override_resource_path), str(renamed_file_path))
                     File.Move(overrideResourcePath, renamedFilePath);
-                    log.AddNote($"Renamed existing Override file '{saveAs}' to '{Path.GetFileName(renamedFilePath)}' to prevent shadowing.");
+                    log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.RenamedExistingOverrideFile, saveAs, Path.GetFileName(renamedFilePath)));
                 }
                 catch (Exception ex)
                 {
-                    // Python: self.log.add_error(f"Could not rename '{patch.saveas}' to '{renamed_file_path.name}' in the Override folder: {universal_simplify_exception(e)}")
-                    log.AddError($"Could not rename '{saveAs}' to '{Path.GetFileName(renamedFilePath)}' in the Override folder: {ex.Message}");
+                    // self.log.add_error(f"Could not rename '{patch.saveas}' to '{renamed_file_path.name}' in the Override folder: {universal_simplify_exception(e)}")
+                    log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotRenameInOverrideFolder, saveAs, Path.GetFileName(renamedFilePath), ex.Message));
                 }
             }
             else if (overrideType == OverrideType.WARN)
             {
-                // Python: self.log.add_warning(f"A resource located at '{override_resource_path}' is shadowing this mod's changes in {patch.destination}!")
+                // self.log.add_warning(f"A resource located at '{override_resource_path}' is shadowing this mod's changes in {patch.destination}!")
                 string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
-                log.AddWarning($"A resource located at '{overrideResourcePath}' is shadowing this mod's changes in {destination}!");
+                log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.ResourceShadowingModChanges, overrideResourcePath, destination));
             }
         }
 
         /// <summary>
         /// Check if a patch is being installed into a rim and overshadowed by a .mod.
-        /// Matches Python: def handle_modrim_shadow(...)
         /// </summary>
         private void HandleModRimShadow(PatcherModifications patch)
         {
-            // Python: erfrim_path: CaseAwarePath = self.game_path / patch.destination / patch.saveas
+            // erfrim_path: CaseAwarePath = self.game_path / patch.destination / patch.saveas
             string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             string erfrimPath = Path.Combine(gamePath, destination, saveAs);
 
-            // Python: mod_path: CaseAwarePath = erfrim_path.with_name(f"{Installation.get_module_root(erfrim_path.name)}.mod")
-            string moduleRoot = Installation.Installation.GetModuleRoot(Path.GetFileName(erfrimPath));
+            // mod_path: CaseAwarePath = erfrim_path.with_name(f"{Installation.get_module_root(erfrim_path.name)}.mod")
+            string moduleRoot = GetModuleRoot(Path.GetFileName(erfrimPath));
             string modFilePath = Path.Combine(Path.GetDirectoryName(erfrimPath) ?? gamePath, $"{moduleRoot}.mod");
 
-            // Python: if erfrim_path != mod_path and mod_path.is_file():
+            // if erfrim_path != mod_path and mod_path.is_file():
             if (!erfrimPath.Equals(modFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(modFilePath))
             {
-                log.AddWarning($"This mod intends to install '{saveAs}' into '{destination}', but is overshadowed by the existing '{Path.GetFileName(modFilePath)}'!");
+                log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.ModOvershadowedByExisting, saveAs, destination, Path.GetFileName(modFilePath)));
             }
         }
 
@@ -970,7 +991,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Creates a MOD file at the given filepath and copies the resources from the corresponding RIM files.
-        /// Matches Python: def rim_to_mod(...)
         /// </summary>
         private void RimToMod(string modFilePath, string rimFolderPath, string moduleRoot)
         {
@@ -1085,7 +1105,6 @@ namespace KPatcher.Core.Patcher
 
         /// <summary>
         /// Creates uninstall scripts (PowerShell and Bash) in the uninstall folder.
-        /// Matches Python: def create_uninstall_scripts(...)
         /// </summary>
         private static void CreateUninstallScripts([NotNull] string backupDir, [NotNull] string uninstallFolder, [NotNull] string mainFolder)
         {

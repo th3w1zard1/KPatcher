@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using KPatcher.Core.Common;
-using KPatcher.Core.Namespaces;
 using IniParser;
 using IniParser.Model;
 using JetBrains.Annotations;
+using KPatcher.Core.Common;
+using KPatcher.Core.Namespaces;
 
 namespace KPatcher.Core.Reader
 {
@@ -26,12 +26,22 @@ namespace KPatcher.Core.Reader
         }
 
         /// <summary>
-        /// Loads namespaces from an INI file at the specified path.
+        /// Loads namespaces from a config file at the specified path (.ini or .yaml/.yml).
+        /// YAML uses the same section/key structure as INI (see ConfigReaderYaml).
         /// </summary>
         public static List<PatcherNamespace> FromFilePath(string path)
         {
-            // Use unified INI loader (case-insensitive for namespaces.ini)
-            IniData ini = ConfigReader.LoadAndParseIni(path, caseInsensitive: true);
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                throw new FileNotFoundException("Namespaces config file not found.", path);
+            }
+
+            string ext = System.IO.Path.GetExtension(path);
+            bool isYaml = ext.Equals(".yaml", StringComparison.OrdinalIgnoreCase) || ext.Equals(".yml", StringComparison.OrdinalIgnoreCase);
+
+            IniData ini = isYaml
+                ? ConfigReaderYaml.LoadAndParseYaml(path)
+                : ConfigReader.LoadAndParseIni(path, caseInsensitive: true);
 
             return new NamespaceReader(ini).Load();
         }

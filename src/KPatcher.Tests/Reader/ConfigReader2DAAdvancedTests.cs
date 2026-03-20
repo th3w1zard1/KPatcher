@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using KPatcher.Core.Config;
-using KPatcher.Core.Mods.TwoDA;
-using KPatcher.Core.Reader;
 using FluentAssertions;
 using IniParser.Model;
 using IniParser.Parser;
+using KPatcher.Core.Config;
+using KPatcher.Core.Mods.TwoDA;
+using KPatcher.Core.Reader;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader
@@ -78,7 +78,7 @@ col_rowcell=other_column
             addRow.Cells["col_high"].Should().BeOfType<RowValueHigh>();
             addRow.Cells["col_rowindex"].Should().BeOfType<RowValueRowIndex>();
             addRow.Cells["col_rowlabel"].Should().BeOfType<RowValueRowLabel>();
-            // Python: RowValueRowCell is only created for store operations (2DAMEMORY#=column or StrRef#=column)
+            // RowValueRowCell is only created for store operations (2DAMEMORY#=column or StrRef#=column)
             // For regular cell assignments like col_rowcell=other_column, it's a RowValueConstant
             addRow.Cells["col_rowcell"].Should().BeOfType<RowValueConstant>();
         }
@@ -312,7 +312,7 @@ col1=value
             var change = result.Patches2DA.First(p => p.SaveAs == "test.2da").Modifiers[0] as ChangeRow2DA;
             change.Should().NotBeNull();
             change.Target.TargetType.Should().Be(TargetType.LABEL_COLUMN);
-            // Python: assert mod_2da_2.target.value == "3" - value is stored as string, not RowValueConstant
+            // assert mod_2da_2.target.value == "3" - value is stored as string, not RowValueConstant
             change.Target.Value.Should().Be("5");
         }
 
@@ -346,7 +346,7 @@ col2=****
 
             var col2 = add.Cells["col2"] as RowValueConstant;
             col2.Should().NotBeNull();
-            // Python: elif value == "****": row_value = RowValueConstant("")
+            // elif value == "****": row_value = RowValueConstant("")
             // "****" is converted to empty string in Python
             col2.String.Should().Be("");
         }

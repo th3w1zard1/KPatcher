@@ -85,7 +85,7 @@ namespace KPatcher.Core.Tests.Performance
                 Directory.CreateDirectory(profileDir);
                 string profileFile = Path.Combine(profileDir, $"{_testName.Replace(" ", "_").Replace("::", "_")}.profile.txt");
                 File.WriteAllText(profileFile, _profileReport.ToString());
-                
+
                 if (_output != null)
                 {
                     _output.WriteLine($"Performance profile saved to: {profileFile}");

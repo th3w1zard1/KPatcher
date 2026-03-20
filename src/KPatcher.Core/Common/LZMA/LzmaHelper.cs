@@ -4,9 +4,6 @@ using System.IO;
 namespace KPatcher.Core.Common.LZMA
 {
     /// <summary>
-    /// Minimal helper for raw LZMA1 compression/decompression (no headers) matching PyKotor bzf.py (lzma.FORMAT_RAW, FILTER_LZMA1).
-    /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/bzf.py:130-134
-    /// Original: return lzma.decompress(compressed_data, format=lzma.FORMAT_RAW, filters=[{"id": lzma.FILTER_LZMA1}])
     /// 
     /// NOTE: LZMA support requires a third-party library. This is a placeholder implementation.
     /// BZF file support will be fully implemented when an LZMA library is added to the project.

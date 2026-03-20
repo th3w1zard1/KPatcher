@@ -4,17 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Logger;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
 
     /// <summary>
-    /// Wrapper for nwnnsscomp.exe to compile NSS scripts to NCS bytecode.
-    /// Provides external compilation support for Windows platforms.
+    /// Compiles NSS to NCS for the patcher: prefers managed KCompiler / NCSAuto on all platforms,
+    /// falls back to nwnnsscomp.exe on Windows only if managed compilation fails.
     /// </summary>
     public class NCSCompiler
     {
@@ -56,9 +56,19 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             string tempNssPath = Path.Combine(_tempScriptFolder, filename);
             File.WriteAllText(tempNssPath, nssSource, Encoding.GetEncoding("windows-1252"));
 
-            // Try external compiler first if on Windows and nwnnsscomp.exe exists
+            // Managed KCompiler first (cross-platform). Optional Windows nwnnsscomp.exe only as fallback.
             bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             bool nwnnsscompExists = !string.IsNullOrEmpty(_nwnnsscompPath) && File.Exists(_nwnnsscompPath);
+
+            try
+            {
+                NCS ncs = NCSAuto.CompileNss(nssSource, game);
+                return NCSAuto.BytesNcs(ncs);
+            }
+            catch (Exception managedEx)
+            {
+                _logger.AddWarning($"Managed compilation failed for '{filename}': {managedEx.Message}");
+            }
 
             if (isWindows && nwnnsscompExists)
             {
@@ -67,35 +77,22 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                     byte[] compiledBytes = CompileWithExternal(tempNssPath, filename, game);
                     if (compiledBytes != null)
                     {
+                        _logger.AddNote($"Compiled '{filename}' using external nwnnsscomp.exe (managed compile failed).");
                         return compiledBytes;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.AddError($"External compilation failed for '{filename}': {ex.Message}");
+                    _logger.AddError($"External nwnnsscomp also failed for '{filename}': {ex.Message}");
                 }
             }
-            else if (isWindows && !nwnnsscompExists)
+            else if (!nwnnsscompExists && isWindows)
             {
-                _logger.AddNote($"nwnnsscomp.exe not found in tslpatchdata folder. Falling back to built-in compiler for '{filename}'.");
-            }
-            else if (!isWindows)
-            {
-                _logger.AddNote($"External NSS compilation is only supported on Windows. Using built-in compiler for '{filename}'.");
+                _logger.AddVerbose("nwnnsscomp.exe not present; no external fallback.");
             }
 
-            // Fall back to PyKotor's built-in compiler (matches Python KPatcher behavior exactly)
-            try
-            {
-                NCS ncs = NCSAuto.CompileNss(nssSource, game);
-                return NCSAuto.BytesNcs(ncs);
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"Built-in compilation failed for '{filename}': {ex.Message}");
-                _logger.AddWarning($"Could not compile '{filename}'. Returning uncompiled NSS source.");
-                return Encoding.GetEncoding("windows-1252").GetBytes(nssSource);
-            }
+            _logger.AddWarning($"Could not compile '{filename}'. Returning uncompiled NSS source.");
+            return Encoding.GetEncoding("windows-1252").GetBytes(nssSource);
         }
 
         /// <summary>
@@ -118,20 +115,23 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 File.Delete(outputPath);
             }
 
-            // Build command line arguments using PyKotor's logic for compatibility with all nwnnsscomp versions
+            // Build command line arguments
             NwnnsscompConfig config = new ExternalNCSCompiler(_nwnnsscompPath)
                 .Config(nssPath, outputPath, game);
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = _nwnnsscompPath,
-                Arguments = string.Join(" ", config.GetCompileArgs(_nwnnsscompPath).Skip(1)),
                 WorkingDirectory = _tempScriptFolder,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+            foreach (string arg in config.GetCompileArgs(_nwnnsscompPath).Skip(1))
+            {
+                startInfo.ArgumentList.Add(arg);
+            }
 
             using (var process = new Process { StartInfo = startInfo })
             {

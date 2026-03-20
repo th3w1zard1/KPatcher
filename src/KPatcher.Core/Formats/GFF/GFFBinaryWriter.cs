@@ -10,7 +10,6 @@ namespace KPatcher.Core.Formats.GFF
 
     /// <summary>
     /// Writes GFF (General File Format) binary data.
-    /// 1:1 port of Python GFFBinaryWriter from pykotor/resource/formats/gff/io_gff.py
     /// </summary>
     public class GFFBinaryWriter
     {
@@ -266,7 +265,6 @@ namespace KPatcher.Core.Formats.GFF
             else
             {
                 // Simple types (stored inline as 4-byte values in the field entry)
-                // Matching PyKotor implementation: writer writes 4-byte values for all simple types
                 switch (fieldType)
                 {
                     case GFFFieldType.UInt8:

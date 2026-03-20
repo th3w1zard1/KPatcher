@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using JetBrains.Annotations;
 using KPatcher.Core.Formats;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.RIM
 {
 
     /// <summary>
     /// Reads RIM (Resource Information Manager) files.
-    /// 1:1 port of Python RIMBinaryReader from pykotor/resource/formats/rim/io_rim.py
     /// </summary>
     public class RIMBinaryReader : BinaryFormatReaderBase
     {

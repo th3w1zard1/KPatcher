@@ -10,9 +10,9 @@ using NetSparkleUpdater.SignatureVerifiers;
 namespace KPatcher.UI
 {
     /// <summary>
-    /// Manages automatic updates using NetSparkle.
-    /// Provides industry-standard auto-update functionality.
-    /// Note: NetSparkle only supports .NET Framework, so this is a no-op for .NET Core/.NET 5+.
+    /// Manages automatic updates using NetSparkle when targeting .NET Framework.
+    /// NetSparkle only supports .NET Framework; on .NET Core/.NET 5+ (e.g. net9.0) this class is a no-op.
+    /// On .NET 5+, use Help → Check for updates to trigger the custom update flow (Config.GetRemoteHolopatcherUpdateInfoAsync + AutoUpdater).
     /// </summary>
     public class UpdateManager : IDisposable
     {

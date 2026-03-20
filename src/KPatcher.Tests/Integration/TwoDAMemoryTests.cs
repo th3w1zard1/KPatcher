@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.TwoDA;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Integration

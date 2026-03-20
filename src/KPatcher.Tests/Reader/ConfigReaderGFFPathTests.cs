@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
+using IniParser.Model;
+using IniParser.Parser;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.GFF;
@@ -8,9 +11,6 @@ using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.GFF;
 using KPatcher.Core.Reader;
-using FluentAssertions;
-using IniParser.Model;
-using IniParser.Parser;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader

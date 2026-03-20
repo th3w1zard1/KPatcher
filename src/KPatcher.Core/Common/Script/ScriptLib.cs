@@ -6,7 +6,6 @@ namespace KPatcher.Core.Common.Script
 
     /// <summary>
     /// NWScript library include files for KOTOR and TSL.
-    /// 1:1 port from pykotor.common.scriptlib
     /// </summary>
     public static class ScriptLib
     {

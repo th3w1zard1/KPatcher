@@ -43,43 +43,64 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 // PREPROCESSOR
                 {
                     chBaseIndex = Preprocessor(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // COMMENTS
                 {
                     chBaseIndex = Comment(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // SEPARATORS
                 {
                     chBaseIndex = Separator(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // OPERATORS
                 {
                     chBaseIndex = Operator(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // LITERALS
                 {
                     chBaseIndex = Literal(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // KEYWORDS
                 {
                     chBaseIndex = Keyword(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 // IDENTIFIERS
                 {
                     chBaseIndex = Identifier(chBaseIndex, data);
-                    if (chBaseIndex != chBaseIndexLast) continue;
+                    if (chBaseIndex != chBaseIndexLast)
+                    {
+                        continue;
+                    }
                 }
 
                 return 1; // Error: couldn't tokenize
@@ -561,8 +582,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
                 else
                 {
-                    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/lexer.py:322-335
-                    // Original: def t_FLOAT_VALUE(self, t): r"[0-9]+\.[0-9]+f?|[0-9]f" / def t_INT_HEX_VALUE(self, t): "0x[0-9a-fA-F]+" / def t_INT_VALUE(self, t): "[0-9]+"
                     if (ch == '0' && chBaseIndex + 1 < data.Length && (data[chBaseIndex + 1] == 'x' || data[chBaseIndex + 1] == 'X'))
                     {
                         int hexStart = chBaseIndex + 2;
@@ -644,7 +663,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         {
             char ch = data[chBaseIndex];
 
-            // Matching PyKotor lexer.py: PLY matches keywords via regex with word boundaries (\b)
             // No restriction on previous token type - word boundary check is sufficient
             foreach (KeyValuePair<string, NssKeywords> kvp in NssKeyword.KeywordMap)
             {
@@ -656,7 +674,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 string strFromData = data.Substring(chBaseIndex, kvp.Key.Length);
                 if (strFromData.Equals(kvp.Key, StringComparison.Ordinal))
                 {
-                    // Matching PyKotor lexer.py line 277: r"location\b" - word boundary matches whitespace, end of string, or non-word characters
                     int chNextAlongIndex = chBaseIndex + kvp.Key.Length;
                     bool accept = false;
 
@@ -667,7 +684,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                     else
                     {
                         char chNextAlong = data[chNextAlongIndex];
-                        // Word boundary: separator, operator, or whitespace (matching PyKotor's \b regex)
                         accept = NssSeparator.SeparatorMap.ContainsKey(chNextAlong) ||
                                  NssOperator.OperatorMap.ContainsKey(chNextAlong) ||
                                  char.IsWhiteSpace(chNextAlong);
@@ -707,7 +723,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             do
             {
                 eof = chScanningIndex >= data.Length;
-                if (eof) break;
+                if (eof)
+                {
+                    break;
+                }
 
                 char chScanning = data[chScanningIndex];
 

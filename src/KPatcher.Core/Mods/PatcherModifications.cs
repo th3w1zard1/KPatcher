@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods
 {
@@ -40,7 +40,7 @@ namespace KPatcher.Core.Mods
     ///     saveas (str): The final name of the file this patch will save as (!SaveAs/!Filename)
     ///     replace_file (bool): Whether to replace the file.
     ///         This bool is True when using syntax Replace#=file_to_replace.ext, and therefore False when File#=file_to_replace.ext syntax is used.
-    ///         It is currently unknown whether this takes priority over !ReplaceFile, current PyKotor implementation will prioritize !ReplaceFile
+    ///         It is currently unknown whether this takes priority over !ReplaceFile, current KPatcher implementation will prioritize !ReplaceFile
     ///     destination (str): The destination for the patch file.
     ///     action (str): The action for this patch, purely used for logging purposes.
     ///     override_type (str): The override type, see `class OverrideType` above.
@@ -56,7 +56,7 @@ namespace KPatcher.Core.Mods
     /// 
     /// Exclamation-point variables:
     /// ---------------------------
-    ///     NOTE: All exclamation-point variables that define a path in KPatcher must be backslashed instead of forward-slashed. PyKotor will normalize both slashes though.
+    ///     NOTE: All exclamation-point variables that define a path in KPatcher must be backslashed instead of forward-slashed. KPatcher will normalize both slashes though.
     ///     - Top-level variables (e.g. [CompileList] [InstallList] [GFFList])
     ///         !DefaultDestination=relative/path/to/destination/folder - Determines where the destination folder is for top-level patch objects.
     ///             Note: !DefaultDestination is highly undocumented in KPatcher so it's unclear whether this matches what KPatcher does. I believe it takes priority over InstallList's destinations (excluding !Destination)
@@ -68,7 +68,7 @@ namespace KPatcher.Core.Mods
     ///         !Destination=relative/path/to/destination/folder - The relative path to the folder to save this patched file.
     ///         !OverrideType=&lt;warn or ignore or rename&gt; - How to handle conflict resolution. See `class OverrideType` above.
     ///         !SourceFolder=relative/path/to/tslpatchdata/subfolder - **NEW KPATCHER** support for pathing within the mod's tslpatchdata itself. Currently only used in InstallList.
-    ///     NOTE: Some patch lists, albeit rare, have different exclamation-point variables. See kpatcher/mods/ncs.py and kpatcher/mods/tlk.py for outliers.
+    ///     NOTE: Some patch lists, albeit rare, have different exclamation-point variables. See src/KPatcher.Core/Mods/NCS/ModificationsNSS.cs and src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs for outliers.
     /// </summary>
     public abstract class PatcherModifications
     {
@@ -92,7 +92,7 @@ namespace KPatcher.Core.Mods
         /// <summary>
         /// Whether to replace the file.
         /// This bool is True when using syntax Replace#=file_to_replace.ext, and therefore False when File#=file_to_replace.ext syntax is used.
-        /// It is currently unknown whether this takes priority over !ReplaceFile, current PyKotor implementation will prioritize !ReplaceFile
+        /// It is currently unknown whether this takes priority over !ReplaceFile, current KPatcher implementation will prioritize !ReplaceFile
         /// </summary>
         public virtual bool ReplaceFile { get; set; }
 
@@ -205,7 +205,7 @@ namespace KPatcher.Core.Mods
         /// - A string "1" (which should be converted to True)
         /// - A string "0" (which should be converted to False)
         /// 
-        /// This function is redundant, but provided for users that may not understand Python.
+        /// This function is redundant, but provided for users that may not understand C#.
         /// </summary>
         protected static bool ConvertToBool(object value)
         {
@@ -216,7 +216,7 @@ namespace KPatcher.Core.Mods
             // - A string "1" (which should be converted to True)
             // - A string "0" (which should be converted to False)
             // 
-            // This function is redundant, but provided for users that may not understand Python.
+            // This function is redundant, but provided for users that may not understand C#.
             return value is bool b && b || (value is string str && str == "1");
         }
     }

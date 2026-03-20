@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <data name="ActionIdOutOfRange" xml:space="preserve"><value>El ID de acción {0} está fuera de rango (0-{1})</value></data>
+  <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve"><value>La instrucción ACTION requiere al menos 2 argumentos</value></data>
+  <data name="ApplyPatchFromIniSection" xml:space="preserve"><value>Aplicar parche desde la sección INI [{0}] FieldType: {1} Ruta GFF: '{2}'</value></data>
+  <data name="BackingUpFile" xml:space="preserve"><value>Haciendo respaldo de '{0}'...</value></data>
+  <data name="CannotAdvanceSameInstruction" xml:space="preserve"><value>No se puede avanzar: la siguiente instrucción en el índice {0} es la misma que la actual en el índice {1}</value></data>
+  <data name="CapsuleNotFoundOrPermission" xml:space="preserve"><value>La cápsula '{0}' no existía, o ocurrieron problemas de permisos, al intentar {1} '{2}'. Omitiendo archivo...</value></data>
+  <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve"><value>La cápsula '{0}' no existía al intentar {1} '{2}'. Omitiendo archivo...</value></data>
+  <data name="ChangesConfigFileNotFound" xml:space="preserve"><value>Archivo de configuración changes no encontrado: {0}</value></data>
+  <data name="CleaningTemporaryScriptFolder" xml:space="preserve"><value>Limpiando carpeta temporal de scripts en '{0}' (pista: use 'SaveProcessedScripts=1' en [Settings] para conservar estos scripts)</value></data>
+  <data name="CliErrorCannotRunMultipleOperations" xml:space="preserve"><value>[Error] No se puede ejecutar más de una de [--install, --uninstall, --validate]</value></data>
+  <data name="CliErrorFailedToLoadMod" xml:space="preserve"><value>[Error] Error al cargar el mod: {0}</value></data>
+  <data name="CliErrorFormat" xml:space="preserve"><value>[Error] {0}: {1}</value></data>
+  <data name="CliErrorInvalidGameDirectory" xml:space="preserve"><value>[Error] Directorio de juego inválido: {0}: {1}</value></data>
+  <data name="CliErrorInvalidModOrGamePaths" xml:space="preserve"><value>[Error] Rutas de mod o juego inválidas</value></data>
+  <data name="CliErrorMustSpecifyOperation" xml:space="preserve"><value>[Error] Debe especificar una de [--install, --uninstall, --validate] para el modo CLI</value></data>
+  <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve"><value>[Error] Índice de namespace {0} fuera de rango (máx: {1})</value></data>
+  <data name="CliErrorNoGameDirectory" xml:space="preserve"><value>[Error] No se especificó el directorio del juego. Use --game-dir &lt;ruta&gt;</value></data>
+  <data name="CliErrorNoModPath" xml:space="preserve"><value>[Error] No se especificó la ruta del mod. Use --tslpatchdata &lt;ruta&gt;</value></data>
+  <data name="CliInfoInstallCompleted" xml:space="preserve"><value>[Info] Instalación completada: {0} errores, {1} advertencias, {2} parches</value></data>
+  <data name="CliInfoInstallTime" xml:space="preserve"><value>[Info] Tiempo de instalación: {0}</value></data>
+  <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Info] Instalando mod desde {0} a {1}</value></data>
+  <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve"><value>[Info] Desinstalación completada exitosamente</value></data>
+  <data name="CliInfoUninstallingMod" xml:space="preserve"><value>[Info] Desinstalando mod desde {0}</value></data>
+  <data name="CliInfoValidatingMod" xml:space="preserve"><value>[Info] Validando configuración del mod</value></data>
+  <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve"><value>[Info] Validación completada exitosamente</value></data>
+  <data name="CliInnerException" xml:space="preserve"><value>Excepción Interna: {0}</value></data>
+  <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Advertencia] Desinstalación completada con advertencias</value></data>
+  <data name="CompileListSectionMissing" xml:space="preserve"><value>Sección [CompileList] faltante en el ini.</value></data>
+  <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>El ConfigReader terminó de cargar el INI</value></data>
+  <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>No se pudo crear la carpeta de respaldo: {0}</value></data>
+  <data name="CouldNotCreateInstallLogFile" xml:space="preserve"><value>No se pudo crear el archivo de registro de instalación: {0}</value></data>
+  <data name="CouldNotDetermineEncoding" xml:space="preserve"><value>No se pudo determinar la codificación de '{0}'. Intentando cargar forzadamente...</value></data>
+  <data name="CouldNotFindChangesIniFile" xml:space="preserve"><value>No se pudo encontrar el archivo changes.ini en el disco.</value></data>
+  <data name="CouldNotFindDirectory" xml:space="preserve"><value>No se pudo encontrar el directorio: '{0}'</value></data>
+  <data name="CouldNotFindFile" xml:space="preserve"><value>No se pudo encontrar el archivo: '{0}'</value></data>
+  <data name="CouldNotInitializeUninstallDirectory" xml:space="preserve"><value>No se pudo inicializar el directorio de desinstalación: {0}</value></data>
+  <data name="CouldNotLoadFileSaveAsMissing" xml:space="preserve"><value>No se pudo cargar el archivo para {0}: SaveAs está faltando o vacío.</value></data>
+  <data name="CouldNotLoadResourceFromCapsule" xml:space="preserve"><value>No se pudo cargar el recurso de la cápsula para {0}: SaveAs está faltando o vacío.</value></data>
+  <data name="CouldNotLoadSourceFileFormat" xml:space="preserve"><value>No se pudo cargar el archivo fuente para {0}:{1}{2}</value></data>
+  <data name="CouldNotLoadSourceFileMissing" xml:space="preserve"><value>No se pudo cargar el archivo fuente para {0}: SourceFile está faltando o vacío (corrija o elimine esta fila de InstallList / patch en changes.ini).</value></data>
+  <data name="CouldNotRenameInOverrideFolder" xml:space="preserve"><value>No se pudo renombrar '{0}' a '{1}' en la carpeta Override: {2}</value></data>
+  <data name="CouldNotWriteEquivalentYaml" xml:space="preserve"><value>No se pudo escribir el YAML equivalente: {0}</value></data>
+  <data name="CriticalErrorUnableToLocateFileToPatch" xml:space="preserve"><value>Error crítico: No se pudo localizar el archivo a parchear, ¡no se encontró el archivo &quot;{0}&quot;!</value></data>
+  <data name="DeletedRestoredBackup" xml:space="preserve"><value>Respaldo restaurado '{0}' eliminado</value></data>
+  <data name="DoesNotExist" xml:space="preserve"><value>No existe</value></data>
+  <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>¡Ocurrió un error al intentar añadir una nueva línea 2DA en el modificador &quot;{0}&quot;!</value></data>
+  <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Error al buscar la etiqueta de columna para el índice de columna {0}.</value></data>
+  <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Error al buscar la etiqueta de fila para el índice de fila {0}.</value></data>
+  <data name="ErrorParsingIniFile" xml:space="preserve"><value>Error al analizar el archivo INI: {0}</value></data>
+  <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Información:</value></data>
+  <data name="ExpectedGffStructButGot" xml:space="preserve"><value>Se esperaba GFFStruct pero se obtuvo {0}</value></data>
+  <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Error al agregar un nuevo struct a la lista '{0}' en [{1}]. Razón: Se esperaba GFFStruct pero se obtuvo '{2}' ({3}) de tipo {4} Omitiendo...</value></data>
+  <data name="FailedToBuildModule" xml:space="preserve"><value>Error al construir el módulo '{0}': {1}</value></data>
+  <data name="FailedToCopyLine2DA" xml:space="preserve"><value>¡Error! No se pudo copiar la línea en 2DA. Omitiendo...</value></data>
+  <data name="FailedToCreateBackup" xml:space="preserve"><value>Error al crear respaldo de '{0}': {1}</value></data>
+  <data name="FileHasNoContent" xml:space="preserve"><value>'{0}' no tiene contenido/datos y está completamente vacío.</value></data>
+  <data name="FileHasNoEntryPoint" xml:space="preserve"><value>Este archivo no tiene punto de entrada y no puede ser compilado (Probablemente un archivo include).</value></data>
+  <data name="FileOperationErrorFormat" xml:space="preserve"><value>Error al {0} {1} a {2}</value></data>
+  <data name="FileOperationErrorWithMessageFormat" xml:space="preserve"><value>Error al {0} {1} a {2}: {3}</value></data>
+  <data name="FileOperationFormat" xml:space="preserve"><value>{0}: {1} -&gt; {2}</value></data>
+  <data name="FilePatcherDescription" xml:space="preserve"><value>Parcheador de archivos 2DA/TLK/GFF/NSS/SSF/ERF/RIM para KotOR/TSL.</value></data>
+  <data name="FileSetToPatchDoesNotExist" xml:space="preserve"><value>¡Error! El archivo &quot;{0}&quot; marcado para parchear no existe.</value></data>
+  <data name="FoundPatchesToApply" xml:space="preserve"><value>Se encontraron {0} parches para aplicar</value></data>
+  <data name="GameDetected" xml:space="preserve"><value>Juego Detectado: {0}</value></data>
+  <data name="GamePath" xml:space="preserve"><value>Ruta del Juego: {0}</value></data>
+  <data name="GffListSectionMissing" xml:space="preserve"><value>Sección [GFFList] faltante en el ini.</value></data>
+  <data name="HackListSectionMissing" xml:space="preserve"><value>Sección [HACKList] faltante en el ini.</value></data>
+  <data name="IOError" xml:space="preserve"><value>Error de E/S: {0}</value></data>
+  <data name="InfiniteLoopDetectedExecuted" xml:space="preserve"><value>Bucle infinito detectado: la instrucción en el índice {0} ({1}) ha sido ejecutada {2} veces</value></data>
+  <data name="InfiniteLoopJumpsToItself" xml:space="preserve"><value>Bucle infinito detectado: {0} en el índice {1} salta a sí mismo</value></data>
+  <data name="IniFileNotFound" xml:space="preserve"><value>Archivo INI no encontrado: {0}</value></data>
+  <data name="IniSectionThrewException" xml:space="preserve"><value>La sección INI [{0}] lanzó una excepción: {1}</value></data>
+  <data name="IniTextCannotBeNullOrEmpty" xml:space="preserve"><value>El texto INI no puede ser nulo o vacío</value></data>
+  <data name="InstallListSectionMissing" xml:space="preserve"><value>Sección [InstallList] faltante en el ini.</value></data>
+  <data name="InstallationCompletedSuccessfully" xml:space="preserve"><value>Instalación completada exitosamente</value></data>
+  <data name="InstallationDate" xml:space="preserve"><value>Fecha de Instalación: {0}</value></data>
+  <data name="InstallationFailedFormat" xml:space="preserve"><value>Instalación fallida: {0}</value></data>
+  <data name="InstallationLogHeader" xml:space="preserve"><value>Registro de Instalación de KPatcher</value></data>
+  <data name="InstallationLogHeaderSeparator" xml:space="preserve"><value>===========================</value></data>
+  <data name="InstallationTerminationRequest" xml:space="preserve"><value>ModInstaller.Install() recibió solicitud de terminación, cancelando...</value></data>
+  <data name="InstructionJumpsToNotInList" xml:space="preserve"><value>La instrucción #{0} ({1}) salta a una instrucción que no está en la lista. Hash del objetivo de salto: {2}</value></data>
+  <data name="InstructionLimitExceeded" xml:space="preserve"><value>Límite de instrucciones excedido: {0} instrucciones ejecutadas</value></data>
+  <data name="InstructionNotImplemented" xml:space="preserve"><value>Instrucción {0} no implementada</value></data>
+  <data name="InstructionNotPresentInTable" xml:space="preserve"><value>Instrucción no presente en la tabla de instrucciones actual</value></data>
+  <data name="InternalErrorInvalidTLKFileType" xml:space="preserve"><value>Error interno, tipo de archivo TLK no válido especificado.</value></data>
+  <data name="Invalid2DAMemoryToken" xml:space="preserve"><value>¡Token 2DAMEMORY no válido! Los índices de token empiezan en 1 y suben.</value></data>
+  <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve"><value>Carpeta del juego no válida, ¡no se encontró dialog.tlk! Asegúrese de haber seleccionado el directorio correcto del juego.</value></data>
+  <data name="InvalidKotorDirectory" xml:space="preserve"><value>El directorio de KOTOR elegido no es una instalación válida - no se puede inicializar ModInstaller.</value></data>
+  <data name="JumpInstructionNoTarget" xml:space="preserve"><value>La instrucción de salto {0} en el índice {1} no tiene objetivo de salto</value></data>
+  <data name="JumpTargetNotFound" xml:space="preserve"><value>Objetivo de salto para la instrucción {0} no encontrado en la tabla de instrucciones</value></data>
+  <data name="LanguageIntegerNotKnown" xml:space="preserve"><value>Entero de idioma desconocido: {0}</value></data>
+  <data name="LoadingCompileListPatches" xml:space="preserve"><value>Cargando parches [CompileList] del ini...</value></data>
+  <data name="LoadingConfigurationFrom" xml:space="preserve"><value>Cargando configuración desde {0}</value></data>
+  <data name="LoadingGffListPatches" xml:space="preserve"><value>Cargando parches [GFFList] del ini...</value></data>
+  <data name="LoadingHackListPatches" xml:space="preserve"><value>Cargando parches [HACKList] del ini...</value></data>
+  <data name="LoadingInstallListPatches" xml:space="preserve"><value>Cargando parches [InstallList] del ini...</value></data>
+  <data name="LoadingSettingsSection" xml:space="preserve"><value>Cargando sección [Settings] del ini...</value></data>
+  <data name="LoadingSsfListPatches" xml:space="preserve"><value>Cargando parches [SSFList] del ini...</value></data>
+  <data name="LoadingTlkListPatches" xml:space="preserve"><value>Cargando parches [TLKList] del ini...</value></data>
+  <data name="LoadingTwoDAListPatches" xml:space="preserve"><value>Cargando parches [2DAList] del ini...</value></data>
+  <data name="ModOvershadowedByExisting" xml:space="preserve"><value>¡Este mod intenta instalar '{0}' en '{1}', pero está ensombrecido por el '{2}' existente!</value></data>
+  <data name="ModPath" xml:space="preserve"><value>Ruta del Mod: {0}</value></data>
+  <data name="ModuleDidNotExistBuilding" xml:space="preserve"><value>¡IMPORTANTE! El módulo en la ruta '{0}' no existía, construyendo uno en la carpeta 'Modules' inmediatamente desde los siguientes archivos:</value></data>
+  <data name="NoEncodingDefinedForLanguage" xml:space="preserve"><value>No hay codificación definida para el idioma: {0}</value></data>
+  <data name="NoFileToInstallSpecified" xml:space="preserve"><value>¡Error! No se especificó ningún archivo para instalar.</value></data>
+  <data name="NoInstallPathSet" xml:space="preserve"><value>¡Error! No se ha establecido la ruta de instalación.</value></data>
+  <data name="NoLineSetToBeModifiedFormat" xml:space="preserve"><value>No hay línea definida para modificar en [{0}].</value></data>
+  <data name="NoNewEntriesAppendedToTlk" xml:space="preserve"><value>Advertencia: No se añadieron entradas nuevas a {0}. Posibles entradas faltantes en append.tlk.</value></data>
+  <data name="NoTLKFileLoaded" xml:space="preserve"><value>No hay archivo TLK cargado. No se puede continuar.</value></data>
+  <data name="NoValidGameFolderSelected" xml:space="preserve"><value>¡Error! No se seleccionó una carpeta de juego válida. Instalación cancelada.</value></data>
+  <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>No se ha asignado valor a la columna {0} para la nueva línea 2DA en el modificador &quot;{1}&quot;...</value></data>
+  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>¡No se encontró nwnnsscomp.exe en la carpeta TSLPatchData! No se puede compilar el script.</value></data>
+  <data name="OperationTimedOut" xml:space="preserve"><value>Operación agotó el tiempo de espera: {0}</value></data>
+  <data name="OperationWasCancelled" xml:space="preserve"><value>Operación fue cancelada: {0}</value></data>
+  <data name="OrphanedIniSectionsFormat" xml:space="preserve"><value>Se encontraron secciones ini huérfanas en los cambios:
+{0}</value></data>
+  <data name="PatchOperationFormat" xml:space="preserve"><value>Parcheando {0}: {1} - {2}</value></data>
+  <data name="PatcherFinished" xml:space="preserve"><value>El parcheador ha terminado. Revise el registro de progreso para ver qué se instaló.</value></data>
+  <data name="PatcherFinishedWithErrors" xml:space="preserve"><value>El parcheador ha terminado, pero se encontraron {0} errores. Es probable que el mod no se haya instalado correctamente.</value></data>
+  <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve"><value>El parcheador ha terminado, pero se encontraron {0} errores y {1} advertencias. Es probable que el mod no se haya instalado correctamente.</value></data>
+  <data name="PatcherFinishedWithWarnings" xml:space="preserve"><value>El parcheador ha terminado, pero se encontraron {0} advertencias. El mod puede funcionar o no correctamente.</value></data>
+  <data name="PatchingRimFileWarning" xml:space="preserve"><value>¡Este mod está parcheando el archivo RIM Modules/{0}!
+Parchear RIMs es altamente incompatible, no recomendado y ampliamente considerado una mala práctica. Por favor, solicite al desarrollador del mod que lo corrija.</value></data>
+  <data name="PathPointsToExpectedGffList" xml:space="preserve"><value>La ruta apunta a un '{0}', se esperaba un GFFList.</value></data>
+  <data name="PermissionDenied" xml:space="preserve"><value>Permiso Denegado: {0}</value></data>
+  <data name="Processing2DAPatches" xml:space="preserve"><value>Procesando parches 2DA...</value></data>
+  <data name="ProcessingGffPatches" xml:space="preserve"><value>Procesando parches GFF...</value></data>
+  <data name="ProcessingInstallListEntries" xml:space="preserve"><value>Procesando entradas de InstallList...</value></data>
+  <data name="ProcessingNcsScriptPatches" xml:space="preserve"><value>Procesando parches de scripts NCS...</value></data>
+  <data name="ProcessingNssScriptPatches" xml:space="preserve"><value>Procesando parches de scripts NSS...</value></data>
+  <data name="ProcessingSsfSoundPatches" xml:space="preserve"><value>Procesando parches de sonido SSF...</value></data>
+  <data name="ProcessingTlkPatches" xml:space="preserve"><value>Procesando parches TLK...</value></data>
+  <data name="ReferencesTracebackMsg" xml:space="preserve"><value>, referenciado por '{0}={1}' en [{2}]</value></data>
+  <data name="RemovedFormat" xml:space="preserve"><value>Eliminado {0}...</value></data>
+  <data name="RenamedExistingOverrideFile" xml:space="preserve"><value>Renombrado archivo Override existente '{0}' a '{1}' para prevenir sombreado.</value></data>
+  <data name="ResolvedGffListPath" xml:space="preserve"><value>Ruta GFFList resuelta de [{0}] desde '{1}' --&gt; '{2}'</value></data>
+  <data name="ResourceShadowingModChanges" xml:space="preserve"><value>¡Un recurso ubicado en '{0}' está sombreando los cambios de este mod en {1}!</value></data>
+  <data name="RestoringBackupOf" xml:space="preserve"><value>Restaurando respaldo de '{0}' a '{1}'...</value></data>
+  <data name="SectionNotFoundError" xml:space="preserve"><value>No se encontró la sección [{0}] en el ini</value></data>
+  <data name="Set2DAMemory" xml:space="preserve"><value>Establecer 2DAMEMORY{0}={1}</value></data>
+  <data name="SettingsSectionMissing" xml:space="preserve"><value>Sección [Settings] faltante en el ini.</value></data>
+  <data name="SkippingEmptyInstallListEntry" xml:space="preserve"><value>Omitiendo entrada vacía de InstallList (línea en blanco o clave vacía en la sección [InstallList] de changes.ini).</value></data>
+  <data name="SkippingFileNoOverwriteDialogTlk" xml:space="preserve"><value>Omitiendo el archivo {0}, este instalador no sobrescribirá dialog.tlk directamente.</value></data>
+  <data name="SkippingFilePatchResource" xml:space="preserve"><value>Omitiendo '{0}' - patch_resource determinó que este archivo puede ser omitido.</value></data>
+  <data name="SsfListSectionMissing" xml:space="preserve"><value>Sección [SSFList] faltante en el ini.</value></data>
+  <data name="StackUnderflowPoppingArgument" xml:space="preserve"><value>Desbordamiento de pila al extraer argumento para '{0}'</value></data>
+  <data name="StackUnderflowPoppingVector" xml:space="preserve"><value>Desbordamiento de pila al extraer vector para '{0}'</value></data>
+  <data name="StartPatchingButton" xml:space="preserve"><value>&amp;Iniciar parcheo</value></data>
+  <data name="StartPatchingConfirmation" xml:space="preserve"><value>Esto iniciará el parcheo de los archivos del juego necesarios. ¿Desea continuar?</value></data>
+  <data name="StartingInstallation" xml:space="preserve"><value>Iniciando instalación...</value></data>
+  <data name="StoreStateCannotAccessInstruction" xml:space="preserve"><value>STORE_STATE en el índice {0}: no se puede acceder a la instrucción en el índice {1}</value></data>
+  <data name="StoreStateReachedEndWithoutRetn" xml:space="preserve"><value>STORE_STATE en el índice {0}: se alcanzó el final de las instrucciones sin encontrar RETN</value></data>
+  <data name="StrRefTokenNotInTLK" xml:space="preserve"><value>Token StrRef &quot;{0}&quot; en la lista de modificadores que no estaba en el TLK.</value></data>
+  <data name="SuccessfullyCompletedFormat" xml:space="preserve"><value>Completado exitosamente {0} {1}.</value></data>
+  <data name="TlkListSectionMissing" xml:space="preserve"><value>Sección [TLKList] faltante en el ini.</value></data>
+  <data name="TwoDAListSectionMissing" xml:space="preserve"><value>Sección [2DAList] faltante en el ini.</value></data>
+  <data name="UnableToAddNewGffField" xml:space="preserve"><value>¡No se pudo agregar el nuevo campo GFF '{0}' en la ruta GFF '{1}'! Esto {2}</value></data>
+  <data name="UnableToAddStructToList" xml:space="preserve"><value>No se pudo agregar struct a la lista '{0}': {1}</value></data>
+  <data name="UnableToFind2DAFileToModify" xml:space="preserve"><value>No se encuentra el archivo 2DA &quot;{0}&quot; para modificar. Omitiendo archivo...</value></data>
+  <data name="UnableToLoad2DAFileSkipping" xml:space="preserve"><value>No se pudo cargar el archivo 2DA {0}. Omitiéndolo...</value></data>
+  <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve"><value>No se pudieron cargar las instrucciones. Asegúrese de que la carpeta &quot;tslpatchdata&quot; contiene el archivo &quot;info.rtf&quot;.</value></data>
+  <data name="UnableToLocateTLKFileToPatch" xml:space="preserve"><value>¡Error! No se pudo localizar el archivo TLK a parchear, ¡no se encontró el archivo &quot;{0}&quot;!</value></data>
+  <data name="UnexpectedModifierType" xml:space="preserve"><value>Tipo de modificador inesperado: {0}: {1}</value></data>
+  <data name="UnknownException" xml:space="preserve"><value>Excepción desconocida</value></data>
+  <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve"><value>{0} usado como índice al cambiar la línea en el modificador &quot;{1}&quot; pero el archivo 2DA no tiene etiqueta para ese índice.</value></data>
+  <data name="UsingBackupDirectory" xml:space="preserve"><value>Usando directorio de respaldo: '{0}'</value></data>
+  <data name="UsingBackupFolder" xml:space="preserve"><value>Usando carpeta de respaldo '{0}'</value></data>
+  <data name="WouldRestoreFile" xml:space="preserve"><value>Se restauraría el archivo '{0}'</value></data>
+</root>

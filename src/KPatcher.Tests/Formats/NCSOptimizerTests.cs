@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler;
 using KPatcher.Core.Formats.NCS.Optimizers;
-using FluentAssertions;
-using JetBrains.Annotations;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Formats

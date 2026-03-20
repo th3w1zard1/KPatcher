@@ -113,8 +113,6 @@ namespace KPatcher.Core.Formats.GFF
             }
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/gff/gff_data.py
-        // Original: @classmethod def get_extensions(cls) -> list[str]:
         /// <summary>
         /// Get all file extensions that represent GFF-based formats.
         /// </summary>

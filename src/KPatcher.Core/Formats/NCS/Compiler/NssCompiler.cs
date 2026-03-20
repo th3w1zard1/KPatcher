@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler.NSS;
 using KPatcher.Core.Formats.NCS.Optimizers;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -48,8 +48,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             // Use provided functions/constants or fallback to ScriptDefs
             List<ScriptFunction> functions = _functions ?? (_game.IsK1() ? ScriptDefs.KOTOR_FUNCTIONS : ScriptDefs.TSL_FUNCTIONS);
             List<ScriptConstant> constants = _constants ?? (_game.IsK1() ? ScriptDefs.KOTOR_CONSTANTS : ScriptDefs.TSL_CONSTANTS);
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/ncs_auto.py:184
-            // Original: library=KOTOR_LIBRARY if game.is_k1() else TSL_LIBRARY
             var lib = library ?? (_game.IsK1() ? ScriptLib.KOTOR_LIBRARY : ScriptLib.TSL_LIBRARY);
 
             var parser = new NssParser(functions, constants, lib, _libraryLookup);

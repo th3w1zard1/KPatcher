@@ -1,5 +1,3 @@
-// Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py
-// Original: """Generate scriptdefs.py from NSS files using the actual NCS lexer/parser."""
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,8 +20,6 @@ namespace GenerateScriptDefs
     {
         private static string TokenTypeToDataType(NssTokenBase token)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:60-75
-            // Original: def token_type_to_datatype(token_type: str) -> str | None:
             if (token is NssKeyword keyword)
             {
                 switch (keyword.Keyword)
@@ -69,8 +65,6 @@ namespace GenerateScriptDefs
         private static (ConstantInfo info, int nextIdx)? ParseConstantFromTokens(
             List<NssTokenBase> tokens, int startIdx, List<string> lines)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:78-220
-            // Original: def parse_constant_from_tokens(tokens: list, start_idx: int, lines: list[str]) -> tuple[dict, int] | None:
             int idx = SkipWhitespace(tokens, startIdx);
             if (idx >= tokens.Count)
             {
@@ -198,8 +192,6 @@ namespace GenerateScriptDefs
 
         private static string ExtractNameFromToken(NssTokenBase token)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:108-120
-            // Original: Extract name - handle special tokens
             if (token is NssKeyword kw)
             {
                 if (kw.Keyword == NssKeywords.ObjectSelf)
@@ -221,8 +213,6 @@ namespace GenerateScriptDefs
         private static (FunctionInfo info, int nextIdx)? ParseFunctionFromTokens(
             List<NssTokenBase> tokens, int startIdx, List<string> lines, Dictionary<NssTokenBase, int> lineNumbers)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:223-287
-            // Original: def parse_function_from_tokens(tokens: list, start_idx: int, lines: list[str], line_numbers: dict) -> tuple[dict, int] | None:
             int idx = SkipWhitespace(tokens, startIdx);
             if (idx >= tokens.Count)
             {
@@ -320,8 +310,6 @@ namespace GenerateScriptDefs
 
         private static List<ParamInfo> ParseFunctionParams(List<NssTokenBase> paramTokens)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:290-494
-            // Original: def parse_function_params(param_tokens: list) -> list[dict]:
             var @params = new List<ParamInfo>();
 
             if (paramTokens.Count == 0)
@@ -512,8 +500,6 @@ namespace GenerateScriptDefs
         private static (string description, string raw) ExtractFunctionDocumentationFromLine(
             List<string> lines, int lineNum, string funcName)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:497-528
-            // Original: def extract_function_documentation_from_line(lines: list[str], line_num: int, func_name: str) -> dict:
             int funcLineIdx = -1;
             for (int i = 0; i < lines.Count; i++)
             {
@@ -561,8 +547,6 @@ namespace GenerateScriptDefs
 
         private static string PreprocessNss(string content)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:531-543
-            // Original: def preprocess_nss(content: str) -> str:
             var lines = content.Split('\n');
             var processedLines = new List<string>();
 
@@ -582,8 +566,6 @@ namespace GenerateScriptDefs
         private static (List<ConstantInfo> constants, List<FunctionInfo> functions) ParseNssFile(
             string nssPath, Game game)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:546-590
-            // Original: def parse_nss_file(nss_path: Path, game: Game) -> tuple[list[dict], list[dict]]:
             string content = File.ReadAllText(nssPath, Encoding.UTF8);
             var lines = content.Split('\n').ToList();
 
@@ -636,8 +618,6 @@ namespace GenerateScriptDefs
 
         private static string CSharpTypeFromNss(string datatype)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:593-608
-            // Original: def python_type_from_nss(datatype: str) -> str:
             switch (datatype.ToLower())
             {
                 case "int": return "DataType.Int";
@@ -657,8 +637,6 @@ namespace GenerateScriptDefs
 
         private static string GenerateConstantCSharp(ConstantInfo constant)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:611-624
-            // Original: def generate_constant_python(constant: dict) -> str:
             string datatypeCs = CSharpTypeFromNss(constant.DataType);
             string name = constant.Name;
             string value = constant.Value;
@@ -678,8 +656,6 @@ namespace GenerateScriptDefs
 
         private static string GenerateFunctionCSharp(FunctionInfo func, List<ConstantInfo> constants)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:645-730
-            // Original: def generate_function_python(func: dict, constants: list[dict]) -> str:
             string returnTypeCs = CSharpTypeFromNss(func.ReturnType);
             string name = func.Name;
 
@@ -752,8 +728,6 @@ namespace GenerateScriptDefs
             List<ConstantInfo> k1Constants, List<FunctionInfo> k1Functions,
             List<ConstantInfo> k2Constants, List<FunctionInfo> k2Functions)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:733-769
-            // Original: def generate_scriptdefs(k1_constants: list[dict], k1_functions: list[dict], k2_constants: list[dict], k2_functions: list[dict]) -> str:
             var sb = new StringBuilder();
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using KPatcher.Core.Common;");
@@ -765,7 +739,6 @@ namespace GenerateScriptDefs
             sb.AppendLine("    /// <summary>");
             sb.AppendLine("    /// NWScript constant and function definitions for KOTOR and TSL.");
             sb.AppendLine("    /// Generated from k1_nwscript.nss and tsl_nwscript.nss using GenerateScriptDefs tool.");
-            sb.AppendLine("    /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/scriptdefs.py");
             sb.AppendLine("    /// </summary>");
             sb.AppendLine("    public static class ScriptDefs");
             sb.AppendLine("    {");
@@ -778,8 +751,6 @@ namespace GenerateScriptDefs
             sb.AppendLine("        /// </summary>");
             sb.AppendLine("        public static readonly List<ScriptConstant> KOTOR_CONSTANTS = new List<ScriptConstant>()");
             sb.AppendLine("        {");
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/scriptdefs.py:14-15
-            // Original: ScriptConstant(DataType.INT, "TRUE", 1), ScriptConstant(DataType.INT, "FALSE", 0),
             // Add built-in TRUE and FALSE constants (not in NSS files but used in scripts)
             sb.AppendLine("        new ScriptConstant(DataType.Int, \"TRUE\", 1),");
             sb.AppendLine("        new ScriptConstant(DataType.Int, \"FALSE\", 0),");
@@ -794,8 +765,6 @@ namespace GenerateScriptDefs
             sb.AppendLine("        /// </summary>");
             sb.AppendLine("        public static readonly List<ScriptConstant> TSL_CONSTANTS = new List<ScriptConstant>()");
             sb.AppendLine("        {");
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/scriptdefs.py:1507-1508
-            // Original: ScriptConstant(DataType.INT, "TRUE", 1), ScriptConstant(DataType.INT, "FALSE", 0),
             // Add built-in TRUE and FALSE constants (not in NSS files but used in scripts)
             sb.AppendLine("        new ScriptConstant(DataType.Int, \"TRUE\", 1),");
             sb.AppendLine("        new ScriptConstant(DataType.Int, \"FALSE\", 0),");
@@ -834,9 +803,7 @@ namespace GenerateScriptDefs
 
         public static void Main(string[] args)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/scripts/generate_scriptdefs.py:772-795
-            // Original: def main():
-            // Calculate repo root: from scripts/GenerateScriptDefs/bin/Debug/net8.0/ go up to repo root
+            // Calculate repo root: from scripts/GenerateScriptDefs/bin/Debug/net9.0/ go up to repo root
             string currentDir = AppDomain.CurrentDomain.BaseDirectory;
             string repoRoot = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..", "..", ".."));
             string k1Nss = Path.Combine(repoRoot, "vendor", "DeNCS", "k1_nwscript.nss");

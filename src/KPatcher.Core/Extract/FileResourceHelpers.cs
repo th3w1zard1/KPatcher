@@ -8,15 +8,11 @@ using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Extract
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:60-100
-    // Original: def _find_real_filesystem_path(filepath: Path) -> tuple[Path | None, list[str]]:
     internal static class FileResourceHelpers
     {
         private static readonly string[] CapsuleExtensions = { ".erf", ".mod", ".rim", ".sav", ".hak" };
         private static readonly string[] AllArchiveExtensions = { ".erf", ".mod", ".rim", ".sav", ".hak", ".bif" };
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:60-100
-        // Original: def _find_real_filesystem_path(filepath: Path) -> tuple[Path | None, list[str]]:
         public static (string realPath, List<string> nestedParts) FindRealFilesystemPath(string filepath)
         {
             // Fast path: if the filepath exists directly, return it with no nested parts
@@ -42,8 +38,6 @@ namespace KPatcher.Core.Extract
             return (null, new List<string>());
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:102-183
-        // Original: def _extract_from_nested_capsules(real_path: Path, nested_parts: list[str]) -> bytes:
         public static byte[] ExtractFromNestedCapsules(string realPath, List<string> nestedParts)
         {
             // Start with the outer capsule data
@@ -108,8 +102,6 @@ namespace KPatcher.Core.Extract
             return currentData;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:185-223
-        // Original: def _read_erf_resources(reader: BinaryReader, capsule_data: bytes) -> list[tuple[str, ResourceType, int, int]]:
         private static List<(string resname, ResourceType restype, int offset, int size)> ReadErfResources(RawBinaryReader reader, byte[] capsuleData)
         {
             var resources = new List<(string, ResourceType, int, int)>();
@@ -145,8 +137,6 @@ namespace KPatcher.Core.Extract
             return resources;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/extract/file.py:226-253
-        // Original: def _read_rim_resources(reader: BinaryReader, capsule_data: bytes) -> list[tuple[str, ResourceType, int, int]]:
         private static List<(string resname, ResourceType restype, int offset, int size)> ReadRimResources(RawBinaryReader reader, byte[] capsuleData)
         {
             var resources = new List<(string, ResourceType, int, int)>();

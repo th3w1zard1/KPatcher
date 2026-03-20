@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
-using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Uninstall
 {
 
     /// <summary>
     /// A class that provides functionality to uninstall a selected mod using the most recent backup folder created during the last install.
-    /// 1:1 port from Python ModUninstaller in pykotor/kpatcher/uninstall.py
     /// </summary>
     /// <remarks>
     /// Initializes a new instance of the ModUninstaller class.
@@ -63,14 +63,14 @@ namespace KPatcher.Core.Uninstall
         /// <returns>Path to the most recent valid backup folder or null</returns>
         public static CaseAwarePath GetMostRecentBackup(
             [CanBeNull] CaseAwarePath backupFolder,
-            Action<string, string> showErrorDialog = null)
+            Action<string, string> showErrorDialog = null,
+            [CanBeNull] ModUninstallerUiStrings ui = null)
         {
+            ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
+            string backupPathStr = backupFolder?.ToString() ?? "";
             if (!Directory.Exists(backupFolder))
             {
-                showErrorDialog?.Invoke(
-                    "No backups found!",
-                    $"No backups found at '{backupFolder}'!{Environment.NewLine}KPatcher cannot uninstall KPatcher.exe installations."
-                );
+                showErrorDialog?.Invoke(text.NoBackupsTitle, text.GetNoBackupsMessage(backupPathStr));
                 return null;
             }
 
@@ -87,10 +87,7 @@ namespace KPatcher.Core.Uninstall
 
             if (validBackups.Count == 0)
             {
-                showErrorDialog?.Invoke(
-                    "No backups found!",
-                    $"No backups found at '{backupFolder}'!{Environment.NewLine}KPatcher cannot uninstall KPatcher.exe installations."
-                );
+                showErrorDialog?.Invoke(text.NoBackupsTitle, text.GetNoBackupsMessage(backupPathStr));
                 return null;
             }
 
@@ -121,7 +118,7 @@ namespace KPatcher.Core.Uninstall
                     File.Delete(filePath);
                 }
 
-                _logger.AddNote($"Removed {relFilePath}...");
+                _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.RemovedFormat, relFilePath));
             }
 
             // Copy each file from the backup folder to the destination restoring the file structure
@@ -145,7 +142,7 @@ namespace KPatcher.Core.Uninstall
                 File.Copy(file, destinationPath, overwrite: true);
 
                 string relativeToGameParent = Path.GetRelativePath(Path.GetDirectoryName(_gamePath) ?? "", destinationPath);
-                _logger.AddNote($"Restoring backup of '{file.Name}' to '{relativeToGameParent}'...");
+                _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.RestoringBackupOf, file.Name, relativeToGameParent));
             }
         }
 
@@ -158,9 +155,11 @@ namespace KPatcher.Core.Uninstall
         /// <returns>Tuple containing: most recent backup folder path, existing files set, files in backup list, folder count</returns>
         public (CaseAwarePath BackupFolder, HashSet<string> ExistingFiles, List<CaseAwarePath> FilesInBackup, int FolderCount) GetBackupInfo(
             [CanBeNull] Action<string, string> showErrorDialog = null,
-            [CanBeNull] Func<string, string, bool> showYesNoDialog = null)
+            [CanBeNull] Func<string, string, bool> showYesNoDialog = null,
+            [CanBeNull] ModUninstallerUiStrings ui = null)
         {
-            CaseAwarePath mostRecentBackupFolder = GetMostRecentBackup(_backupsLocationPath, showErrorDialog);
+            ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
+            CaseAwarePath mostRecentBackupFolder = GetMostRecentBackup(_backupsLocationPath, showErrorDialog, ui);
             if (mostRecentBackupFolder is null)
             {
                 return (null, new HashSet<string>(), new List<CaseAwarePath>(), 0);
@@ -182,11 +181,8 @@ namespace KPatcher.Core.Uninstall
                 if (existingFiles.Count < filesToDelete.Count)
                 {
                     bool continueAnyway = showYesNoDialog?.Invoke(
-                        "Backup out of date or mismatched",
-                        $"This backup doesn't match your current KOTOR installation. Files are missing/changed in your KOTOR install.{Environment.NewLine}" +
-                        $"It is important that you uninstall all mods in their installed order when utilizing this feature.{Environment.NewLine}" +
-                        $"Also ensure you selected the right mod, and the right KOTOR folder.{Environment.NewLine}" +
-                        "Continue anyway?"
+                        text.BackupMismatchTitle,
+                        text.GetBackupMismatchMessage()
                     ) ?? false;
 
                     if (!continueAnyway)
@@ -217,20 +213,22 @@ namespace KPatcher.Core.Uninstall
         public bool UninstallSelectedMod(
             [CanBeNull] Action<string, string> showErrorDialog = null,
             [CanBeNull] Func<string, string, bool> showYesNoDialog = null,
-            [CanBeNull] Func<string, string, bool?> showYesNoCancelDialog = null)
+            [CanBeNull] Func<string, string, bool?> showYesNoCancelDialog = null,
+            [CanBeNull] ModUninstallerUiStrings ui = null)
         {
+            ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
             (
                 CaseAwarePath mostRecentBackupFolder,
                 HashSet<string> existingFiles,
                 List<CaseAwarePath> filesInBackup,
-                int folderCount) = GetBackupInfo(showErrorDialog, showYesNoDialog);
+                int folderCount) = GetBackupInfo(showErrorDialog, showYesNoDialog, ui);
 
             if (mostRecentBackupFolder is null)
             {
                 return false;
             }
 
-            _logger.AddNote($"Using backup folder '{mostRecentBackupFolder}'");
+            _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.UsingBackupFolder, mostRecentBackupFolder));
 
             // Show files to be restored if there are less than 6
             if (filesInBackup.Count < 6)
@@ -238,15 +236,14 @@ namespace KPatcher.Core.Uninstall
                 foreach (CaseAwarePath item in filesInBackup)
                 {
                     string relativePath = Path.GetRelativePath(mostRecentBackupFolder, item);
-                    _logger.AddNote($"Would restore file '{relativePath}'");
+                    _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.WouldRestoreFile, relativePath));
                 }
             }
 
             // Confirm uninstall with user
             bool confirmed = showYesNoDialog?.Invoke(
-                "Confirmation",
-                $"Really uninstall {existingFiles.Count} files and restore the most recent backup (containing {filesInBackup.Count} files and {folderCount} folders)?{Environment.NewLine}" +
-                "Note: This uses the most recent mod-specific backup, the namespace option displayed does not affect this tool."
+                text.ConfirmationTitle,
+                text.GetReallyUninstallMessage(existingFiles.Count, filesInBackup.Count, folderCount)
             ) ?? false;
 
             if (!confirmed)
@@ -262,7 +259,7 @@ namespace KPatcher.Core.Uninstall
             {
                 showErrorDialog?.Invoke(
                     e.GetType().Name,
-                    $"Failed to restore backup because of exception.{Environment.NewLine}{Environment.NewLine}{e.Message}"
+                    text.GetFailedToRestoreMessage(e.Message)
                 );
                 return false;
             }
@@ -284,19 +281,19 @@ namespace KPatcher.Core.Uninstall
                 try
                 {
                     Directory.Delete(mostRecentBackupFolder, recursive: true);
-                    _logger.AddNote($"Deleted restored backup '{mostRecentBackupFolder.Name}'");
+                    _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.DeletedRestoredBackup, mostRecentBackupFolder.Name));
                     break;
                 }
                 catch (UnauthorizedAccessException)
                 {
                     bool? result = showYesNoCancelDialog?.Invoke(
-                        "Permission Error",
-                        "Unable to delete the restored backup due to permission issues. Would you like to gain permission and try again?"
+                        text.PermissionErrorTitle,
+                        text.UnableToDeleteBackupPermissionMessage
                     );
 
                     if (result == true)
                     {
-                        Console.WriteLine("Gaining permission, please wait...");
+                        Console.WriteLine(text.GainingPermissionPleaseWait);
                         // Attempt to gain access - in C# this would require platform-specific code
                         // For now, we'll just retry
                         continue;

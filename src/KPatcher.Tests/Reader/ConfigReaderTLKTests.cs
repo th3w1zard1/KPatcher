@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
+using IniParser.Model;
+using IniParser.Parser;
 using KPatcher.Core.Config;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Reader;
 using KPatcher.Core.Resources;
-using FluentAssertions;
-using IniParser.Model;
-using IniParser.Parser;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader

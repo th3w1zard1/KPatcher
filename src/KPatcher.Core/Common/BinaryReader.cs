@@ -6,12 +6,8 @@ using JetBrains.Annotations;
 namespace KPatcher.Core.Common
 {
     /// <summary>
-    /// Binary reader with enhanced functionality matching Python's RawBinaryReader.
     /// Provides offset/size constrained reading, encoding support, and bounds checking.
     /// </summary>
-    /// <remarks>
-    /// Python Reference: g:/GitHub/PyKotor/Libraries/PyKotor/src/utility/common/stream.py
-    /// </remarks>
     public class RawBinaryReader : IDisposable
     {
         // Static initializer to ensure CodePages encoding provider is registered
@@ -339,7 +335,7 @@ namespace KPatcher.Core.Common
         {
             ExceedCheck(4);
             byte[] bytes = new byte[4];
-            _stream.Read(bytes, 0, 4);
+            _stream.ReadExactly(bytes, 0, 4);
             _position += 4;
 
             if (bigEndian == BitConverter.IsLittleEndian)
@@ -451,8 +447,6 @@ namespace KPatcher.Core.Common
         }
 
         /// <summary>
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/stream.py:726-759
-        // Original: def read_string(self, length: int, encoding: str | None = "windows-1252", errors: Literal["ignore", "strict", "replace"] = "ignore") -> str:
         /// <summary>
         /// Reads a string of specified length with encoding support and null trimming.
         /// </summary>
@@ -552,8 +546,7 @@ namespace KPatcher.Core.Common
                 text = enc.GetString(bytes, 0, read);
             }
 
-            // Matching PyKotor implementation: trim null bytes and everything after first null
-            // Python: if "\0" in string: string = string[: string.index("\0")].rstrip("\0"); string = string.replace("\0", "")
+            // if "\0" in string: string = string[: string.index("\0")].rstrip("\0"); string = string.replace("\0", "")
             int nullIndex = text.IndexOf('\0');
             if (nullIndex >= 0)
             {
@@ -561,20 +554,15 @@ namespace KPatcher.Core.Common
                 text = text.TrimEnd('\0');
                 text = text.Replace("\0", string.Empty);
             }
-            // Python doesn't trim if no null found, so we don't either
 
             return text;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/stream.py:761-799
-        // Original: def read_terminated_string(self, terminator: str = "\0", length: int = -1, encoding: str = "ascii", *, strict: bool = True) -> str:
         /// <summary>
         /// Reads a string until a terminator or length limit is reached.
         /// </summary>
         public string ReadTerminatedString(char terminator = '\0', int length = -1, string encoding = "ascii", bool strict = true)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:183-212
-            // Original: The method appends an empty string initially, then removes the first character
             // This effectively skips the first character read, which is the intended behavior
             StringBuilder sb = new StringBuilder();
             int bytesRead = 0;
@@ -676,8 +664,6 @@ namespace KPatcher.Core.Common
             return line.TrimEnd('\r', '\n');
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:19-44
-        // Original: def read_locstring(self) -> LocalizedString:
         /// <summary>
         /// Reads a LocalizedString following the GFF format specification.
         /// </summary>
@@ -743,8 +729,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:337-345
-    // Original: def get_aurora_scale(obj) -> float:
     /// <summary>
     /// If the scale is uniform, i.e, x=y=z, we will return the value. Else we'll return 1.
     /// </summary>
@@ -759,8 +743,6 @@ namespace KPatcher.Core.Common
             return 1.0f;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:348-350
-        // Original: def get_aurora_rot_from_object(obj) -> list[float]:
         public static float[] GetAuroraRotFromObject(Quaternion q)
         {
             // Extract axis and angle from quaternion
@@ -773,8 +755,6 @@ namespace KPatcher.Core.Common
         }
     }
 
-    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:19-44
-    // Original: class BinaryReader(RawBinaryReader, ABC):
     /// <summary>
     /// Provides easier reading of binary objects that abstracts uniformly to all different stream/data types.
     /// </summary>
@@ -785,8 +765,6 @@ namespace KPatcher.Core.Common
         {
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/stream.py:22-43
-        // Original: def read_locstring(self) -> LocalizedString:
         /// <summary>
         /// Reads the localized string data structure from the stream.
         /// The binary data structure that is read follows the structure found in the GFF format specification.
@@ -812,17 +790,17 @@ namespace KPatcher.Core.Common
             return locString;
         }
 
-        public static BinaryReader FromFile(string path, int offset = 0, int? size = null)
+        public static new BinaryReader FromFile(string path, int offset = 0, int? size = null)
         {
             return new BinaryReaderFile(path, offset, size);
         }
 
-        public static BinaryReader FromBytes(byte[] data, int offset = 0, int? size = null)
+        public static new BinaryReader FromBytes(byte[] data, int offset = 0, int? size = null)
         {
             return new BinaryReaderMemory(data, offset, size);
         }
 
-        public static BinaryReader FromStream(Stream stream, int offset = 0, int? size = null)
+        public static new BinaryReader FromStream(Stream stream, int offset = 0, int? size = null)
         {
             return new BinaryReaderStream(stream, offset, size);
         }

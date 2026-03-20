@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using KPatcher.Core.Common;
 using JetBrains.Annotations;
+using KPatcher.Core.Common;
 
 namespace KPatcher.Core.Formats.TLK
 {
@@ -45,8 +45,8 @@ namespace KPatcher.Core.Formats.TLK
             string oldText = Entries[stringref].Text;
             ResRef oldSound = Entries[stringref].Voiceover;
 
-            // Python line 176: text or old_text - if text is falsy (None, "", etc.), use old_text
-            // Python line 176: ResRef(sound_resref) if sound_resref else old_sound
+            // text or old_text - if text is falsy (None, "", etc.), use old_text
+            // ResRef(sound_resref) if sound_resref else old_sound
             string newText = string.IsNullOrEmpty(text) ? oldText : text;
             ResRef newSound = string.IsNullOrEmpty(soundResref) ? oldSound : new ResRef(soundResref);
 

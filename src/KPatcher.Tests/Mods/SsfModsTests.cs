@@ -1,9 +1,9 @@
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.SSF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.SSF;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Mods
@@ -16,7 +16,7 @@ namespace KPatcher.Core.Tests.Mods
     public class SsfModsTests
     {
         /// <summary>
-        /// Python: test_assign_int
+        /// test_assign_int
         /// Tests assigning constant integer value to SSF sound
         /// </summary>
         [Fact]
@@ -40,7 +40,7 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         /// <summary>
-        /// Python: test_assign_2datoken
+        /// test_assign_2datoken
         /// Tests assigning value from memory_2da using TokenUsage2DA
         /// </summary>
         [Fact]
@@ -63,7 +63,7 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         /// <summary>
-        /// Python: test_assign_tlktoken
+        /// test_assign_tlktoken
         /// Tests assigning value from memory_str using TokenUsageTLK
         /// </summary>
         [Fact]

@@ -5,8 +5,6 @@ using JetBrains.Annotations;
 
 namespace KPatcher.Core.Common
 {
-    // Matching PyKotor implementation at Libraries/PyKotor/src/utility/common/geometry.py:1454-1582
-    // Original: class Polygon3:
     public class Polygon3 : IEnumerable<Vector3>
     {
         private readonly List<Vector3> _points = new List<Vector3>();

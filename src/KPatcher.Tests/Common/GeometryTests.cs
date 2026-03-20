@@ -1,6 +1,6 @@
 using System;
-using KPatcher.Core.Common;
 using FluentAssertions;
+using KPatcher.Core.Common;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Common

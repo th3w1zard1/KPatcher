@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using KPatcher.Core.Formats.NCS;
 using JetBrains.Annotations;
+using KPatcher.Core.Formats.NCS;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -83,7 +83,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                         ncs.Add(NCSInstructionType.CPDOWNSP, new List<object> { -scopeSize - returnType.Size(root) * 2, returnType.Size(root) });
                         ncs.Add(NCSInstructionType.MOVSP, new List<object> { -returnType.Size(root) });
                     }
-                    // Matching PyKotor implementation: only add MOVSP if scopeSize is non-zero
                     // External compiler optimizes away MOVSP with offset 0, so we should match that behavior
                     if (scopeSize != 0)
                     {
@@ -93,7 +92,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                     return;
                 }
             }
-            // Matching PyKotor implementation: only add MOVSP if ScopeSize is non-zero
             // External compiler optimizes away MOVSP with offset 0, so we should match that behavior
             int finalScopeSize = ScopeSize(root);
             if (finalScopeSize != 0)
@@ -109,10 +107,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:632-633
         public void AddScoped(Identifier identifier, DynamicDataType dataType, bool isConst = false)
         {
-            // Insert at beginning to match Python's list.insert(0, ...)
+            // Insert at beginning, list.insert(0, ...)
             Scope.Insert(0, new ScopedValue(identifier, dataType, isConst));
         }
 
@@ -135,10 +132,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
             visited.Add(this);
 
-            // Matching PyKotor classes.py line 641: offset = -self.temp_stack if offset is None else offset - self.temp_stack
             int currentOffset = offset == null ? -TempStack : offset.Value - TempStack;
 
-            // Python implementation uses for...else: loop through scope, break if found, else check parent
+            // for...else: loop through scope, break if found, else check parent
             ScopedValue found = null;
             foreach (ScopedValue scoped in Scope)
             {
@@ -162,7 +158,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Identifier found in this scope
-            // Matching PyKotor classes.py line 650
             return new GetScopedResult(false, found.DataType, currentOffset, found.IsConst);
         }
 

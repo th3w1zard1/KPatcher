@@ -30,7 +30,7 @@ namespace KPatcher.Core.Formats.TwoDA
 
         public List<string> GetHeaders() => new List<string>(_headers);
         public List<string> GetLabels() => new List<string>(_labels);
-        
+
         // Properties for compatibility with Utilities.cs
         public List<string> Headers => GetHeaders();
         public List<TwoDARow> Rows
@@ -332,7 +332,7 @@ namespace KPatcher.Core.Formats.TwoDA
 
         /// <summary>
         /// Compares this TwoDA with another TwoDA instance.
-        /// Ported from vendor/PyKotor/Libraries/PyKotor/src/pykotor/resource/formats/twoda/twoda_data.py:854.
+        /// C# Reference: src/KPatcher.Core/Formats/TwoDA/TwoDA.cs
         /// </summary>
         public bool Compare(TwoDA other, Action<string> logFunc = null)
         {

@@ -1,20 +1,18 @@
 using System;
 using System.IO;
-using KPatcher.Core.Resources;
 using JetBrains.Annotations;
+using KPatcher.Core.Resources;
 
 namespace KPatcher.Core.Formats.RIM
 {
 
     /// <summary>
     /// Auto-detection and convenience functions for RIM files.
-    /// 1:1 port of Python rim_auto.py from pykotor/resource/formats/rim/rim_auto.py
     /// </summary>
     public static class RIMAuto
     {
         /// <summary>
         /// Returns an RIM instance from the source.
-        /// 1:1 port of Python read_rim function.
         /// </summary>
         public static RIM ReadRim(string source, int offset = 0, int size = 0)
         {
@@ -31,7 +29,6 @@ namespace KPatcher.Core.Formats.RIM
 
         /// <summary>
         /// Writes the RIM data to the target location with the specified format (RIM only).
-        /// 1:1 port of Python write_rim function.
         /// </summary>
         public static void WriteRim(RIM rim, string target, ResourceType fileFormat)
         {
@@ -49,7 +46,6 @@ namespace KPatcher.Core.Formats.RIM
 
         /// <summary>
         /// Returns the RIM data as a byte array.
-        /// 1:1 port of Python bytes_rim function.
         /// </summary>
         public static byte[] BytesRim(RIM rim, [CanBeNull] ResourceType fileFormat = null)
         {

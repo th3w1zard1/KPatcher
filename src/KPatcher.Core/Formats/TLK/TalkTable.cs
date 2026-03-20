@@ -13,7 +13,7 @@ namespace KPatcher.Core.Formats.TLK
     /// For full TLK manipulation, use the TLK class instead.
     /// </summary>
     /// <remarks>
-    /// Python Reference: g:/GitHub/PyKotor/Libraries/PyKotor/src/pykotor/extract/talktable.py
+    /// C# Reference: src/KPatcher.Core/Formats/TLK/TalkTable.cs
     /// </remarks>
     public class TalkTable
     {
@@ -54,7 +54,7 @@ namespace KPatcher.Core.Formats.TLK
                     return "";
                 }
 
-                // Python's talktable.py: texts_offset points to TEXT DATA, text_offset is relative to it
+                // texts_offset points to TEXT DATA, text_offset is relative to it
                 var tlkData = ExtractCommonTlkData(reader, stringref);
                 // Calculate absolute position, ensuring no overflow
                 long absolutePosition = (long)textsOffset + (long)tlkData.TextOffset;
@@ -69,7 +69,7 @@ namespace KPatcher.Core.Formats.TLK
                 textBytes = reader.ReadBytes(tlkData.TextLength);
             }
             string text = encoding.GetString(textBytes);
-            // Trim at first null byte (Python's read_string does this)
+            // Trim at first null byte
             int nullIndex = text.IndexOf('\0');
             if (nullIndex >= 0)
             {
@@ -274,7 +274,6 @@ namespace KPatcher.Core.Formats.TLK
 
         private static Encoding GetEncodingForLanguage(Language language)
         {
-            // Match Python's Language.get_encoding() method
             switch (language)
             {
                 case Language.English:
@@ -285,14 +284,6 @@ namespace KPatcher.Core.Formats.TLK
                     return Encoding.GetEncoding("windows-1252"); // cp1252
                 case Language.Polish:
                     return Encoding.GetEncoding("windows-1250"); // cp1250
-                case Language.Korean:
-                    return Encoding.GetEncoding("euc-kr");
-                case Language.ChineseTraditional:
-                    return Encoding.GetEncoding("big5");
-                case Language.ChineseSimplified:
-                    return Encoding.GetEncoding("gb2312");
-                case Language.Japanese:
-                    return Encoding.GetEncoding("shift_jis");
                 default:
                     return Encoding.GetEncoding("windows-1252"); // default to cp1252
             }

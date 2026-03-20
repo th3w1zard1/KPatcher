@@ -1,15 +1,14 @@
 using System;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Mods
 {
 
     /// <summary>
     /// Represents a file to be installed/copied during patching.
-    /// 1:1 port from Python InstallFile in pykotor/kpatcher/mods/install.py
     /// </summary>
     public class InstallFile : PatcherModifications
     {
@@ -38,7 +37,6 @@ namespace KPatcher.Core.Mods
             Game game)
         {
             Apply(source, memory, logger, game);
-            // Python: with BinaryReader.from_auto(source) as reader: return reader.read_all()
             return source;
         }
 

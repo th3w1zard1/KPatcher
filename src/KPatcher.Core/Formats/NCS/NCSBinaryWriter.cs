@@ -64,7 +64,7 @@ namespace KPatcher.Core.Formats.NCS
             writer.Write((byte)byteCode);
             writer.Write(qualifier);
 
-            // Handle instruction-specific arguments - order matches Python
+            // Handle instruction-specific arguments
             if (instruction.InsType == NCSInstructionType.DECxSP ||
                 instruction.InsType == NCSInstructionType.INCxSP ||
                 instruction.InsType == NCSInstructionType.DECxBP ||

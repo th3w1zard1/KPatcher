@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using KPatcher.Core.Formats.NCS.Compiler.NSS;
 using JetBrains.Annotations;
+using KPatcher.Core.Formats.NCS.Compiler.NSS;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -63,7 +63,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
     /// <summary>
     /// Result of scoped variable lookup.
-    /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:251-255
     /// </summary>
     public class GetScopedResult
     {
@@ -99,7 +98,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
     /// <summary>
     /// Scoped variable in a code block or global scope.
-    /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:677-680
     /// </summary>
     public class ScopedValue
     {

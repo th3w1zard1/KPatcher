@@ -76,11 +76,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <!-- Use 7.x (Apache 2.0); 8.x+ is Xceed-licensed and shows a commercial-use warning at test run -->
+    <PackageReference Include="FluentAssertions" Version="7.2.2" />
     <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
     <ProjectReference Include="..\KPatcher.Core\KPatcher.Core.csproj" />
   </ItemGroup>
 

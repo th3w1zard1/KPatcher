@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using KPatcher.Core.Common;
-using KPatcher.Core.Formats.Capsule;
+using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
@@ -14,8 +14,8 @@ namespace KPatcher.Core.Tests.Patcher
 {
 
     /// <summary>
-    /// Tests for ModInstaller (ported from test_config.py)
-    /// Tests lookup_resource and should_patch functionality
+    /// Tests for ModInstaller
+    /// Tests LookupResource and ShouldPatch functionality
     /// </summary>
     public class ModInstallerTests : IDisposable
     {

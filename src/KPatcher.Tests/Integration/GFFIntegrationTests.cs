@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
+using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods.GFF;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Integration
@@ -238,11 +238,11 @@ namespace KPatcher.Core.Tests.Integration
         public void ModifyField_LocalizedString_ShouldUpdateValue()
         {
             // Python test: test_modify_field_locstring
-            // Python: gff.root.set_locstring("Field1", LocalizedString(0))
+            // gff.root.set_locstring("Field1", LocalizedString(0))
             var gff = new GFF();
             gff.Root.SetLocString("Field1", new LocalizedString(0));
 
-            // Python: FieldValueConstant(LocalizedStringDelta(FieldValueConstant(1)))
+            // FieldValueConstant(LocalizedStringDelta(FieldValueConstant(1)))
             var delta = new LocalizedStringDelta(new FieldValueConstant(1));
             var modify = new ModifyFieldGFF("Field1", new FieldValueConstant(delta));
 
@@ -491,7 +491,7 @@ namespace KPatcher.Core.Tests.Integration
         [Fact]
         public void Memory2DA_WithSourceToken_ShouldStoreFromToken()
         {
-            // Python: When dest_field exists, it assigns ptr_to_src to the field value, not to memory
+            // When dest_field exists, it assigns ptr_to_src to the field value, not to memory
             // Arrange
             var gff = new GFF();
             gff.Root.SetInt32("AppearanceType", 100);
@@ -504,7 +504,7 @@ namespace KPatcher.Core.Tests.Integration
             memory2DA.Apply(gff.Root, Memory, Logger);
 
             // Assert - Python assigns ptr_to_src to the field when dest_field exists
-            // Python: dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
+            // dest_field._value = FieldValueConstant(ptr_to_src).value(memory, dest_field.field_type())
             gff.Root.GetInt32("AppearanceType").Should().Be(999);
         }
 

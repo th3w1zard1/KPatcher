@@ -8,7 +8,6 @@ namespace KPatcher.Core.Formats.SSF
 
     /// <summary>
     /// Reads SSF (Sound Set File) binary data.
-    /// Matches Python SSFBinaryReader class.
     /// </summary>
     public class SSFBinaryReader : BinaryFormatReaderBase
     {

@@ -1,62 +1,69 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Config;
-using KPatcher.Core.Installation;
 using KPatcher.Core.Logger;
+using KPatcher.Core.Mods;
+using KPatcher.Core.Mods.GFF;
+using KPatcher.Core.Mods.NCS;
+using KPatcher.Core.Mods.NSS;
+using KPatcher.Core.Mods.SSF;
+using KPatcher.Core.Mods.TwoDA;
 using KPatcher.Core.Namespaces;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Reader;
 using KPatcher.Core.Uninstall;
-using JetBrains.Annotations;
-#if WINDOWS
-using Microsoft.Win32;
-#endif
-
+using KPatcher.UI.Resources;
 namespace KPatcher.UI
 {
 
     /// <summary>
     /// Core functionality for KPatcher.
-    /// Equivalent to kpatcher/KPatcher.Core.py
     /// </summary>
     public static class Core
     {
         public const string VersionLabel = "v0.1.0";
 
         /// <summary>
-        /// Checks if the version string indicates an alpha/pre-release version.
-        /// Matches .NET versioning schema: checks for 'a' followed by digits or 'alpha' (case-insensitive).
-        /// Examples: "1.0.0a1", "1.0.0-alpha1", "1.0.0-alpha.1", "v1.0.0a1"
+        /// Returns true if the version is considered alpha/pre-release or below 1.0.0.
+        /// Recognized as such when: the string contains "alpha" (case-insensitive); the numeric
+        /// part parses to a version with major &lt; 1 (e.g. 0.1.0); or the string contains 'a'/'A'
+        /// immediately followed by a digit (e.g. 1.0.0a1, 1.0.0-a1). A leading 'v' is ignored.
         /// </summary>
-        public static bool IsAlphaVersion(string version)
+        public static bool IsAlphaVersionOrLowerThanV1_0_0(string version)
         {
             if (string.IsNullOrWhiteSpace(version))
             {
                 return false;
             }
 
-            // Remove 'v' prefix if present
-            string normalizedVersion = version.TrimStart('v', 'V');
+            string normalized = version.TrimStart('v', 'V');
 
-            // Check for 'alpha' (case-insensitive)
-            if (normalizedVersion.IndexOf("alpha", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (normalized.Contains("alpha", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            // Check for 'a' followed by a digit (e.g., "a1", "a2", "a10")
-            // This matches patterns like "1.0.0a1" or "1.0.0-a1"
-            for (int i = 0; i < normalizedVersion.Length - 1; i++)
+            int end = 0;
+            while (end < normalized.Length && (char.IsDigit(normalized[end]) || normalized[end] == '.'))
             {
-                if ((normalizedVersion[i] == 'a' || normalizedVersion[i] == 'A') &&
-                    char.IsDigit(normalizedVersion[i + 1]))
+                end++;
+            }
+            if (end > 0 && Version.TryParse(normalized.AsSpan(0, end), out Version v) && v.Major < 1)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < normalized.Length - 1; i++)
+            {
+                if (char.ToLowerInvariant(normalized[i]) == 'a' && char.IsDigit(normalized[i + 1]))
                 {
                     return true;
                 }
@@ -105,7 +112,7 @@ namespace KPatcher.UI
             [CanBeNull]
             public string InfoContent { get; set; }
             /// <summary>
-            /// Whether InfoContent is RTF format (true) or plain text/RTE JSON (false)
+            /// Whether InfoContent is RTF from info.rtf (always true when content is present).
             /// </summary>
             public bool IsRtf { get; set; }
         }
@@ -122,13 +129,69 @@ namespace KPatcher.UI
         }
 
         /// <summary>
-        /// Loads a mod from a directory.
+        /// Returns true if the directory is a valid mod entry point: either a mod root (contains tslpatchdata with config)
+        /// or the tslpatchdata folder itself (contains namespaces.ini, changes.ini, or changes.yaml).
+        /// Used for startup auto-open and for normalizing browse selection.
+        /// </summary>
+        public static bool IsValidModPath(string directoryPath)
+        {
+            if (string.IsNullOrWhiteSpace(directoryPath) || !Directory.Exists(directoryPath))
+            {
+                return false;
+            }
+
+            string childTsl = Path.Combine(directoryPath, "tslpatchdata");
+            if (Directory.Exists(childTsl) && HasTslPatchDataConfig(childTsl))
+            {
+                return true;
+            }
+
+            return HasTslPatchDataConfig(directoryPath);
+        }
+
+        private static bool HasTslPatchDataConfig(string dir)
+        {
+            return File.Exists(Path.Combine(dir, "namespaces.ini"))
+                   || File.Exists(Path.Combine(dir, "namespaces.yaml"))
+                   || File.Exists(Path.Combine(dir, "changes.ini"))
+                   || File.Exists(Path.Combine(dir, "changes.yaml"));
+        }
+
+        /// <summary>
+        /// Two-letter language code used when resolving localized config files (e.g. changes.de.ini).
+        /// Set by RequestLanguageChange so the new window reloads the mod with the new language.
+        /// </summary>
+        public static string ConfigLanguageCode => LanguageSettings.GetConfigLanguageCode();
+
+        /// <summary>
+        /// When the user changes UI language, we create a new window; set this to the previous VM's ModPath
+        /// so the new VM can reload the mod and pick up the language-specific config file.
+        /// </summary>
+        public static string LastLoadedModPathForLanguageChange { get; set; }
+
+        /// <summary>
+        /// Resolves a config file with optional language suffix: tries &lt;base&gt;.&lt;lang&gt;.ini, &lt;base&gt;.&lt;lang&gt;.yaml, then &lt;base&gt;.ini, &lt;base&gt;.yaml.
+        /// Used for namespaces.ini and changes.ini/yaml (and any base name from namespaces.ini). See docs for localized config.
+        /// </summary>
+        /// <param name="directory">Directory (e.g. tslpatchdata path) to look in.</param>
+        /// <param name="baseName">Base filename without extension (e.g. "namespaces", "changes").</param>
+        /// <param name="lang">Two-letter language code (e.g. "de", "en").</param>
+        /// <param name="tryYaml">If true, also try .yaml variants (namespaces and changes both use true).</param>
+        /// <returns>Full path and chosen filename, or (null, null) if none exist.</returns>
+        public static (string FullPath, string FileName) ResolveLocalizedConfigFile(CaseAwarePath directory, string baseName, string lang, bool tryYaml)
+        {
+            return LocalizedConfigResolver.Resolve(directory, baseName, lang, tryYaml);
+        }
+
+        /// <summary>
+        /// Loads a mod from a directory (mod root or tslpatchdata path; both are normalized to mod root).
+        /// Resolves localized config files when the UI language is non-English: e.g. namespaces.de.ini, changes.fr.yaml.
         /// </summary>
         public static ModInfo LoadMod(string directoryPath)
         {
-            // Python: tslpatchdata_path = CaseAwarePath(directory_path, "tslpatchdata")
+            // tslpatchdata_path = CaseAwarePath(directory_path, "tslpatchdata")
             var tslPatchDataPath = new CaseAwarePath(directoryPath, "tslpatchdata");
-            // Python: if not tslpatchdata_path.is_dir() and tslpatchdata_path.parent.name.lower() == "tslpatchdata":
+            // if not tslpatchdata_path.is_dir() and tslpatchdata_path.parent.name.lower() == "tslpatchdata":
             //         tslpatchdata_path = tslpatchdata_path.parent
             if (!tslPatchDataPath.IsDirectory())
             {
@@ -140,34 +203,39 @@ namespace KPatcher.UI
                 }
             }
 
-            // Python: mod_path = str(tslpatchdata_path.parent)
+            // mod_path = str(tslpatchdata_path.parent)
             string modPath = tslPatchDataPath.DirectoryName;
-            CaseAwarePath namespacePath = tslPatchDataPath.Combine("namespaces.ini");
-            CaseAwarePath changesPath = tslPatchDataPath.Combine("changes.ini");
+            string lang = ConfigLanguageCode;
 
             List<PatcherNamespace> namespaces;
-            // Can be null if no config reader is needed
             ConfigReader configReader = null;
 
-            if (namespacePath.IsFile())
+            // Try localized namespaces first: namespaces.<lang>.ini, then namespaces.ini
+            var (namespacesPath, namespacesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "namespaces", lang, tryYaml: false);
+            if (namespacesPath != null)
             {
-                namespaces = NamespaceReader.FromFilePath(namespacePath.GetResolvedPath());
-            }
-            else if (changesPath.IsFile())
-            {
-                configReader = ConfigReader.FromFilePath(changesPath.GetResolvedPath(), tslPatchDataPath: tslPatchDataPath.GetResolvedPath());
-                namespaces = new List<PatcherNamespace>
-            {
-                new PatcherNamespace("changes.ini", "info.rtf")
-                {
-                    Name = "Default",
-                    Description = "Default installation"
-                }
-            };
+                namespaces = NamespaceReader.FromFilePath(namespacesPath);
             }
             else
             {
-                throw new FileNotFoundException($"No namespaces.ini or changes.ini found in {tslPatchDataPath}");
+                // Try localized changes: changes.<lang>.ini, changes.<lang>.yaml, changes.ini, changes.yaml
+                var (changesPath, changesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "changes", lang, tryYaml: true);
+                if (changesPath != null)
+                {
+                    configReader = ConfigReader.FromFilePath(changesPath, tslPatchDataPath: tslPatchDataPath.GetResolvedPath());
+                    namespaces = new List<PatcherNamespace>
+                    {
+                        new PatcherNamespace(changesFileName, "info.rtf")
+                        {
+                            Name = "Default",
+                            Description = UIResources.DefaultInstallation
+                        }
+                    };
+                }
+                else
+                {
+                    throw new FileNotFoundException($"No namespaces.ini, namespaces.yaml, changes.ini, or changes.yaml (or localized variants) found in {tslPatchDataPath}");
+                }
             }
 
             return new ModInfo
@@ -180,6 +248,7 @@ namespace KPatcher.UI
 
         /// <summary>
         /// Loads configuration for a specific namespace.
+        /// Resolves localized changes file when UI language is set: e.g. changes.de.ini for that namespace's base name.
         /// </summary>
         public static NamespaceInfo LoadNamespaceConfig(
             string modPath,
@@ -187,20 +256,41 @@ namespace KPatcher.UI
             string selectedNamespaceName,
             [CanBeNull] ConfigReader configReader = null)
         {
-            // Can be null if namespace not found
             PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
             if (namespaceOption is null)
             {
                 throw new ArgumentException($"Namespace '{selectedNamespaceName}' not found in namespaces list");
             }
 
-            var changesIniPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath());
-            string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            // Use the directory that contains the changes file (supports IniName like "subfolder/changes.ini" with path in filename)
+            string fullChangesPath = Path.Combine(tslPatchDataPathResolved, namespaceOption.ChangesFilePath());
+            string namespaceDir = Path.GetDirectoryName(fullChangesPath) ?? tslPatchDataPathResolved;
+            string baseName = Path.GetFileNameWithoutExtension(Path.GetFileName(namespaceOption.IniFilename) ?? "changes");
+            var namespaceDirPath = new CaseAwarePath(namespaceDir);
+            string lang = ConfigLanguageCode;
 
-            ConfigReader reader = configReader ?? ConfigReader.FromFilePath(changesIniPath.GetResolvedPath(), tslPatchDataPath: tslPatchDataPath);
+            string resolvedChangesPath;
+            var (localizedPath, _) = ResolveLocalizedConfigFile(namespaceDirPath, baseName, lang, tryYaml: true);
+            if (localizedPath != null)
+            {
+                resolvedChangesPath = localizedPath;
+            }
+            else
+            {
+                var changesIniPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath());
+                resolvedChangesPath = changesIniPath.GetResolvedPath();
+            }
+
+            ConfigReader reader = configReader ?? ConfigReader.FromFilePath(resolvedChangesPath, tslPatchDataPath: tslPatchDataPathResolved);
             if (configReader is null)
             {
                 reader.Load(reader.Config); // Load() populates the Config
+                // When loading from INI (not namespace list), create equivalent .yaml alongside
+                if (resolvedChangesPath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
+                {
+                    reader.WriteEquivalentYaml(Path.ChangeExtension(resolvedChangesPath, ".yaml"));
+                }
             }
 
             int? gameNumber = reader.Config.GameNumber;
@@ -208,46 +298,47 @@ namespace KPatcher.UI
             Game? game = gameNumber.HasValue ? (Game?)gameNumber.Value : null;
 
             var gamePaths = new List<string>();
+            Dictionary<Game, List<string>> detectedPaths = FindKotorPathsFromDefault();
             if (game.HasValue)
             {
-                // Find KOTOR paths from registry and default locations
-                Dictionary<Game, List<string>> detectedPaths = FindKotorPathsFromDefault();
-                // Can be null if paths not found
+                // GameNumber set: show paths for that game (and K1 paths when game is TSL)
                 if (detectedPaths.TryGetValue(game.Value, out List<string> paths))
                 {
                     gamePaths.AddRange(paths);
                 }
-                // If TSL, also include K1 paths
                 if (game.Value == Game.TSL && detectedPaths.TryGetValue(Game.K1, out List<string> k1Paths))
                 {
                     gamePaths.AddRange(k1Paths);
                 }
             }
+            else
+            {
+                // No GameNumber in ini: show all detected paths (both K1 and TSL) found on disk
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (List<string> paths in detectedPaths.Values)
+                {
+                    foreach (string p in paths)
+                    {
+                        if (seen.Add(p))
+                        {
+                            gamePaths.Add(p);
+                        }
+                    }
+                }
+                gamePaths = gamePaths.OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList();
+            }
 
-            // Load info.rtf or info.rte - matches Python's on_namespace_option_chosen
+            // Load info.rtf only (exclusively RTF; no .rte / RTE JSON support)
             var infoRtfPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.RtfFilePath());
             string rtfPathStr = infoRtfPath.GetResolvedPath();
-            string rtePathStr = Path.ChangeExtension(rtfPathStr, ".rte");
-            var infoRtePath = new CaseAwarePath(rtePathStr);
 
-            // Can be null if info file not found
             string infoContent = null;
             bool isRtf = false;
-            if (infoRtePath.IsFile())
+            if (infoRtfPath.IsFile())
             {
-                // RTE files are JSON formatted - return raw content for parsing
-                byte[] data = File.ReadAllBytes(infoRtePath.GetResolvedPath());
-                infoContent = DecodeBytesWithFallbacks(data);
-                isRtf = false; // RTE is JSON, not RTF
-            }
-            else if (infoRtfPath.IsFile())
-            {
-                // RTF files - return RAW RTF content for RichTextBox to render!
-                // Unlike Python which strips it because tkinter doesn't support RTF,
-                // Avalonia can render RTF directly with RichTextBox
                 byte[] data = File.ReadAllBytes(infoRtfPath.GetResolvedPath());
                 infoContent = DecodeBytesWithFallbacks(data);
-                isRtf = true; // Mark as RTF so ViewModel knows to use RichTextBox
+                isRtf = true;
             }
 
             return new NamespaceInfo
@@ -323,6 +414,178 @@ namespace KPatcher.UI
         }
 
         /// <summary>
+        /// Builds the TSLPatcher-style configuration summary (dry-run report) from the current config.
+        /// Format matches TSLPatcher CONFIGURATION SUMMARY exactly.
+        /// </summary>
+        public static string BuildConfigurationSummary(
+            string changesFileName,
+            string infoFileName,
+            PatcherConfig config)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("==================================");
+            sb.AppendLine("TSLPatcher - CONFIGURATION SUMMARY");
+            sb.AppendLine("==================================");
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("Settings:");
+            sb.AppendLine("---------");
+            sb.Append("Config file: ");
+            sb.AppendLine(changesFileName);
+            sb.Append("Information file: ");
+            sb.AppendLine(infoFileName);
+            sb.AppendLine("Install location: User selected.");
+            sb.AppendLine("Make backups: Before modifying/overwriting existing files.");
+            sb.Append("Log level: ");
+            sb.Append((int)config.LogLevel);
+            sb.Append(" - ");
+            sb.AppendLine(LogLevelSummary(config.LogLevel));
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("dialog tlk appending:");
+            sb.AppendLine("---------------------");
+            int tlkAppendCount = config.PatchesTLK?.Modifiers?.Count(m => !m.IsReplacement) ?? 0;
+            sb.Append("New entries: ");
+            sb.AppendLine(tlkAppendCount.ToString());
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("2DA file changes:");
+            sb.AppendLine("-----------------");
+            if (config.Patches2DA == null || config.Patches2DA.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                foreach (Modifications2DA m in config.Patches2DA)
+                {
+                    int newRows = m.Modifiers.Count(x => x is AddRow2DA || x is CopyRow2DA);
+                    int modifiedRows = m.Modifiers.Count(x => x is ChangeRow2DA);
+                    int newColumns = m.Modifiers.Count(x => x is AddColumn2DA);
+                    string file = m.SaveAs ?? m.SourceFile ?? "unknown";
+                    sb.Append(" * ");
+                    sb.Append(file);
+                    sb.Append(" - new rows: ");
+                    sb.Append(newRows);
+                    sb.Append(", modified rows: ");
+                    sb.Append(modifiedRows);
+                    sb.Append(", new columns: ");
+                    sb.AppendLine(newColumns.ToString());
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("GFF file changes:");
+            sb.AppendLine("-----------------");
+            if (config.PatchesGFF == null || config.PatchesGFF.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                foreach (ModificationsGFF m in config.PatchesGFF)
+                {
+                    string file = m.SaveAs ?? m.SourceFile ?? "unknown";
+                    string dest = m.Destination ?? "override";
+                    sb.Append(" * ");
+                    sb.Append(file);
+                    sb.Append(" - modify existing, location: ");
+                    sb.AppendLine(dest.ToLowerInvariant());
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("NCS file integer hacks:");
+            sb.AppendLine("-----------------------");
+            if (config.PatchesNCS == null || config.PatchesNCS.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                foreach (ModificationsNCS m in config.PatchesNCS)
+                {
+                    sb.Append(" * ");
+                    sb.AppendLine(m.SaveAs ?? m.SourceFile ?? "unknown");
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("Modified & recompiled scripts:");
+            sb.AppendLine("------------------------------");
+            if (config.PatchesNSS == null || config.PatchesNSS.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                foreach (ModificationsNSS m in config.PatchesNSS)
+                {
+                    sb.Append(" * ");
+                    sb.AppendLine(m.SaveAs ?? m.SourceFile ?? "unknown");
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("New/modified Soundset files:");
+            sb.AppendLine("----------------------------");
+            if (config.PatchesSSF == null || config.PatchesSSF.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                foreach (ModificationsSSF m in config.PatchesSSF)
+                {
+                    sb.Append(" * ");
+                    sb.AppendLine(m.SaveAs ?? m.SourceFile ?? "unknown");
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("Unpatched files to install:");
+            sb.AppendLine("---------------------------");
+            if (config.InstallList == null || config.InstallList.Count == 0)
+            {
+                sb.AppendLine("  (none)");
+            }
+            else
+            {
+                var byDest = config.InstallList
+                    .GroupBy(f => f.Destination ?? "Override")
+                    .OrderBy(g => g.Key);
+                foreach (var group in byDest)
+                {
+                    sb.Append(" * Location: ");
+                    sb.AppendLine(group.Key);
+                    foreach (InstallFile f in group)
+                    {
+                        string action = f.ReplaceFile ? "overwrite" : "skip existing";
+                        sb.Append("   --> ");
+                        sb.Append(f.SaveAs ?? f.SourceFile ?? "unknown");
+                        sb.Append(" - ");
+                        sb.AppendLine(action);
+                    }
+                }
+            }
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        private static string LogLevelSummary(LogLevel level)
+        {
+            switch (level)
+            {
+                case LogLevel.Nothing: return "Nothing: No feedback.";
+                case LogLevel.General: return "General: Progress only.";
+                case LogLevel.Errors: return "Errors: Progress and errors.";
+                case LogLevel.Warnings: return "Standard: Progress, errors and warnings.";
+                case LogLevel.Full: return "Full: Verbose progress (debugging).";
+                default: return "Standard: Progress, errors and warnings.";
+            }
+        }
+
+        /// <summary>
         /// Installs a mod.
         /// </summary>
         public static InstallResult InstallMod(
@@ -359,10 +622,7 @@ namespace KPatcher.UI
             int numPatches = installer.Config().PatchCount();
 
             string timeStr = FormatInstallTime(totalInstallTime);
-            logger.AddNote(
-                $"The installation is complete with {numErrors} errors and {numWarnings} warnings.{Environment.NewLine}" +
-                $"Total install time: {timeStr}{Environment.NewLine}" +
-                $"Total patches: {numPatches}");
+            logger.AddNote(string.Format(CultureInfo.CurrentCulture, UIResources.InstallationCompleteWithErrorsAndWarningsFormat, numErrors, numWarnings, Environment.NewLine, timeStr, numPatches));
 
             return new InstallResult
             {
@@ -394,6 +654,33 @@ namespace KPatcher.UI
 
             var reader = ConfigReader.FromFilePath(iniFilePath, logger, tslPatchDataPath: tslPatchDataPath);
             reader.Load(reader.Config);
+            if (iniFilePath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
+            {
+                reader.WriteEquivalentYaml(Path.ChangeExtension(iniFilePath, ".yaml"));
+            }
+        }
+
+        /// <summary>
+        /// Localized strings for <see cref="ModUninstaller"/> dialogs (current UI culture).
+        /// </summary>
+        [NotNull]
+        public static ModUninstallerUiStrings CreateModUninstallerUiStrings()
+        {
+            return new ModUninstallerUiStrings
+            {
+                NoBackupsTitle = UIResources.NoBackupsFoundTitle,
+                GetNoBackupsMessage = path => string.Format(CultureInfo.CurrentCulture, UIResources.NoBackupsFoundMessageFormat, path, Environment.NewLine),
+                BackupMismatchTitle = UIResources.BackupOutOfDateOrMismatched,
+                GetBackupMismatchMessage = () => string.Format(CultureInfo.CurrentCulture, UIResources.BackupMismatchMessageFormat, Environment.NewLine),
+                ConfirmationTitle = UIResources.Confirmation,
+                GetReallyUninstallMessage = (existing, files, folders) => string.Format(CultureInfo.CurrentCulture, UIResources.ReallyUninstallConfirmFormat, existing, files, folders, Environment.NewLine),
+                GetFailedToRestoreMessage = exMessage => string.Format(CultureInfo.CurrentCulture, UIResources.FailedToRestoreBackupFormat, Environment.NewLine, exMessage),
+                UninstallCompletedTitle = UIResources.UninstallCompletedTitle,
+                GetDeleteBackupPromptMessage = (deletedCount, backupName) => string.Format(CultureInfo.CurrentCulture, UIResources.UninstallCompletedDeleteBackupFormat, deletedCount, backupName, Environment.NewLine),
+                PermissionErrorTitle = UIResources.PermissionErrorTitle,
+                UnableToDeleteBackupPermissionMessage = UIResources.UnableToDeleteBackupPermissionFormat,
+                GainingPermissionPleaseWait = UIResources.GainingPermissionPleaseWait,
+            };
         }
 
         /// <summary>
@@ -421,7 +708,8 @@ namespace KPatcher.UI
             return uninstaller.UninstallSelectedMod(
                 showErrorDialog: showErrorDialog ?? ((title, msg) => { }),
                 showYesNoDialog: showYesNoDialog ?? ((title, msg) => true),
-                showYesNoCancelDialog: showYesNoCancelDialog ?? ((title, msg) => true));
+                showYesNoCancelDialog: showYesNoCancelDialog ?? ((title, msg) => true),
+                ui: CreateModUninstallerUiStrings());
         }
 
         /// <summary>
@@ -452,48 +740,6 @@ namespace KPatcher.UI
         }
 
         /// <summary>
-        /// Finds KOTOR installation paths from default locations and registry.
-        /// Matches Python's find_kotor_paths_from_default() implementation.
-        /// Searches:
-        /// - Windows: Registry (Steam, GOG, retail), common installation directories
-        /// - macOS: Steam, App Store locations
-        /// - Linux: Steam, Flatpak, WSL paths
-        /// </summary>
-        private static Dictionary<Game, List<string>> FindKotorPathsFromDefault()
-        {
-            var paths = new Dictionary<Game, List<string>>
-            {
-                { Game.K1, new List<string>() },
-                { Game.TSL, new List<string>() }
-            };
-
-            // Get platform-specific default paths
-            Dictionary<Game, List<string>> defaultPaths = GetDefaultPaths();
-
-            // Check each default path for existence
-            foreach (var kvp in defaultPaths)
-            {
-                Game game = kvp.Key;
-                foreach (string path in kvp.Value)
-                {
-                    string expandedPath = ExpandPath(path);
-                    if (Directory.Exists(expandedPath) && !paths[game].Contains(expandedPath))
-                    {
-                        paths[game].Add(expandedPath);
-                    }
-                }
-            }
-
-            // On Windows, also check registry for installed game paths
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                SearchWindowsRegistry(paths);
-            }
-
-            return paths;
-        }
-
-        /// <summary>
         /// Returns all detected KOTOR installation paths (K1 + TSL), flattened and deduplicated.
         /// Matches HoloPatcher behavior: same sources as find_kotor_paths_from_default() at UI init.
         /// </summary>
@@ -514,265 +760,6 @@ namespace KPatcher.UI
             }
             return result;
         }
-
-        /// <summary>
-        /// Gets default KOTOR installation paths for the current platform.
-        /// </summary>
-        private static Dictionary<Game, List<string>> GetDefaultPaths()
-        {
-            var paths = new Dictionary<Game, List<string>>
-            {
-                { Game.K1, new List<string>() },
-                { Game.TSL, new List<string>() }
-            };
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Windows K1 paths
-                paths[Game.K1].AddRange(new[]
-                {
-                    @"C:\Program Files\Steam\steamapps\common\swkotor",
-                    @"C:\Program Files (x86)\Steam\steamapps\common\swkotor",
-                    @"C:\Program Files\LucasArts\SWKotOR",
-                    @"C:\Program Files (x86)\LucasArts\SWKotOR",
-                    @"C:\GOG Games\Star Wars - KotOR",
-                    @"C:\Amazon Games\Library\Star Wars - Knights of the Old",
-                });
-
-                // Windows K2/TSL paths
-                paths[Game.TSL].AddRange(new[]
-                {
-                    @"C:\Program Files\Steam\steamapps\common\Knights of the Old Republic II",
-                    @"C:\Program Files (x86)\Steam\steamapps\common\Knights of the Old Republic II",
-                    @"C:\Program Files\LucasArts\SWKotOR2",
-                    @"C:\Program Files (x86)\LucasArts\SWKotOR2",
-                    @"C:\GOG Games\Star Wars - KotOR2",
-                });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // macOS K1 paths
-                paths[Game.K1].AddRange(new[]
-                {
-                    "~/Library/Application Support/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets",
-                    "~/Library/Applications/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets/",
-                });
-
-                // macOS K2/TSL paths
-                paths[Game.TSL].AddRange(new[]
-                {
-                    "~/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/Knights of the Old Republic II.app/Contents/Assets",
-                    "~/Library/Applications/Steam/steamapps/common/Knights of the Old Republic II/Star Wars™: Knights of the Old Republic II.app/Contents/GameData",
-                    "~/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/",
-                    "~/Applications/Knights of the Old Republic 2.app/Contents/Resources/transgaming/c_drive/Program Files/SWKotOR2/",
-                    "/Applications/Knights of the Old Republic 2.app/Contents/Resources/transgaming/c_drive/Program Files/SWKotOR2/",
-                });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // Linux K1 paths
-                paths[Game.K1].AddRange(new[]
-                {
-                    "~/.local/share/steam/common/steamapps/swkotor",
-                    "~/.local/share/steam/common/swkotor",
-                    "~/.steam/debian-installation/steamapps/common/swkotor",
-                    "~/.steam/root/steamapps/common/swkotor",
-                    // Flatpak
-                    "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/swkotor",
-                    // WSL paths
-                    "/mnt/c/Program Files/Steam/steamapps/common/swkotor",
-                    "/mnt/c/Program Files (x86)/Steam/steamapps/common/swkotor",
-                    "/mnt/c/Program Files/LucasArts/SWKotOR",
-                    "/mnt/c/Program Files (x86)/LucasArts/SWKotOR",
-                    "/mnt/c/GOG Games/Star Wars - KotOR",
-                    "/mnt/c/Amazon Games/Library/Star Wars - Knights of the Old",
-                });
-
-                // Linux K2/TSL paths
-                paths[Game.TSL].AddRange(new[]
-                {
-                    "~/.local/share/Steam/common/steamapps/Knights of the Old Republic II",
-                    "~/.local/share/Steam/common/steamapps/kotor2",
-                    "~/.local/share/aspyr-media/kotor2",
-                    "~/.local/share/aspyr-media/Knights of the Old Republic II",
-                    "~/.local/share/Steam/common/Knights of the Old Republic II",
-                    "~/.steam/debian-installation/steamapps/common/Knights of the Old Republic II",
-                    "~/.steam/debian-installation/steamapps/common/kotor2",
-                    "~/.steam/root/steamapps/common/Knights of the Old Republic II",
-                    // Flatpak
-                    "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Knights of the Old Republic II/steamassets",
-                    // WSL paths
-                    "/mnt/c/Program Files/Steam/steamapps/common/Knights of the Old Republic II",
-                    "/mnt/c/Program Files (x86)/Steam/steamapps/common/Knights of the Old Republic II",
-                    "/mnt/c/Program Files/LucasArts/SWKotOR2",
-                    "/mnt/c/Program Files (x86)/LucasArts/SWKotOR2",
-                    "/mnt/c/GOG Games/Star Wars - KotOR2",
-                });
-            }
-
-            return paths;
-        }
-
-        /// <summary>
-        /// Expands path variables like ~ to the user's home directory.
-        /// </summary>
-        private static string ExpandPath(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return path;
-            }
-
-            // Expand ~ to home directory
-            if (path.StartsWith("~"))
-            {
-                string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                path = Path.Combine(home, path.Substring(1).TrimStart('/', '\\'));
-            }
-
-            return Path.GetFullPath(path);
-        }
-
-        /// <summary>
-        /// Searches the Windows registry for KOTOR installation paths.
-        /// Checks Steam, GOG, and retail CD/DVD installations.
-        /// </summary>
-        private static void SearchWindowsRegistry(Dictionary<Game, List<string>> paths)
-        {
-#if WINDOWS
-            // Registry paths for K1
-            var k1RegistryPaths = new (string keyPath, string valueName)[]
-            {
-                // Steam
-                (@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 32370", "InstallLocation"),
-                // GOG (64-bit)
-                (@"SOFTWARE\WOW6432Node\GOG.com\Games\1207666283", "PATH"),
-                // GOG (32-bit)
-                (@"SOFTWARE\GOG.com\Games\1207666283", "PATH"),
-                // Retail (64-bit)
-                (@"SOFTWARE\WOW6432Node\BioWare\SW\KOTOR", "Path"),
-                (@"SOFTWARE\WOW6432Node\BioWare\SW\KOTOR", "InternalPath"),
-                // Retail (32-bit)
-                (@"SOFTWARE\BioWare\SW\KOTOR", "Path"),
-                (@"SOFTWARE\BioWare\SW\KOTOR", "InternalPath"),
-            };
-
-            // Registry paths for K2/TSL
-            var k2RegistryPaths = new (string keyPath, string valueName)[]
-            {
-                // Steam
-                (@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 208580", "InstallLocation"),
-                // GOG (64-bit)
-                (@"SOFTWARE\WOW6432Node\GOG.com\Games\1421404581", "PATH"),
-                // GOG (32-bit)
-                (@"SOFTWARE\GOG.com\Games\1421404581", "PATH"),
-                // Retail (64-bit)
-                (@"SOFTWARE\WOW6432Node\LucasArts\KotOR2", "Path"),
-                (@"SOFTWARE\WOW6432Node\LucasArts\KotOR2", "InternalPath"),
-                // Retail (32-bit)
-                (@"SOFTWARE\LucasArts\KotOR2", "Path"),
-                (@"SOFTWARE\LucasArts\KotOR2", "InternalPath"),
-            };
-
-            // Search K1 registry paths
-            foreach (var (keyPath, valueName) in k1RegistryPaths)
-            {
-                string path = GetRegistryValue(keyPath, valueName);
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path) && !paths[Game.K1].Contains(path))
-                {
-                    paths[Game.K1].Add(path);
-                }
-            }
-
-            // Search K2 registry paths
-            foreach (var (keyPath, valueName) in k2RegistryPaths)
-            {
-                string path = GetRegistryValue(keyPath, valueName);
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path) && !paths[Game.TSL].Contains(path))
-                {
-                    paths[Game.TSL].Add(path);
-                }
-            }
-
-            // Search Amazon Games for K1 (stored in HKEY_USERS)
-            string amazonK1Path = FindAmazonGamesPath("Star Wars - Knights of the Old");
-            if (!string.IsNullOrEmpty(amazonK1Path) && Directory.Exists(amazonK1Path) && !paths[Game.K1].Contains(amazonK1Path))
-            {
-                paths[Game.K1].Add(amazonK1Path);
-            }
-#endif
-        }
-
-#if WINDOWS
-        /// <summary>
-        /// Gets a registry value from HKEY_LOCAL_MACHINE.
-        /// </summary>
-        [CanBeNull]
-        private static string GetRegistryValue(string keyPath, string valueName)
-        {
-            try
-            {
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(keyPath))
-                {
-                    if (key != null)
-                    {
-                        object value = key.GetValue(valueName);
-                        if (value is string stringValue)
-                        {
-                            return stringValue;
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Registry access may fail due to permissions or missing keys
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Searches HKEY_USERS for Amazon Games installation paths.
-        /// Amazon Games stores installation info under user-specific registry keys.
-        /// </summary>
-        [CanBeNull]
-        private static string FindAmazonGamesPath(string softwareName)
-        {
-            try
-            {
-                using (RegistryKey usersKey = Registry.Users)
-                {
-                    foreach (string sidName in usersKey.GetSubKeyNames())
-                    {
-                        try
-                        {
-                            string softwarePath = $@"{sidName}\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\AmazonGames/{softwareName}";
-                            using (RegistryKey softwareKey = usersKey.OpenSubKey(softwarePath))
-                            {
-                                if (softwareKey != null)
-                                {
-                                    object value = softwareKey.GetValue("InstallLocation");
-                                    if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                                    {
-                                        return stringValue;
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            // Skip inaccessible user keys
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Registry access may fail
-            }
-            return null;
-        }
-#endif
 
         /// <summary>
         /// Decodes bytes with fallback encodings.
@@ -807,6 +794,326 @@ namespace KPatcher.UI
         private static string StripRtf(string rtfText)
         {
             return RtfStripper.StripRtf(rtfText);
+        }
+
+        /// <summary>
+        /// Finds existing KOTOR paths: default paths (expanded, resolved, existence-filtered)
+        /// plus Windows registry paths when on Windows. Returns sorted, deduplicated lists per game.
+        /// </summary>
+        private static Dictionary<Game, List<string>> FindKotorPathsFromDefault()
+        {
+            Dictionary<Game, List<string>> defaults = GetDefaultPaths();
+            var result = new Dictionary<Game, HashSet<string>>
+            {
+                [Game.K1] = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                [Game.TSL] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            };
+
+            foreach (KeyValuePair<Game, List<string>> kv in defaults)
+            {
+                Game key = kv.Key == Game.K2 ? Game.TSL : kv.Key;
+                if (!result.ContainsKey(key))
+                {
+                    result[key] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                foreach (string pathTemplate in kv.Value)
+                {
+                    string expanded = ExpandPath(pathTemplate);
+                    string resolved = Path.GetFullPath(expanded);
+                    if (Directory.Exists(resolved))
+                    {
+                        result[key].Add(resolved);
+                    }
+                }
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                AddRegistryPaths(result);
+            }
+
+            return new Dictionary<Game, List<string>>
+            {
+                [Game.K1] = result[Game.K1].OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList(),
+                [Game.TSL] = result[Game.TSL].OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList()
+            };
+        }
+
+        /// <summary>
+        /// Returns default installation path templates for the current OS (with ~ for home).
+        /// </summary>
+        private static Dictionary<Game, List<string>> GetDefaultPaths()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return GetDefaultPathsWindows();
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return GetDefaultPathsDarwin();
+            }
+
+            return GetDefaultPathsLinux();
+        }
+
+        private static Dictionary<Game, List<string>> GetDefaultPathsWindows()
+        {
+            return new Dictionary<Game, List<string>>
+            {
+                [Game.K1] = new List<string>
+                {
+                    @"C:\Program Files\Steam\steamapps\common\swkotor",
+                    @"C:\Program Files (x86)\Steam\steamapps\common\swkotor",
+                    @"C:\Program Files\LucasArts\SWKotOR",
+                    @"C:\Program Files (x86)\LucasArts\SWKotOR",
+                    @"C:\GOG Games\Star Wars - KotOR",
+                    @"C:\Amazon Games\Library\Star Wars - Knights of the Old"
+                },
+                [Game.TSL] = new List<string>
+                {
+                    @"C:\Program Files\Steam\steamapps\common\Knights of the Old Republic II",
+                    @"C:\Program Files (x86)\Steam\steamapps\common\Knights of the Old Republic II",
+                    @"C:\Program Files\LucasArts\SWKotOR2",
+                    @"C:\Program Files (x86)\LucasArts\SWKotOR2",
+                    @"C:\GOG Games\Star Wars - KotOR2"
+                }
+            };
+        }
+
+        private static Dictionary<Game, List<string>> GetDefaultPathsDarwin()
+        {
+            return new Dictionary<Game, List<string>>
+            {
+                [Game.K1] = new List<string>
+                {
+                    "~/Library/Application Support/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets",
+                    "~/Library/Applications/Steam/steamapps/common/swkotor/Knights of the Old Republic.app/Contents/Assets/"
+                },
+                [Game.TSL] = new List<string>
+                {
+                    "~/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/Knights of the Old Republic II.app/Contents/Assets",
+                    "~/Library/Applications/Steam/steamapps/common/Knights of the Old Republic II/Star Wars™: Knights of the Old Republic II.app/Contents/GameData",
+                    "~/Library/Application Support/Steam/steamapps/common/Knights of the Old Republic II/KOTOR2.app/Contents/GameData/",
+                    "~/Applications/Knights of the Old Republic 2.app/Contents/Resources/transgaming/c_drive/Program Files/SWKotOR2/",
+                    "/Applications/Knights of the Old Republic 2.app/Contents/Resources/transgaming/c_drive/Program Files/SWKotOR2/"
+                }
+            };
+        }
+
+        private static Dictionary<Game, List<string>> GetDefaultPathsLinux()
+        {
+            return new Dictionary<Game, List<string>>
+            {
+                [Game.K1] = new List<string>
+                {
+                    "~/.local/share/steam/common/steamapps/swkotor",
+                    "~/.steam/root/steamapps/common/swkotor",
+                    "~/.steam/debian-installation/steamapps/common/swkotor",
+                    "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/swkotor",
+                    "/mnt/C/Program Files/Steam/steamapps/common/swkotor",
+                    "/mnt/C/Program Files (x86)/Steam/steamapps/common/swkotor",
+                    "/mnt/C/Program Files/LucasArts/SWKotOR",
+                    "/mnt/C/Program Files (x86)/LucasArts/SWKotOR",
+                    "/mnt/C/GOG Games/Star Wars - KotOR",
+                    "/mnt/C/Amazon Games/Library/Star Wars - Knights of the Old"
+                },
+                [Game.TSL] = new List<string>
+                {
+                    "~/.local/share/Steam/common/steamapps/Knights of the Old Republic II",
+                    "~/.steam/root/steamapps/common/Knights of the Old Republic II",
+                    "~/.steam/debian-installation/steamapps/common/Knights of the Old Republic II",
+                    "~/.local/share/aspyr-media/kotor2",
+                    "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Knights of the Old Republic II/steamassets",
+                    "/mnt/C/Program Files/Steam/steamapps/common/Knights of the Old Republic II",
+                    "/mnt/C/Program Files (x86)/Steam/steamapps/common/Knights of the Old Republic II",
+                    "/mnt/C/Program Files/LucasArts/SWKotOR2",
+                    "/mnt/C/Program Files (x86)/LucasArts/SWKotOR2",
+                    "/mnt/C/GOG Games/Star Wars - KotOR2"
+                }
+            };
+        }
+
+        private static string ExpandPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            string expanded = path;
+            if (expanded.StartsWith("~", StringComparison.Ordinal))
+            {
+                string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                if (expanded.Length == 1 || expanded[1] == '/' || expanded[1] == '\\')
+                {
+                    expanded = home + expanded.Substring(1);
+                }
+                else
+                {
+                    expanded = Path.Combine(home, expanded.Substring(1));
+                }
+            }
+
+            return Path.GetFullPath(expanded);
+        }
+
+        private static void AddRegistryPaths(Dictionary<Game, HashSet<string>> result)
+        {
+            try
+            {
+                AddRegistryPathsK1(result);
+                AddRegistryPathsTsl(result);
+                AddAmazonK1Path(result);
+            }
+            catch
+            {
+                // Registry access can fail (permissions, not Windows); ignore.
+            }
+        }
+
+        private static void AddRegistryPathsK1(Dictionary<Game, HashSet<string>> result)
+        {
+            string path;
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine,
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 32370", "InstallLocation");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.K1].Add(Path.GetFullPath(path));
+            }
+
+            string subkey = Environment.Is64BitProcess
+                ? @"SOFTWARE\WOW6432Node\GOG.com\Games\1207666283"
+                : @"SOFTWARE\GOG.com\Games\1207666283";
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "PATH");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.K1].Add(Path.GetFullPath(path));
+            }
+
+            subkey = Environment.Is64BitProcess
+                ? @"SOFTWARE\WOW6432Node\BioWare\SW\KOTOR"
+                : @"SOFTWARE\BioWare\SW\KOTOR";
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "InternalPath");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.K1].Add(Path.GetFullPath(path));
+            }
+
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "Path");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.K1].Add(Path.GetFullPath(path));
+            }
+        }
+
+        private static void AddRegistryPathsTsl(Dictionary<Game, HashSet<string>> result)
+        {
+            string path;
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine,
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 208580", "InstallLocation");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.TSL].Add(Path.GetFullPath(path));
+            }
+
+            string subkey = Environment.Is64BitProcess
+                ? @"SOFTWARE\WOW6432Node\GOG.com\Games\1421404581"
+                : @"SOFTWARE\GOG.com\Games\1421404581";
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "PATH");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.TSL].Add(Path.GetFullPath(path));
+            }
+
+            subkey = Environment.Is64BitProcess
+                ? @"SOFTWARE\WOW6432Node\LucasArts\KotOR2"
+                : @"SOFTWARE\LucasArts\KotOR2";
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "InternalPath");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.TSL].Add(Path.GetFullPath(path));
+            }
+
+            path = GetRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, subkey, "Path");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.TSL].Add(Path.GetFullPath(path));
+            }
+        }
+
+        private static void AddAmazonK1Path(Dictionary<Game, HashSet<string>> result)
+        {
+            string path = FindAmazonGamesPath("AmazonGames/Star Wars - Knights of the Old");
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+            {
+                result[Game.K1].Add(Path.GetFullPath(path));
+            }
+        }
+
+        private static string GetRegistryValue(Microsoft.Win32.RegistryHive hive, string keyPath, string valueName)
+        {
+            try
+            {
+                using (var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(hive,
+                    Environment.Is64BitProcess ? Microsoft.Win32.RegistryView.Registry64 : Microsoft.Win32.RegistryView.Registry32))
+                using (Microsoft.Win32.RegistryKey key = baseKey.OpenSubKey(keyPath))
+                {
+                    if (key == null)
+                    {
+                        return null;
+                    }
+
+                    object value = key.GetValue(valueName);
+                    return value?.ToString()?.Trim();
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string FindAmazonGamesPath(string softwareName)
+        {
+            try
+            {
+                using (Microsoft.Win32.RegistryKey hkeyUsers = Microsoft.Win32.RegistryKey.OpenBaseKey(
+                    Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Default))
+                {
+                    string[] sids = hkeyUsers.GetSubKeyNames();
+                    foreach (string sid in sids)
+                    {
+                        string subKeyPath = sid + @"\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\" + softwareName;
+                        try
+                        {
+                            using (Microsoft.Win32.RegistryKey key = hkeyUsers.OpenSubKey(subKeyPath))
+                            {
+                                if (key != null)
+                                {
+                                    object value = key.GetValue("InstallLocation");
+                                    string path = value?.ToString()?.Trim();
+                                    if (!string.IsNullOrEmpty(path))
+                                    {
+                                        return path;
+                                    }
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Skip this SID
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            return null;
         }
     }
 }

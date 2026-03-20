@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS.Compiler;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS
 {
@@ -210,7 +210,7 @@ namespace KPatcher.Core.Formats.NCS
     }
 
     /// <summary>
-    /// Built-in NSS to NCS compiler using PyKotor's native implementation.
+    /// Built-in NSS to NCS compiler.
     ///
     /// This compiler provides full NSS compilation without external dependencies,
     /// using the internal parser and code generator.
@@ -295,7 +295,6 @@ namespace KPatcher.Core.Formats.NCS
 
         /// <summary>
         /// Compiles an NSS script file to NCS bytecode and returns stdout/stderr.
-        /// This is the original method signature from the Python version.
         /// </summary>
         public (string stdout, string stderr) CompileScriptWithOutput(
             string sourceFile,
@@ -318,13 +317,16 @@ namespace KPatcher.Core.Formats.NCS
             var startInfo = new ProcessStartInfo
             {
                 FileName = _nwnnsscompPath,
-                Arguments = string.Join(" ", config.GetCompileArgs(_nwnnsscompPath).Skip(1)),
                 WorkingDirectory = Path.GetDirectoryName(sourceFile) ?? "",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+            foreach (string arg in config.GetCompileArgs(_nwnnsscompPath).Skip(1))
+            {
+                startInfo.ArgumentList.Add(arg);
+            }
 
             try
             {

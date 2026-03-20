@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Formats.SSF;
 using KPatcher.Core.Resources;
-using FluentAssertions;
 using Xunit;
 using static global::KPatcher.Core.Formats.SSF.SSFAuto;
 
@@ -20,7 +20,7 @@ namespace KPatcher.Core.Tests.Formats
         private const string DoesNotExistFile = "./thisfiledoesnotexist";
 
         /// <summary>
-        /// Python: test_binary_io
+        /// test_binary_io
         /// Tests reading from actual test.ssf file and round-trip through bytes
         /// </summary>
         [Fact]
@@ -41,7 +41,7 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         /// <summary>
-        /// Python: test_read_raises
+        /// test_read_raises
         /// Tests various error conditions when reading SSF files
         /// </summary>
         [Fact]
@@ -93,7 +93,7 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         /// <summary>
-        /// Python: test_write_raises
+        /// test_write_raises
         /// Tests various error conditions when writing SSF files
         /// </summary>
         [Fact]
@@ -103,7 +103,7 @@ namespace KPatcher.Core.Tests.Formats
             var ssf = new SSF();
 
             // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // Python: write_ssf(SSF(), ".", ResourceType.SSF)
+            // write_ssf(SSF(), ".", ResourceType.SSF)
             Action act1 = () => WriteSsf(ssf, ".", ResourceType.SSF);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -115,7 +115,7 @@ namespace KPatcher.Core.Tests.Formats
             }
 
             // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // Python: write_ssf(SSF(), ".", ResourceType.INVALID)
+            // write_ssf(SSF(), ".", ResourceType.INVALID)
             Action act2 = () => WriteSsf(ssf, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }

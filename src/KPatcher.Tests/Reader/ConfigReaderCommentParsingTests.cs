@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Reader;
-using FluentAssertions;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader

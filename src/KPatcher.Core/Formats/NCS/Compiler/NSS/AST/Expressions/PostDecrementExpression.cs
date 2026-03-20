@@ -21,10 +21,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
         public override DynamicDataType Compile(NCS ncs, CodeRoot root, CodeBlock block)
         {
-            // Matching PyKotor classes.py lines 2942-2965
             // First compile the field access to push value to stack
             DynamicDataType variableType = FieldAccess.Compile(ncs, root, block);
-            block.TempStack += variableType.Size(root); // Matching PyKotor line 2944
 
             if (variableType.Builtin != DataType.Int && variableType.Builtin != DataType.Float)
             {
@@ -44,7 +42,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             // Decrement the variable (value is already on stack from FieldAccess.Compile)
-            // Matching PyKotor lines 2959-2962
             if (isGlobal)
             {
                 ncs.Add(NCSInstructionType.DECxBP, new List<object> { stackIndex });
@@ -54,7 +51,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 ncs.Add(NCSInstructionType.DECxSP, new List<object> { stackIndex });
             }
 
-            // Matching PyKotor line 2964
             block.TempStack -= variableType.Size(root);
 
             return variableType;

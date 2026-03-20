@@ -17,8 +17,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         public DynamicDataType DataType { get; set; }
         public bool IsConst { get; set; }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:107
-        // Original: def __init__(self, identifier: Identifier, data_type: DynamicDataType, is_const: bool = False):
         public GlobalVariableDeclaration(Identifier identifier, DynamicDataType dataType, bool isConst = false)
         {
             Identifier = identifier;
@@ -92,8 +90,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new CompileError(msg);
             }
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:155
-            // Original: root.add_scoped(self.identifier, self.data_type, is_const=self.is_const)
             root.AddScoped(Identifier, DataType, IsConst);
         }
     }
@@ -105,8 +101,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         public Expression Expression { get; set; }
         public bool IsConst { get; set; }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:65
-        // Original: def __init__(self, identifier: Identifier, data_type: DynamicDataType, value: Expression, is_const: bool = False):
         public GlobalVariableInitialization(Identifier identifier, DynamicDataType dataType, Expression expression, bool isConst = false)
         {
             Identifier = identifier;
@@ -115,12 +109,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             IsConst = isConst;
         }
 
-        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:79
-        // Original: def compile(self, ncs: NCS, root: CodeRoot):
         public override void Compile(NCS ncs, CodeRoot root)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:81
-            // Original: declaration = GlobalVariableDeclaration(self.identifier, self.data_type, self.is_const)
             // Allocate storage for the global variable (this also registers it in the global scope)
             GlobalVariableDeclaration declaration = new GlobalVariableDeclaration(Identifier, DataType, IsConst);
             declaration.Compile(ncs, root);
@@ -137,7 +127,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
             GetScopedResult scoped = root.GetScoped(Identifier, root);
             // Global storage resides on the stack before base pointer is saved, so use stack-pointer-relative copy.
-            // Python: scoped.offset already points to the correct location, but for globals we need to subtract size
+            // scoped.offset already points to the correct location, but for globals we need to subtract size
             // because global offset calculation is different (starts from 0 and goes negative)
             int stackIndex = scoped.Offset - scoped.Datatype.Size(root);
             ncs.Instructions.Add(
@@ -198,8 +188,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             string source = GetScript(root);
             CodeRoot t = nssParser.Parse(source);
 
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:857
-            // Original: root.objects = t.objects + root.objects
             // Merge include objects (including nested IncludeScript nodes) so they are compiled.
             root.Objects = t.Objects.Concat(root.Objects).ToList();
             // Constants are already shared via root.constants, so no need to merge
@@ -216,8 +204,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 {
                     try
                     {
-                        // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:879
-                        // Original: source_bytes = filepath.read_bytes(); source = source_bytes.decode(errors="ignore")
                         // Note: Using UTF-8 with fallback for .NET Core compatibility
                         byte[] sourceBytes = System.IO.File.ReadAllBytes(filepath);
                         source = System.Text.Encoding.UTF8.GetString(sourceBytes);
@@ -240,8 +226,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
                 if (Library.ContainsKey(includeFilename))
                 {
-                    // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/classes.py:894
-                    // Original: source = self.library[include_filename].decode(errors="ignore")
                     // Note: Using UTF-8 with fallback for .NET Core compatibility
                     source = System.Text.Encoding.UTF8.GetString(Library[includeFilename]);
                 }

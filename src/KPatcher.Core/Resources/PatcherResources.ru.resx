@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Resources.Extensions, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51</value></resheader>
+  <data name="ActionIdOutOfRange" xml:space="preserve"><value>ID действия {0} вне диапазона (0-{1})</value></data>
+  <data name="ActionInstructionRequiresTwoArgs" xml:space="preserve"><value>Инструкция ACTION требует не менее 2 аргументов</value></data>
+  <data name="ApplyPatchFromIniSection" xml:space="preserve"><value>Применить патч из секции INI [{0}] FieldType: {1} Путь GFF: '{2}'</value></data>
+  <data name="BackingUpFile" xml:space="preserve"><value>Создание резервной копии '{0}'...</value></data>
+  <data name="CannotAdvanceSameInstruction" xml:space="preserve"><value>Невозможно продвинуться: следующая инструкция по индексу {0} совпадает с текущей по индексу {1}</value></data>
+  <data name="CapsuleNotFoundOrPermission" xml:space="preserve"><value>Капсула '{0}' не существовала, или возникли проблемы с разрешениями при попытке {1} '{2}'. Пропуск файла...</value></data>
+  <data name="CapsuleNotFoundWhenAttempting" xml:space="preserve"><value>Капсула '{0}' не существовала при попытке {1} '{2}'. Пропуск файла...</value></data>
+  <data name="ChangesConfigFileNotFound" xml:space="preserve"><value>Файл конфигурации changes не найден: {0}</value></data>
+  <data name="CleaningTemporaryScriptFolder" xml:space="preserve"><value>Очистка временной папки скриптов в '{0}' (подсказка: используйте 'SaveProcessedScripts=1' в [Settings] для сохранения этих скриптов)</value></data>
+  <data name="CliErrorCannotRunMultipleOperations" xml:space="preserve"><value>[Ошибка] Невозможно выполнить более одной из [--install, --uninstall, --validate]</value></data>
+  <data name="CliErrorFailedToLoadMod" xml:space="preserve"><value>[Ошибка] Ошибка загрузки мода: {0}</value></data>
+  <data name="CliErrorFormat" xml:space="preserve"><value>[Ошибка] {0}: {1}</value></data>
+  <data name="CliErrorInvalidGameDirectory" xml:space="preserve"><value>[Ошибка] Неверный каталог игры: {0}: {1}</value></data>
+  <data name="CliErrorInvalidModOrGamePaths" xml:space="preserve"><value>[Ошибка] Неверные пути мода или игры</value></data>
+  <data name="CliErrorMustSpecifyOperation" xml:space="preserve"><value>[Ошибка] Необходимо указать одну из [--install, --uninstall, --validate] для режима CLI</value></data>
+  <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve"><value>[Ошибка] Индекс пространства имен {0} вне диапазона (макс: {1})</value></data>
+  <data name="CliErrorNoGameDirectory" xml:space="preserve"><value>[Ошибка] Каталог игры не указан. Используйте --game-dir &lt;путь&gt;</value></data>
+  <data name="CliErrorNoModPath" xml:space="preserve"><value>[Ошибка] Путь мода не указан. Используйте --tslpatchdata &lt;путь&gt;</value></data>
+  <data name="CliInfoInstallCompleted" xml:space="preserve"><value>[Инфо] Установка завершена: {0} ошибок, {1} предупреждений, {2} патчей</value></data>
+  <data name="CliInfoInstallTime" xml:space="preserve"><value>[Инфо] Время установки: {0}</value></data>
+  <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Инфо] Установка мода из {0} в {1}</value></data>
+  <data name="CliInfoUninstallCompletedSuccessfully" xml:space="preserve"><value>[Инфо] Удаление успешно завершено</value></data>
+  <data name="CliInfoUninstallingMod" xml:space="preserve"><value>[Инфо] Удаление мода из {0}</value></data>
+  <data name="CliInfoValidatingMod" xml:space="preserve"><value>[Инфо] Проверка конфигурации мода</value></data>
+  <data name="CliInfoValidationCompletedSuccessfully" xml:space="preserve"><value>[Инфо] Проверка успешно завершена</value></data>
+  <data name="CliInnerException" xml:space="preserve"><value>Внутреннее исключение: {0}</value></data>
+  <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Предупреждение] Удаление завершено с предупреждениями</value></data>
+  <data name="CompileListSectionMissing" xml:space="preserve"><value>Секция [CompileList] отсутствует в ini.</value></data>
+  <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>ConfigReader завершил загрузку INI</value></data>
+  <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>Не удалось создать папку резервной копии: {0}</value></data>
+  <data name="CouldNotCreateInstallLogFile" xml:space="preserve"><value>Не удалось создать файл журнала установки: {0}</value></data>
+  <data name="CouldNotDetermineEncoding" xml:space="preserve"><value>Не удалось определить кодировку '{0}'. Попытка принудительной загрузки...</value></data>
+  <data name="CouldNotFindChangesIniFile" xml:space="preserve"><value>Не удалось найти файл changes.ini на диске.</value></data>
+  <data name="CouldNotFindDirectory" xml:space="preserve"><value>Не удалось найти каталог: '{0}'</value></data>
+  <data name="CouldNotFindFile" xml:space="preserve"><value>Не удалось найти файл: '{0}'</value></data>
+  <data name="CouldNotInitializeUninstallDirectory" xml:space="preserve"><value>Не удалось инициализировать каталог удаления: {0}</value></data>
+  <data name="CouldNotLoadFileSaveAsMissing" xml:space="preserve"><value>Не удалось загрузить файл для {0}: SaveAs отсутствует или пуст.</value></data>
+  <data name="CouldNotLoadResourceFromCapsule" xml:space="preserve"><value>Не удалось загрузить ресурс из капсулы для {0}: SaveAs отсутствует или пуст.</value></data>
+  <data name="CouldNotLoadSourceFileFormat" xml:space="preserve"><value>Не удалось загрузить исходный файл для {0}:{1}{2}</value></data>
+  <data name="CouldNotLoadSourceFileMissing" xml:space="preserve"><value>Не удалось загрузить исходный файл для {0}: SourceFile отсутствует или пуст (исправьте или удалите эту строку InstallList / patch в changes.ini).</value></data>
+  <data name="CouldNotRenameInOverrideFolder" xml:space="preserve"><value>Не удалось переименовать '{0}' в '{1}' в папке Override: {2}</value></data>
+  <data name="CouldNotWriteEquivalentYaml" xml:space="preserve"><value>Не удалось записать эквивалентный YAML: {0}</value></data>
+  <data name="CriticalErrorUnableToLocateFileToPatch" xml:space="preserve"><value>Критическая ошибка: не удалось найти файл для патча, «{0}» не найден!</value></data>
+  <data name="DeletedRestoredBackup" xml:space="preserve"><value>Восстановленная резервная копия '{0}' удалена</value></data>
+  <data name="DoesNotExist" xml:space="preserve"><value>Не существует</value></data>
+  <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>Ошибка при добавлении новой строки 2DA в модификаторе «{0}»!</value></data>
+  <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Ошибка поиска метки столбца для индекса столбца {0}.</value></data>
+  <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Ошибка поиска метки строки для индекса строки {0}.</value></data>
+  <data name="ErrorParsingIniFile" xml:space="preserve"><value>Ошибка разбора INI: {0}</value></data>
+  <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Информация:</value></data>
+  <data name="ExpectedGffStructButGot" xml:space="preserve"><value>Ожидался GFFStruct, но получен {0}</value></data>
+  <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Ошибка при добавлении нового struct в список '{0}' в [{1}]. Причина: Ожидался GFFStruct, но получен '{2}' ({3}) типа {4} Пропуск...</value></data>
+  <data name="FailedToBuildModule" xml:space="preserve"><value>Ошибка при создании модуля '{0}': {1}</value></data>
+  <data name="FailedToCopyLine2DA" xml:space="preserve"><value>Ошибка! Не удалось скопировать строку в 2DA! Пропуск...</value></data>
+  <data name="FailedToCreateBackup" xml:space="preserve"><value>Ошибка при создании резервной копии '{0}': {1}</value></data>
+  <data name="FileHasNoContent" xml:space="preserve"><value>'{0}' не имеет содержимого/данных и полностью пуст.</value></data>
+  <data name="FileHasNoEntryPoint" xml:space="preserve"><value>Этот файл не имеет точки входа и не может быть скомпилирован (Скорее всего файл include).</value></data>
+  <data name="FileOperationErrorFormat" xml:space="preserve"><value>Ошибка при {0} {1} в {2}</value></data>
+  <data name="FileOperationErrorWithMessageFormat" xml:space="preserve"><value>Ошибка при {0} {1} в {2}: {3}</value></data>
+  <data name="FileOperationFormat" xml:space="preserve"><value>{0}: {1} -&gt; {2}</value></data>
+  <data name="FilePatcherDescription" xml:space="preserve"><value>Патчер файлов 2DA/TLK/GFF/NSS/SSF/ERF/RIM для KotOR/TSL.</value></data>
+  <data name="FileSetToPatchDoesNotExist" xml:space="preserve"><value>Ошибка! Файл «{0}» для патча не существует!</value></data>
+  <data name="FoundPatchesToApply" xml:space="preserve"><value>Найдено {0} патчей для применения</value></data>
+  <data name="GameDetected" xml:space="preserve"><value>Игра обнаружена: {0}</value></data>
+  <data name="GamePath" xml:space="preserve"><value>Путь игры: {0}</value></data>
+  <data name="GffListSectionMissing" xml:space="preserve"><value>Секция [GFFList] отсутствует в ini.</value></data>
+  <data name="HackListSectionMissing" xml:space="preserve"><value>Секция [HACKList] отсутствует в ini.</value></data>
+  <data name="IOError" xml:space="preserve"><value>Ошибка ввода-вывода: {0}</value></data>
+  <data name="InfiniteLoopDetectedExecuted" xml:space="preserve"><value>Обнаружен бесконечный цикл: инструкция по индексу {0} ({1}) была выполнена {2} раз</value></data>
+  <data name="InfiniteLoopJumpsToItself" xml:space="preserve"><value>Обнаружен бесконечный цикл: {0} по индексу {1} переходит к самому себе</value></data>
+  <data name="IniFileNotFound" xml:space="preserve"><value>Файл INI не найден: {0}</value></data>
+  <data name="IniSectionThrewException" xml:space="preserve"><value>Секция INI [{0}] вызвала исключение: {1}</value></data>
+  <data name="IniTextCannotBeNullOrEmpty" xml:space="preserve"><value>Текст INI не может быть пустым</value></data>
+  <data name="InstallListSectionMissing" xml:space="preserve"><value>Секция [InstallList] отсутствует в ini.</value></data>
+  <data name="InstallationCompletedSuccessfully" xml:space="preserve"><value>Установка успешно завершена</value></data>
+  <data name="InstallationDate" xml:space="preserve"><value>Дата установки: {0}</value></data>
+  <data name="InstallationFailedFormat" xml:space="preserve"><value>Ошибка установки: {0}</value></data>
+  <data name="InstallationLogHeader" xml:space="preserve"><value>Журнал установки KPatcher</value></data>
+  <data name="InstallationLogHeaderSeparator" xml:space="preserve"><value>===========================</value></data>
+  <data name="InstallationTerminationRequest" xml:space="preserve"><value>ModInstaller.Install() получил запрос на завершение, отмена...</value></data>
+  <data name="InstructionJumpsToNotInList" xml:space="preserve"><value>Инструкция #{0} ({1}) переходит к инструкции, которой нет в списке. Хеш цели перехода: {2}</value></data>
+  <data name="InstructionLimitExceeded" xml:space="preserve"><value>Превышен лимит инструкций: {0} инструкций выполнено</value></data>
+  <data name="InstructionNotImplemented" xml:space="preserve"><value>Инструкция {0} не реализована</value></data>
+  <data name="InstructionNotPresentInTable" xml:space="preserve"><value>Инструкция отсутствует в текущей таблице инструкций</value></data>
+  <data name="InternalErrorInvalidTLKFileType" xml:space="preserve"><value>Внутренняя ошибка: указан недопустимый тип файла TLK.</value></data>
+  <data name="Invalid2DAMemoryToken" xml:space="preserve"><value>Недопустимый токен 2DAMEMORY! Индексы токенов начинаются с 1.</value></data>
+  <data name="InvalidGameFolderDialogTlkNotFound" xml:space="preserve"><value>Неверная папка игры, файл dialog.tlk не найден! Укажите правильный каталог игры.</value></data>
+  <data name="InvalidKotorDirectory" xml:space="preserve"><value>Выбранный каталог KOTOR не является допустимой установкой - невозможно инициализировать ModInstaller.</value></data>
+  <data name="JumpInstructionNoTarget" xml:space="preserve"><value>Инструкция перехода {0} по индексу {1} не имеет цели перехода</value></data>
+  <data name="JumpTargetNotFound" xml:space="preserve"><value>Цель перехода для инструкции {0} не найдена в таблице инструкций</value></data>
+  <data name="LanguageIntegerNotKnown" xml:space="preserve"><value>Неизвестный код языка: {0}</value></data>
+  <data name="LoadingCompileListPatches" xml:space="preserve"><value>Загрузка патчей [CompileList] из ini...</value></data>
+  <data name="LoadingConfigurationFrom" xml:space="preserve"><value>Загрузка конфигурации из {0}</value></data>
+  <data name="LoadingGffListPatches" xml:space="preserve"><value>Загрузка патчей [GFFList] из ini...</value></data>
+  <data name="LoadingHackListPatches" xml:space="preserve"><value>Загрузка патчей [HACKList] из ini...</value></data>
+  <data name="LoadingInstallListPatches" xml:space="preserve"><value>Загрузка патчей [InstallList] из ini...</value></data>
+  <data name="LoadingSettingsSection" xml:space="preserve"><value>Загрузка секции [Settings] из ini...</value></data>
+  <data name="LoadingSsfListPatches" xml:space="preserve"><value>Загрузка патчей [SSFList] из ini...</value></data>
+  <data name="LoadingTlkListPatches" xml:space="preserve"><value>Загрузка патчей [TLKList] из ini...</value></data>
+  <data name="LoadingTwoDAListPatches" xml:space="preserve"><value>Загрузка патчей [2DAList] из ini...</value></data>
+  <data name="ModOvershadowedByExisting" xml:space="preserve"><value>Этот мод намеревается установить '{0}' в '{1}', но затенен существующим '{2}'!</value></data>
+  <data name="ModPath" xml:space="preserve"><value>Путь мода: {0}</value></data>
+  <data name="ModuleDidNotExistBuilding" xml:space="preserve"><value>ВАЖНО! Модуль по пути '{0}' не существовал, создание одного в папке 'Modules' немедленно из следующих файлов:</value></data>
+  <data name="NoEncodingDefinedForLanguage" xml:space="preserve"><value>Для языка не задана кодировка: {0}</value></data>
+  <data name="NoFileToInstallSpecified" xml:space="preserve"><value>Ошибка! Не указан файл для установки!</value></data>
+  <data name="NoInstallPathSet" xml:space="preserve"><value>Ошибка! Не задан путь установки!</value></data>
+  <data name="NoLineSetToBeModifiedFormat" xml:space="preserve"><value>Не задана строка для изменения в [{0}].</value></data>
+  <data name="NoNewEntriesAppendedToTlk" xml:space="preserve"><value>Предупреждение: к {0} не добавлено новых записей. Возможно, отсутствуют записи в append.tlk.</value></data>
+  <data name="NoTLKFileLoaded" xml:space="preserve"><value>Файл TLK не загружен. Продолжение невозможно.</value></data>
+  <data name="NoValidGameFolderSelected" xml:space="preserve"><value>Ошибка! Не выбрана допустимая папка игры! Установка прервана.</value></data>
+  <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>Не задано значение столбца {0} для новой строки 2DA в модификаторе «{1}»...</value></data>
+  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>Не найден nwnnsscomp.exe в папке TSLPatchData! Невозможно скомпилировать скрипт.</value></data>
+  <data name="OperationTimedOut" xml:space="preserve"><value>Операция превысила время ожидания: {0}</value></data>
+  <data name="OperationWasCancelled" xml:space="preserve"><value>Операция была отменена: {0}</value></data>
+  <data name="OrphanedIniSectionsFormat" xml:space="preserve"><value>В изменениях обнаружены «осиротевшие» секции INI:
+{0}</value></data>
+  <data name="PatchOperationFormat" xml:space="preserve"><value>Применение патча {0}: {1} - {2}</value></data>
+  <data name="PatcherFinished" xml:space="preserve"><value>Патчер завершил работу. См. журнал прогресса для подробностей.</value></data>
+  <data name="PatcherFinishedWithErrors" xml:space="preserve"><value>Патчер завершил работу, но ошибок: {0}. Мод, вероятно, установлен некорректно.</value></data>
+  <data name="PatcherFinishedWithErrorsAndWarnings" xml:space="preserve"><value>Патчер завершил работу, но ошибок: {0} и предупреждений: {1}. Мод, вероятно, установлен некорректно.</value></data>
+  <data name="PatcherFinishedWithWarnings" xml:space="preserve"><value>Патчер завершил работу, но обнаружено предупреждений: {0}. Мод может работать некорректно.</value></data>
+  <data name="PatchingRimFileWarning" xml:space="preserve"><value>Этот мод применяет патч к файлу RIM Modules/{0}!
+Применение патчей к RIM крайне несовместимо, не рекомендуется и широко считается плохой практикой. Пожалуйста, попросите разработчика мода исправить это.</value></data>
+  <data name="PathPointsToExpectedGffList" xml:space="preserve"><value>Путь указывает на '{0}', ожидается GFFList.</value></data>
+  <data name="PermissionDenied" xml:space="preserve"><value>Доступ запрещен: {0}</value></data>
+  <data name="Processing2DAPatches" xml:space="preserve"><value>Обработка патчей 2DA...</value></data>
+  <data name="ProcessingGffPatches" xml:space="preserve"><value>Обработка патчей GFF...</value></data>
+  <data name="ProcessingInstallListEntries" xml:space="preserve"><value>Обработка записей InstallList...</value></data>
+  <data name="ProcessingNcsScriptPatches" xml:space="preserve"><value>Обработка патчей скриптов NCS...</value></data>
+  <data name="ProcessingNssScriptPatches" xml:space="preserve"><value>Обработка патчей скриптов NSS...</value></data>
+  <data name="ProcessingSsfSoundPatches" xml:space="preserve"><value>Обработка патчей звука SSF...</value></data>
+  <data name="ProcessingTlkPatches" xml:space="preserve"><value>Обработка патчей TLK...</value></data>
+  <data name="ReferencesTracebackMsg" xml:space="preserve"><value>, ссылка «{0}={1}» в [{2}]</value></data>
+  <data name="RemovedFormat" xml:space="preserve"><value>Удалено {0}...</value></data>
+  <data name="RenamedExistingOverrideFile" xml:space="preserve"><value>Существующий файл Override '{0}' переименован в '{1}' для предотвращения затенения.</value></data>
+  <data name="ResolvedGffListPath" xml:space="preserve"><value>Путь GFFList из [{0}] разрешен из '{1}' --&gt; '{2}'</value></data>
+  <data name="ResourceShadowingModChanges" xml:space="preserve"><value>Ресурс, расположенный в '{0}', затеняет изменения этого мода в {1}!</value></data>
+  <data name="RestoringBackupOf" xml:space="preserve"><value>Восстановление резервной копии '{0}' в '{1}'...</value></data>
+  <data name="SectionNotFoundError" xml:space="preserve"><value>Секция [{0}] не найдена в ini</value></data>
+  <data name="Set2DAMemory" xml:space="preserve"><value>Установить 2DAMEMORY{0}={1}</value></data>
+  <data name="SettingsSectionMissing" xml:space="preserve"><value>Секция [Settings] отсутствует в ini.</value></data>
+  <data name="SkippingEmptyInstallListEntry" xml:space="preserve"><value>Пропуск пустой записи InstallList (пустая строка или пустой ключ в секции [InstallList] changes.ini).</value></data>
+  <data name="SkippingFileNoOverwriteDialogTlk" xml:space="preserve"><value>Пропуск файла {0}: установщик не перезаписывает dialog.tlk напрямую.</value></data>
+  <data name="SkippingFilePatchResource" xml:space="preserve"><value>Пропуск '{0}' - patch_resource определил, что этот файл можно пропустить.</value></data>
+  <data name="SsfListSectionMissing" xml:space="preserve"><value>Секция [SSFList] отсутствует в ini.</value></data>
+  <data name="StackUnderflowPoppingArgument" xml:space="preserve"><value>Переполнение стека при извлечении аргумента для '{0}'</value></data>
+  <data name="StackUnderflowPoppingVector" xml:space="preserve"><value>Переполнение стека при извлечении вектора для '{0}'</value></data>
+  <data name="StartPatchingButton" xml:space="preserve"><value>&amp;Начать патчинг</value></data>
+  <data name="StartPatchingConfirmation" xml:space="preserve"><value>Будут пропатчены необходимые файлы игры. Продолжить?</value></data>
+  <data name="StartingInstallation" xml:space="preserve"><value>Запуск установки...</value></data>
+  <data name="StoreStateCannotAccessInstruction" xml:space="preserve"><value>STORE_STATE по индексу {0}: невозможно получить доступ к инструкции по индексу {1}</value></data>
+  <data name="StoreStateReachedEndWithoutRetn" xml:space="preserve"><value>STORE_STATE по индексу {0}: достигнут конец инструкций без RETN</value></data>
+  <data name="StrRefTokenNotInTLK" xml:space="preserve"><value>Токен StrRef «{0}» в списке модификаторов отсутствует в TLK.</value></data>
+  <data name="SuccessfullyCompletedFormat" xml:space="preserve"><value>Успешно завершено {0} {1}.</value></data>
+  <data name="TlkListSectionMissing" xml:space="preserve"><value>Секция [TLKList] отсутствует в ini.</value></data>
+  <data name="TwoDAListSectionMissing" xml:space="preserve"><value>Секция [2DAList] отсутствует в ini.</value></data>
+  <data name="UnableToAddNewGffField" xml:space="preserve"><value>Не удалось добавить новое поле GFF '{0}' по пути GFF '{1}'! Это {2}</value></data>
+  <data name="UnableToAddStructToList" xml:space="preserve"><value>Не удалось добавить struct в список '{0}': {1}</value></data>
+  <data name="UnableToFind2DAFileToModify" xml:space="preserve"><value>Не найден файл 2DA «{0}» для изменения! Пропуск файла...</value></data>
+  <data name="UnableToLoad2DAFileSkipping" xml:space="preserve"><value>Не удалось загрузить файл 2DA {0}! Пропуск...</value></data>
+  <data name="UnableToLoadInstructionsTslpatchdata" xml:space="preserve"><value>Не удалось загрузить текст инструкций! В папке «tslpatchdata» должен быть файл «info.rtf».</value></data>
+  <data name="UnableToLocateTLKFileToPatch" xml:space="preserve"><value>Ошибка! Не удалось найти TLK для патча, файл «{0}» не найден!</value></data>
+  <data name="UnexpectedModifierType" xml:space="preserve"><value>Неожиданный тип модификатора: {0}: {1}</value></data>
+  <data name="UnknownException" xml:space="preserve"><value>Неизвестное исключение</value></data>
+  <data name="UsedAsIndexBut2DAHasNoLabel" xml:space="preserve"><value>{0} использован как индекс при смене строки в модификаторе «{1}», но в 2DA нет метки для этого индекса.</value></data>
+  <data name="UsingBackupDirectory" xml:space="preserve"><value>Использование каталога резервной копии: '{0}'</value></data>
+  <data name="UsingBackupFolder" xml:space="preserve"><value>Использование папки резервной копии '{0}'</value></data>
+  <data name="WouldRestoreFile" xml:space="preserve"><value>Будет восстановлен файл '{0}'</value></data>
+</root>

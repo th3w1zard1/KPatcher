@@ -50,3 +50,46 @@ jobs:
 
       - name: Run analyzers
         run: dotnet build src/KPatcher/KPatcher.csproj --no-restore -c Release -p:RunAnalyzersDuringBuild=true
+
+  kcompiler:
+    name: Build and Pack KCompiler
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/KCompiler.Core/KCompiler.Core.csproj
+
+      - name: Build KCompiler.Core
+        run: dotnet build src/KCompiler.Core/KCompiler.Core.csproj --no-restore -c Release
+
+      - name: Pack KCompiler.Core
+        run: dotnet pack src/KCompiler.Core/KCompiler.Core.csproj --no-build -c Release
+
+      - name: Build KCompiler.NET
+        run: dotnet build src/KCompiler.NET/KCompiler.NET.csproj --no-restore -c Release
+
+      - name: Pack KCompiler.NET
+        run: dotnet pack src/KCompiler.NET/KCompiler.NET.csproj --no-build -c Release
+
+      - name: Upload KCompiler.Core NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: KCompiler.Core-nupkg
+          path: src/KCompiler.Core/bin/Release/*.nupkg
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload KCompiler.NET tool package
+        uses: actions/upload-artifact@v4
+        with:
+          name: KCompiler.NET-nupkg
+          path: src/KCompiler.NET/bin/Release/*.nupkg
+          retention-days: 30
+          if-no-files-found: error

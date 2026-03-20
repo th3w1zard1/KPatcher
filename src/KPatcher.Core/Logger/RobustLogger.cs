@@ -5,8 +5,7 @@ using JetBrains.Annotations;
 namespace KPatcher.Core.Logger
 {
     /// <summary>
-    /// Robust logger for pykotor errors, exceptions, warnings, and info logging.
-    /// Matches Python's RobustLogger functionality from loggerplus.
+    /// Robust logger for KPatcher errors, exceptions, warnings, and info logging.
     /// All logs are written to file regardless of log level.
     /// </summary>
     public class RobustLogger

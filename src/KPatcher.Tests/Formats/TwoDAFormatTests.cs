@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using FluentAssertions;
 using KPatcher.Core.Formats.TwoDA;
 using KPatcher.Core.Resources;
 using KPatcher.Core.Tests.Common;
-using FluentAssertions;
 using Xunit;
 using static global::KPatcher.Core.Formats.TwoDA.TwoDAAuto;
 
@@ -72,7 +72,7 @@ namespace KPatcher.Core.Tests.Formats
             var twoda = new TwoDA(new List<string> { "col1", "col2" });
 
             // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // Python: write_2da(TwoDA(), ".", ResourceType.TwoDA)
+            // write_2da(TwoDA(), ".", ResourceType.TwoDA)
             Action act1 = () => WriteTwoDA(twoda, ".", ResourceType.TwoDA);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -84,7 +84,7 @@ namespace KPatcher.Core.Tests.Formats
             }
 
             // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // Python: write_2da(TwoDA(), ".", ResourceType.INVALID)
+            // write_2da(TwoDA(), ".", ResourceType.INVALID)
             Action act2 = () => WriteTwoDA(twoda, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }

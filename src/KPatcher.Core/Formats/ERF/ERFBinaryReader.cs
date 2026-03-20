@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using JetBrains.Annotations;
 using KPatcher.Core.Formats;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.ERF
 {
 
     /// <summary>
     /// Reads ERF (Encapsulated Resource File) files.
-    /// 1:1 port of Python ERFBinaryReader from pykotor/resource/formats/erf/io_erf.py
     /// </summary>
     public class ERFBinaryReader : BinaryFormatReaderBase
     {

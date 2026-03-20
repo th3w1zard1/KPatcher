@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Script;
 using KPatcher.Core.Formats.NCS;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Formats.NCS.Compiler
 {
@@ -439,13 +439,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         /// </summary>
         public void AdditionOp(NCSInstructionType instructionType = NCSInstructionType.ADDII)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/interpreter.py:1427
-            // Original: def addition_op(self, instruction_type: NCSInstructionType | None = None):
             // Handle vector addition (ADDVV)
             if (instructionType == NCSInstructionType.ADDVV)
             {
-                // Matching PyKotor interpreter.py lines 1430-1445
-                // Original: Pop vectors (each is 3 floats: z, y, x from top to bottom)
                 if (_stack.Count < 6)
                 {
                     throw new IndexOutOfRangeException("Stack underflow in vector addition operation");
@@ -459,7 +455,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 float x1 = Convert.ToSingle(_stack[_stack.Count - 6].Value);
                 _stack.RemoveRange(_stack.Count - 6, 6);
                 // Add component-wise and push result (x, y, z order)
-                // Original: self.add(DataType.FLOAT, x1 + x2)
                 Add(DataType.Float, x1 + x2);
                 Add(DataType.Float, y1 + y2);
                 Add(DataType.Float, z1 + z2);
@@ -477,7 +472,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 _stack.RemoveAt(_stack.Count - 1);
                 _stack.RemoveAt(_stack.Count - 1);
-                // Matching PyKotor interpreter.py lines 1460-1468
                 // Result type is determined by the data type of the second operand (value2)
                 if (value2.DataType == DataType.Int)
                 {
@@ -514,12 +508,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         /// </summary>
         public void SubtractionOp(NCSInstructionType instructionType = NCSInstructionType.SUBII)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/interpreter.py:1482
-            // Original: def subtraction_op(self, instruction_type: NCSInstructionType | None = None):
             // Handle vector subtraction (SUBVV)
             if (instructionType == NCSInstructionType.SUBVV)
             {
-                // Matching PyKotor interpreter.py lines 1485-1500
                 if (_stack.Count < 6)
                 {
                     throw new IndexOutOfRangeException("Stack underflow in vector subtraction operation");
@@ -552,7 +543,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 throw new InvalidOperationException("Subtraction requires numeric operands");
             }
-            // Matching PyKotor interpreter.py line 1517
             // Result type is determined by the data type of the second operand (value2)
             double result = Convert.ToDouble(value2.Value) - Convert.ToDouble(value1.Value);
             _stack.RemoveAt(_stack.Count - 1);
@@ -577,12 +567,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         /// </summary>
         public void MultiplicationOp(NCSInstructionType instructionType = NCSInstructionType.MULII)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/interpreter.py:1519
-            // Original: def multiplication_op(self, instruction_type: NCSInstructionType | None = None):
             // Handle vector multiplication
             if (instructionType == NCSInstructionType.MULVF)
             {
-                // Matching PyKotor interpreter.py lines 1522-1536
                 // MULVF: vector * float (vector is lhs, float is rhs, so float is on top)
                 if (_stack.Count < 4)
                 {
@@ -602,7 +589,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
             else if (instructionType == NCSInstructionType.MULFV)
             {
-                // Matching PyKotor interpreter.py lines 1537-1551
                 // MULFV: float * vector (float is lhs, vector is rhs, so vector is on top)
                 if (_stack.Count < 4)
                 {
@@ -634,7 +620,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 throw new InvalidOperationException("Multiplication requires numeric operands");
             }
-            // Matching PyKotor interpreter.py line 1568
             // Result type is determined by the data type of the second operand (value2)
             double result = Convert.ToDouble(value2.Value) * Convert.ToDouble(value1.Value);
             _stack.RemoveAt(_stack.Count - 1);
@@ -659,12 +644,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
         /// </summary>
         public void DivisionOp(NCSInstructionType instructionType = NCSInstructionType.DIVII)
         {
-            // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/ncs/compiler/interpreter.py:1570
-            // Original: def division_op(self, instruction_type: NCSInstructionType | None = None):
             // Handle vector division (DIVVF: vector / float)
             if (instructionType == NCSInstructionType.DIVVF)
             {
-                // Matching PyKotor interpreter.py lines 1573-1590
                 // DIVVF: vector / float (vector is lhs, float is rhs, so float is on top)
                 if (_stack.Count < 4)
                 {
@@ -708,7 +690,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             {
                 throw new DivideByZeroException("Division by zero in NCS interpreter");
             }
-            // Matching PyKotor interpreter.py lines 1607-1613
             // Result type is determined by the data type of the second operand (value2)
             double result = Convert.ToDouble(value2.Value) / Convert.ToDouble(value1.Value);
             // For integer division, truncate toward zero

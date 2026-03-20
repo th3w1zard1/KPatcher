@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using KPatcher.UI.Resources;
 
 namespace KPatcher.UI.Views.Dialogs
 {
@@ -16,7 +17,7 @@ namespace KPatcher.UI.Views.Dialogs
         {
             if (options is null || options.Count == 0)
             {
-                throw new ArgumentException("At least one option is required.", nameof(options));
+                throw new ArgumentException(UIResources.AtLeastOneOptionRequired, nameof(options));
             }
 
             Title = title;
@@ -67,7 +68,7 @@ namespace KPatcher.UI.Views.Dialogs
 
             var cancelButton = new Button
             {
-                Content = "Cancel",
+                Content = UIResources.Cancel,
                 MinWidth = 80
             };
             cancelButton.Click += (sender, e) => Close(null);

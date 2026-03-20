@@ -7,13 +7,11 @@ namespace KPatcher.Core.Formats.TLK
 
     /// <summary>
     /// Auto-detection and convenience functions for TLK files.
-    /// 1:1 port of Python tlk_auto.py from pykotor/resource/formats/tlk/tlk_auto.py
     /// </summary>
     public static class TLKAuto
     {
         /// <summary>
         /// Writes the TLK data to the target location with the specified format (TLK, TLK_XML or TLK_JSON).
-        /// 1:1 port of Python write_tlk function.
         /// </summary>
         public static void WriteTlk(TLK tlk, string target, ResourceType fileFormat)
         {
@@ -31,7 +29,6 @@ namespace KPatcher.Core.Formats.TLK
 
         /// <summary>
         /// Returns the TLK data as a byte array.
-        /// 1:1 port of Python bytes_tlk function.
         /// </summary>
         public static byte[] BytesTlk(TLK tlk, ResourceType fileFormat)
         {
@@ -49,7 +46,6 @@ namespace KPatcher.Core.Formats.TLK
 
         /// <summary>
         /// Reads a TLK file from a file path or byte array.
-        /// Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/resource/formats/tlk/tlk_auto.py
         /// </summary>
         public static TLK ReadTlk(object source)
         {

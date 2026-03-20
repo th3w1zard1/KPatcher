@@ -1,5 +1,5 @@
-using KPatcher.Core.Config;
 using FluentAssertions;
+using KPatcher.Core.Config;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Config

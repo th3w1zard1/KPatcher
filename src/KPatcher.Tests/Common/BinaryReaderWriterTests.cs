@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using System.Text;
-using KPatcher.Core.Common;
 using FluentAssertions;
+using KPatcher.Core.Common;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Common
@@ -218,7 +218,7 @@ namespace KPatcher.Core.Tests.Common
             float expectedFloat = 1.0f;
             double expectedDouble = 1.0;
             string expectedStr = "Hello, world!";
-            // ReadTerminatedString intentionally skips the first character (PyKotor compatibility); result may include trailing null
+            // ReadTerminatedString intentionally skips the first character; result may include trailing null
             string expectedCstr = "ello, world!";
             byte[] expectedBytes = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
