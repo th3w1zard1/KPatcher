@@ -20,6 +20,26 @@
   <data name="CliErrorInvalidGameDirectory" xml:space="preserve"><value>[Erreur] Répertoire de jeu invalide : {0} : {1}</value></data>
   <data name="CliErrorInvalidModOrGamePaths" xml:space="preserve"><value>[Erreur] Chemins de mod ou de jeu invalides</value></data>
   <data name="CliErrorMustSpecifyOperation" xml:space="preserve"><value>[Erreur] Vous devez spécifier une opération parmi [--install, --uninstall, --validate] pour le mode CLI</value></data>
+  <data name="CliHelpUsage" xml:space="preserve">
+    <value>usage: KPatcher [options] [game_dir] [tslpatchdata] [namespace_option_index]
+
+HoloPatcher-compatible command-line interface.
+
+Options:
+  --game-dir PATH               Path to the KOTOR game directory
+  --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
+  --namespace-option-index N    Namespace index (0-based)
+  --console                     Show console when launching the GUI
+  --install                     Run install in headless CLI (requires game and mod paths)
+  --uninstall                   Run uninstall in headless CLI
+  --validate                    Validate mod configuration in headless CLI
+  -h, --help                    Show this message and exit
+
+Positional arguments (equivalent to --game-dir and --tslpatchdata):
+  game_dir                      Game installation directory
+  tslpatchdata                  Mod folder or path to tslpatchdata
+  namespace_option_index        Optional third argument: namespace index</value>
+  </data>
   <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve"><value>[Erreur] Index de namespace {0} hors limites (max : {1})</value></data>
   <data name="CliErrorNoGameDirectory" xml:space="preserve"><value>[Erreur] Aucun répertoire de jeu spécifié. Utilisez --game-dir &lt;chemin&gt;</value></data>
   <data name="CliErrorNoModPath" xml:space="preserve"><value>[Erreur] Aucun chemin de mod spécifié. Utilisez --tslpatchdata &lt;chemin&gt;</value></data>

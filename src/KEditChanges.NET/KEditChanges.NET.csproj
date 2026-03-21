@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>keditchanges-cli</AssemblyName>
+    <RootNamespace>KEditChanges.Net</RootNamespace>
+    <Version>0.1.0</Version>
+    <Description>Umbrella CLI: KEditChanges (placeholder), KCompiler, and NCS decompile in one tool.</Description>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <!-- Optional single-file publish: dotnet publish -r win-x64 with or without self-contained. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KEditChanges\KEditChanges.csproj" />
+    <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
+    <ProjectReference Include="..\NCSDecomp.Core\NCSDecomp.Core.csproj" />
+  </ItemGroup>
+</Project>

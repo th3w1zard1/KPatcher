@@ -11,8 +11,9 @@
 **Seventh pass:** 2026-03-21 — `repo-research-analyst` + `best-practices-researcher`: **re-verify** workflows + **`AGENTS.md`** (no new drift vs sixth pass); **`test-builds` verify** runs for **all** matrix rows (**net48** + **net9**); **`continue-on-error: true`** on tests; **GitHub supply chain** — dependency review, artifact attestations, SBOM + attest; **CI verify patterns** — per-OS shells, **`AssemblyName`** = apphost basename, Unix **executable** bit, don’t assert “single file only” unless properties guarantee it.  
 **Eighth pass:** 2026-03-21 — `repo-research-analyst` + `best-practices-researcher`: **`build-all-platforms.yml` Build** used **bash `if`** under **`shell: pwsh`** with **no `fi`** — **invalid** for both shells (GitHub docs: **syntax must match declared `shell`**). **Fix:** PowerShell **`if () { } else { }`** like **`test-builds.yml`**. **GHA shell defaults** table — Windows **`pwsh`**, use **`shell: bash`** explicitly for bash scripts. **Implemented in repo:** verify step on **`build-all-platforms`** + net9 sidecar asserts in **`test-builds`**; **`AGENTS.md`** canonical publish + bundled apphost rows; compound learning **`docs/solutions/debugging-patterns/ncsdecomp-lexer-pushback-java-parity.md`**.  
 **Ninth pass:** 2026-03-21 — `repo-research-analyst` + `best-practices-researcher`: **post-implementation** audit — sidecar verify + pwsh Build + **`AGENTS`** rows **confirmed**; **remaining gaps** = parity audit, ~~net48 **`/t:Publish`**~~ (**done** — see **eleventh pass**), supply chain, runbook, **`docs/solutions`** growth (lexer + GHA shell + publish-target doc). **Implemented:** **`--help` smoke**; compound doc for **pwsh/bash mismatch**.  
-**Tenth pass:** 2026-03-21 — `repo-research-analyst` + `best-practices-researcher`: **stale-plan cleanup** — Key improvements **#11–#12** and **third-pass “Verify gap”** superseded by **eighth–ninth pass** CI; **`docs/solutions/`** now **three** files (**`kpatcher-publish-bundled-cli-tools-merge.md`**). **Dependency review:** enable **Dependency graph** (repo settings); **`dependency-review-action`** on **`pull_request`** with **`permissions: contents: read`**; **NuGet lockfiles optional** for graph but **recommended** for transitive vuln fidelity; **private repos** may need **GitHub Advanced Security** — [About dependency review](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review), [Configuring the dependency review action](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-the-dependency-review-action), [Dependency graph data](https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data).  
+**Tenth pass:** 2026-03-21 — `repo-research-analyst` + `best-practices-researcher`: **stale-plan cleanup** — Key improvements **#11–#12** and **third-pass “Verify gap”** superseded by **eighth–ninth pass** CI; **`docs/solutions/`** grew to **four** deployment/debugging articles (merge + GHA shell + **`PublishDir`/`Publish`** + lexer parity). **Dependency review:** enable **Dependency graph** (repo settings); **`dependency-review-action`** on **`pull_request`** with **`permissions: contents: read`**; **NuGet lockfiles optional** for graph but **recommended** for transitive vuln fidelity; **private repos** may need **GitHub Advanced Security** — [About dependency review](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-dependency-review), [Configuring the dependency review action](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-the-dependency-review-action), [Dependency graph data](https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data).  
 **Eleventh pass:** 2026-03-20 — **`/work` + compound:** net48 **`msbuild /t:Publish`** in **`build-all-platforms.yml`** and **`test-builds.yml`** ( **`PublishDir`** honored); **`test-builds`** net48 aligned with release **publish** semantics (no **`OutputPath`-only** build). Compound: [`deployment-issues/msbuild-publishdir-requires-publish-target.md`](../solutions/deployment-issues/msbuild-publishdir-requires-publish-target.md).  
+**Twelfth pass:** 2026-03-21 — **Repo audit:** `.github/workflows` still has **no** `dependency-review-action` / `attest` / SBOM steps — supply chain remains **documentation + follow-up #18**. **Compound:** playbook [`deployment-issues/github-actions-dependency-review-dotnet.md`](../solutions/deployment-issues/github-actions-dependency-review-dotnet.md). **Plan hygiene:** third-pass **“Verify gap”** struck through; **`test-builds`** touchpoint table corrected (verify covers **net9** sidecars + **`--help`**).  
 **Base plan:** [.cursor/plans/cli_layout_and_bundling_2697e2b6.plan.md](../../.cursor/plans/cli_layout_and_bundling_2697e2b6.plan.md) (unchanged)  
 
 **Section manifest (research scope)**
@@ -50,6 +51,7 @@
 18. **`build-all-platforms` Build was broken** — Eighth-pass review: **`if [ … ]; then`** + **`else`** without **`fi`**, under **`pwsh`**, is a **parse error**; seventh pass “replay to see if it parses” understates severity — **must** rewrite in PowerShell or switch **`shell:`** ([Workflow syntax — `jobs.<job_id>.steps[*].shell`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsshell)).
 19. **Compound knowledge** — NCSDecomp **lexer `PushBack`** Java parity documented under **`docs/solutions/debugging-patterns/`** for future deepen-plan **`docs/solutions/`** scans.
 20. **CLI `--help` smoke in CI** — After apphost presence checks, run **`& $path @('--help')`** and assert **`$LASTEXITCODE -eq 0`** immediately ([about_Automatic_Variables](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_automatic_variables)); on Linux/macOS **`chmod +x`** before invoke if the execute bit may be missing ([single-file / extract](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview)). **KPatcher** / **kcompiler** / **NCSDecompCLI** all support **`--help`** and exit **0** when help is requested.
+21. **Supply chain playbook (twelfth pass)** — **Dependency review** is **not** in YAML yet; when implementing **follow-up #18**, use [`github-actions-dependency-review-dotnet.md`](../solutions/deployment-issues/github-actions-dependency-review-dotnet.md) (graph + `dependency-review-action` + optional **NuGet lockfiles**).
 
 ### Learnings from `docs/solutions/` (applied to plan narrative)
 
@@ -59,6 +61,7 @@
 | [`deployment-issues/gha-pwsh-shell-syntax-mismatch.md`](../solutions/deployment-issues/gha-pwsh-shell-syntax-mismatch.md) | **Direct:** **`shell: pwsh`** must pair with **PowerShell** scripts; cross-links eighth pass + workflows. |
 | [`deployment-issues/kpatcher-publish-bundled-cli-tools-merge.md`](../solutions/deployment-issues/kpatcher-publish-bundled-cli-tools-merge.md) | Staging + **`Copy`** merge for **`PublishBundledCliTools`**; avoid shared **`PublishDir`** for nested publishes. |
 | [`deployment-issues/msbuild-publishdir-requires-publish-target.md`](../solutions/deployment-issues/msbuild-publishdir-requires-publish-target.md) | **`PublishDir`** requires **`/t:Publish`** (or **`dotnet publish`**); net48 GHA legs. |
+| [`deployment-issues/github-actions-dependency-review-dotnet.md`](../solutions/deployment-issues/github-actions-dependency-review-dotnet.md) | **PR supply chain:** dependency graph + **`dependency-review-action`** checklist for .NET/NuGet; repo **YAML not yet** wired (twelfth pass). |
 
 ### New considerations (second pass)
 
@@ -71,7 +74,7 @@
 ### New considerations (third pass — CI / docs accuracy)
 
 - **net48 zips:** `PublishBundledCliTools` is **`net9.0` only** — CI jobs that publish **net48** KPatcher (e.g. `build-all-platforms.yml`) **do not** run the merge target; release artifacts may be **GUI-only** for that TFM unless documented otherwise.
-- **Verify gap:** `test-builds.yml` checks **KPatcher** apphost only — **no** assertion that **`kcompiler`** / **`NCSDecompCLI`** landed in `PublishDir` after `PublishBundledCliTools`.
+- ~~**Verify gap:** `test-builds.yml` checks **KPatcher** apphost only — **no** assertion that **`kcompiler`** / **`NCSDecompCLI`** landed in `PublishDir` after `PublishBundledCliTools`.~~ **Superseded** (eighth–ninth pass + **`--help`** smoke); see Key improvements **#12**, **#20**.
 - **Single-file KPatcher vs multi-file sidecars:** Release workflows may set **`PublishSingleFile`** on **KPatcher** while nested sidecar publishes default to **multi-file** output copied into the same folder — document expected layout (duplicate managed DLLs, native satellites) for support.
 - **Staging vs final `PublishDir`:** Nested `MSBuild` `Publish` uses **`PublishDir` = stage roots** (`sidecar_*`), **not** KPatcher’s final `PublishDir`; the **Copy** task performs the merge. Wording “pass absolute final PublishDir to children” would be **incorrect** for this implementation.
 - **AGENTS minimal publish example:** A bare `dotnet publish -f net9.0` without **`-r` / `--self-contained`** differs from **release** matrix jobs; add a **canonical** one-liner matching `build-all-platforms.yml` when documenting releases.
@@ -97,7 +100,7 @@
 ### New considerations (sixth pass — repo + Learn synthesis)
 
 - **Re-verified (unchanged):** `PublishBundledCliTools` (`net9.0` only), staging + `Copy` with `%(RecursiveDir)`, sidecar project paths, `keditchanges-cli` assembly name, `ci.yml` KCompiler pack scope, zip/artifact naming — all **match** prior plan sections.
-- **Dual verify gap:** Treat **`build-all-platforms.yml`** the same as **`test-builds.yml`** for bundle regression: if product expects sidecars in the KPatcher publish folder, **assert apphost names** (and optionally **`--help` / exit 0**) on **both** pipelines; otherwise document “manual zip inspection” explicitly for release.
+- ~~**Dual verify gap:** Treat **`build-all-platforms.yml`** the same as **`test-builds.yml`** for bundle regression…~~ **Superseded** (eighth–ninth pass + **`--help`**); both pipelines now assert sidecars on **net9**.
 - **MSBuild hook pattern:** Prefer a **uniquely named** target with **`AfterTargets="Publish"`** (not redefining built-ins); use **`DependsOnTargets`** for your own chains. Community/SDK edge cases make **`AfterPublish`** timing less dependable than **`Publish`** completion — align any future signing/bundle hooks with **`PrepareForBundle`** → **`GenerateSingleFileBundle`** when mutating the single-file host ([Single-file overview](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview), [Extend the build process](https://learn.microsoft.com/visualstudio/msbuild/how-to-extend-the-visual-studio-build-process)).
 - **Flat-folder collision discipline:** Merging **multiple self-contained** publishes into one directory risks **last-writer-wins** on shared runtime files; keep **RID / self-contained / TFM** aligned across nested publishes or isolate sidecars (subfolders / artifacts layout) if collisions appear ([Deploying .NET apps](https://learn.microsoft.com/dotnet/core/deploying/)).
 - **Artifacts output (optional):** **`UseArtifactsOutput`** / **`--artifacts-path`** remains a structured alternative to a single shared **`PublishDir`** when scaling CI matrix uploads ([Artifacts output layout](https://learn.microsoft.com/dotnet/core/sdk/artifacts-output)).
@@ -128,10 +131,10 @@
 
 ### New considerations (seventh pass — workflows + supply chain)
 
-- **No new repo drift** vs sixth pass: bundle target, **`test-builds`** / **`build-all-platforms`** shape, **`AGENTS.md`** minimal publish, pwsh + bash **`if`** hazard — unchanged; sixth-pass gaps still apply.
-- **Verify runs on net48 too:** Sidecar file asserts belong behind a **net9** (or TFM) condition so net48 jobs keep checking only **KPatcher** apphost + layout expectations without bundled CLIs.
-- **Operational validation:** One-time **replay** of **`build-all-platforms`** Build script on **`windows-latest`** to confirm bash-style **`if`** under **`pwsh`** parses as intended (hazard called out repeatedly).
-- **test-builds vs release net48:** Optional alignment — **`test-builds`** net48 uses **`OutputPath`** while **`build-all-platforms`** uses **`PublishDir`** + **`msbuild`**; harmonize if “test folder == release folder shape” is a goal.
+- **No new repo drift** vs sixth pass: bundle target, **`test-builds`** / **`build-all-platforms`** shape, **`AGENTS.md`** minimal publish — **unchanged**; ~~pwsh + bash **`if`** hazard~~ **fixed** (eighth pass); ~~sixth-pass verify gaps~~ **closed** (eighth–ninth pass).
+- **Verify runs on net48 too:** Sidecar file asserts belong behind a **net9** (or TFM) condition so net48 jobs keep checking only **KPatcher** apphost + layout expectations without bundled CLIs. *(Still true.)*
+- ~~**Operational validation:** One-time **replay** … bash-style **`if`** under **`pwsh`**~~ **Obviated** (Build rewritten in PowerShell, eighth pass).
+- ~~**test-builds vs release net48:** … **`OutputPath`** vs **`PublishDir`**~~ **Resolved** (eleventh pass — both use **`msbuild /t:Publish`** + **`PublishDir`**).
 - **Supply chain depth:** Add **dependency review** to PR workflow when dependency graph is enabled; use **artifact attestations** for release binaries; generate **SPDX/CycloneDX** SBOM (e.g. Microsoft **sbom-tool**) and attach or attest per GitHub docs (links below).
 
 ### Research Insights (seventh pass — CI verify + supply chain, condensed)
@@ -161,7 +164,7 @@
 - **Release verify:** **`build-all-platforms.yml`** now runs **Verify publish output** after Build — **`KPatcher`** apphost + (**net9 only**) **`kcompiler`** / **`NCSDecompCLI`** with correct **`.exe`** suffix on Windows.
 - **PR verify:** **`test-builds.yml`** verify step extended for **`net9.0`** matrix rows — same sidecar apphost checks; **`continue-on-error: true`** on tests **documented** inline in YAML.
 - **`AGENTS.md`:** **Canonical CI-matching publish** row + **bundled apphost names** per OS + **zip naming** note.
-- **Historical plan bullets** (e.g. fifth pass “Shell hazard”, third pass “Verify gap”, sixth pass “Dual verify gap”) describe **pre-fix** or **pre-superseded** state; treat **tenth pass** **Key improvements** + **strikeouts** in older sections as **source of truth** for CI.
+- **Historical plan bullets** (e.g. fifth pass “Shell hazard”, third pass “Verify gap”, sixth pass “Dual verify gap”) describe **pre-fix** or **pre-superseded** state; treat **twelfth pass** **Key improvements** + **strikeouts** in older sections as **source of truth** for CI.
 
 ### Research Insights (eighth pass — GHA shell, condensed)
 
@@ -172,7 +175,7 @@
 
 - **Confirmed in repo:** **`build-all-platforms`** / **`test-builds`** verify **KPatcher** + (**net9**) **`kcompiler`** / **`NCSDecompCLI`**; **Build** uses valid **PowerShell** under **`shell: pwsh`**; **`AGENTS.md`** lists canonical publish + bundled names + zip naming.
 - **Open (unchanged):** HoloPatcher **parity audit**; **supply chain** actions (**dependency review**, **attestations**, SBOM); **release runbook** hardening; **`publish_release.ps1`** vs GHA zip names; **solution folder** cleanup in **`.sln`**. ~~**net48 `/t:Publish`**~~ — **done** (eleventh pass + [`msbuild-publishdir-requires-publish-target.md`](../solutions/deployment-issues/msbuild-publishdir-requires-publish-target.md)).
-- **`docs/solutions/`:** **Four** compound-backed articles — future **`/deepen-plan`** passes should **`glob docs/solutions/**/*.md`** and merge frontmatter **`tags`** into research.
+- **`docs/solutions/`:** **Five** compound-backed articles (under **`docs/solutions/`**) — future **`/deepen-plan`** passes should **`glob docs/solutions/**/*.md`** and merge frontmatter **`tags`** into research.
 - **`--help` smoke:** Implemented in both workflows’ verify steps for every **required** apphost (**net48** = **KPatcher** only; **net9** = main + sidecars). **Avalonia / DISPLAY:** **`Program.Main`** handles **`--help`** before **GUI** bootstrap — suitable for headless Linux runners; regressions that touch **Avalonia** before parsing args would need **Xvfb** or similar ([GitHub-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners)).
 
 ### Research Insights (ninth pass — pwsh exit codes + single-file, condensed)
@@ -180,6 +183,12 @@
 - Read **`$LASTEXITCODE`** immediately after the native apphost; do not interleave cmdlets that overwrite it ([about_Automatic_Variables](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_automatic-variables?view=powershell-7.5)).
 - Single-file first run may trigger **extract** — allow time or set **`DOTNET_BUNDLE_EXTRACT_BASE_DIR`** if agents share temp ([single-file overview](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview)).
 - Use **`shell: pwsh`** consistently on matrix legs when scripting with **`$IsWindows`** / **`$LASTEXITCODE`** so Linux jobs do not default to **bash** and diverge ([workflow syntax — shell](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsshell)).
+
+### New considerations (twelfth pass — supply chain status + doc cleanup)
+
+- **Workflow grep:** No **`dependency-review-action`**, **`attest`**, or **SBOM** generation in **`.github/workflows/`** yet — seventh/tenth pass links remain the **design** reference; implementation = **follow-up #18** + [`github-actions-dependency-review-dotnet.md`](../solutions/deployment-issues/github-actions-dependency-review-dotnet.md).
+- **Build vs Publish (net48):** Eleventh pass **`/t:Publish`** fix is the canonical “**`PublishDir` needs Publish**” story; keep [`msbuild-publishdir-requires-publish-target.md`](../solutions/deployment-issues/msbuild-publishdir-requires-publish-target.md) linked from **`AGENTS.md`** / workflow comments if maintainers reintroduce **`msbuild`** without **`/t:Publish`**.
+- **Historical sections:** Third/sixth/seventh passes that mention “verify gap” or “dual verify gap” are **historical** unless explicitly ~~struck~~ or pointed at **tenth pass** “source of truth” note (line in eighth pass **New considerations**).
 
 ---
 
@@ -208,7 +217,7 @@
 | Area | Path |
 |------|------|
 | Multi-platform publish + zip | `.github/workflows/build-all-platforms.yml` |
-| Smaller matrix + verify | `.github/workflows/test-builds.yml` (KPatcher exe only) |
+| Smaller matrix + verify | `.github/workflows/test-builds.yml` — **KPatcher** + (**net9**) sidecars + **`--help`** smoke; tests may **`continue-on-error`** |
 | Tests / analyzers / KCompiler pack | `.github/workflows/ci.yml` |
 | Release orchestration | `.github/workflows/build-release.yml` |
 | Local release (KPatcher) | `scripts/publish_release.ps1` — **pubxml + `dist\<rid>.zip`**, differs from GHA zip names |
@@ -439,7 +448,7 @@ The base plan defines:
 15. ~~**Optional CI alignment:** **`test-builds`** net48 — same **`msbuild /t:Publish` + `PublishDir`** as **`build-all-platforms`**~~ **Done** (eleventh pass)
 16. ~~**AGENTS.md:** one line listing **expected bundled apphost basenames** per OS (**`kcompiler`**, **`NCSDecompCLI`**, `.exe` on Windows) next to bundle docs — complements #7.~~ **Done**
 17. ~~**One-time:** validate **`build-all-platforms`** Build step (**bash `if` + `pwsh`**) on **`windows-latest`** logs / local replay.~~ **Obviated**
-18. **Supply chain:** enable **dependency review** on PRs; **`actions/attest`** release zips (+ optional **SBOM** via [sbom-tool](https://github.com/microsoft/sbom-tool)); cross-link release runbook (#9).
+18. **Supply chain:** enable **dependency review** on PRs (playbook: [`github-actions-dependency-review-dotnet.md`](../solutions/deployment-issues/github-actions-dependency-review-dotnet.md)); **`actions/attest`** release zips (+ optional **SBOM** via [sbom-tool](https://github.com/microsoft/sbom-tool)); cross-link release runbook (#9).
 19. ~~**Optional:** **`--help` smoke** from **`PublishDir`** for each apphost in CI~~ **Done** (net48: **KPatcher** only; net9: main + sidecars; **`chmod +x`** on non-Windows).
 
 ---

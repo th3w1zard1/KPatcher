@@ -1,0 +1,228 @@
+// Copyright (c) 2021-2025 DeNCS contributors
+// Licensed under the MIT License.
+// See NOTICE and licenses/DeNCS-MIT.txt in the project root.
+
+using System;
+using System.Collections.Generic;
+using NCSDecomp.Core.Analysis;
+
+namespace NCSDecomp.Core.Node
+{
+    public sealed class ABinaryCommand : PBinaryCommand
+    {
+
+        private PBinaryOp _binaryOp_;
+        private TIntegerConstant _pos_;
+        private TIntegerConstant _type_;
+        private TIntegerConstant _size_;
+        private TSemi _semi_;
+
+        public ABinaryCommand()
+        {
+        }
+
+        public ABinaryCommand(PBinaryOp _binaryOp_, TIntegerConstant _pos_, TIntegerConstant _type_, TIntegerConstant _size_, TSemi _semi_)
+        {
+            SetBinaryOp(_binaryOp_);
+            SetPos(_pos_);
+            SetType(_type_);
+            SetSize(_size_);
+            SetSemi(_semi_);
+        }
+
+        public override object Clone()
+        {
+            return (object)new ABinaryCommand(
+             (PBinaryOp)CloneNode(_binaryOp_),
+             (TIntegerConstant)CloneNode(_pos_),
+             (TIntegerConstant)CloneNode(_type_),
+             (TIntegerConstant)CloneNode(_size_),
+             (TSemi)CloneNode(_semi_)
+          );
+        }
+
+        public override void Apply(Switch sw)
+        {
+            ((IAnalysis)sw).CaseABinaryCommand(this);
+        }
+
+        public PBinaryOp GetBinaryOp()
+        {
+            return _binaryOp_;
+        }
+
+        public void SetBinaryOp(PBinaryOp node)
+        {
+            if (_binaryOp_ != null)
+            {
+                _binaryOp_.SetParent(null);
+            }
+
+            if (node != null)
+            {
+                if (node.Parent() != null)
+                {
+                    node.Parent().RemoveChild(node);
+                }
+
+                node.SetParent(this);
+            }
+
+            _binaryOp_ = node;
+        }
+
+        public TIntegerConstant GetPos()
+        {
+            return _pos_;
+        }
+
+        public void SetPos(TIntegerConstant node)
+        {
+            if (_pos_ != null)
+            {
+                _pos_.SetParent(null);
+            }
+
+            if (node != null)
+            {
+                if (node.Parent() != null)
+                {
+                    node.Parent().RemoveChild(node);
+                }
+
+                node.SetParent(this);
+            }
+
+            _pos_ = node;
+        }
+
+        public TIntegerConstant GetCmdType()
+        {
+            return _type_;
+        }
+
+        public void SetType(TIntegerConstant node)
+        {
+            if (_type_ != null)
+            {
+                _type_.SetParent(null);
+            }
+
+            if (node != null)
+            {
+                if (node.Parent() != null)
+                {
+                    node.Parent().RemoveChild(node);
+                }
+
+                node.SetParent(this);
+            }
+
+            _type_ = node;
+        }
+
+        public TIntegerConstant GetSize()
+        {
+            return _size_;
+        }
+
+        public void SetSize(TIntegerConstant node)
+        {
+            if (_size_ != null)
+            {
+                _size_.SetParent(null);
+            }
+
+            if (node != null)
+            {
+                if (node.Parent() != null)
+                {
+                    node.Parent().RemoveChild(node);
+                }
+
+                node.SetParent(this);
+            }
+
+            _size_ = node;
+        }
+
+        public TSemi GetSemi()
+        {
+            return _semi_;
+        }
+
+        public void SetSemi(TSemi node)
+        {
+            if (_semi_ != null)
+            {
+                _semi_.SetParent(null);
+            }
+
+            if (node != null)
+            {
+                if (node.Parent() != null)
+                {
+                    node.Parent().RemoveChild(node);
+                }
+
+                node.SetParent(this);
+            }
+
+            _semi_ = node;
+        }
+
+        public override string ToString()
+        {
+            return ToString(_binaryOp_) + ToString(_pos_) + ToString(_type_) + ToString(_size_) + ToString(_semi_);
+        }
+
+        internal override void RemoveChild(Node child)
+        {
+            if (_binaryOp_ == child)
+            {
+                _binaryOp_ = null;
+            }
+            else if (_pos_ == child)
+            {
+                _pos_ = null;
+            }
+            else if (_type_ == child)
+            {
+                _type_ = null;
+            }
+            else if (_size_ == child)
+            {
+                _size_ = null;
+            }
+            else if (_semi_ == child)
+            {
+                _semi_ = null;
+            }
+        }
+
+        internal override void ReplaceChild(Node oldChild, Node newChild)
+        {
+            if (_binaryOp_ == oldChild)
+            {
+                SetBinaryOp((PBinaryOp)newChild);
+            }
+            else if (_pos_ == oldChild)
+            {
+                SetPos((TIntegerConstant)newChild);
+            }
+            else if (_type_ == oldChild)
+            {
+                SetType((TIntegerConstant)newChild);
+            }
+            else if (_size_ == oldChild)
+            {
+                SetSize((TIntegerConstant)newChild);
+            }
+            else if (_semi_ == oldChild)
+            {
+                SetSemi((TSemi)newChild);
+            }
+        }
+    }
+
+}

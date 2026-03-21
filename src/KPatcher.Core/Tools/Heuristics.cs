@@ -22,6 +22,16 @@ namespace KPatcher.Core.Tools
             }
 
             string basePath = Path.GetFullPath(path);
+
+            // Definitive PC installs: only one main executable — skip scoring heuristics.
+            // If both swkotor.exe and swkotor2.exe are present, keep heuristics (ambiguous / merged tree).
+            bool hasK1Exe = File.Exists(Path.Combine(basePath, "swkotor.exe"));
+            bool hasK2Exe = File.Exists(Path.Combine(basePath, "swkotor2.exe"));
+            if (hasK1Exe ^ hasK2Exe)
+            {
+                return hasK2Exe ? Game.K2 : Game.K1;
+            }
+
             bool Check(string relative) => File.Exists(Path.Combine(basePath, relative)) || Directory.Exists(Path.Combine(basePath, relative));
 
             // K1 PC

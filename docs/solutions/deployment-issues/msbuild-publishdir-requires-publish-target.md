@@ -37,5 +37,6 @@ PR **`test-builds`** was aligned to the same pattern with **`PublishDir=dist\tes
 
 ## Cross-references
 
-- Deepened plan: `docs/plans/2026-03-21-cli-layout-bundling-deepened.md` (fifth pass — net48 precision, follow-up #12 / #15).
+- Deepened plan: `docs/plans/2026-03-21-cli-layout-bundling-deepened.md` (eleventh pass — follow-up #12 / #15; twelfth pass — plan hygiene).
 - Related: `docs/solutions/deployment-issues/gha-pwsh-shell-syntax-mismatch.md` (shell choice for matrix `if` branches).
+- Supply chain (separate): `docs/solutions/deployment-issues/github-actions-dependency-review-dotnet.md` (PR dependency review — not yet in repo workflows).

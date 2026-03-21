@@ -83,10 +83,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
+    <ProjectReference Include="..\KPatcher\KPatcher.csproj" />
     <ProjectReference Include="..\KPatcher.Core\KPatcher.Core.csproj" />
+    <ProjectReference Include="..\NCSDecomp.Core\NCSDecomp.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Same nwscript sources as NCSDecomp.NET / HoloPatcher round-trip tests (repo include/). -->
+    <None Include="..\..\include\k1_nwscript.nss" Link="test_files\k1_nwscript.nss">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\include\k2_nwscript.nss" Link="test_files\k2_nwscript.nss">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="test_files\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

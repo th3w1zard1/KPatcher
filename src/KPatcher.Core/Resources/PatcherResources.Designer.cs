@@ -53,6 +53,7 @@ namespace KPatcher.Core.Resources
         public static string CliErrorNamespaceIndexOutOfRange => ResourceManager.GetString(nameof(CliErrorNamespaceIndexOutOfRange), _resourceCulture);
         public static string CliErrorNoGameDirectory => ResourceManager.GetString(nameof(CliErrorNoGameDirectory), _resourceCulture);
         public static string CliErrorNoModPath => ResourceManager.GetString(nameof(CliErrorNoModPath), _resourceCulture);
+        public static string CliHelpUsage => ResourceManager.GetString(nameof(CliHelpUsage), _resourceCulture);
         public static string CliInfoInstallCompleted => ResourceManager.GetString(nameof(CliInfoInstallCompleted), _resourceCulture);
         public static string CliInfoInstallTime => ResourceManager.GetString(nameof(CliInfoInstallTime), _resourceCulture);
         public static string CliInfoInstallingMod => ResourceManager.GetString(nameof(CliInfoInstallingMod), _resourceCulture);

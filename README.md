@@ -22,9 +22,14 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 
 ## Project Structure
 
-- **KPatcher** - Main Avalonia desktop application
+- **KPatcher** - Main Avalonia desktop application (also HoloPatcher-style headless CLI)
 - **KPatcher.UI** - Packable Avalonia UI library
 - **KPatcher.Core** - Packable core patching engine and data/model library
+- **KCompiler.Core** / **KCompiler.NET** (`kcompiler`) - Managed NSS→NCS compiler CLI
+- **NCSDecomp.Core** / **NCSDecomp.NET** (NCSDecompCLI) / **NCSDecomp.UI** - Managed NCS→NSS decompiler (DeNCS port)
+- **KEditChanges** / **KEditChanges.NET** (`keditchanges-cli`) - Umbrella CLI (compile + decomp + placeholder info)
+
+See [AGENTS.md](AGENTS.md) for build/publish commands and **“Which binary do I run?”**
 
 ## Features
 
@@ -57,8 +62,8 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 
 ## Requirements
 
-- .NET 8.0 SDK
-- Avalonia 11.0.10
+- .NET 9 SDK (primary TFM; some projects multi-target older frameworks)
+- Avalonia 11.x (see project `PackageReference` versions)
 
 ## Vendor submodules
 
@@ -111,6 +116,7 @@ Current test coverage includes:
 - ✅ TLK modifications
 - ✅ SSF modifications
 - 🚧 NSS/NCS modifications (roundtrip tests may require `nwnnsscomp.exe` on Windows)
+- ✅ Managed round-trip compare (`RoundTripUtil.CompareManagedRecompileToOriginalDecoderText`) — xUnit tests in `KPatcher.Tests`
 - ✅ Config reader/INI parsing
 - ✅ SystemHelpers (permission fixing, case sensitivity)
 - ✅ RtfStripper (RTF-to-plain-text)
@@ -120,16 +126,31 @@ Current test coverage includes:
 
 ## Building
 
+From the repository root:
+
 ```bash
-cd Tools/KPatcher
-dotnet restore
-dotnet build
+dotnet restore src/KPatcher/KPatcher.csproj
+dotnet build src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0
+```
+
+Build **all** main apps and tool CLIs in one step:
+
+```bash
+dotnet build KPatcher.sln --configuration Debug
+```
+
+## Publishing (KPatcher + sidecar tools)
+
+A **Release** publish of KPatcher runs **`PublishBundledCliTools`**, which also publishes **kcompiler**, **NCSDecompCLI**, and **keditchanges-cli** into the same output folder (same runtime identifier and self-contained settings as KPatcher). Example:
+
+```bash
+dotnet publish src/KPatcher/KPatcher.csproj -c Release -f net9.0
 ```
 
 ## Running
 
 ```bash
-dotnet run --project src/KPatcher/KPatcher.csproj
+dotnet run --project src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0
 ```
 
 ## Architecture

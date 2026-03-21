@@ -43,6 +43,9 @@ namespace KPatcher.Core.Tests.Formats
 
         public static bool VanillaSubmodulePresent => !string.IsNullOrEmpty(VanillaRoot) && Directory.Exists(VanillaRoot);
 
+        /// <summary>Same path as <see cref="ResolveVanillaScriptRoot"/>; null when submodule not present.</summary>
+        public static string VanillaScriptSourceRoot => VanillaRoot;
+
         private static IEnumerable<string> GetNssFiles(string gameDir, int maxFiles = 20)
         {
             if (string.IsNullOrEmpty(VanillaRoot))

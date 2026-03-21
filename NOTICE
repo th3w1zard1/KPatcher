@@ -1,0 +1,16 @@
+KPatcher
+========
+
+This product includes or ports code from the following:
+
+  DeNCS (KotOR NCS → NSS decompiler; also referred to historically as NCSDecomp)
+  - Upstream: https://github.com/OldRepublicDevs/DeNCS
+  - Vendored reference: vendor/DeNCS/
+  - Copyright (c) 2021-2025 DeNCS contributors
+  - Licensed under the MIT License (see licenses/DeNCS-MIT.txt and file-level headers in ported sources).
+
+Original DeNCS developers: JdNoa (Script Decompiler), Dashus (GUI).
+Current maintainer: OldRepublicDevs (https://openkotor.com).
+
+The C# projects NCSDecomp.Core, NCSDecomp.NET, and NCSDecomp.UI are managed ports
+of that codebase for KPatcher; DeNCS-derived portions use the same MIT terms.

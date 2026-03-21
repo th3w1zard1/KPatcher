@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NCSDecomp.UI.MainWindow"
+        Title="NCSDecomp"
+        Width="760" Height="560">
+  <DockPanel Margin="12">
+    <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Spacing="8">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Name="OpenNcsButton" Content="Open .ncs…" MinWidth="100" />
+        <TextBlock Name="NcsPathText" VerticalAlignment="Center" Text="No file loaded" TextTrimming="CharacterEllipsis" MaxWidth="380" Opacity="0.85" />
+        <TextBlock Text="Game:" VerticalAlignment="Center" />
+        <ComboBox Name="GameCombo" Width="140" SelectedIndex="0">
+          <ComboBoxItem Content="KotOR 1" />
+          <ComboBoxItem Content="KotOR 2 (TSL)" />
+        </ComboBox>
+        <Button Name="DecompileButton" Content="Decompile" MinWidth="88" />
+        <Button Name="SaveNssButton" Content="Save .nss…" MinWidth="100" />
+        <Button Name="RoundTripButton" Content="Managed round-trip" MinWidth="130"
+                ToolTip.Tip="Recompile NSS with KCompiler and compare decoder output to the loaded .ncs" />
+      </StackPanel>
+      <TextBlock TextWrapping="Wrap" Opacity="0.75" FontSize="11"
+                 Text="Managed NCS→NSS (NCSDecomp.Core). Config: config/ncsdecomp.conf next to the app. No external nwnnsscomp." />
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Bottom" Name="StatusText" Margin="0,8,0,0" Opacity="0.9" Text="" />
+    <TabControl Name="MainTabs" SelectionChanged="OnMainTabsSelectionChanged">
+      <TabItem Header="Highlighted">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+          <SelectableTextBlock Name="NssHighlighted"
+                               FontFamily="Consolas,Courier New,monospace" FontSize="12"
+                               TextWrapping="Wrap" />
+        </ScrollViewer>
+      </TabItem>
+      <TabItem Header="Plain text">
+        <TextBox Name="NssOutputPlain" AcceptsReturn="True" TextWrapping="Wrap"
+                 FontFamily="Consolas,Courier New,monospace" FontSize="12"
+                 Watermark="Decompiled NSS appears here…" />
+      </TabItem>
+      <TabItem Header="Bytecode">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+          <SelectableTextBlock Name="NssBytecodeView"
+                               FontFamily="Consolas,Courier New,monospace" FontSize="12"
+                               TextWrapping="Wrap" />
+        </ScrollViewer>
+      </TabItem>
+      <TabItem Header="AST">
+        <TreeView Name="AstTree" FontFamily="Consolas,Courier New,monospace" FontSize="11" />
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

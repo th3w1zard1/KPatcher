@@ -1,6 +1,6 @@
-// Copyright 2021-2025 NCSDecomp (DeNCS)
+// Copyright (c) 2021-2025 DeNCS contributors (DeNCS)
 // Port to C# for KPatcher. Original Java: com.kotor.resource.formats.ncs.Decoder
-// Licensed under the Business Source License 1.1 (BSL 1.1).
+// Licensed under the MIT License (see NOTICE and licenses/DeNCS-MIT.txt).
 
 using System;
 using System.IO;
@@ -73,10 +73,26 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private string ReadCommands(IActionsData actions)
         {
             var sb = new StringBuilder();
+            // Java DeNCS reads byte 8 as opcode 66 ("T") + 4-byte signed int, then continues at offset 13.
+            // We detect the same 0x42 byte as KPatcher/reone extended header and skip to 13, but the SableCC
+            // lexer/parser still require the leading "T <pos> <int>; " line — emit it from bytes 8–12.
+            if (_hasQualifier && _data.Length >= 13 && _data[8] == 0x42)
+            {
+                int tArg = ReadBigEndianInt32(_data, 9);
+                sb.Append("T 8 ").Append(tArg).Append("; ");
+            }
+
             while (ReadCommand(sb, actions))
             {
             }
             return sb.ToString();
+        }
+
+        private static int ReadBigEndianInt32(byte[] data, int offset)
+        {
+            if (data == null || offset < 0 || offset + 4 > data.Length)
+                throw new InvalidDataException("Unexpected EOF reading 32-bit value.");
+            return (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
         }
 
         private bool ReadCommand(StringBuilder strbuffer, IActionsData actions)
@@ -342,13 +358,5 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
                     throw new InvalidDataException("Unknown command code: " + command);
             }
         }
-    }
-
-    /// <summary>
-    /// Minimal interface for ACTION opcode lookup (action index → string). Port of DeNCS ActionsData.getAction(int).
-    /// </summary>
-    public interface IActionsData
-    {
-        string GetAction(int index);
     }
 }
