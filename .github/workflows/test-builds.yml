@@ -63,6 +63,7 @@ jobs:
       - name: Restore test dependencies
         run: dotnet restore src/KPatcher.Tests/KPatcher.Tests.csproj
 
+      # Keeps publish/verify steps useful when the suite has known platform-specific failures (see AGENTS.md); tighten to false if CI green should require all tests.
       - name: Run tests
         run: dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --no-restore --verbosity normal
         continue-on-error: true
@@ -70,7 +71,13 @@ jobs:
       - name: Build
         run: |
           if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/KPatcher/KPatcher.csproj /p:Configuration=Release /p:TargetFramework=${{ matrix.framework }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:SelfContained=${{ matrix.selfcontained }} /p:OutputPath=..\..\dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}
+            msbuild src/KPatcher/KPatcher.csproj `
+              /t:Publish `
+              /p:Configuration=Release `
+              /p:TargetFramework=${{ matrix.framework }} `
+              /p:RuntimeIdentifier=${{ matrix.rid }} `
+              /p:SelfContained=${{ matrix.selfcontained }} `
+              /p:PublishDir=dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}\
           } else {
             dotnet publish src/KPatcher/KPatcher.csproj `
               -c Release `
@@ -118,6 +125,37 @@ jobs:
           }
           
           Write-Host "✓ Executable size: $($fileInfo.Length) bytes"
+
+          $smokeTargets = @($exePath)
+          if ("${{ matrix.framework }}" -eq "net9.0") {
+            $suffix = if ("${{ matrix.platform }}" -eq "win7" -or "${{ matrix.platform }}" -eq "win") { ".exe" } else { "" }
+            foreach ($sidecar in @("kcompiler$suffix", "NCSDecompCLI$suffix")) {
+              $sidePath = Join-Path $outputDir $sidecar
+              if (-not (Test-Path -LiteralPath $sidePath)) {
+                Write-Error "Bundled CLI not found: $sidePath"
+                exit 1
+              }
+              $si = Get-Item -LiteralPath $sidePath
+              if ($si.Length -eq 0) {
+                Write-Error "Bundled CLI is empty: $sidePath"
+                exit 1
+              }
+              Write-Host "✓ Bundled CLI: $sidePath ($($si.Length) bytes)"
+              $smokeTargets += $sidePath
+            }
+          }
+
+          if (-not $IsWindows) {
+            foreach ($t in $smokeTargets) { chmod +x $t }
+          }
+          foreach ($t in $smokeTargets) {
+            & $t @('--help')
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "--help smoke failed for ${t} (exit $LASTEXITCODE)"
+              exit 1
+            }
+            Write-Host "OK --help: $t"
+          }
         shell: pwsh
 
       - name: Upload test artifacts

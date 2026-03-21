@@ -39,6 +39,8 @@
       <Link>shared\NCS\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
     <Compile Remove="..\KPatcher.Core\Formats\NCS\Compiler\NCSCompiler.cs" />
+    <!-- KPatcher-only: references NCSDecomp.Core (avoid KCompiler ↔ NCSDecomp cycle). -->
+    <Compile Remove="..\KPatcher.Core\Formats\NCS\Decompiler\NCSManagedDecompiler.cs" />
     <Compile Include="..\KPatcher.Core\Common\Script\**\*.cs">
       <Link>shared\Script\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>

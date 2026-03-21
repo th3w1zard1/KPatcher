@@ -115,6 +115,10 @@
     <ProjectReference Include="..\KPatcher.UI\KPatcher.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="KPatcher.Tests" />
+  </ItemGroup>
+
   <!-- Don't build project refs in the main build; we build UI ourselves so Avalonia source generator runs (it fails when UI is built only as a dependency). -->
   <PropertyGroup Condition="'$(DesignTimeBuild)' != 'true'">
     <BuildProjectReferences>false</BuildProjectReferences>
@@ -129,4 +133,26 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!-- Publish kcompiler + NCSDecompCLI via staging dirs, then merge into KPatcher publish (publishing directly to PublishDir would wipe KPatcher output). -->
+  <Target Name="PublishBundledCliTools" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net9.0'">
+    <PropertyGroup>
+      <_PublishDirNormalized>$([MSBuild]::EnsureTrailingSlash('$(PublishDir)'))</_PublishDirNormalized>
+      <_KCompilerProj>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'KCompiler.NET', 'KCompiler.NET.csproj'))</_KCompilerProj>
+      <_NcsDecompProj>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'NCSDecomp.NET', 'NCSDecomp.NET.csproj'))</_NcsDecompProj>
+      <_KStage>$([MSBuild]::EnsureTrailingSlash('$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'sidecar_kcompiler'))'))</_KStage>
+      <_NStage>$([MSBuild]::EnsureTrailingSlash('$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'sidecar_ncsdecomp'))'))</_NStage>
+      <_SidecarPublishProps>Configuration=$(Configuration);TargetFramework=$(TargetFramework);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);UseAppHost=true</_SidecarPublishProps>
+    </PropertyGroup>
+    <RemoveDir Directories="$(_KStage);$(_NStage)" />
+    <MakeDir Directories="$(_KStage);$(_NStage)" />
+    <MSBuild Projects="$(_KCompilerProj)" Targets="Publish" Properties="$(_SidecarPublishProps);PublishDir=$(_KStage)" />
+    <MSBuild Projects="$(_NcsDecompProj)" Targets="Publish" Properties="$(_SidecarPublishProps);PublishDir=$(_NStage)" />
+    <ItemGroup>
+      <_KStageFiles Include="$(_KStage)**\*.*" />
+      <_NStageFiles Include="$(_NStage)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_KStageFiles)" DestinationFiles="@(_KStageFiles->'$(_PublishDirNormalized)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_NStageFiles)" DestinationFiles="@(_NStageFiles->'$(_PublishDirNormalized)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

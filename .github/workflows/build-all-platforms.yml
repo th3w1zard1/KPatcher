@@ -119,14 +119,15 @@ jobs:
 
       - name: Build
         run: |
-          if [ "${{ matrix.framework }}" == "net48" ]; then
+          if ("${{ matrix.framework }}" -eq "net48") {
             msbuild src/KPatcher/KPatcher.csproj `
+              /t:Publish `
               /p:Configuration=Release `
               /p:TargetFramework=${{ matrix.framework }} `
               /p:RuntimeIdentifier=${{ matrix.rid }} `
               /p:SelfContained=${{ matrix.selfcontained }} `
               /p:PublishDir=dist\build\${{ matrix.framework }}\${{ matrix.rid }}\
-          else
+          } else {
             dotnet publish src/KPatcher/KPatcher.csproj `
               -c Release `
               -f ${{ matrix.framework }} `
@@ -136,6 +137,52 @@ jobs:
               -p:IncludeNativeLibrariesForSelfExtract=true `
               -p:PublishReadyToRun=true `
               -o dist/build/${{ matrix.framework }}/${{ matrix.rid }}
+          }
+        shell: pwsh
+
+      - name: Verify publish output
+        run: |
+          $framework = "${{ matrix.framework }}"
+          $rid = "${{ matrix.rid }}"
+          $platform = "${{ matrix.platform }}"
+          $outputDir = "dist/build/$framework/$rid"
+          if (-not (Test-Path -LiteralPath $outputDir)) {
+            Write-Error "Output directory not found: $outputDir"
+            exit 1
+          }
+          $isWindows = $platform -eq "win7" -or $platform -eq "win"
+          $suffix = if ($isWindows) { ".exe" } else { "" }
+          $required = @(
+            (Join-Path $outputDir $(if ($isWindows) { "KPatcher.exe" } else { "KPatcher" }))
+          )
+          if ($framework -eq "net9.0") {
+            $required += (Join-Path $outputDir ("kcompiler" + $suffix))
+            $required += (Join-Path $outputDir ("NCSDecompCLI" + $suffix))
+          }
+          foreach ($p in $required) {
+            if (-not (Test-Path -LiteralPath $p)) {
+              Write-Error "Missing required output: $p"
+              exit 1
+            }
+            $len = (Get-Item -LiteralPath $p).Length
+            if ($len -eq 0) {
+              Write-Error "Empty file: $p"
+              exit 1
+            }
+            Write-Host "OK: $p ($len bytes)"
+          }
+
+          if (-not $IsWindows) {
+            foreach ($p in $required) { chmod +x $p }
+          }
+          foreach ($p in $required) {
+            & $p @('--help')
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "--help smoke failed for ${p} (exit $LASTEXITCODE)"
+              exit 1
+            }
+            Write-Host "OK --help: $p"
+          }
         shell: pwsh
 
       - name: Create archive

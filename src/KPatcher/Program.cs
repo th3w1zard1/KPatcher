@@ -1,10 +1,8 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Avalonia;
-using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Resources;
@@ -163,8 +161,14 @@ namespace KPatcher
         [STAThread]
         public static void Main(string[] args)
         {
-            // Parse command line arguments
-            CommandLineArgs cmdlineArgs = ParseArgs(args);
+            HoloPatcherCli.CommandLineArgs cmdlineArgs = HoloPatcherCli.ParseArgs(args);
+
+            if (cmdlineArgs.Help)
+            {
+                HoloPatcherCli.WriteHelp(Console.Out);
+                Environment.Exit(0);
+                return;
+            }
 
             // Determine if we should run in CLI mode
             bool forceCli = cmdlineArgs.Install || cmdlineArgs.Uninstall || cmdlineArgs.Validate;
@@ -191,61 +195,7 @@ namespace KPatcher
             }
         }
 
-        private static CommandLineArgs ParseArgs(string[] args)
-        {
-            var result = new CommandLineArgs();
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i])
-                {
-                    case "--game-dir" when i + 1 < args.Length:
-                        result.GameDir = args[++i];
-                        break;
-                    case "--tslpatchdata" when i + 1 < args.Length:
-                        result.TslPatchData = args[++i];
-                        break;
-                    case "--namespace-option-index" when i + 1 < args.Length:
-                        if (int.TryParse(args[++i], out int index))
-                        {
-                            result.NamespaceOptionIndex = index;
-                        }
-                        break;
-                    case "--console":
-                        result.Console = true;
-                        break;
-                    case "--uninstall":
-                        result.Uninstall = true;
-                        break;
-                    case "--install":
-                        result.Install = true;
-                        break;
-                    case "--validate":
-                        result.Validate = true;
-                        break;
-                    case "--help":
-                        result.Help = true;
-                        break;
-                }
-            }
-
-            // Handle positional arguments (game_dir tslpatchdata [namespace_option_index])
-            int positionalCount = args.Count(a => !a.StartsWith("--"));
-            if (positionalCount >= 2)
-            {
-                string[] positional = args.Where(a => !a.StartsWith("--")).ToArray();
-                result.GameDir = positional[0];
-                result.TslPatchData = positional[1];
-                if (positionalCount >= 3 && int.TryParse(positional[2], out int posIndex))
-                {
-                    result.NamespaceOptionIndex = posIndex;
-                }
-            }
-
-            return result;
-        }
-
-        private static void ExecuteCli(CommandLineArgs args)
+        private static void ExecuteCli(HoloPatcherCli.CommandLineArgs args)
         {
             var logger = new PatchLogger();
             logger.VerboseLogged += (s, l) => Console.WriteLine($"[VERBOSE] {l.Message}");
@@ -388,20 +338,6 @@ namespace KPatcher
                 }
                 Environment.Exit((int)AppCore.ExitCode.ExceptionDuringInstall);
             }
-        }
-
-        private class CommandLineArgs
-        {
-            [CanBeNull]
-            public string GameDir { get; set; }
-            [CanBeNull]
-            public string TslPatchData { get; set; }
-            public int? NamespaceOptionIndex { get; set; }
-            public bool Console { get; set; }
-            public bool Uninstall { get; set; }
-            public bool Install { get; set; }
-            public bool Validate { get; set; }
-            public bool Help { get; set; }
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.

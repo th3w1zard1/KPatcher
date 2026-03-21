@@ -1,6 +1,7 @@
-// Copyright 2021-2025 NCSDecomp (DeNCS)
+// Copyright (c) 2021-2025 DeNCS contributors (DeNCS)
 // Port to C# for KPatcher. Facade for NCS decompilation.
-// Full NSS code generation requires parser/analysis/codegen (future work); this exposes the decoder token stream.
+// Decoder token stream (KCompiler.Core). Full NSS: see NCSManagedDecompiler in this assembly.
+// Licensed under the MIT License (see NOTICE and licenses/DeNCS-MIT.txt).
 
 using System;
 using KPatcher.Core.Formats.NCS;
@@ -8,9 +9,9 @@ using KPatcher.Core.Formats.NCS;
 namespace KPatcher.Core.Formats.NCS.Decompiler
 {
     /// <summary>
-    /// Public API for NCS decompilation. Port of DeNCS FileDecompiler decode pipeline.
-    /// Decodes NCS bytecode to a tokenized command string (consumable by the DeNCS parser).
-    /// Full NSS source emission requires the full Java pipeline (parser, analysis, MainPass, codegen) to be ported.
+    /// Decoder facade: NCS bytecode → tokenized command string (DeNCS lexer/parser input).
+    /// Full managed NSS: <see cref="NCSManagedDecompiler"/> (NCSDecomp.Core pipeline).
+    /// Parse tree only: <c>NCSDecomp.Core.NcsParsePipeline</c>.
     /// </summary>
     public static class NCSDecompiler
     {

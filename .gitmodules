@@ -7,3 +7,6 @@
 [submodule "vendor/DeNCS"]
 	path = vendor/DeNCS
 	url = https://github.com/OldRepublicDevs/DeNCS
+[submodule "vendor/bioware-kaitai-formats"]
+	path = vendor/bioware-kaitai-formats
+	url = https://github.com/OldRepublicDevs/bioware-kaitai-formats

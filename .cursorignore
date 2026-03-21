@@ -1,11 +1,4 @@
-.history
-!.vscode
-!.env
-!.editorconfig
-!.gitignore
-!.cursorrules
-!.cursor
-!.cursorignore
+.history/
 vendor/DeNCS/.git
 vendor/HoloLSP/.git
 vendor/Kotor.NET/.git

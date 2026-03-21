@@ -150,8 +150,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
+    <ProjectReference Include="..\NCSDecomp.Core\NCSDecomp.Core.csproj" />
     <Compile Remove="Formats\NCS\**\*.cs" />
     <Compile Include="Formats\NCS\Compiler\NCSCompiler.cs" />
+    <Compile Include="Formats\NCS\Decompiler\NCSManagedDecompiler.cs" />
     <Compile Remove="Common\Script\**\*.cs" />
     <Compile Remove="Common\Game.cs" />
     <Compile Remove="Common\Language.cs" />

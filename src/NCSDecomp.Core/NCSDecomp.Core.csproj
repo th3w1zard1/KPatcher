@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>NCSDecomp.Core</RootNamespace>
+    <AssemblyName>NCSDecomp.Core</AssemblyName>
+    <Description>KotOR NCS script decompiler library (port of DeNCS). Decodes NCS bytecode to NSS source.</Description>
+    <PackageId>NCSDecomp.Core</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>th3w1zard1</Authors>
+    <Company>bolabaden</Company>
+    <PackageTags>kotor;tsl;ncs;nss;decompiler;dencs</PackageTags>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Decoder, IActionsData, NCS types: linked KPatcher.Core Formats/NCS sources in KCompiler.Core (avoid KPatcher↔NCSDecomp cycle). -->
+    <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
+  </ItemGroup>
+  <!-- Embed when present: copy from vendor/DeNCS/src/main/resources/.../lexer|parser/ and nwscript.nss -->
+  <ItemGroup Condition="Exists('Resources\lexer.dat')">
+    <EmbeddedResource Include="Resources\lexer.dat" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('Resources\parser.dat')">
+    <EmbeddedResource Include="Resources\parser.dat" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('Resources\k1_nwscript.nss')">
+    <EmbeddedResource Include="Resources\k1_nwscript.nss" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('Resources\tsl_nwscript.nss')">
+    <EmbeddedResource Include="Resources\tsl_nwscript.nss" />
+  </ItemGroup>
+</Project>
