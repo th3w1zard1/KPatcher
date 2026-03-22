@@ -98,6 +98,15 @@ When fixing code, convert C# 8+ syntax to C# 7.3 compatible alternatives, includ
 - Failing tests indicate the C# code does not match Python
 - Fix by matching Python exactly, not by changing test expectations
 
+### dotnet test (mandatory timeout)
+
+- **Do not** invoke bare `dotnet test` in agent-driven or automated runs (it can hang indefinitely).
+- **Default:** run tests through the repo wrappers so the subprocess is killed when the timeout elapses:
+  - **Windows:** `.\scripts\DotnetTest.ps1 KPatcher.sln -c Debug` (pass every `dotnet test` argument after optional `-TimeoutSeconds N`; do not use `pwsh -File ... --` — the `--` is swallowed by the host).
+  - **Linux/macOS:** `./scripts/dotnet-test.sh KPatcher.sln -c Debug` (requires GNU `timeout` or `gtimeout` from coreutils; on macOS often `brew install coreutils` and optionally `export TIMEOUT_CMD=gtimeout`).
+- **Duration:** environment variable `DOTNET_TEST_TIMEOUT_SECONDS` (default **7200**). PowerShell also accepts `-TimeoutSeconds`.
+- **Exit code 124** means the timeout fired and the `dotnet` process tree was terminated.
+
 ## NCS/NSS File Operations
 
 The `scripts` directory contains a comprehensive unified PowerShell tool for all NCS/NSS file operations:
