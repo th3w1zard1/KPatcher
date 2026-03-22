@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run dotnet test under a wall-clock timeout; kill the process group when time expires.
-# Default duration: DOTNET_TEST_TIMEOUT_SECONDS or 7200 seconds.
-# Exit 124 on timeout (GNU timeout convention).
+# Default: DOTNET_TEST_TIMEOUT_SECONDS or 300 seconds. Maximum permitted: 300 seconds (5 minutes).
+# Exit 124 on timeout (GNU timeout convention). On 124, optimize bottlenecks — do not disable tests to hide slowness.
 #
 # Usage:
 #   ./scripts/dotnet-test.sh [extra timeout args] -- dotnet-test-args...
@@ -11,12 +11,17 @@
 
 set -euo pipefail
 
+MAX_WRAPPER_SECS=300
+
 resolve_timeout() {
-  local v="${DOTNET_TEST_TIMEOUT_SECONDS:-7200}"
-  if [[ "$v" =~ ^[1-9][0-9]*$ ]]; then
-    echo "$v"
+  local v="${DOTNET_TEST_TIMEOUT_SECONDS:-$MAX_WRAPPER_SECS}"
+  if [[ ! "$v" =~ ^[1-9][0-9]*$ ]]; then
+    v="$MAX_WRAPPER_SECS"
+  fi
+  if [ "$v" -gt "$MAX_WRAPPER_SECS" ]; then
+    echo "$MAX_WRAPPER_SECS"
   else
-    echo "7200"
+    echo "$v"
   fi
 }
 

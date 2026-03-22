@@ -6,50 +6,83 @@
 .DESCRIPTION
     Use this instead of invoking dotnet test directly so hung test runs cannot block agents or CI shells indefinitely.
 
+    Implemented with $args (no param block) so the first token is never bound to a [int] timeout by mistake.
+
     Default timeout order:
-    1) -TimeoutSeconds (if positive)
+    1) -TimeoutSeconds N (if present at the start of the argument list; parsed and stripped)
     2) Environment variable DOTNET_TEST_TIMEOUT_SECONDS (if set to a positive integer)
-    3) 7200 seconds (2 hours)
+    3) 300 seconds (5 minutes)
+
+    Values above 300 are clamped to 300 — this wrapper enforces a single maximum wall clock for any agent/automation run.
 
     If the timeout elapses, the wrapper terminates the dotnet process tree and exits with code 124 (GNU timeout convention).
-
-.PARAMETER TimeoutSeconds
-    Wall-clock limit in seconds. Use 0 to take only env/default (7200).
-
-.PARAMETER DotnetTestArgs
-    All remaining arguments are passed to dotnet test after the literal subcommand test.
+    Treat exit 124 as a signal to profile and speed up the slow path (parallelism, smaller fixtures, caching); do not “fix” timeouts by disabling or skipping tests.
 
 .EXAMPLE
     .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
 
 .EXAMPLE
-    .\scripts\DotnetTest.ps1 -TimeoutSeconds 3600 tests\KPatcher.Tests\KPatcher.Tests.csproj
-#>
-[CmdletBinding()]
-param(
-    [int] $TimeoutSeconds = 0,
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]] $DotnetTestArgs = @()
-)
+    pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 300 KPatcher.sln -c Debug
 
+.EXAMPLE
+    $env:DOTNET_TEST_TIMEOUT_SECONDS = '300'; .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
+#>
 $ErrorActionPreference = 'Stop'
+$script:DotnetTestMaxWallClockSeconds = 300
 
 function Resolve-TimeoutSeconds {
-    param([int] $Explicit)
-    if ($Explicit -gt 0) {
-        return $Explicit
-    }
-    $ev = $env:DOTNET_TEST_TIMEOUT_SECONDS
-    if (-not [string]::IsNullOrWhiteSpace($ev)) {
-        $parsed = 0
-        if ([int]::TryParse($ev, [System.Globalization.NumberStyles]::Integer, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$parsed) -and $parsed -gt 0) {
-            return $parsed
+    param([int] $ExplicitFromSwitch)
+    $resolved = 0
+    if ($ExplicitFromSwitch -gt 0) {
+        $resolved = $ExplicitFromSwitch
+    } else {
+        $ev = $env:DOTNET_TEST_TIMEOUT_SECONDS
+        if (-not [string]::IsNullOrWhiteSpace($ev)) {
+            $parsed = 0
+            if ([int]::TryParse($ev, [System.Globalization.NumberStyles]::Integer, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$parsed) -and $parsed -gt 0) {
+                $resolved = $parsed
+            }
         }
     }
-    return 7200
+    if ($resolved -le 0) {
+        $resolved = $script:DotnetTestMaxWallClockSeconds
+    }
+    if ($resolved -gt $script:DotnetTestMaxWallClockSeconds) {
+        return $script:DotnetTestMaxWallClockSeconds
+    }
+    return $resolved
 }
 
-$TimeoutSeconds = Resolve-TimeoutSeconds -Explicit $TimeoutSeconds
+function Split-TimeoutSwitchFromArgs {
+    param([string[]] $Raw)
+    $explicitTimeout = 0
+    $out = [System.Collections.Generic.List[string]]::new()
+    for ($i = 0; $i -lt $Raw.Count; $i++) {
+        $t = $Raw[$i]
+        if (($t -ceq '-TimeoutSeconds' -or $t -ceq '/TimeoutSeconds') -and ($i + 1) -lt $Raw.Count) {
+            $next = $Raw[$i + 1]
+            $parsed = 0
+            if ([int]::TryParse($next, [System.Globalization.NumberStyles]::Integer, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$parsed) -and $parsed -gt 0) {
+                $explicitTimeout = $parsed
+                $i++
+                continue
+            }
+        }
+        if ($t -eq '--' -and $out.Count -eq 0 -and $i -eq 0) {
+            continue
+        }
+        $out.Add($t) | Out-Null
+    }
+    return [pscustomobject]@{
+        Args    = @($out)
+        Timeout = $explicitTimeout
+    }
+}
+
+$raw = @(if ($null -ne $args -and $args.Count -gt 0) { $args } else { @() })
+$split = Split-TimeoutSwitchFromArgs -Raw $raw
+$DotnetTestArgs = $split.Args
+$TimeoutSeconds = Resolve-TimeoutSeconds -ExplicitFromSwitch $split.Timeout
 $timeoutMs = [long]$TimeoutSeconds * 1000L
 
 if ($DotnetTestArgs.Count -eq 0) {
@@ -60,12 +93,11 @@ if ($DotnetTestArgs.Count -eq 0) {
 No arguments passed and KPatcher.sln not found in the current directory.
 
 Usage:
-  .\scripts\DotnetTest.ps1 [-TimeoutSeconds N] <arguments to dotnet test...>
+  .\scripts\DotnetTest.ps1 [-TimeoutSeconds N] <arguments to dotnet test...>  (N capped at 300)
 
-Example:
+Examples:
   .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
-
-Note: When calling via pwsh -File, do not insert -- before arguments (it is parsed by the host).
+  pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 300 KPatcher.sln -c Debug
 "@
         exit 2
     }
@@ -79,9 +111,8 @@ if ($null -eq $p) {
 }
 
 $finished = $p.WaitForExit([int][Math]::Min($timeoutMs, [int]::MaxValue))
-# WaitForExit(int) is capped; for timeouts > ~24 days use loop — not needed for test runs.
 if (-not $finished) {
-    $elapsedNote = "dotnet test exceeded ${TimeoutSeconds}s (DOTNET_TEST_TIMEOUT_SECONDS / default); terminating process tree (PID $($p.Id))."
+    $elapsedNote = "dotnet test exceeded ${TimeoutSeconds}s (max ${script:DotnetTestMaxWallClockSeconds}s; DOTNET_TEST_TIMEOUT_SECONDS / -TimeoutSeconds / default); terminating process tree (PID $($p.Id))."
     Write-Warning $elapsedNote
     try {
         & taskkill.exe /PID $p.Id /T /F 2>$null | Out-Null
