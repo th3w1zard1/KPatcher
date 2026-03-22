@@ -18,8 +18,11 @@
     <PackageReference Include="Avalonia" Version="11.3.9" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
     <ProjectReference Include="..\NCSDecomp.Core\NCSDecomp.Core.csproj" />
   </ItemGroup>
 </Project>

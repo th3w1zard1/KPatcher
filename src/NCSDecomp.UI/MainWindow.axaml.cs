@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,11 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Markup.Xaml;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.Utils;
 
@@ -22,6 +27,7 @@ namespace NCSDecomp.UI
         private const int TabHighlighted = 0;
         private const int TabAst = 3;
 
+        private readonly ILogger _log;
         private NcsDecompSettings _settings;
         private string _ncsPath;
         /// <summary>Last NCS bytes used for a decompile attempt (parse tree is built lazily from this).</summary>
@@ -32,7 +38,13 @@ namespace NCSDecomp.UI
         public MainWindow()
         {
             InitializeComponent();
-            _settings = NcsDecompSettings.Load(NcsDecompSettings.GetDefaultAppBaseDirectory(), true);
+            _log = Program.ToolLogFactory?.CreateLogger("NCSDecomp.UI.MainWindow") ?? NullLogger.Instance;
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug("Tool=NCSDecomp.UI Phase=ui.startup Message=MainWindow constructed");
+            }
+
+            _settings = NcsDecompSettings.Load(NcsDecompSettings.GetDefaultAppBaseDirectory(), true, _log);
             GameCombo.SelectedIndex = FileDecompilerOptions.IsK2Selected ? 1 : 0;
 
             OpenNcsButton.Click += OnOpenNcsClick;
@@ -60,7 +72,7 @@ namespace NCSDecomp.UI
 
             string text = NssOutputPlain.Text ?? string.Empty;
             NssHighlighted.Inlines.Clear();
-            foreach (NwScriptHighlightedSegment seg in NwScriptSyntaxHighlighter.Segment(text))
+            foreach (NwScriptHighlightedSegment seg in NwScriptSyntaxHighlighter.Segment(text, structuredLog: _log))
             {
                 var run = new Run(seg.Text);
                 IBrush brush = BrushForHighlight(seg.Kind);
@@ -77,7 +89,7 @@ namespace NCSDecomp.UI
 
             tokenStream = tokenStream ?? string.Empty;
             NssBytecodeView.Inlines.Clear();
-            foreach (NcsBytecodeHighlightedSegment seg in NcsBytecodeSyntaxHighlighter.Segment(tokenStream))
+            foreach (NcsBytecodeHighlightedSegment seg in NcsBytecodeSyntaxHighlighter.Segment(tokenStream, structuredLog: _log))
             {
                 var run = new Run(seg.Text);
                 IBrush brush = BrushForBytecode(seg.Kind);
@@ -128,14 +140,18 @@ namespace NCSDecomp.UI
             try
             {
                 bool k2 = GameCombo != null && GameCombo.SelectedIndex == 1;
-                ActionsData actions = ActionsData.LoadForGame(k2, _settings.K1NwscriptPath, _settings.K2NwscriptPath);
-                Start ast = NcsParsePipeline.ParseAst(_bytesForAst, actions);
+                ActionsData actions = ActionsData.LoadForGame(k2, _settings.K1NwscriptPath, _settings.K2NwscriptPath, _log);
+                Start ast = NcsParsePipeline.ParseAst(_bytesForAst, actions, _log);
                 AstOutlineNode outline = NcsAstOutline.Build(ast);
                 AstTree.Items.Add(ToAstTreeItem(outline));
                 _astTreeBuiltForGeneration = _decompileGeneration;
             }
             catch (Exception ex)
             {
+                _log.LogWarning(
+                    ex,
+                    "Tool=NCSDecomp.UI Phase={Phase} Message=AST tree build failed",
+                    DecompPhaseNames.DecompSableCc);
                 AstTree.Items.Add(new TreeViewItem { Header = "AST error: " + ex.Message });
             }
         }
@@ -230,9 +246,19 @@ namespace NCSDecomp.UI
                 if (AstTree != null)
                     AstTree.Items.Clear();
                 StatusText.Text = "Loaded: " + Path.GetFileName(local);
+                if (_log.IsEnabled(LogLevel.Debug))
+                {
+                    _log.LogDebug(
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Path={Path} FileName={Name}",
+                        DecompPhaseNames.UiOpenNcs,
+                        ToolCorrelation.ReadOptional() ?? string.Empty,
+                        ToolPathRedaction.FormatPath(local),
+                        Path.GetFileName(local));
+                }
             }
             catch (Exception ex)
             {
+                _log.LogWarning(ex, "Tool=NCSDecomp.UI Phase={Phase} Message=open NCS failed", DecompPhaseNames.UiOpenNcs);
                 StatusText.Text = ex.Message;
             }
         }
@@ -246,47 +272,103 @@ namespace NCSDecomp.UI
             }
 
             byte[] bytes = null;
-            try
+            using (new UiCorrelationScope())
             {
-                FileDecompilerOptions.IsK2Selected = GameCombo.SelectedIndex == 1;
-                _settings.CaptureFromRuntime();
-                bool k2 = FileDecompilerOptions.IsK2Selected;
-                ActionsData actions = ActionsData.LoadForGame(k2, _settings.K1NwscriptPath, _settings.K2NwscriptPath);
-                var decompiler = new FileDecompiler(actions);
-                bytes = File.ReadAllBytes(_ncsPath);
-                _bytesForAst = bytes;
-                _decompileGeneration++;
-                _astTreeBuiltForGeneration = -1;
-                if (MainTabs != null && MainTabs.SelectedIndex == TabAst)
-                    TryPopulateAstTree();
-
-                string tokenStream = NcsParsePipeline.DecodeToTokenStream(bytes, actions);
-                RefreshBytecodeView(tokenStream);
-
+                string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
                 try
                 {
-                    string nss = decompiler.DecompileToNss(bytes);
-                    NssOutputPlain.Text = nss;
-                    RefreshHighlightedView();
-                    StatusText.Text = "Decompiled " + bytes.Length + " bytes → " + nss.Length + " characters.";
+                    FileDecompilerOptions.IsK2Selected = GameCombo.SelectedIndex == 1;
+                    _settings.CaptureFromRuntime();
+                    bool k2 = FileDecompilerOptions.IsK2Selected;
+                    ActionsData actions = ActionsData.LoadForGame(k2, _settings.K1NwscriptPath, _settings.K2NwscriptPath, _log);
+                    var decompiler = new FileDecompiler(actions, _log);
+                    var swIo = Stopwatch.StartNew();
+                    bytes = File.ReadAllBytes(_ncsPath);
+                    swIo.Stop();
+                    if (_log.IsEnabled(LogLevel.Debug))
+                    {
+                        _log.LogDebug(
+                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Path={Path} ElapsedMs={ElapsedMs} Bytes={Bytes} K2={K2}",
+                            DecompPhaseNames.IoReadNcs,
+                            cid,
+                            ToolPathRedaction.FormatPath(_ncsPath),
+                            swIo.ElapsedMilliseconds,
+                            bytes.Length,
+                            k2);
+                    }
+
+                    _bytesForAst = bytes;
+                    _decompileGeneration++;
+                    _astTreeBuiltForGeneration = -1;
+                    if (MainTabs != null && MainTabs.SelectedIndex == TabAst)
+                    {
+                        TryPopulateAstTree();
+                    }
+
+                    var swTok = Stopwatch.StartNew();
+                    string tokenStream = NcsParsePipeline.DecodeToTokenStream(bytes, actions);
+                    swTok.Stop();
+                    if (_log.IsEnabled(LogLevel.Debug))
+                    {
+                        _log.LogDebug(
+                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} TokenChars={Chars}",
+                            DecompPhaseNames.DecompBytecodeToTokens,
+                            cid,
+                            swTok.ElapsedMilliseconds,
+                            tokenStream?.Length ?? 0);
+                    }
+
+                    RefreshBytecodeView(tokenStream);
+
+                    var swNss = Stopwatch.StartNew();
+                    try
+                    {
+                        string nss = decompiler.DecompileToNss(bytes);
+                        swNss.Stop();
+                        if (_log.IsEnabled(LogLevel.Debug))
+                        {
+                            _log.LogDebug(
+                                "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} NssChars={Chars}",
+                                DecompPhaseNames.UiDecompile,
+                                cid,
+                                swNss.ElapsedMilliseconds,
+                                nss.Length);
+                        }
+
+                        NssOutputPlain.Text = nss;
+                        RefreshHighlightedView();
+                        StatusText.Text = "Decompiled " + bytes.Length + " bytes → " + nss.Length + " characters.";
+                    }
+                    catch (Exception exNss)
+                    {
+                        swNss.Stop();
+                        _log.LogError(
+                            exNss,
+                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=NSS generation failed after successful decode",
+                            DecompPhaseNames.DecompPrint,
+                            cid,
+                            swNss.ElapsedMilliseconds);
+                        StatusText.Text = "Decoder OK; NSS error: " + exNss.Message;
+                        NssOutputPlain.Text = string.Empty;
+                        RefreshHighlightedView();
+                    }
                 }
-                catch (Exception exNss)
+                catch (Exception ex)
                 {
-                    StatusText.Text = "Decoder OK; NSS error: " + exNss.Message;
+                    _log.LogError(
+                        ex,
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Message=decompile failed",
+                        DecompPhaseNames.UiDecompile,
+                        cid);
+                    StatusText.Text = "Error: " + ex.Message;
                     NssOutputPlain.Text = string.Empty;
                     RefreshHighlightedView();
-                }
-            }
-            catch (Exception ex)
-            {
-                StatusText.Text = "Error: " + ex.Message;
-                NssOutputPlain.Text = string.Empty;
-                RefreshHighlightedView();
-                ClearBytecodeView();
-                if (bytes == null)
-                {
-                    _bytesForAst = null;
-                    _astTreeBuiltForGeneration = -1;
+                    ClearBytecodeView();
+                    if (bytes == null)
+                    {
+                        _bytesForAst = null;
+                        _astTreeBuiltForGeneration = -1;
+                    }
                 }
             }
         }
@@ -306,25 +388,49 @@ namespace NCSDecomp.UI
                 return;
             }
 
-            try
+            using (new UiCorrelationScope())
             {
-                _settings.CaptureFromRuntime();
-                bool k2 = GameCombo.SelectedIndex == 1;
-                ManagedRoundTripCompareResult r = RoundTripUtil.CompareManagedRecompileToOriginalDecoderText(
-                    _bytesForAst,
-                    nss,
-                    k2,
-                    _settings.K1NwscriptPath,
-                    _settings.K2NwscriptPath);
+                string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
+                try
+                {
+                    _settings.CaptureFromRuntime();
+                    bool k2 = GameCombo.SelectedIndex == 1;
+                    var sw = Stopwatch.StartNew();
+                    ManagedRoundTripCompareResult r = RoundTripUtil.CompareManagedRecompileToOriginalDecoderText(
+                        _bytesForAst,
+                        nss,
+                        k2,
+                        _settings.K1NwscriptPath,
+                        _settings.K2NwscriptPath,
+                        _log);
+                    sw.Stop();
+                    _log.LogInformation(
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} CompileSucceeded={CompileOk} DecoderMatch={Match} NssChars={Chars} NcsBytes={Bytes}",
+                        DecompPhaseNames.UiRoundTrip,
+                        cid,
+                        sw.ElapsedMilliseconds,
+                        r.CompileSucceeded,
+                        r.DecoderOutputsMatch,
+                        nss.Length,
+                        _bytesForAst.Length);
 
-                string msg = r.Summary;
-                if (msg.Length > 600)
-                    msg = msg.Substring(0, 597) + "…";
-                StatusText.Text = (r.DecoderOutputsMatch ? "OK: " : r.CompileSucceeded ? "Mismatch: " : "") + msg;
-            }
-            catch (Exception ex)
-            {
-                StatusText.Text = "Round-trip check failed: " + ex.Message;
+                    string msg = r.Summary;
+                    if (msg.Length > 600)
+                    {
+                        msg = msg.Substring(0, 597) + "…";
+                    }
+
+                    StatusText.Text = (r.DecoderOutputsMatch ? "OK: " : r.CompileSucceeded ? "Mismatch: " : "") + msg;
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(
+                        ex,
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Message=managed round-trip compare failed",
+                        DecompPhaseNames.UiRoundTrip,
+                        cid);
+                    StatusText.Text = "Round-trip check failed: " + ex.Message;
+                }
             }
         }
 
@@ -347,8 +453,9 @@ namespace NCSDecomp.UI
                         Directory.CreateDirectory(_settings.OutputDirectory);
                         start = await StorageProvider.TryGetFolderFromPathAsync(_settings.OutputDirectory);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        _log.LogDebug(ex, "Tool=NCSDecomp.UI Phase=io.write_nss Message=output directory create/start folder failed");
                         start = null;
                     }
                 }
@@ -399,17 +506,60 @@ namespace NCSDecomp.UI
                         ? new UTF8Encoding(false)
                         : Encoding.GetEncoding(_settings.EncodingName);
                 }
-                catch
+                catch (Exception exEnc)
                 {
+                    _log.LogWarning(
+                        exEnc,
+                        "Tool=NCSDecomp.UI Phase={Phase} RequestedEncoding={Name} Message=invalid encoding name; using UTF-8",
+                        DecompPhaseNames.IoWriteNss,
+                        _settings.EncodingName ?? "");
                     enc = new UTF8Encoding(false);
                 }
 
-                File.WriteAllText(path, text, enc);
-                StatusText.Text = "Saved: " + path;
+                using (new UiCorrelationScope())
+                {
+                    string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
+                    var sw = Stopwatch.StartNew();
+                    File.WriteAllText(path, text, enc);
+                    sw.Stop();
+                    StatusText.Text = "Saved: " + path;
+                    if (_log.IsEnabled(LogLevel.Debug))
+                    {
+                        _log.LogDebug(
+                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Path={Path} Chars={Chars} ElapsedMs={ElapsedMs}",
+                            DecompPhaseNames.IoWriteNss,
+                            cid,
+                            ToolPathRedaction.FormatPath(path),
+                            text.Length,
+                            sw.ElapsedMilliseconds);
+                    }
+                }
             }
             catch (Exception ex)
             {
+                _log.LogError(
+                    ex,
+                    "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Message=save NSS failed",
+                    DecompPhaseNames.IoWriteNss,
+                    ToolCorrelation.ReadOptional() ?? string.Empty);
                 StatusText.Text = "Save failed: " + ex.Message;
+            }
+        }
+
+        /// <summary>Mints <see cref="ToolCorrelation"/> for one UI operation so Core/FileDecompiler logs align.</summary>
+        private sealed class UiCorrelationScope : IDisposable
+        {
+            private readonly string _previous;
+
+            public UiCorrelationScope()
+            {
+                _previous = Environment.GetEnvironmentVariable(ToolCorrelation.EnvironmentVariableName);
+                Environment.SetEnvironmentVariable(ToolCorrelation.EnvironmentVariableName, Guid.NewGuid().ToString("N"));
+            }
+
+            public void Dispose()
+            {
+                Environment.SetEnvironmentVariable(ToolCorrelation.EnvironmentVariableName, _previous);
             }
         }
     }

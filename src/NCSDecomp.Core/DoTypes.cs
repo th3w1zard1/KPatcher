@@ -5,7 +5,10 @@
 // Port of DeNCS DoTypes.java.
 
 using System;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core.Analysis;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.Stack;
 using NCSDecomp.Core.Utils;
@@ -28,9 +31,11 @@ namespace NCSDecomp.Core
         private readonly bool protoreturn;
         private bool skipdeadcode;
         private LocalTypeStack backupstack;
+        private readonly ILogger _log;
 
-        public DoTypes(SubroutineState state, NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions, bool initialprototyping)
+        public DoTypes(SubroutineState state, NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions, bool initialprototyping, ILogger log = null)
         {
+            _log = log ?? NullLogger.Instance;
             this.nodedata = nodedata;
             this.subdata = subdata;
             this.state = state;
@@ -70,7 +75,10 @@ namespace NCSDecomp.Core
         {
             if (stack.Size() > 0)
             {
-                Console.WriteLine("Uh-oh... dumping main() state:");
+                _log.LogWarning(
+                    "Tool=NCSDecomp.Core Phase={Phase} FinalStackSize={Size} Message=DoTypes.AssertStack mismatch; subroutine state dumped to diagnostic trace (KPATCHER_TOOL_LOG_LEVEL=Trace or file sink)",
+                    DecompPhaseNames.DecompAnalysis,
+                    stack.Size());
                 state.PrintState();
                 throw new InvalidOperationException("Error: Final stack size " + stack.Size());
             }

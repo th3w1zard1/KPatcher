@@ -4,6 +4,7 @@
 //
 // Port of DeNCS DoGlobalVars.java.
 
+using Microsoft.Extensions.Logging;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.Stack;
 using NCSDecomp.Core.Utils;
@@ -17,8 +18,8 @@ namespace NCSDecomp.Core
     {
         private bool freezeStack;
 
-        public DoGlobalVars(NodeAnalysisData nodedata, SubroutineAnalysisData subdata)
-            : base(nodedata, subdata)
+        public DoGlobalVars(NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ILogger log = null)
+            : base(nodedata, subdata, log)
         {
             state.SetVarPrefix("GLOB_");
             freezeStack = false;

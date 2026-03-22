@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace NCSDecomp.Core.Utils
 {
@@ -65,7 +67,11 @@ namespace NCSDecomp.Core.Utils
         /// <summary>
         /// Split <paramref name="text"/> into segments. Returns a single Default segment if too large or empty.
         /// </summary>
-        public static IReadOnlyList<NcsBytecodeHighlightedSegment> Segment(string text, Action<string> logDebug = null)
+        /// <param name="structuredLog">Optional MEL sink (<c>Phase=syntax_highlight.ncs_bytecode</c>).</param>
+        public static IReadOnlyList<NcsBytecodeHighlightedSegment> Segment(
+            string text,
+            Action<string> logDebug = null,
+            ILogger structuredLog = null)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -75,6 +81,14 @@ namespace NCSDecomp.Core.Utils
             if (text.Length > MaxHighlightSize)
             {
                 logDebug?.Invoke("NcsBytecodeSyntaxHighlighter: file too large for highlighting (" + text.Length + " chars), skipping.");
+                if (structuredLog != null && structuredLog.IsEnabled(LogLevel.Debug))
+                {
+                    structuredLog.LogDebug(
+                        "Tool=NCSDecomp Phase=syntax_highlight.ncs_bytecode Result=skipped_too_large CharCount={Count} CorrelationId={CorrelationId}",
+                        text.Length,
+                        ToolCorrelation.ReadOptional() ?? "");
+                }
+
                 return new[] { new NcsBytecodeHighlightedSegment(text, NcsBytecodeHighlightKind.Default) };
             }
 
@@ -85,6 +99,15 @@ namespace NCSDecomp.Core.Utils
             catch (Exception ex)
             {
                 logDebug?.Invoke("NcsBytecodeSyntaxHighlighter: error during highlighting: " + ex.GetType().Name + " — " + ex.Message);
+                if (structuredLog != null && structuredLog.IsEnabled(LogLevel.Debug))
+                {
+                    structuredLog.LogDebug(
+                        ex,
+                        "Tool=NCSDecomp Phase=syntax_highlight.ncs_bytecode Result=error CharCount={Count} CorrelationId={CorrelationId}",
+                        text.Length,
+                        ToolCorrelation.ReadOptional() ?? "");
+                }
+
                 return new[] { new NcsBytecodeHighlightedSegment(text, NcsBytecodeHighlightKind.Default) };
             }
         }

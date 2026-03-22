@@ -3,7 +3,7 @@
 
 param(
     [string]$HpVersion = "v0.1.0",
-    [string]$ProjectFile = "src\KPatcher\KPatcher.csproj",
+    [string]$ProjectFile = "src\KPatcher.UI\KPatcher.UI.csproj",
     [string]$PublishProfilesDir = "src\KPatcher\Properties\PublishProfiles",
     [string]$SevenZipPath = "C:\Program Files\7-Zip\7z.exe",
     [string]$OutputDir = "dist",

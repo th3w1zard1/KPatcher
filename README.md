@@ -116,7 +116,7 @@ Current test coverage includes:
 - ✅ TLK modifications
 - ✅ SSF modifications
 - 🚧 NSS/NCS modifications (roundtrip tests may require `nwnnsscomp.exe` on Windows)
-- ✅ Managed round-trip compare (`RoundTripUtil.CompareManagedRecompileToOriginalDecoderText`) — xUnit tests in `KPatcher.Tests`
+- ✅ Managed round-trip compare (`RoundTripUtil.CompareManagedRecompileToOriginalDecoderText`) — xUnit tests in `tests/KPatcher.Tests`
 - ✅ Config reader/INI parsing
 - ✅ SystemHelpers (permission fixing, case sensitivity)
 - ✅ RtfStripper (RTF-to-plain-text)
@@ -129,8 +129,8 @@ Current test coverage includes:
 From the repository root:
 
 ```bash
-dotnet restore src/KPatcher/KPatcher.csproj
-dotnet build src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0
+dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
+dotnet build src/KPatcher.UI/KPatcher.UI.csproj --configuration Debug --framework net9.0
 ```
 
 Build **all** main apps and tool CLIs in one step:
@@ -144,13 +144,13 @@ dotnet build KPatcher.sln --configuration Debug
 A **Release** publish of KPatcher runs **`PublishBundledCliTools`**, which also publishes **kcompiler**, **NCSDecompCLI**, and **keditchanges-cli** into the same output folder (same runtime identifier and self-contained settings as KPatcher). Example:
 
 ```bash
-dotnet publish src/KPatcher/KPatcher.csproj -c Release -f net9.0
+dotnet publish src/KPatcher.UI/KPatcher.UI.csproj -c Release -f net9.0
 ```
 
 ## Running
 
 ```bash
-dotnet run --project src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0
+dotnet run --project src/KPatcher.UI/KPatcher.UI.csproj --configuration Debug --framework net9.0
 ```
 
 ## Architecture

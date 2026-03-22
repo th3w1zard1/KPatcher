@@ -10,17 +10,17 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 
 | Task | Command |
 |---|---|
-| Restore | `dotnet restore src/KPatcher/KPatcher.csproj` |
-| Build solution (all main projects) | `dotnet build KPatcher.sln --configuration Debug` — includes **KPatcher**, **kcompiler** (`KCompiler.NET`), **NCSDecomp** (Core / CLI / UI), **keditchanges-cli** (`KEditChanges.NET`), **KEditChanges** lib |
-| Build (Debug) | `dotnet build src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0` |
+| Restore | `dotnet restore src/KPatcher.UI/KPatcher.UI.csproj` |
+| Build solution (all main projects) | `dotnet build KPatcher.sln --configuration Debug` — includes **KPatcher** (executable project `KPatcher.UI`), **kcompiler** (`KCompiler.NET`), **NCSDecomp** (Core / CLI / UI), **keditchanges-cli** (`KEditChanges.NET`), **KEditChanges** lib |
+| Build (Debug) | `dotnet build src/KPatcher.UI/KPatcher.UI.csproj --configuration Debug --framework net9.0` |
 | Build (Release, with analyzers) | `dotnet build src/KPatcher.Core/KPatcher.Core.csproj --configuration Release` |
 | Build KCompiler.Core | `dotnet build src/KCompiler.Core/KCompiler.Core.csproj --configuration Debug --framework net9.0` |
 | Run KCompiler CLI | `dotnet run --project src/KCompiler.NET/KCompiler.NET.csproj --configuration Debug -- -c script.nss -o out.ncs -g 1` (note `--` before app args) |
 | Pack KCompiler.Core (NuGet) | `dotnet build src/KCompiler.Core/KCompiler.Core.csproj --configuration Release` (packs via `GeneratePackageOnBuild`) or `dotnet pack ... --configuration Release` after a Release build |
-| Run tests | `dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj` |
-| Run app | `DISPLAY=:1 dotnet run --project src/KPatcher/KPatcher.csproj --configuration Debug --framework net9.0` |
-| Publish KPatcher + sidecar CLIs | `dotnet publish src/KPatcher/KPatcher.csproj -c Release -f net9.0` — **`PublishBundledCliTools`** (after `Publish`) merges **kcompiler** and **NCSDecompCLI** into the same **`PublishDir`** via staging under `obj/.../sidecar_*` (same RID/self-contained as KPatcher; **`net9.0` only**). Publish **keditchanges-cli** separately from `KEditChanges.NET`. |
-| Publish KPatcher (**match CI release layout**) | `dotnet publish src/KPatcher/KPatcher.csproj -c Release -f net9.0 -r <rid> --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true -o dist/build/net9.0/<rid>/` — same MSBuild properties as `.github/workflows/build-all-platforms.yml` / `test-builds.yml` (substitute `<rid>`, e.g. `win-x64`). **GitHub release zips:** `KPatcher-<version>-<platform>-<arch>.zip` (not raw RID in the filename). |
+| Run tests | `dotnet test KPatcher.sln -c Debug` (all test projects) or `dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj` — also `tests/KCompiler.Tests`, `tests/NCSDecomp.Tests`, `tests/KEditChanges.Tests` |
+| Run app | `DISPLAY=:1 dotnet run --project src/KPatcher.UI/KPatcher.UI.csproj --configuration Debug --framework net9.0` |
+| Publish KPatcher + sidecar CLIs | `dotnet publish src/KPatcher.UI/KPatcher.UI.csproj -c Release -f net9.0` — **`PublishBundledCliTools`** (after `Publish`) merges **kcompiler** and **NCSDecompCLI** into the same **`PublishDir`** via staging under `obj/.../sidecar_*` (same RID/self-contained as KPatcher; **`net9.0` only**). Publish **keditchanges-cli** separately from `KEditChanges.NET`. |
+| Publish KPatcher (**match CI release layout**) | `dotnet publish src/KPatcher.UI/KPatcher.UI.csproj -c Release -f net9.0 -r <rid> --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true -o dist/build/net9.0/<rid>/` — same MSBuild properties as `.github/workflows/build-all-platforms.yml` / `test-builds.yml` (substitute `<rid>`, e.g. `win-x64`). **GitHub release zips:** `KPatcher-<version>-<platform>-<arch>.zip` (not raw RID in the filename). |
 | Bundled apphosts (with KPatcher **net9** publish) | **Windows:** `KPatcher.exe`, `kcompiler.exe`, `NCSDecompCLI.exe` in **`PublishDir`**. **Linux / macOS:** extensionless `KPatcher`, `kcompiler`, `NCSDecompCLI`. **`net48`** KPatcher publish does **not** run `PublishBundledCliTools` — no bundled sidecars. |
 | CI verify (workflows) | **`test-builds`** / **`build-all-platforms`** assert those apphosts exist (non-empty) and run **`--help`** with exit code **0** after publish (`chmod +x` on Unix before invoking). |
 
@@ -28,7 +28,7 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 
 | Need | Executable / entry |
 |------|----------------------|
-| Install mods (GUI or HoloPatcher-style CLI) | **KPatcher** (`src/KPatcher`) — `--help` for flags |
+| Install mods (GUI or HoloPatcher-style CLI) | **KPatcher** (`src/KPatcher.UI`, assembly/output name **KPatcher**) — `--help` for flags |
 | NSS → NCS (managed, nwnnsscomp-style args) | **kcompiler** (`KCompiler.NET`) or `keditchanges-cli compile …` |
 | NCS → NSS (managed DeNCS port) | **NCSDecompCLI** (`NCSDecomp.NET`) or `keditchanges-cli ncsdecomp …` |
 | One binary with subcommands (compile / decomp / info) | **keditchanges-cli** (`KEditChanges.NET`) |
@@ -41,7 +41,7 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 - **NCS→NSS (managed DeNCS port):** `NCSDecomp.Core` + **`KPatcher.Core.Formats.NCS.Decompiler.NCSManagedDecompiler`** (full pipeline). Decoder-only token string: **`NCSDecompiler.Decompile`** in `KCompiler.Core`. `NCSDecomp.Core` references `KCompiler.Core` only; `KPatcher.Core` references `NCSDecomp.Core` so there is no project cycle.
 - **NCS Roundtrip tests** should prefer managed compile/decompile; any test that shells out to `nwnnsscomp.exe` should be clearly marked as legacy or optional, not the default suite expectation.
 - **Avalonia GUI** requires `DISPLAY=:1` environment variable to launch the X11 window.
-- **Test host path errors**: If you see `System.ArgumentNullException: Value cannot be null. (Parameter 'path1')` in `Path.Combine` during test execution, ensure the project is built first: `dotnet build src/KPatcher.Tests/KPatcher.Tests.csproj` before running tests. This can occur with corrupted build state or when running tests without a prior build.
+- **Test host path errors**: If you see `System.ArgumentNullException: Value cannot be null. (Parameter 'path1')` in `Path.Combine` during test execution, ensure the project is built first: `dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj` before running tests. This can occur with corrupted build state or when running tests without a prior build.
 
 ## Learned User Preferences
 
@@ -50,6 +50,8 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 - Keep the main log or status area readable at a comfortable font size, with per-line color highlighting by log level (error/warning/note) and support for normal text selection, copy, and select-all like a typical desktop text surface.
 - When asked to perform work directly, use the terminal to run builds, tests, and other commands instead of only giving the user a manual step list; try the run first and fix or automate setup when it fails, rather than opening with a long prerequisite or “blocker” lecture.
 - Tests should be meticulous and thorough with multiple assertions per stage, as strict as possible; after NCS/NSS, KCompiler, or DeNCS-related changes, run the relevant `KPatcher.Tests` coverage (including managed round-trip helpers where they apply). Prefer managed compile and decompile in those tests; do not treat registry spoofing or `nwnnsscomp.exe` as the default gate for core NSS/NCS verification.
+- For repo pytest runs under `tests/py`, control log verbosity with `--kpatcher-log-level` or `--LOG_LEVEL` (and env `LOG_LEVEL`); pytest reserves `--log-level`, so do not rely on that name for KPatcher test logging.
+- In PowerShell, avoid `[switch]$Parameter = $true` for on-by-default behavior; use `[bool]$Parameter = $true` instead so defaults work as intended and PSScriptAnalyzer stays clean.
 
 ### Localization
 
@@ -67,5 +69,7 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 ## Learned Workspace Facts
 
 - In `KPatcher.Core/Tools/Heuristics.cs`, skip game-detection heuristics when the candidate path contains exactly one of `swkotor.exe` (K1) or `swkotor2.exe` (K2); when both executables are present in the same path, do not skip—use the normal heuristic path.
-- The DeNCS-managed port lives in `src/NCSDecomp.Core`; `src/NCSDecomp.NET` is the CLI host (`NCSDecompCLI`), not the directory that holds the bulk of the decompiler implementation.
+- The DeNCS-managed port lives in `src/NCSDecomp.Core`; `src/NCSDecomp.NET` is the CLI host (`NCSDecompCLI`), not the directory that holds the bulk of the decompiler implementation. **Java→C# checklist (/lfg):** `docs/NCS_DENCS_JAVA_ACCOUNTING.md`; narrative status: `src/NCSDecomp.Core/PORTING_STATUS.md`.
 - KPatcher **net9** publish is expected to ship headless tool apphosts beside the GUI (e.g. `kcompiler`, `NCSDecompCLI`) where documented in **Key commands**; the KPatcher executable’s CLI should stay aligned with HoloPatcher-style behavior, and individual tool projects should remain publishable on their own.
+- Verbose developer tracing that must not land in `installlog.txt` uses `PatchLogger.AddDiagnostic` / `LogType.Diagnostic` (`ModInstaller` ignores that type for `InstallLogWriter`); in headless CLI (`Program.ExecuteCli`), each diagnostic is printed as `[DIAG]` on the console like the other subscribed log tiers.
+- `KPatcher.UI/Program.cs` sends `--install`, `--uninstall`, and `--validate` straight into headless CLI; `--console` without game dir, mod path, namespace index, or one of those operations exits with code 1; the GUI path runs when `DesktopDisplayLikelyAvailable()` is true (Linux: `DISPLAY` or `WAYLAND_DISPLAY`; Windows/macOS: `Environment.UserInteractive`). With no display and no CLI indicators, it exits with a “use CLI” error.

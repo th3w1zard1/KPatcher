@@ -6,8 +6,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core.Analysis;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.ScriptUtils;
 using NCSDecomp.Core.Utils;
@@ -20,10 +25,17 @@ namespace NCSDecomp.Core
     public sealed class FileDecompiler
     {
         private readonly ActionsData _actions;
+        private readonly ILogger _log;
 
         public FileDecompiler(ActionsData actions)
+            : this(actions, null)
+        {
+        }
+
+        public FileDecompiler(ActionsData actions, ILogger logger)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _log = logger ?? NullLogger.Instance;
         }
 
         /// <summary>Full pipeline: parse tree, analysis, codegen. Requires action table for ACTION opcodes.</summary>
@@ -34,41 +46,84 @@ namespace NCSDecomp.Core
                 throw new ArgumentException("NCS bytes null or empty.", nameof(ncsBytes));
             }
 
-            Start ast = NcsParsePipeline.ParseAst(ncsBytes, _actions);
-            var data = new FileScriptData();
+            SubScriptLogger.SetDiagnosticSink(_log);
+            try
+            {
+            string cid = ToolCorrelation.ReadOptional();
+            var swTotal = Stopwatch.StartNew();
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=NCSDecomp.Core Operation=decompile Phase={Phase} CorrelationId={CorrelationId} InputBytes={Bytes}",
+                    DecompPhaseNames.DecompDecode,
+                    cid ?? "",
+                    ncsBytes.Length);
+            }
+
+            var swPhase = Stopwatch.StartNew();
+            Start ast = NcsParsePipeline.ParseAst(ncsBytes, _actions, _log);
+            swPhase.Stop();
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs}",
+                    DecompPhaseNames.DecompDecode,
+                    cid ?? "",
+                    swPhase.ElapsedMilliseconds);
+            }
+
+            var data = new FileScriptData(_log);
             var nodedata = new NodeAnalysisData();
             var subdata = new SubroutineAnalysisData(nodedata);
 
+            var swPart = Stopwatch.StartNew();
             var setpos = new SetPositions(nodedata);
             ast.Apply(setpos);
             setpos.Done();
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisSetPositions, cid, swPart);
 
+            swPart = Stopwatch.StartNew();
             SetDestinations setdest = null;
             try
             {
                 setdest = new SetDestinations(ast, nodedata, subdata);
                 ast.Apply(setdest);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 setdest?.Done();
                 setdest = null;
+                _log.LogWarning(
+                    ex,
+                    "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=SetDestinations failed; continuing without destination metadata.",
+                    DecompPhaseNames.DecompAnalysis,
+                    cid ?? "");
             }
 
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisSetDestinations, cid, swPart);
+
+            swPart = Stopwatch.StartNew();
             try
             {
                 var dead = new SetDeadCode(nodedata, subdata, setdest != null ? setdest.GetOrigins() : null);
                 ast.Apply(dead);
                 dead.Done();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // continue without dead-code metadata
+                _log.LogWarning(
+                    ex,
+                    "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=SetDeadCode failed; continuing without dead-code metadata.",
+                    DecompPhaseNames.DecompAnalysis,
+                    cid ?? "");
             }
+
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisSetDeadCode, cid, swPart);
 
             setdest?.Done();
             setdest = null;
 
+            swPart = Stopwatch.StartNew();
             subdata.SplitOffSubroutines(ast);
             ASubroutine mainsub = subdata.GetMainSub();
 
@@ -85,13 +140,16 @@ namespace NCSDecomp.Core
                 }
             }
 
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisSplitFlatten, cid, swPart);
+
+            swPart = Stopwatch.StartNew();
             DoGlobalVars doglobs = null;
             try
             {
                 ASubroutine globSub = subdata.GetGlobalsSub();
                 if (globSub != null)
                 {
-                    doglobs = new DoGlobalVars(nodedata, subdata);
+                    doglobs = new DoGlobalVars(nodedata, subdata, _log);
                     globSub.Apply(doglobs);
                     var cleanG = new CleanupPass(doglobs.GetScriptRoot(), nodedata, subdata, doglobs.GetState());
                     cleanG.Apply();
@@ -100,26 +158,40 @@ namespace NCSDecomp.Core
                     cleanG.Done();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _log.LogWarning(
+                    ex,
+                    "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=DoGlobalVars failed; continuing.",
+                    DecompPhaseNames.DecompAnalysis,
+                    cid ?? "");
                 doglobs?.Done();
                 doglobs = null;
             }
 
-            var proto = new PrototypeEngine(nodedata, subdata, _actions, FileDecompilerOptions.StrictSignatures);
-            proto.Run();
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisGlobalVars, cid, swPart);
 
+            swPart = Stopwatch.StartNew();
+            var proto = new PrototypeEngine(nodedata, subdata, _actions, FileDecompilerOptions.StrictSignatures, _log);
+            proto.Run();
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisPrototypeEngine, cid, swPart);
+
+            swPart = Stopwatch.StartNew();
             if (mainsub != null)
             {
-                DoTypes dotypes = new DoTypes(subdata.GetState(mainsub), nodedata, subdata, _actions, false);
+                DoTypes dotypes = new DoTypes(subdata.GetState(mainsub), nodedata, subdata, _actions, false, _log);
                 mainsub.Apply(dotypes);
                 try
                 {
                     dotypes.AssertStack();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // DeNCS continues
+                    _log.LogWarning(
+                        ex,
+                        "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=DoTypes.AssertStack failed for main; continuing (DeNCS parity)",
+                        DecompPhaseNames.DecompAnalysis,
+                        cid ?? "");
                 }
 
                 dotypes.Done();
@@ -134,8 +206,13 @@ namespace NCSDecomp.Core
                 onedone = true;
                 donecount = subdata.CountSubsDone();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _log.LogWarning(
+                    ex,
+                    "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=SubroutineCounts query failed; using fallback completion flags",
+                    DecompPhaseNames.DecompAnalysis,
+                    cid ?? "");
                 alldone = true;
                 onedone = false;
             }
@@ -150,14 +227,14 @@ namespace NCSDecomp.Core
                         continue;
                     }
 
-                    var dt = new DoTypes(subdata.GetState(sub), nodedata, subdata, _actions, false);
+                    var dt = new DoTypes(subdata.GetState(sub), nodedata, subdata, _actions, false, _log);
                     sub.Apply(dt);
                     dt.Done();
                 }
 
                 if (mainsub != null)
                 {
-                    var dtMain = new DoTypes(subdata.GetState(mainsub), nodedata, subdata, _actions, false);
+                    var dtMain = new DoTypes(subdata.GetState(mainsub), nodedata, subdata, _actions, false, _log);
                     mainsub.Apply(dtMain);
                     dtMain.Done();
                 }
@@ -169,22 +246,30 @@ namespace NCSDecomp.Core
                     donecount = newDone;
                     alldone = subdata.CountSubsDone() == subdata.NumSubs();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _log.LogWarning(
+                        ex,
+                        "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=DoTypes iteration loop CountSubsDone failed; breaking",
+                        DecompPhaseNames.DecompAnalysis,
+                        cid ?? "");
                     break;
                 }
             }
 
-            EnforceStrictSignatures(subdata, nodedata);
+            LogDecompPhaseDuration(DecompPhaseNames.DecompAnalysisDoTypes, cid, swPart);
+
+            EnforceStrictSignatures(subdata, nodedata, cid);
             nodedata.ClearProtoData();
 
+            swPart = Stopwatch.StartNew();
             foreach (ASubroutine iterSub in subdata.GetSubroutines())
             {
                 MainPass mainpass = null;
                 CleanupPass cleanpass = null;
                 try
                 {
-                    mainpass = new MainPass(subdata.GetState(iterSub), nodedata, subdata, _actions);
+                    mainpass = new MainPass(subdata.GetState(iterSub), nodedata, subdata, _actions, _log);
                     iterSub.Apply(mainpass);
                     cleanpass = new CleanupPass(mainpass.GetScriptRoot(), nodedata, subdata, mainpass.GetState());
                     cleanpass.Apply();
@@ -203,14 +288,19 @@ namespace NCSDecomp.Core
                 CleanupPass cleanpass = null;
                 try
                 {
-                    mainpass = new MainPass(subdata.GetState(mainsub), nodedata, subdata, _actions);
+                    mainpass = new MainPass(subdata.GetState(mainsub), nodedata, subdata, _actions, _log);
                     mainsub.Apply(mainpass);
                     try
                     {
                         mainpass.AssertStack();
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        _log.LogWarning(
+                            ex,
+                            "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=MainPass.AssertStack failed for main; continuing",
+                            DecompPhaseNames.DecompPrint,
+                            cid ?? "");
                     }
 
                     cleanpass = new CleanupPass(mainpass.GetScriptRoot(), nodedata, subdata, mainpass.GetState());
@@ -224,6 +314,8 @@ namespace NCSDecomp.Core
                     cleanpass?.Done();
                 }
             }
+
+            LogDecompPhaseDuration(DecompPhaseNames.DecompPrintMainPass, cid, swPart);
 
             data.Subdata(subdata);
 
@@ -254,11 +346,49 @@ namespace NCSDecomp.Core
                 mainsub.Apply(destroy);
             }
 
+            swPart = Stopwatch.StartNew();
             data.GenerateCode();
+            LogDecompPhaseDuration(DecompPhaseNames.DecompPrintAssemble, cid, swPart);
+
+            swTotal.Stop();
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=NCSDecomp.Core Operation=decompile Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} InputBytes={InputBytes} OutputChars={Chars}",
+                    DecompPhaseNames.DecompComplete,
+                    cid ?? "",
+                    swTotal.ElapsedMilliseconds,
+                    ncsBytes.Length,
+                    data.GetCode()?.Length ?? 0);
+            }
+
             return data.GetCode();
+            }
+            finally
+            {
+                SubScriptLogger.ClearDiagnosticSink();
+            }
         }
 
-        private static void EnforceStrictSignatures(SubroutineAnalysisData subdata, NodeAnalysisData nodedata)
+        private void LogDecompPhaseDuration(string phase, string correlationId, Stopwatch sw)
+        {
+            if (sw == null)
+            {
+                return;
+            }
+
+            sw.Stop();
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=NCSDecomp.Core Operation=decompile Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs}",
+                    phase,
+                    correlationId ?? string.Empty,
+                    sw.ElapsedMilliseconds);
+            }
+        }
+
+        private void EnforceStrictSignatures(SubroutineAnalysisData subdata, NodeAnalysisData nodedata, string correlationId)
         {
             if (!FileDecompilerOptions.StrictSignatures)
             {
@@ -270,8 +400,11 @@ namespace NCSDecomp.Core
                 SubroutineState state = subdata.GetState(iterSub);
                 if (!state.IsTotallyPrototyped())
                 {
-                    Console.WriteLine("Strict signatures: unresolved signature for subroutine at "
-                        + nodedata.GetPos(iterSub) + " (continuing)");
+                    _log.LogWarning(
+                        "Tool=NCSDecomp.Core Phase={Phase} CorrelationId={CorrelationId} Message=Strict signatures: unresolved signature for subroutine at {Pos} (continuing)",
+                        DecompPhaseNames.DecompAnalysis,
+                        correlationId ?? "",
+                        nodedata.GetPos(iterSub));
                 }
             }
         }
@@ -279,10 +412,16 @@ namespace NCSDecomp.Core
         /// <summary>Per-script output state (DeNCS FileScriptData).</summary>
         private sealed class FileScriptData
         {
+            private readonly ILogger _log;
             private readonly List<SubScriptState> subs = new List<SubScriptState>();
             private SubScriptState globals;
             private SubroutineAnalysisData subdata;
             private string code;
+
+            public FileScriptData(ILogger log)
+            {
+                _log = log ?? NullLogger.Instance;
+            }
 
             public void AddSub(SubScriptState sub)
             {
@@ -339,6 +478,10 @@ namespace NCSDecomp.Core
                     }
                     catch (Exception ex)
                     {
+                        _log.LogWarning(
+                            ex,
+                            "Tool=NCSDecomp.Core Phase={Phase} Message=subroutine codegen failed; emitting NSS comment only",
+                            DecompPhaseNames.DecompPrint);
                         fcnbuff.Append("// Error generating subroutine: ").Append(ex.Message).Append(nl);
                     }
                 }
@@ -352,6 +495,10 @@ namespace NCSDecomp.Core
                     }
                     catch (Exception ex)
                     {
+                        _log.LogWarning(
+                            ex,
+                            "Tool=NCSDecomp.Core Phase={Phase} Message=globals codegen failed; emitting NSS comment only",
+                            DecompPhaseNames.DecompPrint);
                         globs = "// Error: globals — " + ex.Message + nl;
                     }
                 }
@@ -370,8 +517,12 @@ namespace NCSDecomp.Core
                         structDecls = subdata.GetStructDeclarations();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _log.LogWarning(
+                        ex,
+                        "Tool=NCSDecomp.Core Phase={Phase} Message=GetStructDeclarations failed; continuing without struct block.",
+                        DecompPhaseNames.DecompPrint);
                 }
 
                 code = structDecls + globs + protohdr + protobuff + fcnbuff.ToString();

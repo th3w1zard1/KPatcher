@@ -2,12 +2,12 @@
 # Generates cProfile-like output for bottleneck analysis
 
 param(
-    [string[]]$Projects = @("src\KPatcher.Tests\KPatcher.Tests.csproj", "tests\KPatcher.Core.Tests\KPatcher.Core.Tests.csproj"),
+    [string[]]$Projects = @("tests\KPatcher.Tests\KPatcher.Tests.csproj"),
     [string]$Filter = "",
     [int]$MaxSeconds = 120,
-    [switch]$EnableProfiling = $true,
+    [bool]$EnableProfiling = $true,
     [string]$OutputDir = "profiles",
-    [switch]$StopOnFailure = $false
+    [switch]$StopOnFailure
 )
 
 $ErrorActionPreference = "Continue"

@@ -29,7 +29,7 @@ Options:
   --game-dir PATH               Path to the KOTOR game directory
   --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
   --namespace-option-index N    Namespace index (0-based)
-  --console                     Show console when launching the GUI
+  --console                     Run in console/headless mode only (no GUI window)
   --install                     Run install in headless CLI (requires game and mod paths)
   --uninstall                   Run uninstall in headless CLI
   --validate                    Validate mod configuration in headless CLI
@@ -43,6 +43,8 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve"><value>[Ошибка] Индекс пространства имен {0} вне диапазона (макс: {1})</value></data>
   <data name="CliErrorNoGameDirectory" xml:space="preserve"><value>[Ошибка] Каталог игры не указан. Используйте --game-dir &lt;путь&gt;</value></data>
   <data name="CliErrorNoModPath" xml:space="preserve"><value>[Ошибка] Путь мода не указан. Используйте --tslpatchdata &lt;путь&gt;</value></data>
+  <data name="CliErrorConsoleRequiresCliArgs" xml:space="preserve"><value>[Ошибка] --console требует операции CLI (--install, --uninstall или --validate) или используйте --help</value></data>
+  <data name="CliErrorNoDisplayUseCli" xml:space="preserve"><value>[Ошибка] Дисплей недоступен; запустите с --install, --uninstall или --validate (см. --help)</value></data>
   <data name="CliInfoInstallCompleted" xml:space="preserve"><value>[Инфо] Установка завершена: {0} ошибок, {1} предупреждений, {2} патчей</value></data>
   <data name="CliInfoInstallTime" xml:space="preserve"><value>[Инфо] Время установки: {0}</value></data>
   <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Инфо] Установка мода из {0} в {1}</value></data>

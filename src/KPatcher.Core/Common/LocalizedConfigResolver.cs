@@ -1,5 +1,8 @@
 using System;
+using System.Globalization;
 using System.IO;
+using JetBrains.Annotations;
+using KPatcher.Core.Logger;
 
 namespace KPatcher.Core.Common
 {
@@ -20,10 +23,16 @@ namespace KPatcher.Core.Common
         /// <param name="lang">Two-letter language code (e.g. "de", "en").</param>
         /// <param name="tryYaml">If true, also try .yaml variants; if false, only .ini.</param>
         /// <returns>Full path and chosen filename, or (null, null) if none exist.</returns>
-        public static (string FullPath, string FileName) Resolve(CaseAwarePath directory, string baseName, string lang, bool tryYaml)
+        public static (string FullPath, string FileName) Resolve(
+            CaseAwarePath directory,
+            string baseName,
+            string lang,
+            bool tryYaml,
+            [CanBeNull] PatchLogger logger = null)
         {
             if (string.IsNullOrEmpty(baseName))
             {
+                logger?.AddDiagnostic("LocalizedConfigResolver.Resolve: empty baseName; returning (null,null)");
                 return (null, null);
             }
 
@@ -41,15 +50,27 @@ namespace KPatcher.Core.Common
                     $"{baseName}.ini"
                 };
 
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "LocalizedConfigResolver.Resolve: dir={0} baseName={1} lang={2} tryYaml={3} candidateCount={4}",
+                directory.GetResolvedPath(), baseName, lang, tryYaml, candidates.Length));
+
             foreach (string fileName in candidates)
             {
                 var path = directory.Combine(fileName);
-                if (path.IsFile())
+                bool hit = path.IsFile();
+                logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "LocalizedConfigResolver.Resolve: candidate={0} isFile={1}", fileName, hit));
+                if (hit)
                 {
-                    return (path.GetResolvedPath(), fileName);
+                    string full = path.GetResolvedPath();
+                    logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "LocalizedConfigResolver.Resolve: selected path={0}", full));
+                    return (full, fileName);
                 }
             }
 
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "LocalizedConfigResolver.Resolve: no file matched in dir={0} for baseName={1}", directory.GetResolvedPath(), baseName));
             return (null, null);
         }
     }

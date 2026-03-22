@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
@@ -36,6 +37,11 @@ namespace KPatcher.Core.Mods
             PatchLogger logger,
             Game game)
         {
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "InstallFile.PatchResource: passthrough copy sourceFile={0} saveAs={1} bytes={2}",
+                SourceFile ?? "",
+                SaveAs ?? SourceFile ?? "",
+                source?.Length ?? 0));
             Apply(source, memory, logger, game);
             return source;
         }

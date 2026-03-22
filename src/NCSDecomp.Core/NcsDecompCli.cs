@@ -3,8 +3,13 @@
 // See NOTICE and licenses/DeNCS-MIT.txt in the project root.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Utils;
 
 namespace NCSDecomp.Core
@@ -16,6 +21,31 @@ namespace NCSDecomp.Core
     {
         public static int Run(string[] args)
         {
+            return Run(args, null);
+        }
+
+        public static int Run(string[] args, ILogger appLogger)
+        {
+            ILogger log = appLogger ?? NullLogger.Instance;
+            string correlationId = ToolCorrelation.ReadOptional();
+            if (args == null)
+            {
+                log.LogWarning(
+                    "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Message=args was null; using empty argv",
+                    DecompPhaseNames.CliParse,
+                    correlationId ?? "");
+                args = Array.Empty<string>();
+            }
+
+            if (log.IsEnabled(LogLevel.Debug))
+            {
+                log.LogDebug(
+                    "Tool=NCSDecompCLI Operation=decomp Phase={Phase} CorrelationId={CorrelationId} ArgCount={Count}",
+                    DecompPhaseNames.CliParse,
+                    correlationId ?? "",
+                    args.Length);
+            }
+
             string inputPath = null;
             string outputPath = null;
             string game = "k1";
@@ -33,42 +63,98 @@ namespace NCSDecomp.Core
                 if (args[i] == "--help" || args[i] == "-h")
                 {
                     PrintHelp();
+                    if (log.IsEnabled(LogLevel.Debug))
+                    {
+                        log.LogDebug(
+                            "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Result=help",
+                            DecompPhaseNames.CliParse,
+                            correlationId ?? "");
+                    }
+
                     return 0;
                 }
             }
 
+            if (verbose && log.IsEnabled(LogLevel.Debug))
+            {
+                log.LogDebug(
+                    "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Verbose=true",
+                    DecompPhaseNames.CliParse,
+                    correlationId ?? "");
+            }
+
             if (string.IsNullOrEmpty(inputPath) || string.IsNullOrEmpty(outputPath))
             {
-                Console.Error.WriteLine("Error: -i <input.ncs> and -o <output.nss> are required.");
+                log.LogWarning(
+                    "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Message=Missing -i or -o",
+                    DecompPhaseNames.CliParse,
+                    correlationId ?? "");
+                Console.Error.WriteLine("Error: -i <input.ncs> and -o <output.nss> are required. CorrelationId=" + (correlationId ?? "-"));
                 PrintHelp();
                 return 1;
             }
 
             if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine("Error: Input file not found: " + inputPath);
+                log.LogWarning(
+                    "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Input={Input} Message=file not found",
+                    DecompPhaseNames.IoReadNcs,
+                    correlationId ?? "",
+                    ToolPathRedaction.FormatPath(inputPath));
+                Console.Error.WriteLine("Error: Input file not found: " + inputPath + " CorrelationId=" + (correlationId ?? "-"));
                 return 1;
             }
 
-            var log = NcsDecompLogger.Default;
+            var logHuman = NcsDecompLogger.Default;
             try
             {
                 if (verbose)
                 {
-                    log.StartNcsDecompSection();
+                    logHuman.StartNcsDecompSection();
                 }
 
                 NcsDecompSettings settings = null;
                 if (!noConfig)
                 {
-                    settings = NcsDecompSettings.Load(NcsDecompSettings.GetDefaultAppBaseDirectory(), true);
+                    settings = NcsDecompSettings.Load(NcsDecompSettings.GetDefaultAppBaseDirectory(), true, log);
                     if (verbose && settings.ConfigLoadedFromPath != null)
                     {
-                        log.Info("Config: " + settings.ConfigLoadedFromPath);
+                        logHuman.Info("Config: " + settings.ConfigLoadedFromPath);
+                    }
+
+                    if (log.IsEnabled(LogLevel.Debug) && settings != null)
+                    {
+                        log.LogDebug(
+                            "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} ConfigPath={Path}",
+                            DecompPhaseNames.CliParse,
+                            correlationId ?? "",
+                            settings.ConfigLoadedFromPath != null
+                                ? ToolPathRedaction.FormatPath(settings.ConfigLoadedFromPath)
+                                : "(none)");
                     }
                 }
+                else if (log.IsEnabled(LogLevel.Debug))
+                {
+                    log.LogDebug(
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} NoConfig=true",
+                        DecompPhaseNames.CliParse,
+                        correlationId ?? "");
+                }
 
+                var swIo = Stopwatch.StartNew();
                 byte[] ncsBytes = File.ReadAllBytes(inputPath);
+                swIo.Stop();
+                if (log.IsEnabled(LogLevel.Debug))
+                {
+                    log.LogDebug(
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Bytes={Bytes} Input={Input}",
+                        DecompPhaseNames.IoReadNcs,
+                        correlationId ?? "",
+                        swIo.ElapsedMilliseconds,
+                        ncsBytes.Length,
+                        ToolPathRedaction.FormatPath(inputPath));
+                }
+
                 bool k2;
                 if (gameFromCli)
                 {
@@ -89,7 +175,7 @@ namespace NCSDecomp.Core
 
                 if (verbose)
                 {
-                    log.Info("Input: " + inputPath + " (" + ncsBytes.Length + " bytes), game: " + (k2 ? "TSL" : "K1"));
+                    logHuman.Info("Input: " + inputPath + " (" + ncsBytes.Length + " bytes), game: " + (k2 ? "TSL" : "K1"));
                 }
 
                 ActionsData actions;
@@ -97,26 +183,63 @@ namespace NCSDecomp.Core
                 {
                     string k1p = settings != null ? settings.K1NwscriptPath : null;
                     string k2p = settings != null ? settings.K2NwscriptPath : null;
-                    actions = ActionsData.LoadForGame(k2, k1p, k2p);
+                    actions = ActionsData.LoadForGame(k2, k1p, k2p, log);
                 }
                 catch (FileNotFoundException ex)
                 {
-                    Console.Error.WriteLine("Error: Embedded nwscript action table not found. Add k1_nwscript.nss / tsl_nwscript.nss under NCSDecomp.Core/Resources/.");
-                    Console.Error.WriteLine(ex.Message);
+                    log.LogError(
+                        ex,
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Message=actions table load failed Detail={Detail}",
+                        DecompPhaseNames.DecompDecode,
+                        correlationId ?? "",
+                        ToolExceptionFormatter.Format(ex, includeStack: false));
+                    Console.Error.WriteLine("Error: Embedded nwscript action table not found. Add k1_nwscript.nss / tsl_nwscript.nss under NCSDecomp.Core/Resources/. CorrelationId=" + (correlationId ?? "-"));
+                    Console.Error.WriteLine(ToolCliStderr.FormatExceptionOneLiner(ex));
                     return 1;
                 }
 
-                var decompiler = new FileDecompiler(actions);
+                var decompiler = new FileDecompiler(actions, log);
+                var swDecomp = Stopwatch.StartNew();
                 string nss = decompiler.DecompileToNss(ncsBytes);
-                Encoding enc = ResolveOutputEncoding(settings);
+                swDecomp.Stop();
+                if (log.IsEnabled(LogLevel.Debug))
+                {
+                    log.LogDebug(
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} NssChars={Chars}",
+                        DecompPhaseNames.DecompPrint,
+                        correlationId ?? "",
+                        swDecomp.ElapsedMilliseconds,
+                        nss.Length);
+                }
+
+                Encoding enc = ResolveOutputEncoding(settings, log, correlationId);
+                var swWrite = Stopwatch.StartNew();
                 File.WriteAllText(outputPath, nss, enc);
+                swWrite.Stop();
+                if (log.IsEnabled(LogLevel.Debug))
+                {
+                    log.LogDebug(
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Output={Output} Encoding={Enc}",
+                        DecompPhaseNames.IoWriteNss,
+                        correlationId ?? "",
+                        swWrite.ElapsedMilliseconds,
+                        ToolPathRedaction.FormatPath(outputPath),
+                        enc.WebName);
+                }
+
                 if (verbose)
                 {
-                    log.Success("Wrote NSS: " + outputPath + " (" + nss.Length + " chars)");
-                    log.EndSection();
+                    logHuman.Success("Wrote NSS: " + outputPath + " (" + nss.Length + " chars)");
+                    logHuman.EndSection();
                 }
                 else
                 {
+                    log.LogInformation(
+                        "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Output={Output} Chars={Chars} Message=Wrote NSS",
+                        DecompPhaseNames.IoWriteNss,
+                        correlationId ?? "",
+                        ToolPathRedaction.FormatPath(outputPath),
+                        nss.Length);
                     Console.WriteLine("Wrote NSS: " + outputPath);
                 }
 
@@ -124,7 +247,12 @@ namespace NCSDecomp.Core
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("Error: " + ex.Message);
+                log.LogError(
+                    ex,
+                    "Tool=NCSDecompCLI Operation=decomp Phase=error CorrelationId={CorrelationId} Detail={Detail}",
+                    correlationId ?? "",
+                    ToolExceptionFormatter.Format(ex, ToolExceptionFormatter.IncludeStackTraces));
+                Console.Error.WriteLine("Error: " + ToolCliStderr.FormatExceptionOneLiner(ex));
                 return 1;
             }
         }
@@ -141,7 +269,7 @@ namespace NCSDecomp.Core
             Console.WriteLine("  --no-config   Skip config file; use defaults except -g / embedded nwscript.");
         }
 
-        private static Encoding ResolveOutputEncoding(NcsDecompSettings settings)
+        private static Encoding ResolveOutputEncoding(NcsDecompSettings settings, ILogger log, string correlationId)
         {
             if (settings == null || string.IsNullOrWhiteSpace(settings.EncodingName))
             {
@@ -152,8 +280,14 @@ namespace NCSDecomp.Core
             {
                 return Encoding.GetEncoding(settings.EncodingName);
             }
-            catch
+            catch (Exception ex)
             {
+                log.LogWarning(
+                    ex,
+                    "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} RequestedEncoding={Name} Message=Falling back to UTF-8 without BOM",
+                    DecompPhaseNames.IoWriteNss,
+                    correlationId ?? "",
+                    settings.EncodingName);
                 return new UTF8Encoding(false);
             }
         }

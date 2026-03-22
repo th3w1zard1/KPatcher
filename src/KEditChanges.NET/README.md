@@ -11,4 +11,4 @@ keditchanges-cli ncsdecomp -i in.ncs -o out.nss -g k1
 
 Assembly name **`keditchanges-cli`** avoids NuGet/solution restore name clashes with the **KEditChanges** class library when both are in `KPatcher.sln`.
 
-Published next to **KPatcher** when using **`PublishBundledCliTools`** (see `src/KPatcher/KPatcher.csproj`).
+Published next to **KPatcher** when using **`PublishBundledCliTools`** (see `src/KPatcher.UI/KPatcher.UI.csproj`).

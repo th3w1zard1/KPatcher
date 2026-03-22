@@ -178,17 +178,26 @@ namespace KPatcher.UI
         /// <param name="lang">Two-letter language code (e.g. "de", "en").</param>
         /// <param name="tryYaml">If true, also try .yaml variants (namespaces and changes both use true).</param>
         /// <returns>Full path and chosen filename, or (null, null) if none exist.</returns>
-        public static (string FullPath, string FileName) ResolveLocalizedConfigFile(CaseAwarePath directory, string baseName, string lang, bool tryYaml)
+        public static (string FullPath, string FileName) ResolveLocalizedConfigFile(
+            CaseAwarePath directory,
+            string baseName,
+            string lang,
+            bool tryYaml,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
         {
-            return LocalizedConfigResolver.Resolve(directory, baseName, lang, tryYaml);
+            return LocalizedConfigResolver.Resolve(directory, baseName, lang, tryYaml, diagnosticLogger);
         }
 
         /// <summary>
         /// Loads a mod from a directory (mod root or tslpatchdata path; both are normalized to mod root).
         /// Resolves localized config files when the UI language is non-English: e.g. namespaces.de.ini, changes.fr.yaml.
         /// </summary>
-        public static ModInfo LoadMod(string directoryPath)
+        /// <param name="diagnosticLogger">Optional logger for diagnostic-level trace (does not add install-log info lines).</param>
+        public static ModInfo LoadMod(string directoryPath, [CanBeNull] PatchLogger diagnosticLogger = null)
         {
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadMod: enter directoryPath={0}", directoryPath));
+
             // tslpatchdata_path = CaseAwarePath(directory_path, "tslpatchdata")
             var tslPatchDataPath = new CaseAwarePath(directoryPath, "tslpatchdata");
             // if not tslpatchdata_path.is_dir() and tslpatchdata_path.parent.name.lower() == "tslpatchdata":
@@ -207,22 +216,34 @@ namespace KPatcher.UI
             string modPath = tslPatchDataPath.DirectoryName;
             string lang = ConfigLanguageCode;
 
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadMod: tslPatchDataPath={0} modPath={1} lang={2}",
+                tslPatchDataPath.GetResolvedPath(), modPath, lang));
+
             List<PatcherNamespace> namespaces;
             ConfigReader configReader = null;
 
             // Try localized namespaces first: namespaces.<lang>.ini, then namespaces.ini
-            var (namespacesPath, namespacesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "namespaces", lang, tryYaml: false);
+            var (namespacesPath, namespacesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "namespaces", lang, tryYaml: false, diagnosticLogger);
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadMod: ResolveLocalizedConfigFile(namespaces) fullPath={0} fileName={1}",
+                namespacesPath ?? "(null)", namespacesFileName ?? "(null)"));
+
             if (namespacesPath != null)
             {
-                namespaces = NamespaceReader.FromFilePath(namespacesPath);
+                namespaces = NamespaceReader.FromFilePath(namespacesPath, diagnosticLogger);
             }
             else
             {
                 // Try localized changes: changes.<lang>.ini, changes.<lang>.yaml, changes.ini, changes.yaml
-                var (changesPath, changesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "changes", lang, tryYaml: true);
+                var (changesPath, changesFileName) = ResolveLocalizedConfigFile(tslPatchDataPath, "changes", lang, tryYaml: true, diagnosticLogger);
+                diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Core.LoadMod: ResolveLocalizedConfigFile(changes) fullPath={0} fileName={1}",
+                    changesPath ?? "(null)", changesFileName ?? "(null)"));
+
                 if (changesPath != null)
                 {
-                    configReader = ConfigReader.FromFilePath(changesPath, tslPatchDataPath: tslPatchDataPath.GetResolvedPath());
+                    configReader = ConfigReader.FromFilePath(changesPath, diagnosticLogger, tslPatchDataPath: tslPatchDataPath.GetResolvedPath());
                     namespaces = new List<PatcherNamespace>
                     {
                         new PatcherNamespace(changesFileName, "info.rtf")
@@ -231,12 +252,18 @@ namespace KPatcher.UI
                             Description = UIResources.DefaultInstallation
                         }
                     };
+                    diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "Core.LoadMod: default namespace from changes only; changesFileName={0}", changesFileName));
                 }
                 else
                 {
                     throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.NoNamespacesOrChangesFoundInFormat, tslPatchDataPath));
                 }
             }
+
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadMod: exit modPath={0} namespaceCount={1} hasPreloadedConfigReader={2}",
+                modPath, namespaces.Count, configReader != null));
 
             return new ModInfo
             {
@@ -254,13 +281,18 @@ namespace KPatcher.UI
             string modPath,
             List<PatcherNamespace> namespaces,
             string selectedNamespaceName,
-            [CanBeNull] ConfigReader configReader = null)
+            [CanBeNull] ConfigReader configReader = null,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
         {
             PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
             if (namespaceOption is null)
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
+
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadNamespaceConfig: enter modPath={0} selectedNamespace={1} reuseConfigReader={2}",
+                modPath, selectedNamespaceName, configReader != null));
 
             string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
             // Use the directory that contains the changes file (supports IniName like "subfolder/changes.ini" with path in filename)
@@ -271,7 +303,11 @@ namespace KPatcher.UI
             string lang = ConfigLanguageCode;
 
             string resolvedChangesPath;
-            var (localizedPath, _) = ResolveLocalizedConfigFile(namespaceDirPath, baseName, lang, tryYaml: true);
+            var (localizedPath, localizedChangesName) = ResolveLocalizedConfigFile(namespaceDirPath, baseName, lang, tryYaml: true, diagnosticLogger);
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadNamespaceConfig: ResolveLocalizedConfigFile(changes) fullPath={0} fileName={1}",
+                localizedPath ?? "(null)", localizedChangesName ?? "(null)"));
+
             if (localizedPath != null)
             {
                 resolvedChangesPath = localizedPath;
@@ -282,15 +318,26 @@ namespace KPatcher.UI
                 resolvedChangesPath = changesIniPath.GetResolvedPath();
             }
 
-            ConfigReader reader = configReader ?? ConfigReader.FromFilePath(resolvedChangesPath, tslPatchDataPath: tslPatchDataPathResolved);
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadNamespaceConfig: resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
+                resolvedChangesPath, namespaceDir, baseName, tslPatchDataPathResolved));
+
+            ConfigReader reader = configReader ?? ConfigReader.FromFilePath(resolvedChangesPath, diagnosticLogger, tslPatchDataPath: tslPatchDataPathResolved);
             if (configReader is null)
             {
                 reader.Load(reader.Config); // Load() populates the Config
                 // When loading from INI (not namespace list), create equivalent .yaml alongside
                 if (resolvedChangesPath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
                 {
-                    reader.WriteEquivalentYaml(Path.ChangeExtension(resolvedChangesPath, ".yaml"));
+                    string yamlPath = Path.ChangeExtension(resolvedChangesPath, ".yaml");
+                    reader.WriteEquivalentYaml(yamlPath);
+                    diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "Core.LoadNamespaceConfig: wrote equivalent yaml path={0}", yamlPath));
                 }
+            }
+            else
+            {
+                diagnosticLogger?.AddDiagnostic("Core.LoadNamespaceConfig: using existing configReader instance; skipping ConfigReader.Load");
             }
 
             int? gameNumber = reader.Config.GameNumber;
@@ -339,7 +386,20 @@ namespace KPatcher.UI
                 byte[] data = File.ReadAllBytes(infoRtfPath.GetResolvedPath());
                 infoContent = DecodeBytesWithFallbacks(data);
                 isRtf = true;
+                diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Core.LoadNamespaceConfig: read info.rtf path={0} bytes={1}", rtfPathStr, data.Length));
             }
+            else
+            {
+                diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Core.LoadNamespaceConfig: info.rtf missing or not a file path={0}", rtfPathStr));
+            }
+
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.LoadNamespaceConfig: exit gameNumber={0} suggestedGamePaths={1} logLevel={2}",
+                gameNumber?.ToString() ?? "null",
+                gamePaths.Count,
+                reader.Config.LogLevel));
 
             return new NamespaceInfo
             {
@@ -355,25 +415,37 @@ namespace KPatcher.UI
         /// <summary>
         /// Validates a KOTOR game directory.
         /// </summary>
-        public static string ValidateGameDirectory(string directoryPath)
+        public static string ValidateGameDirectory(string directoryPath, [CanBeNull] PatchLogger diagnosticLogger = null)
         {
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.ValidateGameDirectory: enter path={0}", directoryPath));
+
             var directory = new CaseAwarePath(directoryPath);
             if (!directory.IsDirectory())
             {
+                diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Core.ValidateGameDirectory: not a directory path={0}", directoryPath));
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.InvalidKotorDirectoryFormat, directoryPath));
             }
-            return directory.GetResolvedPath();
+
+            string resolved = directory.GetResolvedPath();
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.ValidateGameDirectory: ok resolved={0}", resolved));
+            return resolved;
         }
 
         /// <summary>
         /// Validates that mod and game paths are ready for installation.
         /// </summary>
-        public static bool ValidateInstallPaths(string modPath, string gamePath)
+        public static bool ValidateInstallPaths(string modPath, string gamePath, [CanBeNull] PatchLogger diagnosticLogger = null)
         {
-            return !string.IsNullOrEmpty(modPath) &&
-                   new CaseAwarePath(modPath).IsDirectory() &&
-                   !string.IsNullOrEmpty(gamePath) &&
-                   new CaseAwarePath(gamePath).IsDirectory();
+            bool modOk = !string.IsNullOrEmpty(modPath) && new CaseAwarePath(modPath).IsDirectory();
+            bool gameOk = !string.IsNullOrEmpty(gamePath) && new CaseAwarePath(gamePath).IsDirectory();
+            bool ok = modOk && gameOk;
+            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.ValidateInstallPaths: modPath={0} modOk={1} gamePath={2} gameOk={3} overall={4}",
+                modPath ?? "", modOk, gamePath ?? "", gameOk, ok));
+            return ok;
         }
 
         /// <summary>
@@ -613,6 +685,13 @@ namespace KPatcher.UI
                 TslPatchDataPath = tslPatchDataPath
             };
 
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.InstallMod: namespace={0}, iniFilePath={1}, tslPatchDataPath={2}, gamePath={3}",
+                selectedNamespaceName,
+                iniFilePath,
+                tslPatchDataPath,
+                gamePath));
+
             DateTime installStartTime = DateTime.UtcNow;
             installer.Install(cancellationToken, progressCallback);
             TimeSpan totalInstallTime = DateTime.UtcNow - installStartTime;
@@ -620,6 +699,14 @@ namespace KPatcher.UI
             int numErrors = logger.Errors.Count();
             int numWarnings = logger.Warnings.Count();
             int numPatches = installer.Config().PatchCount();
+
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.InstallMod: complete elapsedMs={0} errors={1} warnings={2} patches={3} diagnosticsLogged={4}",
+                totalInstallTime.TotalMilliseconds,
+                numErrors,
+                numWarnings,
+                numPatches,
+                logger.Diagnostics.Count()));
 
             string timeStr = FormatInstallTime(totalInstallTime);
             logger.AddNote(string.Format(CultureInfo.CurrentCulture, UIResources.InstallationCompleteWithErrorsAndWarningsFormat, numErrors, numWarnings, Environment.NewLine, timeStr, numPatches));
@@ -652,12 +739,21 @@ namespace KPatcher.UI
             string iniFilePath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
             string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
 
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.ValidateConfig: iniFilePath={0}, tslPatchDataPath={1}", iniFilePath, tslPatchDataPath));
+
             var reader = ConfigReader.FromFilePath(iniFilePath, logger, tslPatchDataPath: tslPatchDataPath);
             reader.Load(reader.Config);
             if (iniFilePath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
             {
-                reader.WriteEquivalentYaml(Path.ChangeExtension(iniFilePath, ".yaml"));
+                string yamlOut = Path.ChangeExtension(iniFilePath, ".yaml");
+                reader.WriteEquivalentYaml(yamlOut);
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Core.ValidateConfig: wrote equivalent yaml path={0}", yamlOut));
             }
+
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.ValidateConfig: complete patchCount={0}", reader.Config.PatchCount()));
         }
 
         /// <summary>
@@ -699,6 +795,9 @@ namespace KPatcher.UI
             {
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.BackupFolderNotFoundFormat, backupParentFolder));
             }
+
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Core.UninstallMod: modPath={0}, gamePath={1}, backupParent={2}", modPath, gamePath, backupParentFolder));
 
             var uninstaller = new ModUninstaller(
                 new CaseAwarePath(backupParentFolder),

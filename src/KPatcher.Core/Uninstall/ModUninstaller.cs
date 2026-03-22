@@ -32,6 +32,10 @@ namespace KPatcher.Core.Uninstall
             _backupsLocationPath = backupsLocationPath;
             _gamePath = gamePath;
             _logger = logger ?? new PatchLogger();
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModUninstaller ctor: backups={0}, gamePath={1}",
+                backupsLocationPath,
+                gamePath?.ToString() ?? "null"));
         }
 
         /// <summary>
@@ -64,35 +68,59 @@ namespace KPatcher.Core.Uninstall
         public static CaseAwarePath GetMostRecentBackup(
             [CanBeNull] CaseAwarePath backupFolder,
             Action<string, string> showErrorDialog = null,
-            [CanBeNull] ModUninstallerUiStrings ui = null)
+            [CanBeNull] ModUninstallerUiStrings ui = null,
+            [CanBeNull] PatchLogger logger = null)
         {
             ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
             string backupPathStr = backupFolder?.ToString() ?? "";
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetMostRecentBackup: backupRoot={0}", backupPathStr));
+
             if (!Directory.Exists(backupFolder))
             {
+                logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "GetMostRecentBackup: directory does not exist path={0}", backupPathStr));
                 showErrorDialog?.Invoke(text.NoBackupsTitle, text.GetNoBackupsMessage(backupPathStr));
                 return null;
             }
 
             var validBackups = new List<CaseAwarePath>();
-            foreach (string subfolder in Directory.GetDirectories(backupFolder))
+            string[] subdirs = Directory.GetDirectories(backupFolder);
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetMostRecentBackup: scanning subdirCount={0}", subdirs.Length));
+
+            foreach (string subfolder in subdirs)
             {
                 var subfolderPath = new CaseAwarePath(subfolder);
-                // Check if folder has contents and is a valid backup folder
-                if (Directory.EnumerateFileSystemEntries(subfolder).Any() && IsValidBackupFolder(subfolderPath))
+                bool hasEntries = Directory.EnumerateFileSystemEntries(subfolder).Any();
+                bool nameOk = IsValidBackupFolder(subfolderPath);
+                if (hasEntries && nameOk)
                 {
                     validBackups.Add(subfolderPath);
+                    logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "GetMostRecentBackup: valid backup folder name={0}", subfolderPath.Name));
+                }
+                else
+                {
+                    logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "GetMostRecentBackup: skip subdir={0} hasEntries={1} validName={2}",
+                        subfolderPath.Name, hasEntries, nameOk));
                 }
             }
 
             if (validBackups.Count == 0)
             {
+                logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "GetMostRecentBackup: zero valid backups under {0}", backupPathStr));
                 showErrorDialog?.Invoke(text.NoBackupsTitle, text.GetNoBackupsMessage(backupPathStr));
                 return null;
             }
 
             // Return the folder with the maximum datetime parsed from folder name
-            return validBackups.MaxBy(x => DateTime.ParseExact(x.Name, "yyyy-MM-dd_HH.mm.ss", CultureInfo.InvariantCulture));
+            CaseAwarePath chosen = validBackups.MaxBy(x => DateTime.ParseExact(x.Name, "yyyy-MM-dd_HH.mm.ss", CultureInfo.InvariantCulture));
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetMostRecentBackup: chosen={0} (from {1} valid)", chosen, validBackups.Count));
+            return chosen;
         }
 
         /// <summary>
@@ -107,6 +135,11 @@ namespace KPatcher.Core.Uninstall
             HashSet<string> existingFiles,
             List<CaseAwarePath> filesInBackup)
         {
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "RestoreBackup: deleteFirstCount={0}, restoreFileCount={1}",
+                existingFiles.Count,
+                filesInBackup.Count));
+
             // Remove any existing files not in the backup
             foreach (string fileStr in existingFiles)
             {
@@ -115,7 +148,14 @@ namespace KPatcher.Core.Uninstall
 
                 if (File.Exists(filePath))
                 {
+                    _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "RestoreBackup: deleting existing file rel={0} full={1}", relFilePath, filePath));
                     File.Delete(filePath);
+                }
+                else
+                {
+                    _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "RestoreBackup: delete list entry not on disk rel={0} full={1}", relFilePath, filePath));
                 }
 
                 _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.RemovedFormat, relFilePath));
@@ -126,6 +166,7 @@ namespace KPatcher.Core.Uninstall
             {
                 if (file.Name == "remove these files.txt")
                 {
+                    _logger.AddDiagnostic("RestoreBackup: skip marker file 'remove these files.txt'");
                     continue;
                 }
 
@@ -139,11 +180,19 @@ namespace KPatcher.Core.Uninstall
                     Directory.CreateDirectory(parentDir);
                 }
 
+                _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "RestoreBackup: copy src={0} dst={1} bytes={2}",
+                    file.GetResolvedPath(),
+                    destinationPath,
+                    File.Exists(file) ? new FileInfo(file).Length : 0L));
+
                 File.Copy(file, destinationPath, overwrite: true);
 
                 string relativeToGameParent = Path.GetRelativePath(Path.GetDirectoryName(_gamePath) ?? "", destinationPath);
                 _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.RestoringBackupOf, file.Name, relativeToGameParent));
             }
+
+            _logger.AddDiagnostic("RestoreBackup: completed delete pass and restore copies");
         }
 
         /// <summary>
@@ -159,11 +208,15 @@ namespace KPatcher.Core.Uninstall
             [CanBeNull] ModUninstallerUiStrings ui = null)
         {
             ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
-            CaseAwarePath mostRecentBackupFolder = GetMostRecentBackup(_backupsLocationPath, showErrorDialog, ui);
+            CaseAwarePath mostRecentBackupFolder = GetMostRecentBackup(_backupsLocationPath, showErrorDialog, ui, _logger);
             if (mostRecentBackupFolder is null)
             {
+                _logger.AddDiagnostic("GetBackupInfo: no valid backup folder from GetMostRecentBackup");
                 return (null, new HashSet<string>(), new List<CaseAwarePath>(), 0);
             }
+
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetBackupInfo: selected backup={0}", mostRecentBackupFolder));
 
             string deleteListFile = Path.Combine(mostRecentBackupFolder, "remove these files.txt");
             var filesToDelete = new HashSet<string>();
@@ -172,6 +225,8 @@ namespace KPatcher.Core.Uninstall
             if (File.Exists(deleteListFile))
             {
                 string[] lines = File.ReadAllLines(deleteListFile);
+                _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "GetBackupInfo: delete list file lines={0} path={1}", lines.Length, deleteListFile));
                 filesToDelete = lines.Where(line => !string.IsNullOrWhiteSpace(line))
                                      .Select(line => line.Trim())
                                      .ToHashSet();
@@ -180,6 +235,9 @@ namespace KPatcher.Core.Uninstall
 
                 if (existingFiles.Count < filesToDelete.Count)
                 {
+                    _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "GetBackupInfo: delete list mismatch entries={0} existingOnDisk={1}",
+                        filesToDelete.Count, existingFiles.Count));
                     bool continueAnyway = showYesNoDialog?.Invoke(
                         text.BackupMismatchTitle,
                         text.GetBackupMismatchMessage()
@@ -187,10 +245,21 @@ namespace KPatcher.Core.Uninstall
 
                     if (!continueAnyway)
                     {
+                        _logger.AddDiagnostic("GetBackupInfo: user declined backup mismatch continue");
                         return (null, new HashSet<string>(), new List<CaseAwarePath>(), 0);
                     }
                 }
             }
+            else
+            {
+                _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "GetBackupInfo: no delete list file at {0}", deleteListFile));
+            }
+
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetBackupInfo: deleteListEntries={0} existingTargetFiles={1}",
+                filesToDelete.Count,
+                existingFiles.Count));
 
             var filesInBackup = Directory.EnumerateFiles(mostRecentBackupFolder, "*", SearchOption.AllDirectories)
                                         .Select(f => new CaseAwarePath(f))
@@ -198,6 +267,10 @@ namespace KPatcher.Core.Uninstall
 
             int allEntries = Directory.EnumerateFileSystemEntries(mostRecentBackupFolder, "*", SearchOption.AllDirectories).Count();
             int folderCount = allEntries - filesInBackup.Count;
+
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetBackupInfo: backupFileCount={0} allEntries={1} folderCount={2}",
+                filesInBackup.Count, allEntries, folderCount));
 
             return (mostRecentBackupFolder, existingFiles, filesInBackup, folderCount);
         }
@@ -217,6 +290,9 @@ namespace KPatcher.Core.Uninstall
             [CanBeNull] ModUninstallerUiStrings ui = null)
         {
             ModUninstallerUiStrings text = ui ?? ModUninstallerUiStrings.EnglishDefaults;
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "UninstallSelectedMod: begin backupsRoot={0} gamePath={1}", _backupsLocationPath, _gamePath));
+
             (
                 CaseAwarePath mostRecentBackupFolder,
                 HashSet<string> existingFiles,
@@ -225,8 +301,16 @@ namespace KPatcher.Core.Uninstall
 
             if (mostRecentBackupFolder is null)
             {
+                _logger.AddDiagnostic("UninstallSelectedMod: abort (no backup folder from GetBackupInfo)");
                 return false;
             }
+
+            _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "UninstallSelectedMod: backupFolder={0}, existingFiles={1}, filesInBackup={2}, folderCount={3}",
+                mostRecentBackupFolder,
+                existingFiles.Count,
+                filesInBackup.Count,
+                folderCount));
 
             _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.UsingBackupFolder, mostRecentBackupFolder));
 
@@ -248,15 +332,20 @@ namespace KPatcher.Core.Uninstall
 
             if (!confirmed)
             {
+                _logger.AddDiagnostic("UninstallSelectedMod: user declined uninstall confirmation");
                 return false;
             }
 
             try
             {
                 RestoreBackup(mostRecentBackupFolder, existingFiles, filesInBackup);
+                _logger.AddDiagnostic("UninstallSelectedMod: RestoreBackup finished without exception");
             }
             catch (Exception e)
             {
+                _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "UninstallSelectedMod: RestoreBackup failed type={0} message={1}",
+                    e.GetType().FullName, e.Message));
                 showErrorDialog?.Invoke(
                     e.GetType().Name,
                     text.GetFailedToRestoreMessage(e.Message)
@@ -265,8 +354,13 @@ namespace KPatcher.Core.Uninstall
             }
 
             // Offer to delete restored backup
+            int deleteBackupPromptIteration = 0;
             while (true)
             {
+                deleteBackupPromptIteration++;
+                _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "UninstallSelectedMod: delete-backup prompt iteration={0}", deleteBackupPromptIteration));
+
                 bool deleteBackup = showYesNoDialog?.Invoke(
                     "Uninstall completed!",
                     $"Deleted {existingFiles.Count} files and successfully restored backup created on {mostRecentBackupFolder.Name}{Environment.NewLine}{Environment.NewLine}" +
@@ -275,21 +369,28 @@ namespace KPatcher.Core.Uninstall
 
                 if (!deleteBackup)
                 {
+                    _logger.AddDiagnostic("UninstallSelectedMod: user kept backup folder");
                     break;
                 }
 
                 try
                 {
                     Directory.Delete(mostRecentBackupFolder, recursive: true);
+                    _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "UninstallSelectedMod: deleted backup folder path={0}", mostRecentBackupFolder));
                     _logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.DeletedRestoredBackup, mostRecentBackupFolder.Name));
                     break;
                 }
                 catch (UnauthorizedAccessException)
                 {
+                    _logger.AddDiagnostic("UninstallSelectedMod: UnauthorizedAccessException while deleting backup; showing permission dialog");
                     bool? result = showYesNoCancelDialog?.Invoke(
                         text.PermissionErrorTitle,
                         text.UnableToDeleteBackupPermissionMessage
                     );
+
+                    _logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "UninstallSelectedMod: permission dialog result={0}", result?.ToString() ?? "null"));
 
                     if (result == true)
                     {
@@ -309,6 +410,7 @@ namespace KPatcher.Core.Uninstall
                 }
             }
 
+            _logger.AddDiagnostic("UninstallSelectedMod: completed successfully");
             return true;
         }
     }

@@ -298,6 +298,7 @@ namespace KPatcher.UI.ViewModels
             ToggleConfigurationSummaryCommand = new AsyncRelayCommand(ToggleConfigurationSummary);
 
             // Subscribe to logger events
+            _logger.DiagnosticLogged += OnLogEntry;
             _logger.VerboseLogged += OnLogEntry;
             _logger.NoteLogged += OnLogEntry;
             _logger.WarningLogged += OnLogEntry;
@@ -374,7 +375,7 @@ namespace KPatcher.UI.ViewModels
                 case LogLevel.General:
                     return LogType.Warning;
                 case LogLevel.Full:
-                    return LogType.Verbose;
+                    return LogType.Diagnostic;
                 case LogLevel.Warnings:
                     return LogType.Note;
                 case LogLevel.Nothing:
@@ -1139,7 +1140,7 @@ namespace KPatcher.UI.ViewModels
         {
             try
             {
-                Core.ModInfo modInfo = Core.LoadMod(path);
+                Core.ModInfo modInfo = Core.LoadMod(path, _logger);
                 ModPath = modInfo.ModPath;
                 _loadedNamespaces = modInfo.Namespaces;
                 _currentConfigReader = modInfo.ConfigReader;
@@ -1186,7 +1187,7 @@ namespace KPatcher.UI.ViewModels
 
             try
             {
-                Core.NamespaceInfo namespaceInfo = Core.LoadNamespaceConfig(ModPath, _loadedNamespaces, SelectedNamespace, _currentConfigReader);
+                Core.NamespaceInfo namespaceInfo = Core.LoadNamespaceConfig(ModPath, _loadedNamespaces, SelectedNamespace, _currentConfigReader, _logger);
                 _logLevel = namespaceInfo.LogLevel;
 
                 // Update game paths based on namespace (from FindKotorPathsFromDefault in Core)
@@ -1452,6 +1453,10 @@ namespace KPatcher.UI.ViewModels
 
             switch (logType)
             {
+                case LogType.Diagnostic:
+                    TagName = "DIAG";
+                    EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#696969")); // dim gray
+                    break;
                 case LogType.Note:
                     TagName = "INFO";
                     EntryBrush = new SolidColorBrush(Avalonia.Media.Color.Parse("#000000")); // default/info black

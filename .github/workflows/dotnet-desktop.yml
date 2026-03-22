@@ -28,14 +28,14 @@ jobs:
         dotnet-version: 9.0.x
 
     - name: Restore dependencies
-      run: dotnet restore src/KPatcher/KPatcher.csproj
+      run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
 
     - name: Build
-      run: dotnet build src/KPatcher/KPatcher.csproj -c ${{ matrix.configuration }} --no-restore
+      run: dotnet build src/KPatcher.UI/KPatcher.UI.csproj -c ${{ matrix.configuration }} --no-restore
 
     - name: Restore test dependencies
-      run: dotnet restore src/KPatcher.Tests/KPatcher.Tests.csproj
+      run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
 
     - name: Execute unit tests
-      run: dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c ${{ matrix.configuration }} --verbosity normal
+      run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c ${{ matrix.configuration }} --verbosity normal
       continue-on-error: true

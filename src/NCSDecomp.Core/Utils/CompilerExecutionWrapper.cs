@@ -7,9 +7,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core;
 
 namespace NCSDecomp.Core.Utils
@@ -33,11 +37,13 @@ namespace NCSDecomp.Core.Utils
         private string originalNwscriptBackup;
         private string copiedSourceFile;
         private string actualSourceFile;
+        private readonly ILogger _log;
 
         /// <exception cref="ArgumentException">Unknown compiler fingerprint.</exception>
         /// <exception cref="IOException">Hash/read failure.</exception>
-        public CompilerExecutionWrapper(string compilerPath, string sourcePath, string outputPath, bool isK2)
+        public CompilerExecutionWrapper(string compilerPath, string sourcePath, string outputPath, bool isK2, ILogger logger = null)
         {
+            _log = logger ?? NullLogger.Instance;
             if (string.IsNullOrEmpty(compilerPath))
             {
                 throw new ArgumentNullException(nameof(compilerPath));
@@ -85,10 +91,26 @@ namespace NCSDecomp.Core.Utils
 
         public void PrepareExecutionEnvironment(IList<string> includeDirs)
         {
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
+            int includesBefore = copiedIncludeFiles.Count;
+            int nwBefore = copiedNwscriptFiles.Count;
+            var sw = Stopwatch.StartNew();
             PrepareNwscriptFile();
 
             PrepareIncludeFiles(includeDirs);
             actualSourceFile = sourceFile;
+            sw.Stop();
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=CompilerExecutionWrapper Phase=prepare_env CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} IncludeDirCount={IncludeDirs} CopiedIncludeFiles={CopiedInc} CopiedNwscriptFiles={CopiedNw} HasNwBackup={Backup}",
+                    cid,
+                    sw.ElapsedMilliseconds,
+                    includeDirs?.Count ?? 0,
+                    copiedIncludeFiles.Count - includesBefore,
+                    copiedNwscriptFiles.Count - nwBefore,
+                    !string.IsNullOrEmpty(originalNwscriptBackup));
+            }
         }
 
         public string GetWorkingDirectory()
@@ -129,8 +151,12 @@ namespace NCSDecomp.Core.Utils
                     var spoofedConfig = new NwnnsscompConfig(compilerFile, actualSourceFile, outputFile, isK2);
                     return spoofedConfig.GetCompileArgs(compilerFile, includeDirs);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _log.LogWarning(
+                        ex,
+                        "Tool=CompilerExecutionWrapper CorrelationId={CorrelationId} Message=GetCompileArgs spoofed-path fallback; using primary config argv",
+                        ToolCorrelation.ReadOptional() ?? "");
                     return config.GetCompileArgs(compilerFile, includeDirs);
                 }
             }
@@ -139,23 +165,28 @@ namespace NCSDecomp.Core.Utils
         }
 
         /// <summary>Runs the compiler after <see cref="PrepareExecutionEnvironment"/>.</summary>
-        public ExternalCompilerRunResult ExecuteCompile(IList<string> includeDirs, int? timeoutMilliseconds)
+        public ExternalCompilerRunResult ExecuteCompile(IList<string> includeDirs, int? timeoutMilliseconds, ILogger logger = null)
         {
             string[] argv = GetCompileArgs(includeDirs);
-            return ExternalCompilerProcess.Run(argv, GetWorkingDirectory(), envOverrides, timeoutMilliseconds);
+            return ExternalCompilerProcess.Run(argv, GetWorkingDirectory(), envOverrides, timeoutMilliseconds, logger);
         }
 
         public void Cleanup()
         {
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
             if (!string.IsNullOrEmpty(copiedSourceFile) && File.Exists(copiedSourceFile))
             {
                 try
                 {
                     File.Delete(copiedSourceFile);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    _log.LogWarning(
+                        ex,
+                        "Tool=CompilerExecutionWrapper Phase=cleanup CorrelationId={CorrelationId} Message=failed to delete copied source Path={Path}",
+                        cid,
+                        ToolPathRedaction.FormatPath(copiedSourceFile));
                 }
 
                 copiedSourceFile = null;
@@ -170,9 +201,13 @@ namespace NCSDecomp.Core.Utils
                         File.Delete(copiedIncludeFiles[i]);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    _log.LogWarning(
+                        ex,
+                        "Tool=CompilerExecutionWrapper Phase=cleanup CorrelationId={CorrelationId} Message=failed to delete copied include Path={Path}",
+                        cid,
+                        ToolPathRedaction.FormatPath(copiedIncludeFiles[i]));
                 }
             }
 
@@ -194,9 +229,13 @@ namespace NCSDecomp.Core.Utils
 
                     File.Delete(originalNwscriptBackup);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore
+                    _log.LogWarning(
+                        ex,
+                        "Tool=CompilerExecutionWrapper Phase=cleanup CorrelationId={CorrelationId} Message=nwscript restore/delete failed Backup={Path}",
+                        cid,
+                        ToolPathRedaction.FormatPath(originalNwscriptBackup));
                 }
             }
         }
@@ -399,6 +438,13 @@ namespace NCSDecomp.Core.Utils
             envOverrides["NWN_ROOT"] = resolvedRoot;
             envOverrides["NWNDir"] = resolvedRoot;
             envOverrides["KOTOR_ROOT"] = resolvedRoot;
+            if (_log.IsEnabled(LogLevel.Debug))
+            {
+                _log.LogDebug(
+                    "Tool=CompilerExecutionWrapper Phase=env_overrides CorrelationId={CorrelationId} Message=NWN_ROOT family set Root={Root}",
+                    ToolCorrelation.ReadOptional() ?? string.Empty,
+                    ToolPathRedaction.FormatPath(resolvedRoot));
+            }
         }
 
         private bool SupportsGameFlag()

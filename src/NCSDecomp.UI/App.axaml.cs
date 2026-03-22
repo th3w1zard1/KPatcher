@@ -3,6 +3,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace NCSDecomp.UI
 {
@@ -15,8 +18,20 @@ namespace NCSDecomp.UI
 
         public override void OnFrameworkInitializationCompleted()
         {
+            ILogger log = Program.ToolLogFactory?.CreateLogger("NCSDecomp.UI.App") ?? NullLogger.Instance;
+            if (log.IsEnabled(LogLevel.Debug))
+            {
+                log.LogDebug(
+                    "Tool=NCSDecomp.UI Phase=avalonia.framework_init CorrelationId={CorrelationId} LifetimeType={Lifetime}",
+                    ToolCorrelation.ReadOptional() ?? string.Empty,
+                    ApplicationLifetime?.GetType().Name ?? "(null)");
+            }
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
                 desktop.MainWindow = new MainWindow();
+            }
+
             base.OnFrameworkInitializationCompleted();
         }
     }

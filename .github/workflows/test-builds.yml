@@ -58,20 +58,20 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher/KPatcher.csproj -p:Configuration=Release
+        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -p:Configuration=Release
 
       - name: Restore test dependencies
-        run: dotnet restore src/KPatcher.Tests/KPatcher.Tests.csproj
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
 
       # Keeps publish/verify steps useful when the suite has known platform-specific failures (see AGENTS.md); tighten to false if CI green should require all tests.
       - name: Run tests
-        run: dotnet test src/KPatcher.Tests/KPatcher.Tests.csproj --no-restore --verbosity normal
+        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore --verbosity normal
         continue-on-error: true
 
       - name: Build
         run: |
           if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/KPatcher/KPatcher.csproj `
+            msbuild src/KPatcher.UI/KPatcher.UI.csproj `
               /t:Publish `
               /p:Configuration=Release `
               /p:TargetFramework=${{ matrix.framework }} `
@@ -79,7 +79,7 @@ jobs:
               /p:SelfContained=${{ matrix.selfcontained }} `
               /p:PublishDir=dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}\
           } else {
-            dotnet publish src/KPatcher/KPatcher.csproj `
+            dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
               -c Release `
               -f ${{ matrix.framework }} `
               -r ${{ matrix.rid }} `

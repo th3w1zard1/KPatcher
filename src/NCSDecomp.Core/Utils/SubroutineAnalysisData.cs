@@ -111,7 +111,7 @@ namespace NCSDecomp.Core.Utils
             foreach (AstNode subnode in substates.Keys)
             {
                 SubroutineState state = (SubroutineState)substates[subnode];
-                Console.WriteLine("Printing state for subroutine at " + nodedata.GetPos(subnode));
+                SubScriptLogger.Trace("Printing state for subroutine at " + nodedata.GetPos(subnode));
                 state.PrintState();
             }
         }

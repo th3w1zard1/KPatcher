@@ -35,11 +35,19 @@ namespace KPatcher.Core.Mods.GFF
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsGFF.PatchResource: saveAs={0} sourceBytes={1} modifierCount={2} replaceFile={3} game={4}",
+                label, source?.Length ?? 0, Modifiers.Count, ReplaceFile, game));
+
             var reader = new GFFBinaryReader(source);
             Formats.GFF.GFF gff = reader.Load();
             Apply(gff, memory, logger, game);
             var writer = new GFFBinaryWriter(gff);
-            return writer.Write();
+            byte[] written = writer.Write();
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsGFF.PatchResource: wrote saveAs={0} outBytes={1}", label, written.Length));
+            return written;
         }
 
         public override void Apply(

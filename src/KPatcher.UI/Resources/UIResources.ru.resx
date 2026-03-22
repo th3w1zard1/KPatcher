@@ -186,7 +186,7 @@
   <data name="StartingInstallation" xml:space="preserve"><value>Запуск установки...</value></data>
   <data name="Strike" xml:space="preserve"><value>Зачёркнутый</value></data>
   <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Права доступа успешно получены</value></data>
-  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>Для распаковки tar.gz требуется .NET 8 или выше</value></data>
+  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>Для распаковки tar.gz требуется .NET 9 или выше</value></data>
   <data name="TaskAlreadyRunning" xml:space="preserve"><value>Задача уже выполняется</value></data>
   <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>Для этого мода требуется подтверждение</value></data>
   <data name="TimeUnitDay" xml:space="preserve"><value>день</value></data>

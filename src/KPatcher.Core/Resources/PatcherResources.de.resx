@@ -29,7 +29,7 @@ Options:
   --game-dir PATH               Path to the KOTOR game directory
   --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
   --namespace-option-index N    Namespace index (0-based)
-  --console                     Show console when launching the GUI
+  --console                     Run in console/headless mode only (no GUI window)
   --install                     Run install in headless CLI (requires game and mod paths)
   --uninstall                   Run uninstall in headless CLI
   --validate                    Validate mod configuration in headless CLI
@@ -43,6 +43,8 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="CliErrorNamespaceIndexOutOfRange" xml:space="preserve"><value>[Fehler] Namespace-Index {0} außerhalb des Bereichs (max: {1})</value></data>
   <data name="CliErrorNoGameDirectory" xml:space="preserve"><value>[Fehler] Kein Spielverzeichnis angegeben. Verwenden Sie --game-dir &lt;Pfad&gt;</value></data>
   <data name="CliErrorNoModPath" xml:space="preserve"><value>[Fehler] Kein Mod-Pfad angegeben. Verwenden Sie --tslpatchdata &lt;Pfad&gt;</value></data>
+  <data name="CliErrorConsoleRequiresCliArgs" xml:space="preserve"><value>[Fehler] --console erfordert eine CLI-Operation (--install, --uninstall oder --validate) oder --help</value></data>
+  <data name="CliErrorNoDisplayUseCli" xml:space="preserve"><value>[Fehler] Kein Display verfügbar; mit --install, --uninstall oder --validate ausführen (siehe --help)</value></data>
   <data name="CliInfoInstallCompleted" xml:space="preserve"><value>[Info] Installation abgeschlossen: {0} Fehler, {1} Warnungen, {2} Patches</value></data>
   <data name="CliInfoInstallTime" xml:space="preserve"><value>[Info] Installationszeit: {0}</value></data>
   <data name="CliInfoInstallingMod" xml:space="preserve"><value>[Info] Installiere Mod von {0} nach {1}</value></data>

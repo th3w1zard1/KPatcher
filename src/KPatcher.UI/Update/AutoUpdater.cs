@@ -74,7 +74,7 @@ namespace KPatcher.UI.Update
 
                             long? contentLength = response.Content.Headers.ContentLength;
 
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                             using (Stream httpStream = await response.Content.ReadAsStreamAsync(token))
 #else
                             using (Stream httpStream = await response.Content.ReadAsStreamAsync())
@@ -87,7 +87,7 @@ namespace KPatcher.UI.Update
 
                                 while (true)
                                 {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                                     int read = await httpStream.ReadAsync(buffer.AsMemory(0, buffer.Length), token);
 #else
                                     int read = await httpStream.ReadAsync(buffer, 0, buffer.Length, token);
@@ -96,7 +96,7 @@ namespace KPatcher.UI.Update
                                     {
                                         break;
                                     }
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                                     await fileStream.WriteAsync(buffer.AsMemory(0, read), token);
 #else
                                     await fileStream.WriteAsync(buffer, 0, read, token);
@@ -166,7 +166,7 @@ namespace KPatcher.UI.Update
             string lower = archivePath.ToLowerInvariant();
             if (lower.EndsWith(".zip", StringComparison.Ordinal))
             {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                 await Task.Run(() => ZipFile.ExtractToDirectory(archivePath, extractRoot, overwriteFiles: true), token);
 #else
                 await Task.Run(() => ExtractZipWithOverwrite(archivePath, extractRoot), token);
@@ -185,7 +185,7 @@ namespace KPatcher.UI.Update
             return LocatePayloadRoot(extractRoot);
         }
 
-#if !NET8_0_OR_GREATER
+#if !NET9_0_OR_GREATER
         private static void ExtractZipWithOverwrite(string archivePath, string extractRoot)
         {
             using (ZipArchive archive = ZipFile.OpenRead(archivePath))
@@ -214,14 +214,14 @@ namespace KPatcher.UI.Update
             using (FileStream tarStream = File.Create(tarPath))
             using (var gzip = new GZipStream(sourceStream, CompressionMode.Decompress))
             {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                 await gzip.CopyToAsync(tarStream, token);
 #else
                 await gzip.CopyToAsync(tarStream);
 #endif
             }
 
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
             System.Formats.Tar.TarFile.ExtractToDirectory(tarPath, outputDirectory, overwriteFiles: true);
 #else
             // Fallback for older frameworks - just throw not supported for tar.gz
@@ -249,7 +249,7 @@ namespace KPatcher.UI.Update
 
         private async Task ApplyUpdateAsync(string payloadRoot, UpdateProgressViewModel progress, CancellationToken token)
         {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
             string currentProcessPath = Environment.ProcessPath
                 ?? Process.GetCurrentProcess().MainModule?.FileName
                 ?? throw new InvalidOperationException(UIResources.UnableToLocateCurrentProcessPath);
@@ -270,7 +270,7 @@ namespace KPatcher.UI.Update
                 ? BuildWindowsScript(payloadRoot, targetDirectory, currentProcessPath, Environment.ProcessId)
                 : BuildUnixScript(payloadRoot, targetDirectory, currentProcessPath, Environment.ProcessId);
 
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
             await File.WriteAllTextAsync(scriptPath, scriptContent, token);
 #else
             File.WriteAllText(scriptPath, scriptContent);
@@ -279,7 +279,7 @@ namespace KPatcher.UI.Update
 
             if (!IsWindows())
             {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
                 File.SetUnixFileMode(scriptPath, UnixFileMode.UserRead | UnixFileMode.UserExecute | UnixFileMode.UserWrite);
 #endif
             }
@@ -294,7 +294,7 @@ namespace KPatcher.UI.Update
 
         private static bool IsWindows()
         {
-#if NET8_0_OR_GREATER
+#if NET9_0_OR_GREATER
             return OperatingSystem.IsWindows();
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

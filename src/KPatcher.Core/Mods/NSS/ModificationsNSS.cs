@@ -58,16 +58,25 @@ namespace KPatcher.Core.Mods.NSS
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
             if (source is null)
             {
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "ModificationsNSS.PatchResource: null source for {0}; returning sentinel true", label));
                 logger.AddError(PatcherResources.InvalidNssSourceProvided);
                 return true;
             }
+
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNSS.PatchResource: sourceFile={0} saveAs={1} sourceBytes={2} action={3} game={4} skipIfNotReplace={5}",
+                SourceFile, SaveAs, source.Length, Action, game, SkipIfNotReplace));
 
             // Decode the NSS source bytes
             string sourceText = Encoding.GetEncoding("windows-1252").GetString(source);
             var mutableSource = new MutableString(sourceText);
             Apply(mutableSource, memory, logger, game);
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNSS.PatchResource: after token Apply nssCharLength={0}", mutableSource.Value.Length));
 
             // Compile the modified NSS source to NCS bytecode
             if (Action.Equals("Compile", StringComparison.OrdinalIgnoreCase))
@@ -76,6 +85,9 @@ namespace KPatcher.Core.Mods.NSS
                 Directory.CreateDirectory(tempFolder);
                 string tempScriptFile = Path.Combine(tempFolder, SourceFile);
                 File.WriteAllText(tempScriptFile, mutableSource.Value, Encoding.GetEncoding("windows-1252"));
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "ModificationsNSS.PatchResource: wrote temp NSS path={0} tempFolder={1} isWindows={2}",
+                    tempScriptFile, tempFolder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows)));
 
                 // Try built-in compiler first
                 bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -91,15 +103,22 @@ namespace KPatcher.Core.Mods.NSS
                         null,
                         new List<string> { tempFolder });
                     compiledBytes = NCSAuto.BytesNcs(ncs);
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                     return compiledBytes;
                 }
                 catch (EntryPointError e)
                 {
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: EntryPointError from built-in compile sourceFile={0} message={1}", SourceFile, e.Message));
                     logger.AddNote(e.Message);
                     return true;
                 }
                 catch (Exception e)
                 {
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: built-in compile exception sourceFile={0} type={1} message={2}",
+                        SourceFile, e.GetType().FullName, e.Message));
                     logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
                 }
 
@@ -107,6 +126,8 @@ namespace KPatcher.Core.Mods.NSS
                 if (!builtInSucceeded && isWindows)
                 {
                     bool nwnnsscompExists = !string.IsNullOrEmpty(NwnnsscompPath) && File.Exists(NwnnsscompPath);
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: external path gate nwnnsscompExists={0} path={1}", nwnnsscompExists, NwnnsscompPath ?? ""));
                     if (!nwnnsscompExists)
                     {
                         logger.AddError(TSLPatcherMessages.NwnnsscompNotFoundInTslPatchData);
@@ -142,17 +163,27 @@ namespace KPatcher.Core.Mods.NSS
                             compiledBytes = CompileWithExternal(tempScriptFile, externalCompiler, logger, game);
                             if (compiledBytes != null)
                             {
+                                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                    "ModificationsNSS.PatchResource: external compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                                 return compiledBytes;
                             }
+
+                            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                "ModificationsNSS.PatchResource: external compile returned null sourceFile={0}", SourceFile));
                         }
                         catch (Exception e)
                         {
+                            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                "ModificationsNSS.PatchResource: external compile exception sourceFile={0} type={1} message={2}",
+                                SourceFile, e.GetType().FullName, e.Message));
                             logger.AddError(e.Message);
                         }
                     }
                 }
                 else if (!isWindows)
                 {
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: non-Windows host; skipping external nwnnsscomp sourceFile={0}", SourceFile));
                     logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.PatchingFromUnixCompilingFormat, SourceFile));
                 }
 
@@ -162,12 +193,17 @@ namespace KPatcher.Core.Mods.NSS
                     return compiledBytes;
                 }
 
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "ModificationsNSS.PatchResource: falling back to NSS bytes sourceFile={0} nssCharLength={1}", SourceFile, mutableSource.Value.Length));
                 logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCompileReturningUncompiledFormat, SourceFile));
                 return Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
             }
 
             // If not compiling, just return the modified source
-            return Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
+            byte[] nssOut = Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNSS.PatchResource: non-Compile action returning NSS bytes sourceFile={0} outBytes={1}", SourceFile, nssOut.Length));
+            return nssOut;
         }
 
         public override void Apply(

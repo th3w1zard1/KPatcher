@@ -101,7 +101,7 @@ jobs:
       - name: Update version in csproj
         run: |
           $version = "${{ inputs.version }}"
-          $csprojPath = "src/KPatcher/KPatcher.csproj"
+          $csprojPath = "src/KPatcher.UI/KPatcher.UI.csproj"
           
           # Update Version tag
           (Get-Content $csprojPath) -replace '<Version>.*</Version>', "<Version>$version</Version>" | Set-Content $csprojPath
@@ -115,12 +115,12 @@ jobs:
         shell: pwsh
 
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher/KPatcher.csproj
+        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
 
       - name: Build
         run: |
           if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/KPatcher/KPatcher.csproj `
+            msbuild src/KPatcher.UI/KPatcher.UI.csproj `
               /t:Publish `
               /p:Configuration=Release `
               /p:TargetFramework=${{ matrix.framework }} `
@@ -128,7 +128,7 @@ jobs:
               /p:SelfContained=${{ matrix.selfcontained }} `
               /p:PublishDir=dist\build\${{ matrix.framework }}\${{ matrix.rid }}\
           } else {
-            dotnet publish src/KPatcher/KPatcher.csproj `
+            dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
               -c Release `
               -f ${{ matrix.framework }} `
               -r ${{ matrix.rid }} `

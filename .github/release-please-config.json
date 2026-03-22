@@ -3,7 +3,7 @@
     ".": {
       "release-type": "node",
       "package-name": "KPatcher",
-      "version-file": "src/KPatcher/KPatcher.csproj",
+      "version-file": "src/KPatcher.UI/KPatcher.UI.csproj",
       "extra-files": [
         "src/CSharpKOTOR/CSharpKOTOR.csproj"
       ],

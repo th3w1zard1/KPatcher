@@ -186,7 +186,7 @@ Para uso en producción, utilice la versión estable.</value></data>
   <data name="StartingInstallation" xml:space="preserve"><value>Iniciando instalación...</value></data>
   <data name="Strike" xml:space="preserve"><value>Tachado</value></data>
   <data name="SuccessfullyAcquiredPermission" xml:space="preserve"><value>Permiso obtenido correctamente</value></data>
-  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>La extracción tar.gz requiere .NET 8 o superior</value></data>
+  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>La extracción tar.gz requiere .NET 9 o superior</value></data>
   <data name="TaskAlreadyRunning" xml:space="preserve"><value>Ya hay una tarea en ejecución</value></data>
   <data name="ThisModRequiresConfirmation" xml:space="preserve"><value>Este mod requiere confirmación</value></data>
   <data name="TimeUnitDay" xml:space="preserve"><value>día</value></data>

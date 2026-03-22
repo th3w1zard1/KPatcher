@@ -236,8 +236,15 @@ namespace KPatcher.Core.Mods.NCS
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNCS.PatchResource: saveAs={0} sourceBytes={1} modifierCount={2} game={3}",
+                label, source?.Length ?? 0, Modifiers.Count, game));
+
             byte[] ncsBytearray = (byte[])source.Clone();
             Apply(ncsBytearray, memory, logger, game);
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNCS.PatchResource: done saveAs={0} outBytes={1} (in-place patch)", label, ncsBytearray.Length));
             return ncsBytearray;
         }
 

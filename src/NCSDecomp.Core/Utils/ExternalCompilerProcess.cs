@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace NCSDecomp.Core.Utils
 {
@@ -33,17 +36,33 @@ namespace NCSDecomp.Core.Utils
         /// <param name="workingDirectory">Process working directory.</param>
         /// <param name="environment">Optional extra/override env vars.</param>
         /// <param name="timeoutMilliseconds">Null = wait indefinitely.</param>
+        /// <param name="logger">Optional structured log (defaults to no-op).</param>
         public static ExternalCompilerRunResult Run(
             string[] argv,
             string workingDirectory,
             IDictionary<string, string> environment,
-            int? timeoutMilliseconds)
+            int? timeoutMilliseconds,
+            ILogger logger = null)
         {
+            ILogger log = logger ?? NullLogger.Instance;
             if (argv == null || argv.Length == 0)
             {
                 throw new ArgumentException("argv must include executable path.", nameof(argv));
             }
 
+            string cid = ToolCorrelation.ReadOptional();
+            if (log.IsEnabled(LogLevel.Debug))
+            {
+                log.LogDebug(
+                    "Tool=ExternalCompiler Phase=start CorrelationId={CorrelationId} Exe={Exe} ArgCount={Count} Cwd={Cwd} TimeoutMs={Timeout}",
+                    cid ?? "",
+                    ToolPathRedaction.FormatPath(argv[0]),
+                    argv.Length,
+                    ToolPathRedaction.FormatPath(workingDirectory ?? Environment.CurrentDirectory),
+                    timeoutMilliseconds?.ToString() ?? "none");
+            }
+
+            var sw = Stopwatch.StartNew();
             var psi = new ProcessStartInfo
             {
                 FileName = argv[0],
@@ -77,6 +96,10 @@ namespace NCSDecomp.Core.Utils
             {
                 if (proc == null)
                 {
+                    log.LogError(
+                        "Tool=ExternalCompiler CorrelationId={CorrelationId} Message=Failed to start process Exe={Exe}",
+                        cid ?? "",
+                        ToolPathRedaction.FormatPath(argv[0]));
                     throw new IOException("Failed to start process: " + argv[0]);
                 }
 
@@ -91,11 +114,23 @@ namespace NCSDecomp.Core.Utils
                         {
                             proc.Kill(true);
                         }
-                        catch
+                        catch (Exception killEx)
                         {
-                            // ignore
+                            if (log.IsEnabled(LogLevel.Debug))
+                            {
+                                log.LogDebug(
+                                    killEx,
+                                    "Tool=ExternalCompiler CorrelationId={CorrelationId} Message=Kill after timeout threw",
+                                    cid ?? "");
+                            }
                         }
 
+                        sw.Stop();
+                        log.LogWarning(
+                            "Tool=ExternalCompiler CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=timeout; process killed TimeoutMs={Timeout}",
+                            cid ?? "",
+                            sw.ElapsedMilliseconds,
+                            timeoutMilliseconds);
                         throw new TimeoutException("External compiler exceeded timeout (" + timeoutMilliseconds + " ms).");
                     }
                 }
@@ -106,6 +141,34 @@ namespace NCSDecomp.Core.Utils
 
                 string stdout = outTask.GetAwaiter().GetResult();
                 string stderr = errTask.GetAwaiter().GetResult();
+                sw.Stop();
+                if (log.IsEnabled(LogLevel.Debug))
+                {
+                    log.LogDebug(
+                        "Tool=ExternalCompiler Phase=done CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} ExitCode={Code} OutLen={OutLen} ErrLen={ErrLen}",
+                        cid ?? "",
+                        sw.ElapsedMilliseconds,
+                        proc.ExitCode,
+                        stdout.Length,
+                        stderr.Length);
+                }
+
+                if (proc.ExitCode != 0 && log.IsEnabled(LogLevel.Warning))
+                {
+                    string errPreview = (stderr ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
+                    if (errPreview.Length > 400)
+                    {
+                        errPreview = errPreview.Substring(0, 400) + "...";
+                    }
+
+                    log.LogWarning(
+                        "Tool=ExternalCompiler Phase=done CorrelationId={CorrelationId} ExitCode={Code} Exe={Exe} Message=non-zero exit StderrPreview={Preview}",
+                        cid ?? "",
+                        proc.ExitCode,
+                        ToolPathRedaction.FormatPath(argv[0]),
+                        string.IsNullOrEmpty(errPreview) ? "(empty)" : errPreview);
+                }
+
                 return new ExternalCompilerRunResult(proc.ExitCode, stdout, stderr);
             }
         }

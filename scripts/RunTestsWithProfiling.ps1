@@ -5,7 +5,7 @@ param(
     [string]$ProjectPath = "",
     [string]$Filter = "",
     [int]$MaxSeconds = 120,
-    [switch]$EnableProfiling = $true,
+    [bool]$EnableProfiling = $true,
     [string]$OutputDir = "profiles"
 )
 
@@ -16,8 +16,7 @@ if ([string]::IsNullOrEmpty($ProjectPath))
 {
     # Try to find test projects
     $testProjects = @(
-        "src\KPatcher.Tests\KPatcher.Tests.csproj",
-        "tests\KPatcher.Core.Tests\KPatcher.Core.Tests.csproj"
+        "tests\KPatcher.Tests\KPatcher.Tests.csproj"
     )
     
     foreach ($proj in $testProjects)

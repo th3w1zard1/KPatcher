@@ -6,9 +6,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using KCompiler.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Utils;
 
 namespace NCSDecomp.Core
@@ -165,8 +170,11 @@ namespace NCSDecomp.Core
         }
 
         /// <summary>Load from <c>config/ncsdecomp.conf</c> or legacy <c>dencs.conf</c>. On failure, returns defaults.</summary>
-        public static NcsDecompSettings Load(string appBaseDirectory, bool createDefaultConfigIfMissing)
+        public static NcsDecompSettings Load(string appBaseDirectory, bool createDefaultConfigIfMissing, ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
+            var swLoad = Stopwatch.StartNew();
             if (string.IsNullOrEmpty(appBaseDirectory))
             {
                 appBaseDirectory = GetDefaultAppBaseDirectory();
@@ -180,9 +188,14 @@ namespace NCSDecomp.Core
                     Directory.CreateDirectory(configDir);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // continue — Save may fail later
+                logger.LogWarning(
+                    ex,
+                    "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Message=config directory create failed Path={Path}",
+                    DecompPhaseNames.ConfigLoad,
+                    cid,
+                    ToolPathRedaction.FormatPath(configDir));
             }
 
             string primary = Path.Combine(configDir, ConfigFileName);
@@ -196,16 +209,31 @@ namespace NCSDecomp.Core
                 {
                     try
                     {
-                        defaults.Save(appBaseDirectory);
+                        defaults.Save(appBaseDirectory, logger);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // non-fatal
+                        logger.LogWarning(
+                            ex,
+                            "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Message=initial Save failed (non-fatal)",
+                            DecompPhaseNames.ConfigLoad,
+                            cid);
                     }
                 }
 
                 defaults.ConfigLoadedFromPath = null;
                 defaults.ApplyToRuntime();
+                swLoad.Stop();
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Source=defaults ElapsedMs={ElapsedMs} ConfigDir={Dir}",
+                        DecompPhaseNames.ConfigLoad,
+                        cid,
+                        swLoad.ElapsedMilliseconds,
+                        ToolPathRedaction.FormatPath(configDir));
+                }
+
                 return defaults;
             }
 
@@ -272,18 +300,39 @@ namespace NCSDecomp.Core
                     s.NwnnsscompPath = string.Empty;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                logger.LogWarning(
+                    ex,
+                    "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Message=config parse failed; using defaults Path={Path}",
+                    DecompPhaseNames.ConfigLoad,
+                    cid,
+                    ToolPathRedaction.FormatPath(pathToLoad));
                 s = CreateDefaults(appBaseDirectory);
                 s.ConfigLoadedFromPath = pathToLoad;
             }
 
             s.ApplyToRuntime();
+            swLoad.Stop();
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                bool isLegacy = pathToLoad != null && pathToLoad.EndsWith(LegacyConfigFileName, StringComparison.OrdinalIgnoreCase);
+                logger.LogDebug(
+                    "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Source=file ElapsedMs={ElapsedMs} Path={Path} Legacy={Legacy}",
+                    DecompPhaseNames.ConfigLoad,
+                    cid,
+                    swLoad.ElapsedMilliseconds,
+                    ToolPathRedaction.FormatPath(pathToLoad),
+                    isLegacy);
+            }
+
             return s;
         }
 
-        public void Save(string appBaseDirectory)
+        public void Save(string appBaseDirectory, ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
             if (string.IsNullOrEmpty(appBaseDirectory))
             {
                 appBaseDirectory = GetDefaultAppBaseDirectory();
@@ -346,8 +395,30 @@ namespace NCSDecomp.Core
                 sb.AppendLine(EscapePropertyValue(kv.Value));
             }
 
-            File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));
-            ConfigLoadedFromPath = path;
+            try
+            {
+                File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));
+                ConfigLoadedFromPath = path;
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Path={Path} Bytes={Bytes}",
+                        DecompPhaseNames.ConfigSave,
+                        cid,
+                        ToolPathRedaction.FormatPath(path),
+                        sb.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Tool=NcsDecompSettings Phase={Phase} CorrelationId={CorrelationId} Path={Path} Message=config write failed",
+                    DecompPhaseNames.ConfigSave,
+                    cid,
+                    ToolPathRedaction.FormatPath(path));
+                throw;
+            }
         }
 
         public void ApplyToRuntime()

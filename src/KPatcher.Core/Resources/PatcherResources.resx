@@ -407,6 +407,12 @@ Patching RIMs is highly incompatible, not recommended, and widely considered bad
   <data name="CliErrorMustSpecifyOperation" xml:space="preserve">
     <value>[Error] Must specify one of [--install, --uninstall, --validate] for CLI mode</value>
   </data>
+  <data name="CliErrorConsoleRequiresCliArgs" xml:space="preserve">
+    <value>[Error] --console requires additional CLI arguments (for example --install with paths). Use --help for options.</value>
+  </data>
+  <data name="CliErrorNoDisplayUseCli" xml:space="preserve">
+    <value>[Error] No graphical display detected (set DISPLAY or WAYLAND_DISPLAY on Linux, or run from an interactive desktop session). Use CLI options such as --install, or run with --help.</value>
+  </data>
   <data name="CliHelpUsage" xml:space="preserve">
     <value>usage: KPatcher [options] [game_dir] [tslpatchdata] [namespace_option_index]
 
@@ -416,7 +422,7 @@ Options:
   --game-dir PATH               Path to the KOTOR game directory
   --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
   --namespace-option-index N    Namespace index (0-based)
-  --console                     Show console when launching the GUI
+  --console                     Run in console/headless mode only (no GUI window)
   --install                     Run install in headless CLI (requires game and mod paths)
   --uninstall                   Run uninstall in headless CLI
   --validate                    Validate mod configuration in headless CLI

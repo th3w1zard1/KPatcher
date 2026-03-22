@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 // See NOTICE and licenses/DeNCS-MIT.txt in the project root.
 
-using System.Diagnostics;
 using NCSDecomp.Core.ScriptNode;
 
 namespace NCSDecomp.Core.ScriptUtils
@@ -639,7 +638,7 @@ namespace NCSDecomp.Core.ScriptUtils
             }
             else
             {
-                Debug.WriteLine("Variable Naming: consider adding " + action);
+                SubScriptLogger.Trace("Variable Naming: consider adding " + action);
                 return null;
             }
         }

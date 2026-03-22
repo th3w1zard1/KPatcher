@@ -110,7 +110,7 @@ fi
 
 # Check UpdateManager configuration
 echo "Checking UpdateManager configuration..."
-UPDATE_MANAGER_PATH="src/KPatcher/UpdateManager.cs"
+UPDATE_MANAGER_PATH="src/KPatcher.UI/UpdateManager.cs"
 if [ -f "$UPDATE_MANAGER_PATH" ]; then
     if grep -q 'Ed25519PublicKey\s*=\s*""' "$UPDATE_MANAGER_PATH"; then
         echo "  ⚠ Ed25519PublicKey is empty in UpdateManager.cs"

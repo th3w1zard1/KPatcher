@@ -5,11 +5,16 @@
 // Port of DeNCS RoundTripUtil.java — managed NCS→NSS helpers (Java used FileDecompiler + temp files).
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using KCompiler;
+using KCompiler.Diagnostics;
 using KPatcher.Core.Common;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NCSDecomp.Core.Diagnostics;
 
 namespace NCSDecomp.Core
 {
@@ -48,10 +53,21 @@ namespace NCSDecomp.Core
         /// </summary>
         /// <returns>Null if the NCS file is missing; otherwise decompiled text.</returns>
         /// <exception cref="DecompilerException">Actions load or decompile failure.</exception>
-        public static string DecompileNcsToNss(string ncsFilePath, string gameFlag, string k1NwscriptPath = null, string k2NwscriptPath = null)
+        public static string DecompileNcsToNss(string ncsFilePath, string gameFlag, string k1NwscriptPath = null, string k2NwscriptPath = null, ILogger log = null)
         {
+            ILogger loggerEarly = log ?? NullLogger.Instance;
+            string cidEarly = ToolCorrelation.ReadOptional() ?? string.Empty;
             if (string.IsNullOrEmpty(ncsFilePath) || !File.Exists(ncsFilePath))
             {
+                if (loggerEarly.IsEnabled(LogLevel.Debug))
+                {
+                    loggerEarly.LogDebug(
+                        "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Result=skipped Message=ncs missing or empty path Path={Path}",
+                        DecompPhaseNames.IoReadNcs,
+                        cidEarly,
+                        string.IsNullOrEmpty(ncsFilePath) ? "(null)" : ToolPathRedaction.FormatPath(ncsFilePath));
+                }
+
                 return null;
             }
 
@@ -60,17 +76,43 @@ namespace NCSDecomp.Core
             {
                 bool k2 = ParseK2(gameFlag);
                 FileDecompilerOptions.IsK2Selected = k2;
-                ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath);
-                var decompiler = new FileDecompiler(actions);
+                ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath, log);
+                var decompiler = new FileDecompiler(actions, log);
+                var sw = Stopwatch.StartNew();
                 byte[] bytes = File.ReadAllBytes(ncsFilePath);
+                sw.Stop();
+                ILogger logger = log ?? NullLogger.Instance;
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Path={Path} ElapsedMs={ElapsedMs} Bytes={Bytes}",
+                        DecompPhaseNames.IoReadNcs,
+                        ToolCorrelation.ReadOptional() ?? string.Empty,
+                        ToolPathRedaction.FormatPath(ncsFilePath),
+                        sw.ElapsedMilliseconds,
+                        bytes.Length);
+                }
+
                 return decompiler.DecompileToNss(bytes);
             }
             catch (FileNotFoundException ex)
             {
+                ILogger lx = log ?? NullLogger.Instance;
+                lx.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=actions or embedded resource missing before decompile",
+                    DecompPhaseNames.ActionsLoad,
+                    ToolCorrelation.ReadOptional() ?? string.Empty);
                 throw new DecompilerException("Failed to load actions data: " + ex.Message, ex);
             }
             catch (Exception ex)
             {
+                ILogger lx = log ?? NullLogger.Instance;
+                lx.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=decompile path failed",
+                    DecompPhaseNames.DecompDecode,
+                    ToolCorrelation.ReadOptional() ?? string.Empty);
                 throw new DecompilerException("Failed to decompile: " + ex.Message, ex);
             }
             finally
@@ -89,10 +131,22 @@ namespace NCSDecomp.Core
             string gameFlag,
             Encoding charset,
             string k1NwscriptPath = null,
-            string k2NwscriptPath = null)
+            string k2NwscriptPath = null,
+            ILogger log = null)
         {
+            ILogger loggerFile = log ?? NullLogger.Instance;
+            string cidFile = ToolCorrelation.ReadOptional() ?? string.Empty;
             if (string.IsNullOrEmpty(ncsFilePath) || !File.Exists(ncsFilePath))
             {
+                if (loggerFile.IsEnabled(LogLevel.Debug))
+                {
+                    loggerFile.LogDebug(
+                        "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Result=fail Message=NCS missing Path={Path}",
+                        DecompPhaseNames.IoReadNcs,
+                        cidFile,
+                        string.IsNullOrEmpty(ncsFilePath) ? "(null)" : ToolPathRedaction.FormatPath(ncsFilePath));
+                }
+
                 throw new DecompilerException("NCS file does not exist: " + (ncsFilePath ?? "null"));
             }
 
@@ -113,11 +167,21 @@ namespace NCSDecomp.Core
                     Directory.CreateDirectory(parent);
                 }
 
-                ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath);
-                var decompiler = new FileDecompiler(actions);
+                ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath, log);
+                var decompiler = new FileDecompiler(actions, log);
                 byte[] bytes = File.ReadAllBytes(ncsFilePath);
                 string nss = decompiler.DecompileToNss(bytes);
                 File.WriteAllText(nssOutputPath, nss, charset);
+                ILogger logger = log ?? NullLogger.Instance;
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} NssPath={Path} Chars={Chars}",
+                        DecompPhaseNames.IoWriteNss,
+                        ToolCorrelation.ReadOptional() ?? string.Empty,
+                        ToolPathRedaction.FormatPath(nssOutputPath),
+                        nss.Length);
+                }
 
                 if (!File.Exists(nssOutputPath))
                 {
@@ -130,10 +194,20 @@ namespace NCSDecomp.Core
             }
             catch (FileNotFoundException ex)
             {
+                loggerFile.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=actions or embedded resource missing (file decompile)",
+                    DecompPhaseNames.ActionsLoad,
+                    cidFile);
                 throw new DecompilerException("Failed to load actions data: " + ex.Message, ex);
             }
             catch (Exception ex)
             {
+                loggerFile.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=decompile to nss file failed",
+                    DecompPhaseNames.DecompDecode,
+                    cidFile);
                 throw new DecompilerException("Failed to decompile file: " + ex.Message, ex);
             }
             finally
@@ -145,12 +219,23 @@ namespace NCSDecomp.Core
         /// <summary>
         /// After external compile, the NCS usually sits beside the NSS with the same base name — decompile that NCS.
         /// </summary>
-        public static string GetRoundTripDecompiledCode(string savedNssFilePath, string gameFlag, string k1NwscriptPath = null, string k2NwscriptPath = null)
+        public static string GetRoundTripDecompiledCode(string savedNssFilePath, string gameFlag, string k1NwscriptPath = null, string k2NwscriptPath = null, ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
             try
             {
                 if (string.IsNullOrEmpty(savedNssFilePath) || !File.Exists(savedNssFilePath))
                 {
+                    if (logger.IsEnabled(LogLevel.Debug))
+                    {
+                        logger.LogDebug(
+                            "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=NSS path missing or not found Path={Path}",
+                            DecompPhaseNames.RoundTripGetSiblingNcs,
+                            cid,
+                            string.IsNullOrEmpty(savedNssFilePath) ? "(null)" : ToolPathRedaction.FormatPath(savedNssFilePath));
+                    }
+
                     return null;
                 }
 
@@ -158,36 +243,63 @@ namespace NCSDecomp.Core
                 string baseName = Path.GetFileNameWithoutExtension(savedNssFilePath);
                 if (string.IsNullOrEmpty(dir) || string.IsNullOrEmpty(baseName))
                 {
+                    if (logger.IsEnabled(LogLevel.Debug))
+                    {
+                        logger.LogDebug(
+                            "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=invalid NSS path structure",
+                            DecompPhaseNames.RoundTripGetSiblingNcs,
+                            cid);
+                    }
+
                     return null;
                 }
 
                 string recompiledNcs = Path.Combine(dir, baseName + ".ncs");
                 if (!File.Exists(recompiledNcs))
                 {
+                    if (logger.IsEnabled(LogLevel.Debug))
+                    {
+                        logger.LogDebug(
+                            "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=no sibling NCS beside NSS Path={Path}",
+                            DecompPhaseNames.RoundTripGetSiblingNcs,
+                            cid,
+                            ToolPathRedaction.FormatPath(recompiledNcs));
+                    }
+
                     return null;
                 }
 
-                return DecompileNcsToNss(recompiledNcs, gameFlag, k1NwscriptPath, k2NwscriptPath);
+                return DecompileNcsToNss(recompiledNcs, gameFlag, k1NwscriptPath, k2NwscriptPath, logger);
             }
-            catch (DecompilerException)
+            catch (DecompilerException ex)
             {
+                logger.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=decompile sibling NCS failed",
+                    DecompPhaseNames.RoundTripGetSiblingNcs,
+                    cid);
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=get round-trip decompiled code failed",
+                    DecompPhaseNames.RoundTripGetSiblingNcs,
+                    cid);
                 return null;
             }
         }
 
         /// <summary>Overload using paths from <see cref="NcsDecompSettings"/>.</summary>
-        public static string DecompileNcsToNss(string ncsFilePath, string gameFlag, NcsDecompSettings settings)
+        public static string DecompileNcsToNss(string ncsFilePath, string gameFlag, NcsDecompSettings settings, ILogger log = null)
         {
             if (settings == null)
             {
-                return DecompileNcsToNss(ncsFilePath, gameFlag);
+                return DecompileNcsToNss(ncsFilePath, gameFlag, null, null, log);
             }
 
-            return DecompileNcsToNss(ncsFilePath, gameFlag, settings.K1NwscriptPath, settings.K2NwscriptPath);
+            return DecompileNcsToNss(ncsFilePath, gameFlag, settings.K1NwscriptPath, settings.K2NwscriptPath, log);
         }
 
         /// <summary>
@@ -207,34 +319,65 @@ namespace NCSDecomp.Core
             string nss,
             bool k2,
             string k1NwscriptPath = null,
-            string k2NwscriptPath = null)
+            string k2NwscriptPath = null,
+            ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
             if (originalNcs == null || originalNcs.Length == 0)
             {
+                logger.LogDebug(
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=no original bytes",
+                    DecompPhaseNames.RoundTripCompile,
+                    cid);
                 return new ManagedRoundTripCompareResult(false, false, "No original NCS bytes.");
             }
 
             if (string.IsNullOrEmpty(nss))
             {
+                logger.LogDebug(
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} Message=no nss text",
+                    DecompPhaseNames.RoundTripCompile,
+                    cid);
                 return new ManagedRoundTripCompareResult(false, false, "No NSS text to recompile.");
             }
 
-            ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath);
+            ActionsData actions = LoadActions(k2, k1NwscriptPath, k2NwscriptPath, logger);
             Game game = k2 ? Game.K2 : Game.K1;
             string nwscriptPath = k2 ? k2NwscriptPath : k1NwscriptPath;
 
             byte[] recompiled;
+            var swCompile = Stopwatch.StartNew();
             try
             {
-                recompiled = ManagedNwnnsscomp.CompileSourceToBytes(nss, game, null, false, nwscriptPath);
+                recompiled = ManagedNwnnsscomp.CompileSourceToBytes(nss, game, null, false, nwscriptPath, logger);
             }
             catch (Exception ex)
             {
+                swCompile.Stop();
+                logger.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=managed compile failed",
+                    DecompPhaseNames.RoundTripCompile,
+                    cid,
+                    swCompile.ElapsedMilliseconds);
                 return new ManagedRoundTripCompareResult(false, false, "Managed compile failed: " + ex.Message);
+            }
+
+            swCompile.Stop();
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} OutBytes={Bytes}",
+                    DecompPhaseNames.RoundTripCompile,
+                    cid,
+                    swCompile.ElapsedMilliseconds,
+                    recompiled.Length);
             }
 
             string decOrig;
             string decRound;
+            var swDec = Stopwatch.StartNew();
             try
             {
                 decOrig = NcsParsePipeline.DecodeToTokenStream(originalNcs, actions);
@@ -242,12 +385,49 @@ namespace NCSDecomp.Core
             }
             catch (Exception ex)
             {
+                swDec.Stop();
+                logger.LogWarning(
+                    ex,
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=decode for compare failed",
+                    DecompPhaseNames.RoundTripDecode,
+                    cid,
+                    swDec.ElapsedMilliseconds);
                 return new ManagedRoundTripCompareResult(true, false, "Decode for compare failed: " + ex.Message);
+            }
+
+            swDec.Stop();
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} OrigChars={Orig} RoundChars={Round}",
+                    DecompPhaseNames.RoundTripDecode,
+                    cid,
+                    swDec.ElapsedMilliseconds,
+                    decOrig?.Length ?? 0,
+                    decRound?.Length ?? 0);
             }
 
             if (decOrig == decRound)
             {
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} DecoderMatch=true",
+                        DecompPhaseNames.RoundTripDecode,
+                        cid);
+                }
+
                 return new ManagedRoundTripCompareResult(true, true, "Decoder token streams match (managed round-trip).");
+            }
+
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Tool=RoundTripUtil Phase={Phase} CorrelationId={CorrelationId} DecoderMatch=false OrigLen={Orig} RoundLen={Round}",
+                    DecompPhaseNames.RoundTripDecode,
+                    cid,
+                    decOrig?.Length ?? 0,
+                    decRound?.Length ?? 0);
             }
 
             return new ManagedRoundTripCompareResult(true, false, BuildDecoderTextDiffSummary(decOrig, decRound));
@@ -339,9 +519,9 @@ namespace NCSDecomp.Core
             return g == "k2" || g == "tsl" || g == "2";
         }
 
-        private static ActionsData LoadActions(bool k2, string k1Path, string k2Path)
+        private static ActionsData LoadActions(bool k2, string k1Path, string k2Path, ILogger log = null)
         {
-            return ActionsData.LoadForGame(k2, k1Path, k2Path);
+            return ActionsData.LoadForGame(k2, k1Path, k2Path, log);
         }
     }
 }

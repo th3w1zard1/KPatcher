@@ -45,6 +45,7 @@ namespace KPatcher.Core.Resources
         public static string ChangesConfigFileNotFound => ResourceManager.GetString(nameof(ChangesConfigFileNotFound), _resourceCulture);
         public static string CleaningTemporaryScriptFolder => ResourceManager.GetString(nameof(CleaningTemporaryScriptFolder), _resourceCulture);
         public static string CliErrorCannotRunMultipleOperations => ResourceManager.GetString(nameof(CliErrorCannotRunMultipleOperations), _resourceCulture);
+        public static string CliErrorConsoleRequiresCliArgs => ResourceManager.GetString(nameof(CliErrorConsoleRequiresCliArgs), _resourceCulture);
         public static string CliErrorFailedToLoadMod => ResourceManager.GetString(nameof(CliErrorFailedToLoadMod), _resourceCulture);
         public static string CliErrorFormat => ResourceManager.GetString(nameof(CliErrorFormat), _resourceCulture);
         public static string CliErrorInvalidGameDirectory => ResourceManager.GetString(nameof(CliErrorInvalidGameDirectory), _resourceCulture);
@@ -53,6 +54,7 @@ namespace KPatcher.Core.Resources
         public static string CliErrorNamespaceIndexOutOfRange => ResourceManager.GetString(nameof(CliErrorNamespaceIndexOutOfRange), _resourceCulture);
         public static string CliErrorNoGameDirectory => ResourceManager.GetString(nameof(CliErrorNoGameDirectory), _resourceCulture);
         public static string CliErrorNoModPath => ResourceManager.GetString(nameof(CliErrorNoModPath), _resourceCulture);
+        public static string CliErrorNoDisplayUseCli => ResourceManager.GetString(nameof(CliErrorNoDisplayUseCli), _resourceCulture);
         public static string CliHelpUsage => ResourceManager.GetString(nameof(CliHelpUsage), _resourceCulture);
         public static string CliInfoInstallCompleted => ResourceManager.GetString(nameof(CliInfoInstallCompleted), _resourceCulture);
         public static string CliInfoInstallTime => ResourceManager.GetString(nameof(CliInfoInstallTime), _resourceCulture);

@@ -4,9 +4,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using KCompiler.Diagnostics;
 using KPatcher.Core.Formats.NCS.Decompiler;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Utils;
 
 namespace NCSDecomp.Core
@@ -19,6 +24,9 @@ namespace NCSDecomp.Core
     {
         private readonly List<ActionEntry> actions;
 
+        /// <summary>Number of slots in the parsed action table (includes null gaps).</summary>
+        public int ActionTableSlotCount => actions.Count;
+
         public ActionsData(TextReader actionsReader)
         {
             actions = new List<ActionEntry>(877);
@@ -29,31 +37,74 @@ namespace NCSDecomp.Core
         /// Load nwscript action table from embedded resources (k1_nwscript.nss / tsl_nwscript.nss).
         /// </summary>
         /// <exception cref="FileNotFoundException">Embedded resource or fallback missing.</exception>
-        public static ActionsData LoadFromEmbedded(bool tsl)
+        public static ActionsData LoadFromEmbedded(bool tsl, ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
+            var sw = Stopwatch.StartNew();
             Stream stream = tsl ? ResourceLoader.OpenTslNwscript() : ResourceLoader.OpenK1Nwscript();
             using (stream)
             using (var reader = new StreamReader(stream))
             {
-                return new ActionsData(reader);
+                var data = new ActionsData(reader);
+                sw.Stop();
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    logger.LogDebug(
+                        "Tool=ActionsData Phase={Phase} CorrelationId={CorrelationId} Source=embedded GameTsl={Tsl} ElapsedMs={ElapsedMs} Slots={Slots}",
+                        DecompPhaseNames.ActionsLoad,
+                        cid,
+                        tsl,
+                        sw.ElapsedMilliseconds,
+                        data.ActionTableSlotCount);
+                }
+
+                return data;
             }
         }
 
         /// <summary>
         /// Uses <paramref name="k1Path"/> / <paramref name="k2Path"/> when the file exists; otherwise embedded resources (DeNCS Settings paths).
         /// </summary>
-        public static ActionsData LoadForGame(bool tsl, string k1Path, string k2Path)
+        public static ActionsData LoadForGame(bool tsl, string k1Path, string k2Path, ILogger log = null)
         {
+            ILogger logger = log ?? NullLogger.Instance;
+            string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
             string path = tsl ? k2Path : k1Path;
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
             {
+                var sw = Stopwatch.StartNew();
                 using (var reader = new StreamReader(path))
                 {
-                    return new ActionsData(reader);
+                    var data = new ActionsData(reader);
+                    sw.Stop();
+                    if (logger.IsEnabled(LogLevel.Debug))
+                    {
+                        logger.LogDebug(
+                            "Tool=ActionsData Phase={Phase} CorrelationId={CorrelationId} Source=disk GameTsl={Tsl} Path={Path} ElapsedMs={ElapsedMs} Slots={Slots}",
+                            DecompPhaseNames.ActionsLoad,
+                            cid,
+                            tsl,
+                            ToolPathRedaction.FormatPath(path),
+                            sw.ElapsedMilliseconds,
+                            data.ActionTableSlotCount);
+                    }
+
+                    return data;
                 }
             }
 
-            return LoadFromEmbedded(tsl);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Tool=ActionsData Phase={Phase} CorrelationId={CorrelationId} Message=no disk nwscript; using embedded GameTsl={Tsl} CandidatePath={Path}",
+                    DecompPhaseNames.ActionsLoad,
+                    cid,
+                    tsl,
+                    string.IsNullOrWhiteSpace(path) ? "(empty)" : ToolPathRedaction.FormatPath(path));
+            }
+
+            return LoadFromEmbedded(tsl, logger);
         }
 
         public string GetAction(int index)

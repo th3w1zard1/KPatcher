@@ -242,7 +242,7 @@ For production use, please use the stable release.</value></data>
   <data name="NoContentInGitHubApiResponse" xml:space="preserve"><value>No content found in GitHub API response</value></data>
   <data name="JsonDataNotFoundOrMarkersIncorrect" xml:space="preserve"><value>JSON data not found or markers are incorrect</value></data>
   <data name="FailedToDeserializeRemoteInfo" xml:space="preserve"><value>Failed to deserialize remote info</value></data>
-  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>tar.gz extraction requires .NET 8 or greater</value></data>
+  <data name="TarGzRequiresNet8OrGreater" xml:space="preserve"><value>tar.gz extraction requires .NET 9 or greater</value></data>
   <data name="NoDirectDownloadLinksForFormat" xml:space="preserve"><value>No direct download links were provided for {0}/{1}.</value></data>
   <data name="FlowDocumentNotInitialized" xml:space="preserve"><value>FlowDocument is not initialized</value></data>
   <data name="ConfigSummaryTitle" xml:space="preserve"><value>TSLPatcher - CONFIGURATION SUMMARY</value></data>

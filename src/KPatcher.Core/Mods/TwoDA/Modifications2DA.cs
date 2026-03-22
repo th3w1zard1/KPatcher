@@ -48,6 +48,11 @@ namespace KPatcher.Core.Mods.TwoDA
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Modifications2DA.PatchResource: saveAs={0} sourceBytes={1} modifierCount={2} game={3}",
+                label, source?.Length ?? 0, Modifiers.Count, game));
+
             Formats.TwoDA.TwoDA twoda;
             try
             {
@@ -56,6 +61,8 @@ namespace KPatcher.Core.Mods.TwoDA
             catch (Exception)
             {
                 // TSLPatcher parity: "Unable to load the 2DA file %s! Skipping it..."
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Modifications2DA.PatchResource: TwoDABinaryReader.Load failed for {0}; returning original bytes", label));
                 logger.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.UnableToLoad2DAFileSkipping, SaveAs ?? SourceFile ?? ""));
                 return source;
             }
@@ -70,13 +77,20 @@ namespace KPatcher.Core.Mods.TwoDA
                 if (curRowCount > twodaRowLimit)
                 {
                     int rowsOverLimit = curRowCount - twodaRowLimit;
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "Modifications2DA.PatchResource: K1 hardcap rejected saveAs={0} limit={1} rows={2} overBy={3}; returning original bytes",
+                        SaveAs, twodaRowLimit, curRowCount, rowsOverLimit));
                     logger.AddError(
                         $"{SaveAs} has a max row count of {twodaRowLimit} on KOTOR 1. Result has {curRowCount} rows ({rowsOverLimit} over the limit); changes were not applied.");
                     return source;
                 }
             }
 
-            return new TwoDABinaryWriter(twoda).Write();
+            byte[] written = new TwoDABinaryWriter(twoda).Write();
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Modifications2DA.PatchResource: wrote saveAs={0} outBytes={1} rowCount={2}",
+                label, written.Length, twoda.GetHeight()));
+            return written;
         }
 
         public override void Apply(

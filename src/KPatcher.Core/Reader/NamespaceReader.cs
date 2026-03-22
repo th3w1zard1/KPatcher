@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using IniParser;
 using IniParser.Model;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
+using KPatcher.Core.Logger;
 using KPatcher.Core.Namespaces;
 
 namespace KPatcher.Core.Reader
@@ -29,7 +31,7 @@ namespace KPatcher.Core.Reader
         /// Loads namespaces from a config file at the specified path (.ini or .yaml/.yml).
         /// YAML uses the same section/key structure as INI (see ConfigReaderYaml).
         /// </summary>
-        public static List<PatcherNamespace> FromFilePath(string path)
+        public static List<PatcherNamespace> FromFilePath(string path, [CanBeNull] PatchLogger logger = null)
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
@@ -39,18 +41,24 @@ namespace KPatcher.Core.Reader
             string ext = System.IO.Path.GetExtension(path);
             bool isYaml = ext.Equals(".yaml", StringComparison.OrdinalIgnoreCase) || ext.Equals(".yml", StringComparison.OrdinalIgnoreCase);
 
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "NamespaceReader.FromFilePath: path={0} format={1}", path, isYaml ? "yaml" : "ini"));
+
             IniData ini = isYaml
                 ? ConfigReaderYaml.LoadAndParseYaml(path)
                 : ConfigReader.LoadAndParseIni(path, caseInsensitive: true);
 
-            return new NamespaceReader(ini).Load();
+            return new NamespaceReader(ini).Load(logger);
         }
 
         /// <summary>
         /// Load and parse all namespaces from the INI data.
         /// </summary>
-        public List<PatcherNamespace> Load()
+        public List<PatcherNamespace> Load([CanBeNull] PatchLogger logger = null)
         {
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "NamespaceReader.Load: sectionCount={0}", _ini.Sections.Count));
+
             // Find the [Namespaces] section (case-insensitive)
             SectionData namespacesSection = _ini.Sections.FirstOrDefault(s =>
                 s.SectionName.Equals("Namespaces", StringComparison.OrdinalIgnoreCase));
@@ -88,8 +96,19 @@ namespace KPatcher.Core.Reader
                     NamespaceId = namespaceSection.SectionName
                 };
 
+                logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "NamespaceReader.Load: namespaceId={0} iniName={1} infoName={2} displayName={3} dataPathLen={4}",
+                    namespaceSection.SectionName,
+                    iniFilename,
+                    infoFilename,
+                    ns.Name,
+                    ns.DataFolderPath.Length));
+
                 namespaces.Add(ns);
             }
+
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "NamespaceReader.Load: loaded namespaceCount={0}", namespaces.Count));
 
             return namespaces;
         }

@@ -1,4 +1,4 @@
-# Build NuGet packages for KPatcher.Core and KPatcher
+# Build NuGet packages for KPatcher.Core (app host is not packaged)
 # Usage: .\build-nuget.ps1 [--publish] [--source <feed-url>] [--api-key <key>]
 #
 # API Key can be provided via:
@@ -50,30 +50,13 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Build KPatcher package
-Write-Host "`nBuilding KPatcher..." -ForegroundColor Cyan
-dotnet pack src/KPatcher/KPatcher.csproj --configuration $Configuration --no-build
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Failed to build KPatcher package" -ForegroundColor Red
-    exit 1
-}
-
 # Find package files
 $tslCorePackage = Get-ChildItem -Path "src/KPatcher.Core/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
-$holoPatcherPackage = Get-ChildItem -Path "src/KPatcher/bin/$Configuration" -Filter "*.nupkg" | Select-Object -First 1
 
 if ($tslCorePackage) {
     Write-Host "`nKPatcher.Core package created: $($tslCorePackage.FullName)" -ForegroundColor Green
 } else {
     Write-Host "`nKPatcher.Core package not found!" -ForegroundColor Red
-    exit 1
-}
-
-if ($holoPatcherPackage) {
-    Write-Host "KPatcher package created: $($holoPatcherPackage.FullName)" -ForegroundColor Green
-} else {
-    Write-Host "KPatcher package not found!" -ForegroundColor Red
     exit 1
 }
 
@@ -106,27 +89,12 @@ if ($Publish) {
         exit 1
     }
 
-    # Publish KPatcher
-    Write-Host "Publishing KPatcher..." -ForegroundColor Cyan
-    & dotnet $pushArgs $holoPatcherPackage.FullName
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to publish KPatcher" -ForegroundColor Red
-        exit 1
-    }
-
     # Publish symbol packages if they exist
     $tslCoreSymbols = Get-ChildItem -Path "src/KPatcher.Core/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
-    $holoPatcherSymbols = Get-ChildItem -Path "src/KPatcher/bin/$Configuration" -Filter "*.snupkg" | Select-Object -First 1
 
     if ($tslCoreSymbols) {
         Write-Host "Publishing KPatcher.Core symbols..." -ForegroundColor Cyan
         & dotnet $pushArgs $tslCoreSymbols.FullName
-    }
-
-    if ($holoPatcherSymbols) {
-        Write-Host "Publishing KPatcher symbols..." -ForegroundColor Cyan
-        & dotnet $pushArgs $holoPatcherSymbols.FullName
     }
 
     Write-Host "`nPackages published successfully!" -ForegroundColor Green

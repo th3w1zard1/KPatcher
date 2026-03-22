@@ -1,6 +1,9 @@
 using System;
+using System.Globalization;
 using System.IO;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
+using KPatcher.Core.Logger;
 
 namespace KPatcher.Core.Tools
 {
@@ -13,15 +16,19 @@ namespace KPatcher.Core.Tools
         /// Determines the game based on files and folders under the given path.
         /// </summary>
         /// <param name="path">Path to game directory.</param>
+        /// <param name="logger">Optional patch logger for diagnostic trace.</param>
         /// <returns>Game enum with highest score, or null if scores are equal or all checks fail.</returns>
-        public static Game? DetermineGame(string path)
+        public static Game? DetermineGame(string path, [CanBeNull] PatchLogger logger = null)
         {
             if (string.IsNullOrEmpty(path))
             {
+                logger?.AddDiagnostic("Heuristics.DetermineGame: path is null or empty; returning null");
                 return null;
             }
 
             string basePath = Path.GetFullPath(path);
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Heuristics.DetermineGame: resolved basePath={0}", basePath));
 
             // Definitive PC installs: only one main executable — skip scoring heuristics.
             // If both swkotor.exe and swkotor2.exe are present, keep heuristics (ambiguous / merged tree).
@@ -29,7 +36,11 @@ namespace KPatcher.Core.Tools
             bool hasK2Exe = File.Exists(Path.Combine(basePath, "swkotor2.exe"));
             if (hasK1Exe ^ hasK2Exe)
             {
-                return hasK2Exe ? Game.K2 : Game.K1;
+                Game? early = hasK2Exe ? Game.K2 : Game.K1;
+                logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Heuristics.DetermineGame: single main exe branch hasK1Exe={0} hasK2Exe={1} -> {2}",
+                    hasK1Exe, hasK2Exe, early));
+                return early;
             }
 
             bool Check(string relative) => File.Exists(Path.Combine(basePath, relative)) || Directory.Exists(Path.Combine(basePath, relative));
@@ -201,6 +212,10 @@ namespace KPatcher.Core.Tools
             if (game1Ios > bestScore) { bestScore = game1Ios; bestGame = Game.K1_IOS; }
             if (game2Ios > bestScore) { bestScore = game2Ios; bestGame = Game.K2_IOS; }
             // K1_ANDROID, K2_ANDROID have 0 checks; no need to compare
+
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "Heuristics.DetermineGame: scores game1Pc={0} game2Pc={1} game1Xbox={2} game2Xbox={3} game1Ios={4} game2Ios={5} bestScore={6} bestGame={7}",
+                game1Pc, game2Pc, game1Xbox, game2Xbox, game1Ios, game2Ios, bestScore, bestGame?.ToString() ?? "null"));
 
             return bestGame;
         }

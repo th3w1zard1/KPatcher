@@ -3,40 +3,24 @@
     <LangVersion>7.3</LangVersion>
     <RootNamespace>KPatcher.UI</RootNamespace>
     <NeutralLanguage>en</NeutralLanguage>
+    <AssemblyName>KPatcher</AssemblyName>
     <Version>0.1.0</Version>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <Platforms>x86;x64;arm64</Platforms>
+    <UseAppHost>true</UseAppHost>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <!-- This is a UI Library -->
-    <OutputType>Library</OutputType>
-    <IsPackable>true</IsPackable>
-    <PackageId>KPatcher.UI</PackageId>
-    <Authors>th3w1zard1</Authors>
-    <Company>OpenKotOR</Company>
-    <Product>KPatcher.UI</Product>
-    <Description>Avalonia UI components for KPatcher, providing a graphical interface for installing and managing KOTOR mods.</Description>
-    <PackageTags>kotor;tsl;patcher;mod;gui;avalonia;kpatcher;ui</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-    <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsPackable>false</IsPackable>
     <!-- IDE fallback: set single TFM for language server when multi-target logic isn't evaluated -->
     <TargetFramework Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == ''">net9.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
-    <!-- Helper to append without duplicate semicolons -->
     <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">
       $([System.String]::Copy('$(TargetFrameworks)').TrimEnd(';').TrimStart(';'))
     </TargetFrameworks>
-    <!-- Add each TFM conditionally -->
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '10.0.0'))">
       $(TargetFrameworks);net10.0
     </TargetFrameworks>
@@ -46,11 +30,9 @@
     <TargetFrameworks Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '8.0.0'))">
       $(TargetFrameworks);net9.0
     </TargetFrameworks>
-    <!-- === .NET 7 SDK: include net7.0 + net6.0 (legacy support) === -->
     <TargetFrameworks Condition="$([System.String]::new('$(NETCoreSdkVersion)').StartsWith('7.'))">
       $(TargetFrameworks);net7.0;net6.0
     </TargetFrameworks>
-    <!-- === .NET 6 SDK: include (legacy support) === -->
     <TargetFrameworks Condition="$([System.String]::new('$(NETCoreSdkVersion)').StartsWith('6.'))">
       $(TargetFrameworks);net6.0
     </TargetFrameworks>
@@ -60,11 +42,23 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT' AND Exists('$(MSBuildProgramFiles32)\..\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.2')">
       $(TargetFrameworks);net462
     </TargetFrameworks>
-    <!-- Ensure we always have at least one framework to avoid empty TargetFrameworks -->
-      <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net9.0</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- Release Configuration -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)'=='' OR $(RuntimeIdentifier.StartsWith('win'))">
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(RuntimeIdentifier.StartsWith('win')) AND '$(RuntimeIdentifier)'!=''">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <RuntimeIdentifiers>win7-x86;win7-x64;win10-x86;win10-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -79,19 +73,14 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
-  <!-- Debug Configuration: Optimized for faster development builds -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <!-- Single target framework for fastest Debug builds -->
-      <TargetFrameworks>net9.0</TargetFrameworks>
-    <!-- Disable style analyzers in Debug; keep RunAnalyzersDuringBuild true so Avalonia source generator runs (required for InitializeComponent and x:Name) -->
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
-  <!-- AvaloniaUI defs -->
   <PropertyGroup>
-    <!-- Workaround for MSB4022: AvaloniaBuildTasksLocation can be empty when buildTransitive targets load before props (solution build). -->
     <AvaloniaBuildTasksLocation Condition="'$(AvaloniaBuildTasksLocation)' == ''">$(NuGetPackageRoot)avalonia\11.3.9\tools\netstandard2.0\Avalonia.Build.Tasks.dll</AvaloniaBuildTasksLocation>
     <AvaloniaCopyWin32Dll>false</AvaloniaCopyWin32Dll>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -99,7 +88,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Avalonia packages - use versions compatible with .NET 6+ and net48 -->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.9" />
     <PackageReference Include="DialogHost.Avalonia" Version="0.10.2" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
@@ -123,15 +111,44 @@
     <PackageReference Include="MessageBox.Avalonia" Version="3.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
-    <!-- NetSparkle only supports .NET Framework, so only include for net48 -->
     <PackageReference Condition="'$(TargetFramework)' == 'net48'" Include="NetSparkle" Version="1.1.0" />
+    <PackageReference Include="Dotnet.Bundle" Version="*" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
     <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
     <ProjectReference Include="..\KCompiler.Core\KCompiler.Core.csproj" />
     <ProjectReference Include="..\KPatcher.Core\KPatcher.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="KPatcher.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="RtfDomParserAv.dll" Condition="Exists('RtfDomParserAv.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PublishBundledCliTools" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net9.0'">
+    <PropertyGroup>
+      <_PublishDirNormalized>$([MSBuild]::EnsureTrailingSlash('$(PublishDir)'))</_PublishDirNormalized>
+      <_KCompilerProj>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'KCompiler.NET', 'KCompiler.NET.csproj'))</_KCompilerProj>
+      <_NcsDecompProj>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..', 'NCSDecomp.NET', 'NCSDecomp.NET.csproj'))</_NcsDecompProj>
+      <_KStage>$([MSBuild]::EnsureTrailingSlash('$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'sidecar_kcompiler'))'))</_KStage>
+      <_NStage>$([MSBuild]::EnsureTrailingSlash('$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'sidecar_ncsdecomp'))'))</_NStage>
+      <_SidecarPublishProps>Configuration=$(Configuration);TargetFramework=$(TargetFramework);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishReadyToRun=$(PublishReadyToRun);PublishTrimmed=$(PublishTrimmed);UseAppHost=true</_SidecarPublishProps>
+    </PropertyGroup>
+    <RemoveDir Directories="$(_KStage);$(_NStage)" />
+    <MakeDir Directories="$(_KStage);$(_NStage)" />
+    <MSBuild Projects="$(_KCompilerProj)" Targets="Publish" Properties="$(_SidecarPublishProps);PublishDir=$(_KStage)" />
+    <MSBuild Projects="$(_NcsDecompProj)" Targets="Publish" Properties="$(_SidecarPublishProps);PublishDir=$(_NStage)" />
+    <ItemGroup>
+      <_KStageFiles Include="$(_KStage)**\*.*" />
+      <_NStageFiles Include="$(_NStage)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_KStageFiles)" DestinationFiles="@(_KStageFiles->'$(_PublishDirNormalized)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_NStageFiles)" DestinationFiles="@(_NStageFiles->'$(_PublishDirNormalized)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

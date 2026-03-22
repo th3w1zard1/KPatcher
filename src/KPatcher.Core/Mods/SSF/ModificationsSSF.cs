@@ -57,12 +57,20 @@ namespace KPatcher.Core.Mods.SSF
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsSSF.PatchResource: saveAs={0} sourceBytes={1} modifierCount={2} game={3}",
+                label, source?.Length ?? 0, Modifiers.Count, game));
+
             var reader = new SSFBinaryReader(source);
             Formats.SSF.SSF ssf = reader.Load();
             Apply(ssf, memory, logger, game);
 
             var writer = new SSFBinaryWriter(ssf);
-            return writer.Write();
+            byte[] written = writer.Write();
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsSSF.PatchResource: wrote saveAs={0} outBytes={1}", label, written.Length));
+            return written;
         }
 
         public override void Apply(

@@ -4,7 +4,10 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core.Analysis;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.ScriptNode;
 using NCSDecomp.Core.ScriptUtils;
@@ -28,9 +31,11 @@ namespace NCSDecomp.Core
         protected bool globals;
         protected LocalVarStack backupstack;
         protected DecompType type;
+        private readonly ILogger _log;
 
-        public MainPass(SubroutineState protostate, NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions)
+        public MainPass(SubroutineState protostate, NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions, ILogger log = null)
         {
+            _log = log ?? NullLogger.Instance;
             this.nodedata = nodedata;
             this.subdata = subdata;
             this.actions = actions;
@@ -42,8 +47,9 @@ namespace NCSDecomp.Core
             type = protostate.Type();
         }
 
-        protected MainPass(NodeAnalysisData nodedata, SubroutineAnalysisData subdata)
+        protected MainPass(NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ILogger log = null)
         {
+            _log = log ?? NullLogger.Instance;
             this.nodedata = nodedata;
             this.subdata = subdata;
             skipdeadcode = false;
@@ -638,7 +644,11 @@ namespace NCSDecomp.Core
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine("Decompiler recovery at position " + nodedata.GetPos(node) + ": " + e.Message);
+                _log.LogWarning(
+                    e,
+                    "Tool=NCSDecomp.Core Phase={Phase} Pos={Pos} Message=decompiler visitor recovery; stack restored",
+                    DecompPhaseNames.DecompPrint,
+                    nodedata.GetPos(node));
                 stack = stackSnapshot;
                 state.SetStack(stack);
                 backupstack = backupSnapshot;

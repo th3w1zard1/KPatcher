@@ -6,7 +6,10 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NCSDecomp.Core;
+using NCSDecomp.Core.Diagnostics;
 using NCSDecomp.Core.Node;
 using NCSDecomp.Core.Utils;
 
@@ -22,13 +25,15 @@ namespace NCSDecomp.Core.Analysis
         private readonly SubroutineAnalysisData subdata;
         private readonly ActionsData actions;
         private readonly bool strict;
+        private readonly ILogger _log;
 
-        public PrototypeEngine(NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions, bool strict)
+        public PrototypeEngine(NodeAnalysisData nodedata, SubroutineAnalysisData subdata, ActionsData actions, bool strict, ILogger log = null)
         {
             this.nodedata = nodedata;
             this.subdata = subdata;
             this.actions = actions;
             this.strict = strict;
+            _log = log ?? NullLogger.Instance;
         }
 
         public void Run()
@@ -108,7 +113,7 @@ namespace NCSDecomp.Core.Analysis
                     sub.Apply(finder);
                     if (state.IsBeingPrototyped())
                     {
-                        var dotypes = new DoTypes(state, nodedata, subdata, actions, true);
+                        var dotypes = new DoTypes(state, nodedata, subdata, actions, true, _log);
                         sub.Apply(dotypes);
                         dotypes.Done();
                         progress = progress || state.IsPrototyped();
@@ -133,7 +138,10 @@ namespace NCSDecomp.Core.Analysis
                 {
                     if (strict)
                     {
-                        Console.WriteLine("Strict signatures: missing prototype for subroutine at " + nodedata.GetPos(sub) + " (continuing)");
+                        _log.LogWarning(
+                            "Tool=NCSDecomp.Core Phase={Phase} Pos={Pos} Message=Strict signatures: missing prototype for subroutine (continuing)",
+                            DecompPhaseNames.DecompAnalysis,
+                            nodedata.GetPos(sub));
                     }
 
                     int pos = nodedata.GetPos(sub);

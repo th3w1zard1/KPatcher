@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using NCSDecomp.Core.Node;
+using NCSDecomp.Core.ScriptUtils;
 using NCSDecomp.Core.Stack;
 using AstNode = global::NCSDecomp.Core.Node.Node;
 
@@ -70,8 +71,8 @@ namespace NCSDecomp.Core.Utils
 
         public void PrintState()
         {
-            Console.WriteLine("Return type is " + type);
-            Console.WriteLine("There are " + paramsize + " parameters");
+            SubScriptLogger.Trace("Return type is " + type);
+            SubScriptLogger.Trace("There are " + paramsize + " parameters");
             if (paramsize > 0)
             {
                 var buff = new System.Text.StringBuilder();
@@ -81,7 +82,7 @@ namespace NCSDecomp.Core.Utils
                     buff.Append(pt).Append(" ");
                 }
 
-                Console.WriteLine(buff);
+                SubScriptLogger.Trace(buff.ToString());
             }
         }
 

@@ -54,6 +54,11 @@ namespace KPatcher.Core.Reader
             // path to the tslpatchdata, optional but we'll use it here for the nwnnsscomp.exe if it exists.
             _tslPatchDataPath = tslPatchDataPath;
             _log = logger ?? new PatchLogger();
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader ctor: modPath={0}, tslPatchDataPath={1}, iniSectionCount={2}",
+                _modPath,
+                _tslPatchDataPath ?? "null",
+                _ini.Sections.Count));
         }
 
         /// <summary>
@@ -185,6 +190,11 @@ namespace KPatcher.Core.Reader
 
             var instance = new ConfigReader(ini, Path.GetDirectoryName(resolvedFilePath) ?? string.Empty, logger, tslPatchDataPath);
             instance.Config = new PatcherConfig();
+            logger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.FromFilePath: path={0} format={1} modDir={2}",
+                resolvedFilePath,
+                isYaml ? "yaml" : "ini",
+                Path.GetDirectoryName(resolvedFilePath) ?? ""));
             return instance;
         }
 
@@ -204,6 +214,7 @@ namespace KPatcher.Core.Reader
         {
             Config = config;
             _previouslyParsedSections.Clear();
+            _log.AddDiagnostic("ConfigReader.Load: begin all sections");
 
             LoadSettings();
             LoadTLKList();
@@ -213,6 +224,9 @@ namespace KPatcher.Core.Reader
             LoadCompileList();
             LoadHackList();
             LoadSSFList();
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.Load: finished section loaders; parsedSectionCount={0}",
+                _previouslyParsedSections.Count));
             _log.AddNote(PatcherResources.ConfigReaderFinishedLoadingIni);
             var allSectionsSet = _ini.Sections.Select(s => s.SectionName).ToHashSet();
             var orphanedSections = allSectionsSet.Except(_previouslyParsedSections).ToHashSet();
@@ -246,6 +260,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadSettings()
         {
+            _log.AddDiagnostic("ConfigReader.LoadSettings: enter");
             // Can be null if section not found
             string settingsSection = GetSectionName("settings");
             if (settingsSection is null)
@@ -308,6 +323,12 @@ namespace KPatcher.Core.Reader
             {
                 Config.GameNumber = null;
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadSettings: done logLevel={0} saveProcessedScripts={1} requiredGroups={2}",
+                Config.LogLevel,
+                Config.SaveProcessedScripts,
+                Config.RequiredFiles.Count));
         }
 
         /// <summary>
@@ -324,6 +345,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadInstallList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadInstallList: enter");
             // Can be null if section not found
             string installListSection = GetSectionName("InstallList");
             if (installListSection is null)
@@ -373,6 +395,9 @@ namespace KPatcher.Core.Reader
                     }
                 }
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadInstallList: done count={0}", Config.InstallList.Count));
         }
 
         /// <summary>
@@ -387,6 +412,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadTLKList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadTLKList: enter");
             // Can be null if section not found
             string tlkListSection = GetSectionName("tlklist");
             if (tlkListSection is null)
@@ -510,6 +536,9 @@ namespace KPatcher.Core.Reader
                     throw new InvalidOperationException($"Could not parse '{key}={value}' in [TLKList]", ex);
                 }
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadTLKList: done modifiers={0}", Config.PatchesTLK.Modifiers.Count));
         }
 
         /// <summary>
@@ -532,6 +561,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void Load2DAList()
         {
+            _log.AddDiagnostic("ConfigReader.Load2DAList: enter");
             // Can be null if section not found
             string twodaSectionName = GetSectionName("2DAList");
             if (twodaSectionName is null)
@@ -622,6 +652,9 @@ namespace KPatcher.Core.Reader
                     modifications.Modifiers.Add(manipulation);
                 }
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.Load2DAList: done files={0}", Config.Patches2DA.Count));
         }
 
         /// <summary>
@@ -640,6 +673,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadSSFList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadSSFList: enter");
             // Can be null if section not found
             string ssfListSection = GetSectionName("SSFList");
             if (ssfListSection is null)
@@ -703,6 +737,9 @@ namespace KPatcher.Core.Reader
                     modifications.Modifiers.Add(modifier);
                 }
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadSSFList: done files={0}", Config.PatchesSSF.Count));
         }
 
         /// <summary>
@@ -722,6 +759,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadGFFList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadGFFList: enter");
             // Can be null if section not found
             string gffListSection = GetSectionName("GFFList");
             if (gffListSection is null)
@@ -825,6 +863,9 @@ namespace KPatcher.Core.Reader
                     modifications.Modifiers.Add(modifier);
                 }
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadGFFList: done files={0}", Config.PatchesGFF.Count));
         }
 
         /// <summary>
@@ -842,6 +883,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadCompileList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadCompileList: enter");
             // Can be null if section not found
             string compilelistSection = GetSectionName("CompileList");
             if (compilelistSection is null)
@@ -876,6 +918,9 @@ namespace KPatcher.Core.Reader
                 nwnnsscompExepath = _tslPatchDataPath != null ? Path.Combine(_tslPatchDataPath, "nwnnsscomp.exe") : null; // KPatcher default
             }
 
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadCompileList: nwnnsscompExepath={0}", nwnnsscompExepath ?? "null"));
+
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
                 bool replace = identifier.ToLower().StartsWith("replace");
@@ -900,6 +945,9 @@ namespace KPatcher.Core.Reader
                 modifications.NwnnsscompPath = nwnnsscompExepath;
                 Config.PatchesNSS.Add(modifications);
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadCompileList: done nssPatches={0}", Config.PatchesNSS.Count));
         }
 
         /// <summary>
@@ -915,6 +963,7 @@ namespace KPatcher.Core.Reader
         /// </summary>
         private void LoadHackList()
         {
+            _log.AddDiagnostic("ConfigReader.LoadHackList: enter");
             // Can be null if section not found
             string hacklistSection = GetSectionName("HACKList");
             if (hacklistSection is null)
@@ -960,6 +1009,9 @@ namespace KPatcher.Core.Reader
                 // Add the completed modifications to config
                 Config.PatchesNCS.Add(modifications);
             }
+
+            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ConfigReader.LoadHackList: done ncsPatches={0}", Config.PatchesNCS.Count));
         }
 
         /// <summary>

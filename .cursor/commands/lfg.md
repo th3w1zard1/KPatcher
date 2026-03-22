@@ -46,7 +46,7 @@ As an AI code assistant, please follow these instructions to carry out the porti
 
      - The test suite in `C:/GitHub/Andastra/`.
 
-   - Port any relevant roundtrip tests into **`src/KPatcher.Tests`**, using **managed** compile/decompile paths unless a test is explicitly marked as legacy/external-only (avoid making `nwnnsscomp.exe` a default gate).
+   - Port any relevant roundtrip tests into **`tests/KPatcher.Tests`**, using **managed** compile/decompile paths unless a test is explicitly marked as legacy/external-only (avoid making `nwnnsscomp.exe` a default gate).
 
    - Run all tests and confirm correctness and roundtrip fidelity.
 

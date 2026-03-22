@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. **Install .NET 8.0 SDK**
+1. **Install .NET 9.0 SDK**
    - Download from: <https://dotnet.microsoft.com/download/dotnet/8.0>
    - Verify installation: `dotnet --version`
 
@@ -42,7 +42,7 @@ dotnet build
 
 ```bash
 cd Tools/KPatcher
-dotnet run --project src/KPatcher/KPatcher.csproj
+dotnet run --project src/KPatcher.UI/KPatcher.UI.csproj
 ```
 
 ## Project Structure Overview
@@ -119,7 +119,7 @@ The codebase follows MVVM (Model-View-ViewModel) pattern:
 dotnet build
 
 # Run
-dotnet run --project src/KPatcher/KPatcher.csproj
+dotnet run --project src/KPatcher.UI/KPatcher.UI.csproj
 
 # (Future) Run tests
 dotnet test
@@ -179,7 +179,7 @@ See `MIGRATION_GUIDE.md` for detailed implementation guidance.
 
 **"SDK not found"**:
 
-- Ensure .NET 8.0 SDK is installed
+- Ensure .NET 9.0 SDK is installed
 - Run `dotnet --version` to verify
 
 **"Package restore failed"**:

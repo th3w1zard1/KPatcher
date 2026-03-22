@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using KCompiler.Diagnostics;
 using KPatcher.Core.Common;
+using Microsoft.Extensions.Logging;
 
 namespace KCompiler.Cli
 {
@@ -27,10 +29,36 @@ namespace KCompiler.Cli
     {
         public static NwnnsscompParseResult Parse(string[] args)
         {
+            return Parse(args, null);
+        }
+
+        /// <param name="log">Optional MEL logger; Debug lines use redacted paths and short failure reasons.</param>
+        public static NwnnsscompParseResult Parse(string[] args, ILogger log)
+        {
             var r = new NwnnsscompParseResult();
-            if (args == null || args.Length == 0)
+            string cid = ToolCorrelation.ReadOptional() ?? "";
+            if (args == null)
+            {
+                log?.LogWarning(
+                    "Tool=kcompiler Phase={Phase} CorrelationId={CorrelationId} Message=argv reference was null; treating as empty",
+                    CompilePhaseNames.CliParse,
+                    cid);
+                args = Array.Empty<string>();
+            }
+
+            if (log != null && log.IsEnabled(LogLevel.Debug))
+            {
+                log.LogDebug(
+                    "Tool=kcompiler Phase={Phase} CorrelationId={CorrelationId} ArgCount={ArgCount}",
+                    CompilePhaseNames.CliParse,
+                    cid,
+                    args.Length);
+            }
+
+            if (args.Length == 0)
             {
                 r.ErrorMessage = "No arguments. Use: kcompiler -c [options] <source.nss> [-o <out.ncs>]";
+                LogParseDebugFail(log, cid, "no_args", null, r);
                 return r;
             }
 
@@ -40,6 +68,7 @@ namespace KCompiler.Cli
                 r.Success = true;
                 r.IsHelp = true;
                 r.ErrorMessage = HelpText();
+                LogParseDebugHelp(log, cid);
                 return r;
             }
 
@@ -48,12 +77,14 @@ namespace KCompiler.Cli
             if (cIdx >= 0 && dIdx >= 0)
             {
                 r.ErrorMessage = "Cannot use -c (compile) and -d (decompile) together. " + HelpText();
+                LogParseDebugFail(log, cid, "mode_conflict_c_and_d", null, r);
                 return r;
             }
 
             if (cIdx < 0 && dIdx < 0)
             {
                 r.ErrorMessage = "Compile mode requires -c (decompile -d is not implemented). " + HelpText();
+                LogParseDebugFail(log, cid, "no_compile_mode", null, r);
                 return r;
             }
 
@@ -86,6 +117,7 @@ namespace KCompiler.Cli
                     if (i + 1 >= list.Count)
                     {
                         r.ErrorMessage = "-g requires a value (1 = K1, 2 = TSL).";
+                        LogParseDebugFail(log, cid, "g_missing_value", null, r);
                         return r;
                     }
 
@@ -104,6 +136,7 @@ namespace KCompiler.Cli
                     else
                     {
                         r.ErrorMessage = $"-g must be 1 or 2, got '{gv}'.";
+                        LogParseDebugFail(log, cid, "g_invalid", gv, r);
                         return r;
                     }
 
@@ -115,6 +148,7 @@ namespace KCompiler.Cli
                     if (i + 1 >= list.Count)
                     {
                         r.ErrorMessage = "--outputdir requires a directory.";
+                        LogParseDebugFail(log, cid, "outputdir_missing", null, r);
                         return r;
                     }
 
@@ -130,6 +164,7 @@ namespace KCompiler.Cli
                     if (i + 1 >= list.Count)
                     {
                         r.ErrorMessage = "-o requires an output file name or path.";
+                        LogParseDebugFail(log, cid, "o_missing", null, r);
                         return r;
                     }
 
@@ -153,6 +188,7 @@ namespace KCompiler.Cli
                     if (i + 1 >= list.Count)
                     {
                         r.ErrorMessage = "--nwscript requires a path.";
+                        LogParseDebugFail(log, cid, "nwscript_missing", null, r);
                         return r;
                     }
 
@@ -166,6 +202,7 @@ namespace KCompiler.Cli
                 if (a.StartsWith("-", StringComparison.Ordinal))
                 {
                     r.ErrorMessage = $"Unknown option '{a}'. " + HelpText();
+                    LogParseDebugFail(log, cid, "unknown_option", a, r);
                     return r;
                 }
             }
@@ -220,18 +257,21 @@ namespace KCompiler.Cli
             if (r.Decompile)
             {
                 r.ErrorMessage = "Decompile (-d) is not implemented. Use -c to compile.";
+                LogParseDebugFail(log, cid, "decompile_not_implemented", null, r);
                 return r;
             }
 
             if (string.IsNullOrEmpty(source))
             {
                 r.ErrorMessage = "Could not determine source .nss path. " + HelpText();
+                LogParseDebugFail(log, cid, "no_source", null, r);
                 return r;
             }
 
             if (string.IsNullOrEmpty(output))
             {
                 r.ErrorMessage = "Could not determine output .ncs path. " + HelpText();
+                LogParseDebugFail(log, cid, "no_output", null, r);
                 return r;
             }
 
@@ -241,7 +281,66 @@ namespace KCompiler.Cli
             r.Game = game;
             r.Debug = debug;
             r.NwscriptPath = nwscript;
+            LogParseDebugOk(log, cid, r);
             return r;
+        }
+
+        private static void LogParseDebugHelp(ILogger log, string correlationId)
+        {
+            if (log == null || !log.IsEnabled(LogLevel.Debug))
+            {
+                return;
+            }
+
+            log.LogDebug(
+                "Tool=kcompiler Phase={Phase} CorrelationId={CorrelationId} Result=help",
+                CompilePhaseNames.CliParse,
+                correlationId);
+        }
+
+        private static void LogParseDebugFail(ILogger log, string correlationId, string reason, string token, NwnnsscompParseResult r)
+        {
+            if (log == null || !log.IsEnabled(LogLevel.Debug))
+            {
+                return;
+            }
+
+            log.LogDebug(
+                "Tool=kcompiler Phase={Phase} CorrelationId={CorrelationId} Result=fail Reason={Reason} Token={Token} UserHint={Hint}",
+                CompilePhaseNames.CliParse,
+                correlationId,
+                reason ?? "",
+                token ?? "",
+                TruncateOneLine(r.ErrorMessage, 200));
+        }
+
+        private static void LogParseDebugOk(ILogger log, string correlationId, NwnnsscompParseResult r)
+        {
+            if (log == null || !log.IsEnabled(LogLevel.Debug))
+            {
+                return;
+            }
+
+            log.LogDebug(
+                "Tool=kcompiler Phase={Phase} CorrelationId={CorrelationId} Result=ok Game={Game} Debug={Debug} Source={Source} Output={Output} Nwscript={Nwscript}",
+                CompilePhaseNames.CliParse,
+                correlationId,
+                r.Game,
+                r.Debug,
+                ToolPathRedaction.FormatPath(r.SourcePath),
+                ToolPathRedaction.FormatPath(r.OutputPath),
+                string.IsNullOrEmpty(r.NwscriptPath) ? "(default)" : ToolPathRedaction.FormatPath(r.NwscriptPath));
+        }
+
+        private static string TruncateOneLine(string s, int max)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return "";
+            }
+
+            s = s.Replace('\r', ' ').Replace('\n', ' ').Trim();
+            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
 
         private static string HelpText()

@@ -32,7 +32,7 @@
 ### Key improvements (all passes)
 
 1. **Publish merge pattern** — staging + `Copy` beats chained `Publish` to one `PublishDir` (avoids wiping KPatcher output).
-2. **Testability** — `InternalsVisibleTo`, `HoloPatcherCliTests` without launching Avalonia.
+2. **Testability** — `InternalsVisibleTo`, `KPatcherCLITests` without launching Avalonia.
 3. **SDK / NuGet** — umbrella as **`keditchanges-cli`** to avoid ambiguous graph identity.
 4. **Framework matrix** — `PublishBundledCliTools` is **`net9.0` only** until sidecar TFMs align.
 5. **Official docs alignment** — solution-level `--output` pitfalls, `IsPublishable`, artifacts output, single-file CLI caveats (see appendix).
@@ -69,7 +69,7 @@
 - **Optional fourth binary:** `keditchanges-cli` is **not** merged into KPatcher publish today (lean default); product decision to add a third nested `Publish` + copy.
 - **Dependency flattening:** Flat `Copy` of two sidecars into one folder — audit duplicate DLL names/versions on upgrade (Microsoft warns about single shared output dirs for solutions).
 - **Solution hygiene:** `KPatcher.sln` has an unused **`src` solution folder** (no nested projects); nest projects or remove folder for clarity.
-- **Artifacts output (.NET 8+):** Optional `UseArtifactsOutput` for predictable per-project publish trees before merge ([Artifacts output layout](https://learn.microsoft.com/dotnet/core/sdk/artifacts-output)).
+- **Artifacts output (.NET 9+):** Optional `UseArtifactsOutput` for predictable per-project publish trees before merge ([Artifacts output layout](https://learn.microsoft.com/dotnet/core/sdk/artifacts-output)).
 
 ### New considerations (third pass — CI / docs accuracy)
 
@@ -201,10 +201,10 @@
 | Bundle target | [`src/KPatcher/KPatcher.csproj`](../../src/KPatcher/KPatcher.csproj) — `PublishBundledCliTools`, `AfterTargets="Publish"`, `Condition` on `net9.0` |
 | Staging | `$(MSBuildProjectDirectory)` + `$(IntermediateOutputPath)` → `sidecar_kcompiler\`, `sidecar_ncsdecomp\` |
 | Sidecar props | `_SidecarPublishProps`: Configuration, TargetFramework, RuntimeIdentifier, SelfContained, PublishReadyToRun, PublishTrimmed, `UseAppHost=true` |
-| HoloPatcher CLI | [`src/KPatcher/HoloPatcherCli.cs`](../../src/KPatcher/HoloPatcherCli.cs), [`src/KPatcher/Program.cs`](../../src/KPatcher/Program.cs) |
+| HoloPatcher CLI | [`src/KPatcher/KPatcherCLI.cs`](../../src/KPatcher/KPatcherCLI.cs), [`src/KPatcher/Program.cs`](../../src/KPatcher/Program.cs) |
 | Shared NCS CLI | [`src/NCSDecomp.Core/NcsDecompCli.cs`](../../src/NCSDecomp.Core/NcsDecompCli.cs); host [`src/NCSDecomp.NET/Program.cs`](../../src/NCSDecomp.NET/Program.cs) |
 | Umbrella | [`src/KEditChanges.NET/`](../../src/KEditChanges.NET/) — **not** in `PublishBundledCliTools` |
-| Tests | [`src/KPatcher.Tests/HoloPatcherCliTests.cs`](../../src/KPatcher.Tests/HoloPatcherCliTests.cs) |
+| Tests | [`tests/KPatcher.Tests/HoloPatcherCliTests.cs`](../../tests/KPatcher.Tests/HoloPatcherCliTests.cs) |
 
 **Gaps vs brainstorm open questions**
 
@@ -395,7 +395,7 @@ The base plan defines:
 | `dotnet publish` / `PublishDir` / `IsPublishable` | https://learn.microsoft.com/dotnet/core/tools/dotnet-publish |
 | Solution `--output` breaking change (.NET 7+) | https://learn.microsoft.com/dotnet/core/compatibility/sdk/7.0/solution-level-output-no-longer-valid |
 | MSBuild `AfterTargets` / extend publish | https://learn.microsoft.com/visualstudio/msbuild/how-to-extend-the-visual-studio-build-process?view=vs-2022 |
-| Artifacts output layout (.NET 8+) | https://learn.microsoft.com/dotnet/core/sdk/artifacts-output |
+| Artifacts output layout (.NET 9+) | https://learn.microsoft.com/dotnet/core/sdk/artifacts-output |
 | Core library + solution structure | https://learn.microsoft.com/dotnet/core/tutorials/libraries |
 | Project / folder organization | https://learn.microsoft.com/dotnet/core/porting/project-structure |
 | .NET tools (global/local) | https://learn.microsoft.com/dotnet/core/tools/global-tools |

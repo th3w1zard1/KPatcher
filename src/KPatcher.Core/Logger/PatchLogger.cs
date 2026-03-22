@@ -25,6 +25,7 @@ namespace KPatcher.Core.Logger
             }
         }
 
+        public IEnumerable<PatchLog> Diagnostics => AllLogs.Where(log => log.LogType == LogType.Diagnostic);
         public IEnumerable<PatchLog> VerboseLogs => AllLogs.Where(log => log.LogType == LogType.Verbose);
         public IEnumerable<PatchLog> Notes => AllLogs.Where(log => log.LogType == LogType.Note);
         public IEnumerable<PatchLog> Warnings => AllLogs.Where(log => log.LogType == LogType.Warning);
@@ -35,6 +36,8 @@ namespace KPatcher.Core.Logger
         // Events for real-time log updates
         [CanBeNull]
         public event EventHandler<PatchLog> LogAdded;
+        [CanBeNull]
+        public event EventHandler<PatchLog> DiagnosticLogged;
         [CanBeNull]
         public event EventHandler<PatchLog> VerboseLogged;
         [CanBeNull]
@@ -47,6 +50,17 @@ namespace KPatcher.Core.Logger
         public void CompletePatch()
         {
             PatchesCompleted++;
+        }
+
+        public void AddDiagnostic(string message)
+        {
+            var log = new PatchLog(message, LogType.Diagnostic);
+            lock (_lockObject)
+            {
+                _allLogs.Add(log);
+            }
+            LogAdded?.Invoke(this, log);
+            DiagnosticLogged?.Invoke(this, log);
         }
 
         public void AddVerbose(string message)

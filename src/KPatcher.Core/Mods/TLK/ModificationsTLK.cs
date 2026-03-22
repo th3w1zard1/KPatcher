@@ -55,12 +55,21 @@ namespace KPatcher.Core.Mods.TLK
             PatchLogger logger,
             Game game)
         {
+            string label = SaveAs ?? SourceFile ?? "";
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsTLK.PatchResource: saveAs={0} sourceBytes={1} modifierCount={2} game={3}",
+                label, source?.Length ?? 0, Modifiers.Count, game));
+
             var reader = new TLKBinaryReader(source);
             Formats.TLK.TLK dialog = reader.Load();
             Apply(dialog, memory, logger, game);
 
             var writer = new TLKBinaryWriter(dialog);
-            return writer.Write();
+            byte[] written = writer.Write();
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsTLK.PatchResource: wrote saveAs={0} outBytes={1} entryCount={2}",
+                label, written.Length, dialog.Count));
+            return written;
         }
 
         /// <summary>

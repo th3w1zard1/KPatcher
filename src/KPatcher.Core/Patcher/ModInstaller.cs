@@ -61,7 +61,10 @@ namespace KPatcher.Core.Patcher
             this.changesIniPath = changesIniPath ?? throw new ArgumentNullException(nameof(changesIniPath));
             log = logger ?? new PatchLogger();
 
-            Game = Heuristics.DetermineGame(this.gamePath);
+            Game = Heuristics.DetermineGame(this.gamePath, log);
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller ctor: modPath={0}, gamePath={1}, initialChangesIni={2}, game={3}",
+                this.modPath, this.gamePath, this.changesIniPath, Game?.ToString() ?? "null"));
 
             // Handle legacy syntax - look for changes.ini in various locations
             if (!File.Exists(this.changesIniPath))
@@ -81,6 +84,10 @@ namespace KPatcher.Core.Patcher
                         this.changesIniPath);
                 }
             }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller ctor: resolved changesIniPath={0}, modDirectory={1}",
+                this.changesIniPath, Path.GetDirectoryName(this.changesIniPath) ?? this.modPath));
 
             // Initialize install log writer in the mod directory (where changes.ini is located)
             string modDirectory = Path.GetDirectoryName(this.changesIniPath) ?? this.modPath;
@@ -123,6 +130,8 @@ namespace KPatcher.Core.Patcher
                     case LogType.Verbose:
                         installLog.WriteInfo(logEntry.Message);
                         break;
+                    case LogType.Diagnostic:
+                        break;
                 }
             }
             catch
@@ -138,8 +147,15 @@ namespace KPatcher.Core.Patcher
         {
             if (config != null)
             {
+                log.AddDiagnostic("ModInstaller.Config: returning cached PatcherConfig instance");
                 return config;
             }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller.Config: loading from path={0}, isYaml={1}",
+                changesIniPath,
+                Path.GetExtension(changesIniPath).Equals(".yaml", StringComparison.OrdinalIgnoreCase)
+                || Path.GetExtension(changesIniPath).Equals(".yml", StringComparison.OrdinalIgnoreCase)));
 
             if (!File.Exists(changesIniPath))
             {
@@ -185,6 +201,15 @@ namespace KPatcher.Core.Patcher
 
             ConfigReader reader = new ConfigReader(ini, modPath, log, TslPatchDataPath);
             config = reader.Load(new PatcherConfig());
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller.Config: loaded patch counts installList={0} twoDa={1} gff={2} tlkMods={3} nss={4} ncs={5} ssf={6}",
+                config.InstallList.Count,
+                config.Patches2DA.Count,
+                config.PatchesGFF.Count,
+                config.PatchesTLK.Modifiers.Count,
+                config.PatchesNSS.Count,
+                config.PatchesNCS.Count,
+                config.PatchesSSF.Count));
 
             // When loading from INI, create equivalent .yaml alongside (same dir, same base name)
             if (!isYaml && changesIniPath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
@@ -229,6 +254,9 @@ namespace KPatcher.Core.Patcher
         {
             if (backup != null)
             {
+                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "GetBackup: returning existing backup={0}, processedFiles={1}",
+                    backup, processedBackupFiles.Count));
                 return (backup, processedBackupFiles);
             }
 
@@ -274,6 +302,8 @@ namespace KPatcher.Core.Patcher
 
             log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.UsingBackupDirectory, backupDir));
             backup = backupDir;
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetBackup: created backupDir={0}, timestampToken={1}", backupDir, timestamp));
 
             return (backup, processedBackupFiles);
         }
@@ -294,12 +324,19 @@ namespace KPatcher.Core.Patcher
                 }
 
                 installLog?.WriteInfo(PatcherResources.StartingInstallation);
+                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Install: start game={0} gamePath={1} modPath={2} changesIni={3}",
+                    Game, gamePath, modPath, changesIniPath));
 
                 PatcherMemory memory = new PatcherMemory();
                 PatcherConfig cfg = Config();
 
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.LoadingConfigurationFrom, Path.GetFileName(changesIniPath)));
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FoundPatchesToApply, cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count));
+
+                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Install: ordered queue TLK+install+2DA+GFF+NSS+NCS+SSF; TslPatchDataPath={0}",
+                    TslPatchDataPath ?? "null"));
 
                 List<PatcherModifications> patchesList = new List<PatcherModifications>();
                 // TSLPatcher patch order: TLK → InstallList → 2DA → GFF → NSS → NCS → SSF
@@ -310,6 +347,9 @@ namespace KPatcher.Core.Patcher
                 patchesList.AddRange(cfg.PatchesNSS);
                 patchesList.AddRange(cfg.PatchesNCS);
                 patchesList.AddRange(cfg.PatchesSSF);
+
+                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "Install: total patch objects in run order={0}", patchesList.Count));
 
                 bool finishedPreprocessedScripts = false;
                 // Can be null if not found
@@ -323,8 +363,22 @@ namespace KPatcher.Core.Patcher
                 bool processingNCS = false;
                 bool processingSSF = false;
 
+                int patchOrdinal = 0;
                 foreach (PatcherModifications patch in patchesList)
                 {
+                    patchOrdinal++;
+                    log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "Install patch {0}/{1}: clrType={2} action={3} sourceFile={4} saveAs={5} destination={6} replaceFile={7} skipIfNotReplace={8}",
+                        patchOrdinal,
+                        patchesList.Count,
+                        patch.GetType().Name,
+                        patch.Action,
+                        patch.SourceFile ?? "",
+                        patch.SaveAs ?? "",
+                        patch.Destination ?? "",
+                        patch.ReplaceFile,
+                        patch.SkipIfNotReplace));
+
                     cancellationToken?.ThrowIfCancellationRequested();
 
                     // if should_cancel is not None and should_cancel.is_set(): sys.exit()
@@ -386,6 +440,8 @@ namespace KPatcher.Core.Patcher
                         string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
                         string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
                         string outputContainerPath = Path.Combine(gamePath, destination);
+                        log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "Install: outputContainerPath={0}, saveAs={1}", outputContainerPath, saveAs));
 
                         // TSLPatcher: do not overwrite dialog.tlk directly
                         if (patch is ModificationsTLK && string.Equals(saveAs, "dialog.tlk", StringComparison.OrdinalIgnoreCase))
@@ -395,9 +451,15 @@ namespace KPatcher.Core.Patcher
                         }
 
                         HandleCapsuleResult result = HandleCapsuleAndBackup(patch, outputContainerPath, destination, saveAs);
+                        log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "Install: HandleCapsuleAndBackup exists={0} capsule={1}",
+                            result.Exists,
+                            result.Capsule != null ? result.Capsule.Path.GetResolvedPath() : "null"));
 
                         if (!ShouldPatch(patch, result.Exists, result.Capsule))
                         {
+                            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                "Install: ShouldPatch=false, skipping ordinal={0}", patchOrdinal));
                             continue;
                         }
 
@@ -406,6 +468,8 @@ namespace KPatcher.Core.Patcher
 
                         if (dataToPatch is null)
                         {
+                            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                "Install: LookupResource returned null for ordinal={0} saveAs={1}", patchOrdinal, saveAs));
                             // TSLPatcher parity: No TLK file loaded / Unable to locate TLK file
                             if (patch is ModificationsTLK tlkPatch)
                                 log.AddError(string.Format(TSLPatcherMessages.UnableToLocateTLKFileToPatch, tlkPatch.SaveAs ?? tlkPatch.SourceFile ?? "dialog.tlk"));
@@ -421,7 +485,13 @@ namespace KPatcher.Core.Patcher
                             log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.FileHasNoContent, patch.SourceFile));
                         }
 
+                        log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "Install: input bytes length={0} for ordinal={1}", dataToPatch.Length, patchOrdinal));
                         object patchedData = patch.PatchResource(dataToPatch, memory, log, Game.Value);
+                        log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "Install: PatchResource resultType={0} ordinal={1}",
+                            patchedData?.GetType().Name ?? "null",
+                            patchOrdinal));
 
                         // If PatchResource returns the boolean true, it means skip
                         if (patchedData is bool b && b)
@@ -440,6 +510,9 @@ namespace KPatcher.Core.Patcher
                                 (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
                                 result.Capsule.Add(resName, resType, patchedDataBytes);
                                 result.Capsule.Save();
+                                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                    "Install: wrote resource into capsule resName={0} resType={1} bytes={2} ordinal={3}",
+                                    resName, resType, patchedDataBytes.Length, patchOrdinal));
                             }
                             else
                             {
@@ -447,6 +520,9 @@ namespace KPatcher.Core.Patcher
                                 Directory.CreateDirectory(outputContainerPath);
                                 string destinationPath = Path.Combine(outputContainerPath, saveAs);
                                 File.WriteAllBytes(destinationPath, patchedDataBytes);
+                                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                    "Install: wrote file {0} bytes={1} ordinal={2}",
+                                    destinationPath, patchedDataBytes.Length, patchOrdinal));
                             }
 
                             log.CompletePatch();
@@ -454,6 +530,9 @@ namespace KPatcher.Core.Patcher
                     }
                     catch (Exception ex)
                     {
+                        log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "Install: exception in patch ordinal={0} type={1} message={2}",
+                            patchOrdinal, ex.GetType().FullName, ex.Message));
                         // exc_type, exc_msg = universal_simplify_exception(e)
                         string excType = ex.GetType().Name;
                         string excMsg = ex.Message;
@@ -508,8 +587,12 @@ namespace KPatcher.Core.Patcher
             // tslpatchdata should be read-only, this allows us to replace memory tokens while ensuring include scripts work correctly.
             if (config.PatchesNSS.Count == 0)
             {
+                log.AddDiagnostic("PrepareCompileList: no NSS patches, skipping temp script folder");
                 return null;
             }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "PrepareCompileList: NSS patch count={0}, modPath={1}", config.PatchesNSS.Count, modPath));
 
             // Move nwscript.nss to Override if there are any nss patches to do
             string nwscriptPath = Path.Combine(modPath, "nwscript.nss");
@@ -664,6 +747,13 @@ namespace KPatcher.Core.Patcher
                 exists = File.Exists(fullPath);
             }
 
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "HandleCapsuleAndBackup: destination={0} saveAs={1} exists={2} isCapsuleDestination={3}",
+                destination,
+                saveAs,
+                exists,
+                IsCapsuleFile(destination)));
+
             return new HandleCapsuleResult { Exists = exists, Capsule = capsule };
         }
 
@@ -679,6 +769,10 @@ namespace KPatcher.Core.Patcher
         /// </summary>
         private void CreateBackupHelper(string destinationFilePath, string backupFolderPath, HashSet<string> processedFiles, [CanBeNull] string subdirectoryPath = null)
         {
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "CreateBackupHelper: dest={0} backupRoot={1} subdir={2}",
+                destinationFilePath, backupFolderPath, subdirectoryPath ?? ""));
+
             string destinationFileStr = destinationFilePath;
             string destinationFileStrLower = destinationFileStr.ToLowerInvariant();
 
@@ -724,7 +818,7 @@ namespace KPatcher.Core.Patcher
                         gameFolder = Path.GetDirectoryName(destinationFilePath) ?? gamePath;
                     }
 
-                    CreateUninstallScripts(backupFolderPath, uninstallFolder, gameFolder);
+                    CreateUninstallScripts(backupFolderPath, uninstallFolder, gameFolder, log);
                     processedFiles.Add(uninstallStrLower);
                 }
 
@@ -804,6 +898,10 @@ namespace KPatcher.Core.Patcher
                         return null;
                     }
 
+                    log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "LookupResource: loading from mod (replaceOrMissingOutput) sourceFolder={0} sourceFile={1}",
+                        sourceFolder, sourceFile));
+
                     // Path resolution: mod_path / sourcefolder / sourcefile
                     // mod_path is typically the tslpatchdata folder (parent of changes.ini).
                     // If sourcefolder = ".", this resolves to mod_path itself (tslpatchdata folder).
@@ -822,6 +920,8 @@ namespace KPatcher.Core.Patcher
                     }
 
                     string targetPath = Path.Combine(outputContainerPath, saveAs);
+                    log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "LookupResource: loading existing override file {0}", targetPath));
                     return LoadResourceFile(targetPath);
                 }
 
@@ -833,6 +933,8 @@ namespace KPatcher.Core.Patcher
 
                 // return capsule.resource(*ResourceIdentifier.from_path(patch.saveas).unpack())
                 (string resName, ResourceType resType) = ResourceIdentifier.FromPath(saveAs).Unpack();
+                log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "LookupResource: capsule get resName={0} resType={1} path={2}", resName, resType, capsule.Path.GetResolvedPath()));
                 return capsule.GetResource(resName, resType);
             }
             catch (Exception ex)
@@ -848,6 +950,10 @@ namespace KPatcher.Core.Patcher
             bool exists,
             [CanBeNull] Capsule capsule = null)
         {
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ShouldPatch: exists={0} capsuleNull={1} replaceFile={2} skipIfNotReplace={3}",
+                exists, capsule == null, patch.ReplaceFile, patch.SkipIfNotReplace));
+
             string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
             string localFolder = destination == "." ? new DirectoryInfo(gamePath).Name : destination;
             string containerType = capsule is null ? "folder" : "archive";
@@ -861,29 +967,34 @@ namespace KPatcher.Core.Patcher
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
                 log.AddNote($"{actionBase}ing '{patch.SourceFile}' and replacing existing file {saveAsStr} the '{localFolder}' {containerType}");
+                log.AddDiagnostic("ShouldPatch: branch replaceFile && exists -> true");
                 return true;
             }
 
             if (!patch.SkipIfNotReplace && !patch.ReplaceFile && exists)
             {
                 log.AddNote($"{actionBase}ing existing file '{saveAs}' in the '{localFolder}' {containerType}");
+                log.AddDiagnostic("ShouldPatch: branch patch existing without replace flag -> true");
                 return true;
             }
 
             if (patch.SkipIfNotReplace && !patch.ReplaceFile && exists)
             {
                 log.AddNote($"'{saveAs}' already exists in the '{localFolder}' {containerType}. Skipping file...");
+                log.AddDiagnostic("ShouldPatch: branch skipIfNotReplace -> false");
                 return false;
             }
 
             // If capsule doesn't exist on disk, return false
             if (capsule != null && !capsule.Path.IsFile())
             {
+                log.AddDiagnostic("ShouldPatch: capsule path not a file -> false");
                 log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundWhenAttempting, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile));
                 return false;
             }
             if (capsule != null && !capsule.ExistedOnDisk && !patch.ReplaceFile)
             {
+                log.AddDiagnostic("ShouldPatch: capsule did not exist on disk and not replace -> false");
                 log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundWhenAttempting, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile));
                 return false;
             }
@@ -891,6 +1002,7 @@ namespace KPatcher.Core.Patcher
             string saveType = (capsule != null && saveAs == patch.SourceFile) ? "adding" : "saving";
             string savingAsStr = saveAs != patch.SourceFile ? $"as '{saveAs}' in" : "to";
             log.AddNote($"{actionBase}ing '{patch.SourceFile}' and {saveType} {savingAsStr} the '{localFolder}' {containerType}");
+            log.AddDiagnostic("ShouldPatch: default new/copy branch -> true");
             return true;
         }
 
@@ -901,6 +1013,9 @@ namespace KPatcher.Core.Patcher
         {
             // override_type: str = patch.override_type.lower().strip()
             string overrideType = patch.OverrideTypeValue.ToLowerInvariant().Trim();
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "HandleOverrideType: saveAs={0} overrideType={1}",
+                patch.SaveAs ?? patch.SourceFile ?? "", overrideType));
             if (string.IsNullOrEmpty(overrideType) || overrideType == OverrideType.IGNORE)
             {
                 return;
@@ -957,6 +1072,7 @@ namespace KPatcher.Core.Patcher
         /// </summary>
         private void HandleModRimShadow(PatcherModifications patch)
         {
+            log.AddDiagnostic("HandleModRimShadow: checking .mod shadow for RIM/ERF write");
             // erfrim_path: CaseAwarePath = self.game_path / patch.destination / patch.saveas
             string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
@@ -998,6 +1114,9 @@ namespace KPatcher.Core.Patcher
             {
                 throw new ArgumentException("Specified file must end with the .mod extension", nameof(modFilePath));
             }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "RimToMod: modFilePath={0} rimFolderPath={1} moduleRoot={2}", modFilePath, rimFolderPath, moduleRoot));
 
             string filepathRim = Path.Combine(rimFolderPath, $"{moduleRoot}.rim");
             string filepathRimS = Path.Combine(rimFolderPath, $"{moduleRoot}_s.rim");
@@ -1041,6 +1160,9 @@ namespace KPatcher.Core.Patcher
             {
                 writer.Write(fs);
             }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "RimToMod: completed write modFilePath={0} resourceCount={1}", modFilePath, mod.Count));
         }
 
         /// <summary>
@@ -1054,6 +1176,7 @@ namespace KPatcher.Core.Patcher
 
             if (config.PatchesTLK.Modifiers.Count == 0)
             {
+                log.AddDiagnostic("GetTlkPatches: no TLK modifiers in config");
                 return tlkPatches;
             }
 
@@ -1098,16 +1221,22 @@ namespace KPatcher.Core.Patcher
                 femaleTlkPatches.SaveAs = femaleDialogFilename;
 
                 tlkPatches.Add(femaleTlkPatches);
+                log.AddDiagnostic("GetTlkPatches: appended female dialogf.tlk patch clone");
             }
 
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "GetTlkPatches: returning {0} TLK patch object(s)", tlkPatches.Count));
             return tlkPatches;
         }
 
         /// <summary>
         /// Creates uninstall scripts (PowerShell and Bash) in the uninstall folder.
         /// </summary>
-        private static void CreateUninstallScripts([NotNull] string backupDir, [NotNull] string uninstallFolder, [NotNull] string mainFolder)
+        private static void CreateUninstallScripts([NotNull] string backupDir, [NotNull] string uninstallFolder, [NotNull] string mainFolder, PatchLogger patchLog)
         {
+            patchLog.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "CreateUninstallScripts: backupDir={0} uninstallFolder={1} mainFolder={2}",
+                backupDir, uninstallFolder, mainFolder));
             // PowerShell script - using StringBuilder to avoid verbatim string parsing issues
             string ps1Path = Path.Combine(uninstallFolder, "uninstall.ps1");
             var ps1Script = new StringBuilder();
