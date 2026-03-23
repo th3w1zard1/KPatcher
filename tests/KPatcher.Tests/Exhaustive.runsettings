@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Only NCSDecompCliRoundTripTest (Category=DeNCSRoundTrip). Long-running; typically run locally without the 600s wrapper or in a dedicated job. -->
+    <TestCaseFilter>Category=DeNCSRoundTrip</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

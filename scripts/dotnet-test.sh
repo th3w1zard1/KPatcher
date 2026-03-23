@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Run dotnet test under a wall-clock timeout; kill the process group when time expires.
+# Agents/CI: use this script instead of bare "dotnet test". Run once; on 124 or hang, find the bottleneck — do not poll for hours.
 # Default: DOTNET_TEST_TIMEOUT_SECONDS or 600 seconds. Maximum permitted: 600 seconds (10 minutes) — never exceed.
 # Exit 124 on timeout (GNU timeout convention). On 124: find the bottleneck (profile/trace) and speed up; do not disable tests.
 #

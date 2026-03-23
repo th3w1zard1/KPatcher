@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Default CI/agent runs must finish under the repo 10-minute wrapper cap. Exhaustive vanilla↔NCS harness: see Exhaustive.runsettings -->
+    <TestCaseFilter>Category!=DeNCSRoundTrip</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

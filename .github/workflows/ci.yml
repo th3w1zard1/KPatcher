@@ -30,7 +30,7 @@ jobs:
         run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
 
       - name: Test
-        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --verbosity normal
+        run: pwsh -NoProfile -File ./scripts/DotnetTest.ps1 tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --verbosity normal
         continue-on-error: true
 
   lint:

@@ -4,6 +4,8 @@
     Runs dotnet test under a wall-clock timeout and kills the process tree when time expires.
 
 .DESCRIPTION
+    **Agents and CI must use this script (or dotnet-test.sh on Unix), not bare `dotnet test`.** Run it once per check; if it exits 124 (timeout) or does not finish within one invocation, stop and find the bottleneck — do not poll the same run for hours.
+
     Use this instead of invoking dotnet test directly so hung test runs cannot block agents or CI shells indefinitely.
 
     Implemented with $args (no param block) so the first token is never bound to a [int] timeout by mistake.

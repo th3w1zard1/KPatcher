@@ -4,6 +4,8 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- Default.runsettings: exclude exhaustive DeNCS CLI round-trip (23k+ scripts) so dotnet test / CI finish under the 10-minute wrapper cap -->
+    <VSTestSetting>$(MSBuildThisFileDirectory)Default.runsettings</VSTestSetting>
   </PropertyGroup>
 
   <!-- RuntimeIdentifiers: Forward-compatible dynamic assignment based on .NET version -->

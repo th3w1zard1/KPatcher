@@ -98,13 +98,16 @@ When fixing code, convert C# 8+ syntax to C# 7.3 compatible alternatives, includ
 - Failing tests indicate the C# code does not match Python
 - Fix by matching Python exactly, not by changing test expectations
 
-### dotnet test (mandatory timeout)
+### dotnet test (mandatory script + timeout)
 
 - **Do not** invoke bare `dotnet test` in agent-driven or automated runs (it can hang indefinitely).
+- **Forbidden:** bare `dotnet test` in agent workflows, CI, or automation — **always** the wrappers below.
 - **Default:** run tests through the repo wrappers so the subprocess is killed when the timeout elapses:
   - **Windows:** `.\scripts\DotnetTest.ps1 KPatcher.sln -c Debug` (optional leading `-TimeoutSeconds N` is parsed out; values above **600** are clamped).
   - **Linux/macOS:** `./scripts/dotnet-test.sh KPatcher.sln -c Debug` (requires GNU `timeout` or `gtimeout` from coreutils; on macOS often `brew install coreutils` and optionally `export TIMEOUT_CMD=gtimeout`).
-- **Duration:** **Never exceed 10 minutes total** for any `dotnet test` run. Hard **maximum 600 seconds** for the entire invocation — env `DOTNET_TEST_TIMEOUT_SECONDS` and PowerShell `-TimeoutSeconds` **cannot** raise that ceiling; default is **600**. Suites must complete **well under** 10 minutes in practice; if not, **find the bottleneck** (profile/trace, slow tests, redundant work) and optimize.
+  - **GitHub Actions:** use `pwsh -NoProfile -File ./scripts/DotnetTest.ps1 ...` (available on `ubuntu-latest`, `windows-latest`, `macos-latest`).
+- **One shot, no polling:** run the wrapper **once** per verification pass. If the run does not complete in that invocation (including exit **124**), **stop** and **find the bottleneck** — do not leave a test run running indefinitely or poll its output for hours.
+- **Duration:** **Never exceed 10 minutes total** for any wrapped run. Hard **maximum 600 seconds** — env `DOTNET_TEST_TIMEOUT_SECONDS` and PowerShell `-TimeoutSeconds` **cannot** raise that ceiling; default is **600**. **`KPatcher.Tests`** uses **`tests/KPatcher.Tests/Default.runsettings`** to exclude **`Category=DeNCSRoundTrip`** by default so the suite finishes **well under** the cap.
 - **Exit code 124** means the timeout fired and the `dotnet` process tree was terminated. **Mandatory response:** identify and fix the bottleneck — **do not** “fix” timeouts by commenting out, skipping, or disabling tests as the primary response.
 
 ## NCS/NSS File Operations
