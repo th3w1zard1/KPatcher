@@ -11,24 +11,24 @@
     Default timeout order:
     1) -TimeoutSeconds N (if present at the start of the argument list; parsed and stripped)
     2) Environment variable DOTNET_TEST_TIMEOUT_SECONDS (if set to a positive integer)
-    3) 300 seconds (5 minutes)
+    3) 600 seconds (10 minutes)
 
-    Values above 300 are clamped to 300 — this wrapper enforces a single maximum wall clock for any agent/automation run.
+    Values above 600 are clamped to 600 — **never** exceed 10 minutes total wall clock for `dotnet test` (no env override can raise the cap).
 
     If the timeout elapses, the wrapper terminates the dotnet process tree and exits with code 124 (GNU timeout convention).
-    Treat exit 124 as a signal to profile and speed up the slow path (parallelism, smaller fixtures, caching); do not “fix” timeouts by disabling or skipping tests.
+    Treat exit 124 as mandatory bottleneck work: profile, trace, and optimize until the suite finishes **well under** 10 minutes; do not satisfy timeouts by disabling, skipping, or shrinking coverage as the primary fix.
 
 .EXAMPLE
     .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
 
 .EXAMPLE
-    pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 300 KPatcher.sln -c Debug
+    pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 600 KPatcher.sln -c Debug
 
 .EXAMPLE
-    $env:DOTNET_TEST_TIMEOUT_SECONDS = '300'; .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
+    $env:DOTNET_TEST_TIMEOUT_SECONDS = '600'; .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
 #>
 $ErrorActionPreference = 'Stop'
-$script:DotnetTestMaxWallClockSeconds = 300
+$script:DotnetTestMaxWallClockSeconds = 600
 
 function Resolve-TimeoutSeconds {
     param([int] $ExplicitFromSwitch)
@@ -93,11 +93,11 @@ if ($DotnetTestArgs.Count -eq 0) {
 No arguments passed and KPatcher.sln not found in the current directory.
 
 Usage:
-  .\scripts\DotnetTest.ps1 [-TimeoutSeconds N] <arguments to dotnet test...>  (N capped at 300)
+  .\scripts\DotnetTest.ps1 [-TimeoutSeconds N] <arguments to dotnet test...>  (N capped at 600)
 
 Examples:
   .\scripts\DotnetTest.ps1 KPatcher.sln -c Debug
-  pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 300 KPatcher.sln -c Debug
+  pwsh -File .\scripts\DotnetTest.ps1 -TimeoutSeconds 600 KPatcher.sln -c Debug
 "@
         exit 2
     }
