@@ -3,8 +3,11 @@
 Port vendor/DeNCS .../node/*.java SableCC classes to C# under src/NCSDecomp.Core/Node/{Declarations,Expressions,Statements}/.
 Skips: tokens (T*), Token.java, Node.java, Switch*.java, EOF, AProgram, ACommandBlock (hand-ported), Cast.java (interface -> ICast.cs).
 """
+
 from __future__ import print_function
+
 import re
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,19 +33,69 @@ FOOTER = """
 DECL = {"AProgram", "ASubroutine", "PProgram", "PSubroutine"}
 
 EXPR = {
-    "AAddBinaryOp", "ADivBinaryOp", "AEqualBinaryOp", "AExclOrLogiiOp", "AFloatConstant", "AGeqBinaryOp",
-    "AGtBinaryOp", "AIncibpStackOp", "AIncispStackOp", "AInclOrLogiiOp", "AIntConstant", "ALeqBinaryOp",
-    "ALtBinaryOp", "AModBinaryOp", "AMulBinaryOp", "ANegUnaryOp", "ANequalBinaryOp", "ANonzeroJumpIf",
-    "ANotUnaryOp", "AOrLogiiOp", "ARestorebpBpOp", "ASavebpBpOp", "AShleftBinaryOp", "AShrightBinaryOp",
-    "ASize", "AStringConstant", "ASubBinaryOp", "AUnrightBinaryOp", "AZeroJumpIf",
-    "AAndLogiiOp", "ABitAndLogiiOp", "ACompUnaryOp", "ADecibpStackOp", "ADecispStackOp",
-    "PBinaryOp", "PUnaryOp", "PLogiiOp", "PConstant", "PStackOp", "PBpOp", "PSize", "PJumpIf",
+    "AAddBinaryOp",
+    "ADivBinaryOp",
+    "AEqualBinaryOp",
+    "AExclOrLogiiOp",
+    "AFloatConstant",
+    "AGeqBinaryOp",
+    "AGtBinaryOp",
+    "AIncibpStackOp",
+    "AIncispStackOp",
+    "AInclOrLogiiOp",
+    "AIntConstant",
+    "ALeqBinaryOp",
+    "ALtBinaryOp",
+    "AModBinaryOp",
+    "AMulBinaryOp",
+    "ANegUnaryOp",
+    "ANequalBinaryOp",
+    "ANonzeroJumpIf",
+    "ANotUnaryOp",
+    "AOrLogiiOp",
+    "ARestorebpBpOp",
+    "ASavebpBpOp",
+    "AShleftBinaryOp",
+    "AShrightBinaryOp",
+    "ASize",
+    "AStringConstant",
+    "ASubBinaryOp",
+    "AUnrightBinaryOp",
+    "AZeroJumpIf",
+    "AAndLogiiOp",
+    "ABitAndLogiiOp",
+    "ACompUnaryOp",
+    "ADecibpStackOp",
+    "ADecispStackOp",
+    "PBinaryOp",
+    "PUnaryOp",
+    "PLogiiOp",
+    "PConstant",
+    "PStackOp",
+    "PBpOp",
+    "PSize",
+    "PJumpIf",
 }
 
 SKIP_NAMES = {
-    "Token", "Node", "Switch", "Switchable", "Cast", "TypedLinkedList", "NodeCast", "NoCast",
-    "Start", "XPCmd", "X1PCmd", "X2PCmd", "XPSubroutine", "X1PSubroutine", "X2PSubroutine",
-    "AProgram", "ACommandBlock", "EOF",
+    "Token",
+    "Node",
+    "Switch",
+    "Switchable",
+    "Cast",
+    "TypedLinkedList",
+    "NodeCast",
+    "NoCast",
+    "Start",
+    "XPCmd",
+    "X1PCmd",
+    "X2PCmd",
+    "XPSubroutine",
+    "X1PSubroutine",
+    "X2PSubroutine",
+    "AProgram",
+    "ACommandBlock",
+    "EOF",
 }
 
 
@@ -142,7 +195,9 @@ def extract_class_block(raw, class_name):
 
 def class_declaration(raw, class_name):
     m = re.search(
-        r"public\s+(final\s+|abstract\s+)?class\s+" + re.escape(class_name) + r"\s+extends\s+(\w+)\s*\{?",
+        r"public\s+(final\s+|abstract\s+)?class\s+"
+        + re.escape(class_name)
+        + r"\s+extends\s+(\w+)\s*\{?",
         raw,
     )
     if not m:

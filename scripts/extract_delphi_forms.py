@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+
 from pathlib import Path
 
 
@@ -52,10 +53,17 @@ def extract_rcdata(pe) -> list[tuple[str, bytes]]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Extract Delphi form (RCDATA) resources from a PE file.")
+    parser = argparse.ArgumentParser(
+        description="Extract Delphi form (RCDATA) resources from a PE file."
+    )
     parser.add_argument("exe", type=Path, help="Path to the executable (e.g. TSLPatcher.exe)")
-    parser.add_argument("output_dir", type=Path, nargs="?", default=None,
-                        help="Output directory (default: <exe_stem>_forms next to exe)")
+    parser.add_argument(
+        "output_dir",
+        type=Path,
+        nargs="?",
+        default=None,
+        help="Output directory (default: <exe_stem>_forms next to exe)",
+    )
     args = parser.parse_args()
 
     exe = args.exe.resolve()
@@ -76,7 +84,9 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     pe = pefile.PE(str(exe), fast_load=True)
-    pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_RESOURCE"]])
+    pe.parse_data_directories(
+        directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_RESOURCE"]]
+    )
 
     items = extract_rcdata(pe)
     pe.close()
@@ -91,7 +101,11 @@ def main() -> int:
         path = out_dir / f"{safe}.{ext}"
         path.write_bytes(data)
         sig = data[:4] if len(data) >= 4 else data
-        sig_desc = "binary (TPF0)" if sig == b"TPF0" else ("binary (0xFF)" if (data[0:1] == b"\xff") else "binary/unknown")
+        sig_desc = (
+            "binary (TPF0)"
+            if sig == b"TPF0"
+            else ("binary (0xFF)" if (data[0:1] == b"\xff") else "binary/unknown")
+        )
         print(f"Saved: {path} ({len(data)} bytes, {sig_desc})")
 
     print(f"\nExtracted {len(items)} form(s) to {out_dir}")

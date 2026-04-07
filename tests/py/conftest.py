@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+
 from typing import Any, Generator, List, Optional
 
 import pytest
@@ -91,9 +92,7 @@ def pytest_sessionstart(session: pytest.Session) -> None:
 
     level: int = session.config._kpatcher_log_level  # type: ignore[attr-defined]
     if level <= TRACE_LEVEL:
-        log.trace(
-            "TRACE enabled: subprocess.Popen and threading.Thread.start are instrumented"
-        )
+        log.trace("TRACE enabled: subprocess.Popen and threading.Thread.start are instrumented")
 
 
 @pytest.hookimpl(tryfirst=True)

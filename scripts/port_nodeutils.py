@@ -4,7 +4,9 @@ from __future__ import annotations
 import pathlib
 import re
 
-j = pathlib.Path(r"vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/utils/NodeUtils.java").read_text(encoding="utf-8")
+j = pathlib.Path(
+    r"vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/utils/NodeUtils.java"
+).read_text(encoding="utf-8")
 body = re.sub(r"(?s)^.*?public final class NodeUtils \{", "", j)
 body = body.strip().rstrip("}").rstrip()
 body = body.replace("public static", "public static")

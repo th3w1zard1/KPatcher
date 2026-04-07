@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """Emit AnalysisAdapter.cs from vendor DeNCS AnalysisAdapter.java."""
+
 import re
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-JA = ROOT / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/analysis/AnalysisAdapter.java"
+JA = (
+    ROOT / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/analysis/AnalysisAdapter.java"
+)
 OUT = ROOT / "src/NCSDecomp.Core/Analysis/AnalysisAdapter.cs"
 
 HEADER = """// Copyright (c) 2021-2025 DeNCS contributors
@@ -73,7 +77,9 @@ def main():
     body = body.replace("this.out.put(node, out);", "_out[node] = value;")
 
     body = body.replace("this.defaultCase(node);", "DefaultCase(node);")
-    body = body.replace("public void defaultCase(Node node) {", "public virtual void DefaultCase(Node node)\n    {")
+    body = body.replace(
+        "public void defaultCase(Node node) {", "public virtual void DefaultCase(Node node)\n    {"
+    )
 
     body = re.sub(r"public void case(\w+)\(", r"public void Case\1(", body)
 

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Generate PatcherResources.{es,de,fr,ru,pl}.resx from PatcherResources.resx + translation overrides."""
-from pathlib import Path
+
 import re
+
+from pathlib import Path
 
 HEADER = """<?xml version="1.0" encoding="utf-8"?>
 <root>
@@ -22,9 +24,15 @@ def _read_english_from_resx(root: Path) -> dict:
     for m in pattern.finditer(text):
         key, raw_val = m.group(1), m.group(2)
         # Unescape for use in Python; we re-escape when writing
-        val = (raw_val.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"').replace("&amp;", "&"))
+        val = (
+            raw_val.replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", '"')
+            .replace("&amp;", "&")
+        )
         result[key] = val
     return result
+
 
 # English keys match PatcherResources.resx (values are translations)
 TRANSLATIONS = {
@@ -40,24 +48,24 @@ TRANSLATIONS = {
         "PatcherFinishedWithWarnings": "El parcheador ha terminado, pero se encontraron {0} advertencias. El mod puede funcionar o no correctamente.",
         "PatcherFinishedWithErrors": "El parcheador ha terminado, pero se encontraron {0} errores. Es probable que el mod no se haya instalado correctamente.",
         "PatcherFinishedWithErrorsAndWarnings": "El parcheador ha terminado, pero se encontraron {0} errores y {1} advertencias. Es probable que el mod no se haya instalado correctamente.",
-        "StrRefTokenNotInTLK": "Token StrRef \"{0}\" en la lista de modificadores que no estaba en el TLK.",
+        "StrRefTokenNotInTLK": 'Token StrRef "{0}" en la lista de modificadores que no estaba en el TLK.',
         "NoNewEntriesAppendedToTlk": "Advertencia: No se añadieron entradas nuevas a {0}. Posibles entradas faltantes en append.tlk.",
         "NoTLKFileLoaded": "No hay archivo TLK cargado. No se puede continuar.",
-        "UnableToLocateTLKFileToPatch": "¡Error! No se pudo localizar el archivo TLK a parchear, ¡no se encontró el archivo \"{0}\"!",
-        "UnableToFind2DAFileToModify": "No se encuentra el archivo 2DA \"{0}\" para modificar. Omitiendo archivo...",
+        "UnableToLocateTLKFileToPatch": '¡Error! No se pudo localizar el archivo TLK a parchear, ¡no se encontró el archivo "{0}"!',
+        "UnableToFind2DAFileToModify": 'No se encuentra el archivo 2DA "{0}" para modificar. Omitiendo archivo...',
         "ErrorLookingUpRowLabelForRowIndex": "Error al buscar la etiqueta de fila para el índice de fila {0}.",
         "ErrorLookingUpColumnLabelForColumnIndex": "Error al buscar la etiqueta de columna para el índice de columna {0}.",
-        "UsedAsIndexBut2DAHasNoLabel": "{0} usado como índice al cambiar la línea en el modificador \"{1}\" pero el archivo 2DA no tiene etiqueta para ese índice.",
+        "UsedAsIndexBut2DAHasNoLabel": '{0} usado como índice al cambiar la línea en el modificador "{1}" pero el archivo 2DA no tiene etiqueta para ese índice.',
         "FailedToCopyLine2DA": "¡Error! No se pudo copiar la línea en 2DA. Omitiendo...",
         "UnableToLoad2DAFileSkipping": "No se pudo cargar el archivo 2DA {0}. Omitiéndolo...",
-        "NoValueAssignedColumn2DA": "No se ha asignado valor a la columna {0} para la nueva línea 2DA en el modificador \"{1}\"...",
-        "ErrorAddingNewLine2DA": "¡Ocurrió un error al intentar añadir una nueva línea 2DA en el modificador \"{0}\"!",
+        "NoValueAssignedColumn2DA": 'No se ha asignado valor a la columna {0} para la nueva línea 2DA en el modificador "{1}"...',
+        "ErrorAddingNewLine2DA": '¡Ocurrió un error al intentar añadir una nueva línea 2DA en el modificador "{0}"!',
         "InternalErrorInvalidTLKFileType": "Error interno, tipo de archivo TLK no válido especificado.",
-        "CriticalErrorUnableToLocateFileToPatch": "Error crítico: No se pudo localizar el archivo a parchear, ¡no se encontró el archivo \"{0}\"!",
+        "CriticalErrorUnableToLocateFileToPatch": 'Error crítico: No se pudo localizar el archivo a parchear, ¡no se encontró el archivo "{0}"!',
         "NoFileToInstallSpecified": "¡Error! No se especificó ningún archivo para instalar.",
         "NoInstallPathSet": "¡Error! No se ha establecido la ruta de instalación.",
-        "FileSetToPatchDoesNotExist": "¡Error! El archivo \"{0}\" marcado para parchear no existe.",
-        "UnableToLoadInstructionsTslpatchdata": "No se pudieron cargar las instrucciones. Asegúrese de que la carpeta \"tslpatchdata\" contiene el archivo \"info.rtf\".",
+        "FileSetToPatchDoesNotExist": '¡Error! El archivo "{0}" marcado para parchear no existe.',
+        "UnableToLoadInstructionsTslpatchdata": 'No se pudieron cargar las instrucciones. Asegúrese de que la carpeta "tslpatchdata" contiene el archivo "info.rtf".',
         "SectionNotFoundError": "No se encontró la sección [{0}] en el ini",
         "ReferencesTracebackMsg": ", referenciado por '{0}={1}' en [{2}]",
         "ErrorParsingIniFile": "Error al analizar el archivo INI: {0}",
@@ -239,24 +247,24 @@ TRANSLATIONS = {
         "PatcherFinishedWithWarnings": "Der Patcher ist fertig, aber {0} Warnungen sind aufgetreten! Der Mod funktioniert möglicherweise nicht korrekt.",
         "PatcherFinishedWithErrors": "Der Patcher ist fertig, aber {0} Fehler sind aufgetreten! Der Mod wurde wahrscheinlich nicht korrekt installiert.",
         "PatcherFinishedWithErrorsAndWarnings": "Der Patcher ist fertig, aber {0} Fehler und {1} Warnungen sind aufgetreten! Der Mod wurde wahrscheinlich nicht korrekt installiert.",
-        "StrRefTokenNotInTLK": "StrRef-Token \"{0}\" in der Modifierliste war im TLK nicht vorhanden.",
+        "StrRefTokenNotInTLK": 'StrRef-Token "{0}" in der Modifierliste war im TLK nicht vorhanden.',
         "NoNewEntriesAppendedToTlk": "Warnung: Keine neuen Einträge zu {0} angehängt. Möglicherweise fehlen Einträge in append.tlk.",
         "NoTLKFileLoaded": "Keine TLK-Datei geladen. Fortsetzung nicht möglich.",
-        "UnableToLocateTLKFileToPatch": "Fehler! TLK-Datei zum Patchen nicht gefunden, Datei \"{0}\" nicht gefunden!",
-        "UnableToFind2DAFileToModify": "2DA-Datei \"{0}\" zum Ändern nicht gefunden! Datei wird übersprungen...",
+        "UnableToLocateTLKFileToPatch": 'Fehler! TLK-Datei zum Patchen nicht gefunden, Datei "{0}" nicht gefunden!',
+        "UnableToFind2DAFileToModify": '2DA-Datei "{0}" zum Ändern nicht gefunden! Datei wird übersprungen...',
         "ErrorLookingUpRowLabelForRowIndex": "Fehler beim Nachschlagen der Zeilenbezeichnung für Zeilenindex {0}.",
         "ErrorLookingUpColumnLabelForColumnIndex": "Fehler beim Nachschlagen der Spaltenbezeichnung für Spaltenindex {0}.",
-        "UsedAsIndexBut2DAHasNoLabel": "{0} als Index beim Zeilenwechsel in Modifier \"{1}\" verwendet, aber 2DA hat keine Bezeichnung für diesen Index.",
+        "UsedAsIndexBut2DAHasNoLabel": '{0} als Index beim Zeilenwechsel in Modifier "{1}" verwendet, aber 2DA hat keine Bezeichnung für diesen Index.',
         "FailedToCopyLine2DA": "Fehler! Zeile in 2DA konnte nicht kopiert werden! Überspringe...",
         "UnableToLoad2DAFileSkipping": "2DA-Datei {0} konnte nicht geladen werden! Überspringe...",
-        "NoValueAssignedColumn2DA": "Kein Wert für Spalte {0} bei neuer 2DA-Zeile in Modifier \"{1}\" zugewiesen...",
-        "ErrorAddingNewLine2DA": "Fehler beim Hinzufügen einer neuen Zeile zur 2DA in Modifier \"{0}\"!",
+        "NoValueAssignedColumn2DA": 'Kein Wert für Spalte {0} bei neuer 2DA-Zeile in Modifier "{1}" zugewiesen...',
+        "ErrorAddingNewLine2DA": 'Fehler beim Hinzufügen einer neuen Zeile zur 2DA in Modifier "{0}"!',
         "InternalErrorInvalidTLKFileType": "Interner Fehler, ungültiger TLK-Dateityp angegeben.",
-        "CriticalErrorUnableToLocateFileToPatch": "Kritischer Fehler: Datei zum Patchen nicht gefunden, Datei \"{0}\" nicht gefunden!",
+        "CriticalErrorUnableToLocateFileToPatch": 'Kritischer Fehler: Datei zum Patchen nicht gefunden, Datei "{0}" nicht gefunden!',
         "NoFileToInstallSpecified": "Fehler! Keine zu installierende Datei angegeben!",
         "NoInstallPathSet": "Fehler! Kein Installationspfad festgelegt!",
-        "FileSetToPatchDoesNotExist": "Fehler! Datei \"{0}\" zum Patchen existiert nicht!",
-        "UnableToLoadInstructionsTslpatchdata": "Anweisungstext konnte nicht geladen werden! Der Ordner \"tslpatchdata\" muss die Datei \"info.rtf\" enthalten.",
+        "FileSetToPatchDoesNotExist": 'Fehler! Datei "{0}" zum Patchen existiert nicht!',
+        "UnableToLoadInstructionsTslpatchdata": 'Anweisungstext konnte nicht geladen werden! Der Ordner "tslpatchdata" muss die Datei "info.rtf" enthalten.',
         "SectionNotFoundError": "Abschnitt [{0}] wurde in der INI nicht gefunden",
         "ReferencesTracebackMsg": ", referenziert von '{0}={1}' in [{2}]",
         "ErrorParsingIniFile": "Fehler beim Analysieren der INI-Datei: {0}",
@@ -1027,12 +1035,7 @@ TRANSLATIONS = {
 
 
 def escape_xml(s: str) -> str:
-    return (
-        s.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-    )
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
 def get_all_keys(english: dict) -> list:

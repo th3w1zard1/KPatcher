@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Process transcripts incrementally for continual learning."""
+
 import json
-import os
+
 from pathlib import Path
-from datetime import datetime
 
 transcript_dir = Path(r"C:\Users\boden\.cursor\projects\c-GitHub-KPatcher\agent-transcripts")
 index_file = Path(r"C:\GitHub\KPatcher\.cursor\hooks\state\continual-learning-index.json")
@@ -11,7 +11,7 @@ index_file = Path(r"C:\GitHub\KPatcher\.cursor\hooks\state\continual-learning-in
 # Load existing index
 index_data = {"version": 1, "transcripts": {}}
 if index_file.exists():
-    with open(index_file, 'r', encoding='utf-8') as f:
+    with open(index_file, "r", encoding="utf-8") as f:
         index_data = json.load(f)
 
 # Find all transcript files
@@ -22,7 +22,7 @@ files_to_process = []
 for tf in transcript_files:
     full_path = str(tf.resolve())
     mtime_ms = int(tf.stat().st_mtime * 1000)
-    
+
     if full_path not in index_data["transcripts"]:
         files_to_process.append((full_path, mtime_ms))
     else:
@@ -34,7 +34,7 @@ for tf in transcript_files:
 result = {
     "total_files": len(transcript_files),
     "files_to_process": len(files_to_process),
-    "files": [{"path": p, "mtimeMs": m} for p, m in files_to_process]
+    "files": [{"path": p, "mtimeMs": m} for p, m in files_to_process],
 }
 
 print(json.dumps(result, indent=2))

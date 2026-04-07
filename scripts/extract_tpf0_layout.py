@@ -7,6 +7,7 @@ exact UI layout for TSLPatcher parity; see docs/TSLPATCHER_RE.md §5.3.0.1.
 """
 
 import sys
+
 from pathlib import Path
 
 
@@ -37,13 +38,7 @@ def extract_layout_controls(data: bytes) -> list[tuple[str, str, dict[str, int]]
             i += 1
             continue
         # Control class: T + uppercase (TPanel, TButton, TSpeedButton, TMainForm, ...)
-        if (
-            len(s) >= 2
-            and s[0] == "T"
-            and s[1].isupper()
-            and s.isascii()
-            and s.isalpha()
-        ):
+        if len(s) >= 2 and s[0] == "T" and s[1].isupper() and s.isascii() and s.isalpha():
             name, i = read_lp_string(data, i)
             if name and name.isascii() and name not in layout_props:
                 if current and current[2]:

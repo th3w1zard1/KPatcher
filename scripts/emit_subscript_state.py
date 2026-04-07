@@ -3,7 +3,10 @@ import pathlib
 import re
 
 root = pathlib.Path(__file__).resolve().parents[1]
-java_path = root / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/scriptutils/SubScriptState.java"
+java_path = (
+    root
+    / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/scriptutils/SubScriptState.java"
+)
 out_path = root / "src/NCSDecomp.Core/ScriptUtils/SubScriptState.cs"
 
 text = java_path.read_text(encoding="utf-8")
@@ -66,7 +69,7 @@ body = sub_many(
         ("throw new RuntimeException", "throw new InvalidOperationException"),
         ("new RuntimeException", "new InvalidOperationException"),
         ("new Type(", "new DecompType("),
-        ("Integer.toHexString(nodePos)", "nodePos.ToString(\"X\")"),
+        ("Integer.toHexString(nodePos)", 'nodePos.ToString("X")'),
         ("catch (RuntimeException", "catch (Exception"),
         ("Hashtable<Variable, AVarDecl>", "Hashtable"),
         ("Hashtable<Type, Integer>", "Hashtable"),
@@ -243,16 +246,25 @@ body = re.sub(
 body = body.replace("Integer.valueOf(1)", "1")
 body = body.replace("(Integer)", "(int)")
 body = body.replace("Integer ", "int ")
-body = re.sub(r"int (\w+) = \(int\)this\.varcounts\[", r"object __o = this.varcounts[", body)  # too hacky
+body = re.sub(
+    r"int (\w+) = \(int\)this\.varcounts\[", r"object __o = this.varcounts[", body
+)  # too hacky
 
 # Simpler: Java Integer -> object box in Hashtable; use int unbox
 body = body.replace("(int)this.varcounts[key]", "(int)this.varcounts[key]")
-body = body.replace("int curcount = (int)this.varcounts[key]", "object __cur = this.varcounts[key];\n         int curcount = __cur != null ? (int)__cur : 0")
+body = body.replace(
+    "int curcount = (int)this.varcounts[key]",
+    "object __cur = this.varcounts[key];\n         int curcount = __cur != null ? (int)__cur : 0",
+)
 
 # Fix varcounts get pattern manually after build
 
 body = body.replace("this.varnames.containsKey(", "this.varnames.ContainsKey(")
-body = re.sub(r"this\.varnames\.put\(\s*([^,]+)\s*,\s*Integer\.valueOf\(\s*1\s*\)\s*\)", r"this.varnames[\1] = 1", body)
+body = re.sub(
+    r"this\.varnames\.put\(\s*([^,]+)\s*,\s*Integer\.valueOf\(\s*1\s*\)\s*\)",
+    r"this.varnames[\1] = 1",
+    body,
+)
 body = re.sub(r"this\.varnames\.put\(\s*([^,]+)\s*,\s*1\s*\)", r"this.varnames[\1] = 1", body)
 
 # parseDone Enumeration
@@ -329,7 +341,10 @@ body = body.replace("new TreeSet<>()", "new SortedSet<VarStruct>()")  # invalid
 body = sub_many(
     body,
     [
-        ("SortedSet<VarStruct> varstructs = new SortedSet<VarStruct>();", "var varstructs = new List<VarStruct>();"),
+        (
+            "SortedSet<VarStruct> varstructs = new SortedSet<VarStruct>();",
+            "var varstructs = new List<VarStruct>();",
+        ),
         ("Iterator<Variable> it = vars.iterator();", ""),
         ("while (it.hasNext())", "foreach (Variable var in new List<Variable>(vars))"),
     ],

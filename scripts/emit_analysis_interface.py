@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from pathlib import Path
 import re
+
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 JA = ROOT / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/analysis/Analysis.java"

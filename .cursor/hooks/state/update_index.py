@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import json
-from pathlib import Path
-from datetime import datetime
 
-index_file = Path(r'C:\GitHub\KPatcher\.cursor\hooks\state\continual-learning-index.json')
-transcript_dir = Path(r'C:\Users\boden\.cursor\projects\c-GitHub-KPatcher\agent-transcripts')
+from datetime import datetime
+from pathlib import Path
+
+index_file = Path(r"C:\GitHub\KPatcher\.cursor\hooks\state\continual-learning-index.json")
+transcript_dir = Path(r"C:\Users\boden\.cursor\projects\c-GitHub-KPatcher\agent-transcripts")
 
 # Load existing index
 index_data = {"version": 1, "transcripts": {}}
 if index_file.exists():
-    with open(index_file, 'r', encoding='utf-8') as f:
+    with open(index_file, "r", encoding="utf-8") as f:
         index_data = json.load(f)
 
 # Find all transcript files and update mtimes
@@ -19,7 +20,7 @@ for tf in all_files:
     mtime_ms = int(tf.stat().st_mtime * 1000)
     index_data["transcripts"][full_path] = {
         "mtimeMs": mtime_ms,
-        "lastProcessedAt": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        "lastProcessedAt": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z"),
     }
 
 # Remove entries for files that no longer exist
@@ -30,7 +31,7 @@ for p in to_remove:
 
 # Write back
 index_file.parent.mkdir(parents=True, exist_ok=True)
-with open(index_file, 'w', encoding='utf-8') as f:
+with open(index_file, "w", encoding="utf-8") as f:
     json.dump(index_data, f, indent=2)
 
 print(f"Updated index: {len(all_files)} files, removed {len(to_remove)} deleted entries")

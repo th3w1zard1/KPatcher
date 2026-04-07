@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-JA = ROOT / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/analysis/AnalysisAdapter.java"
+JA = (
+    ROOT / "vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/analysis/AnalysisAdapter.java"
+)
 OUT = ROOT / "src/NCSDecomp.Core/Analysis/AnalysisAdapter.cs"
 
 HEADER = """// Copyright (c) 2021-2025 DeNCS contributors
@@ -29,7 +32,10 @@ def main():
     s = re.sub(r"import com\.kotor\.resource\.formats\.ncs\.node\.\w+;\s*", "", s)
     s = re.sub(r"import java\.util\.Hashtable;\s*", "", s)
     s = re.sub(r"@Override\s*\n\s*", "", s)
-    s = s.replace("public class AnalysisAdapter implements Analysis", "public class AnalysisAdapter : Analysis")
+    s = s.replace(
+        "public class AnalysisAdapter implements Analysis",
+        "public class AnalysisAdapter : Analysis",
+    )
     s = s.replace("private Hashtable<Node, Object> in;", "private Hashtable _in;")
     s = s.replace("private Hashtable<Node, Object> out;", "private Hashtable _out;")
     s = s.replace("this.in", "_in")
@@ -39,10 +45,14 @@ def main():
     s = s.replace("Object getIn(Node node)", "public object GetIn(Node node)")
     s = s.replace("void setIn(Node node, Object in)", "public void SetIn(Node node, object @in)")
     s = s.replace("Object getOut(Node node)", "public object GetOut(Node node)")
-    s = s.replace("void setOut(Node node, Object out)", "public void SetOut(Node node, object @out)")
+    s = s.replace(
+        "void setOut(Node node, Object out)", "public void SetOut(Node node, object @out)"
+    )
     s = re.sub(r"public void case(\w+)\(", r"public void Case\1(", s)
     s = s.replace("this.defaultCase(node);", "DefaultCase(node);")
-    s = s.replace("public void defaultCase(Node node)", "public virtual void DefaultCase(Node node)")
+    s = s.replace(
+        "public void defaultCase(Node node)", "public virtual void DefaultCase(Node node)"
+    )
     s = s.replace("   }", "    }")
     s = s.replace("   public", "    public")
     s = s.replace("   if (", "        if (")

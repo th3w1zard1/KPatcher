@@ -14,6 +14,7 @@ import subprocess
 import sys
 import threading
 import traceback
+
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 # --- Custom numeric levels (must be registered before first use) -----------------
@@ -173,7 +174,9 @@ def _summarize_popen_kwargs(kwargs: Mapping[str, Any]) -> Dict[str, Any]:
         v = kwargs[k]
         if k == "env" and v is not None:
             if isinstance(v, Mapping):
-                out["env"] = f"<env {len(v)} keys: {sorted(v.keys())[:40]!r}{'...' if len(v) > 40 else ''}>"
+                out["env"] = (
+                    f"<env {len(v)} keys: {sorted(v.keys())[:40]!r}{'...' if len(v) > 40 else ''}>"
+                )
             else:
                 out["env"] = repr(v)[:200]
         elif k == "startupinfo" and v is not None and sys.platform == "win32":
@@ -203,6 +206,7 @@ def _visible_window_titles_for_pid_win32(pid: int) -> List[str]:
         return []
     try:
         import ctypes
+
         from ctypes import wintypes
     except ImportError:
         return []
