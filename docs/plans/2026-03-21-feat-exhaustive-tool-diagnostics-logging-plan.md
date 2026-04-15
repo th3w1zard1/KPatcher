@@ -13,7 +13,7 @@ Add **systematic, level-gated, diagnostically useful** logging across all `src/`
 
 | Project / area | Role |
 |----------------|------|
-| `KCompiler.Core`, `KCompiler.NET` | Managed NSS→NCS pipeline and `kcompiler` CLI |
+| `KCompiler.Core`, `KCompiler.NET` | Managed NSS->NCS pipeline and `kcompiler` CLI |
 | `NCSDecomp.Core`, `NCSDecomp.NET`, `NCSDecomp.UI` | DeNCS port, `NCSDecompCLI`, Avalonia UI host |
 | `KEditChanges`, `KEditChanges.NET` | Library placeholder + `keditchanges-cli` umbrella |
 
@@ -30,7 +30,7 @@ Validated and inferred gaps (see structured findings from bug-reproduction / cod
 1. **CLI exception handling** — `KCompiler.NET`, `KEditChanges.NET` (`RunKCompiler`), and `NcsDecompCli` use `Console.Error.WriteLine("Error: " + ex.Message)`, which drops stack traces, inner exceptions, and fields like `FileNotFoundException.FileName` (e.g. missing NSS shows a generic message without the resolved path).
 2. **Compiler diagnostics not surfaced** — `ManagedNwnnsscomp` passes `errorlog: null` into `NCSAuto.CompileNss`, so multi-line compiler feedback may never reach the CLI.
 3. **Decompiler observability split-brain** — `NcsDecompLogger` + `-v` exist for CLI, but `SubScriptLogger` and much of `SubScriptState` use `Debug.WriteLine` only; many `FileDecompiler` passes use empty `catch` blocks and continue with **no** user-visible signal.
-4. **Inconsistent channels** — Mix of stdout (`Console.WriteLine` in libraries), stderr (`NcsDecompLogger`), and silent fallbacks (e.g. invalid encoding name in `NcsDecompCli.ResolveOutputEncoding` → UTF-8 without warning).
+4. **Inconsistent channels** — Mix of stdout (`Console.WriteLine` in libraries), stderr (`NcsDecompLogger`), and silent fallbacks (e.g. invalid encoding name in `NcsDecompCli.ResolveOutputEncoding` -> UTF-8 without warning).
 5. **Umbrella CLI** — `keditchanges-cli` delegates to the same runners without a shared **correlation** story for support logs.
 
 Institutional context: `docs/solutions/debugging-patterns/` documents **lexer/parser parity** debugging for NCSDecomp, not a general logging contract. `docs/PERFORMANCE_TESTING.md` covers **test** verbosity and profiling — complementary to runtime tool logging.
@@ -91,7 +91,7 @@ For each **phase boundary** and **exception**, log (when level permits):
 
 ---
 
-## Diagnostic priorities (symptom → instrument → fields)
+## Diagnostic priorities (symptom -> instrument -> fields)
 
 Use this when deciding **where** logging pays off first (“meticulous” means **high-signal**, not **high-volume**).
 
@@ -165,9 +165,9 @@ Use this when deciding **where** logging pays off first (“meticulous” means 
 
 ## Phase naming (stable for tests and support)
 
-**Compile:** `cli.parse` → `io.read_nss` → `compile.parse` → `compile.codegen` → `optimize` → `io.write_ncs` → `done`
+**Compile:** `cli.parse` -> `io.read_nss` -> `compile.parse` -> `compile.codegen` -> `optimize` -> `io.write_ncs` -> `done`
 
-**Decomp:** `cli.parse` → `io.read_ncs` → `decomp.decode` → `decomp.analysis` → `decomp.ast` → `decomp.print` → `io.write_nss` → `done`
+**Decomp:** `cli.parse` -> `io.read_ncs` -> `decomp.decode` -> `decomp.analysis` -> `decomp.ast` -> `decomp.print` -> `io.write_nss` -> `done`
 
 Implementers may subdivide `decomp.analysis` to match `FileDecompiler` passes; **document** the final enum or constants in one shared file per solution area.
 
@@ -176,7 +176,7 @@ Implementers may subdivide `decomp.analysis` to match `FileDecompiler` passes; *
 ## Acceptance criteria
 
 - [ ] **AC-default:** With no flags/env, only **Error** (and critical **Warning** such as encoding fallback / skipped decomp pass) emit; no per-token/per-instruction logs; hot paths use `IsEnabled` checks.
-- [ ] **AC-levels:** Published ladder (Error → Warning → Information → Debug → Trace) and what each adds for compile and decomp.
+- [ ] **AC-levels:** Published ladder (Error -> Warning -> Information -> Debug -> Trace) and what each adds for compile and decomp.
 - [ ] **AC-structure:** Phase logs include **Tool**, **Operation**, **Phase**, **CorrelationId** (where applicable), **ElapsedMs**; stable **event ids** or category names for tests.
 - [ ] **AC-paths:** Default redacted paths; full paths behind env flag only.
 - [ ] **AC-no-content:** No NSS/NCS body in logs at Information or below.

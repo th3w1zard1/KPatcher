@@ -87,7 +87,7 @@ netsparkle-generate-appcast --generate-keys --export true
 
 ### 2. Configure GitHub Secrets
 
-Go to Repository Settings → Secrets and variables → Actions, and add:
+Go to Repository Settings -> Secrets and variables -> Actions, and add:
 
 - **NETSPARKLE_PRIVATE_KEY**: Base64-encoded Ed25519 private key
 - **NETSPARKLE_PUBLIC_KEY**: Base64-encoded Ed25519 public key (for reference)
@@ -158,9 +158,9 @@ The `release-please-config.json` is already configured. It will:
 
 Release Please uses conventional commits to determine version bumps:
 
-- `feat:` → Minor version bump (1.0.0 → 1.1.0)
-- `fix:` → Patch version bump (1.0.0 → 1.0.1)
-- `BREAKING CHANGE:` → Major version bump (1.0.0 → 0.1.0)
+- `feat:` -> Minor version bump (1.0.0 -> 1.1.0)
+- `fix:` -> Patch version bump (1.0.0 -> 1.0.1)
+- `BREAKING CHANGE:` -> Major version bump (1.0.0 -> 0.1.0)
 
 Examples:
 ```bash

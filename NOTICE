@@ -3,7 +3,7 @@ KPatcher
 
 This product includes or ports code from the following:
 
-  DeNCS (KotOR NCS → NSS decompiler; also referred to historically as NCSDecomp)
+  DeNCS (KotOR NCS -> NSS decompiler; also referred to historically as NCSDecomp)
   - Upstream: https://github.com/OldRepublicDevs/DeNCS
   - Vendored reference: vendor/DeNCS/
   - Copyright (c) 2021-2025 DeNCS contributors

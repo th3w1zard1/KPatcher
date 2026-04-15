@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // See NOTICE and licenses/DeNCS-MIT.txt in the project root.
 //
-// Port of DeNCS KnownExternalCompilers.java — SHA256 → nwnnsscomp / ncsdis argument templates.
+// Port of DeNCS KnownExternalCompilers.java — SHA256 -> nwnnsscomp / ncsdis argument templates.
 
 using System;
 using System.Collections.Generic;

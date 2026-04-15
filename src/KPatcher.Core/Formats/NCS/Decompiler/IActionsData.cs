@@ -5,7 +5,7 @@
 namespace KPatcher.Core.Formats.NCS.Decompiler
 {
     /// <summary>
-    /// Minimal interface for ACTION opcode lookup (action index → string).
+    /// Minimal interface for ACTION opcode lookup (action index -> string).
     /// Port of DeNCS ActionsData.getAction(int). Implemented by <see cref="Decoder"/> consumers;
     /// full nwscript.nss parsing lives in NCSDecomp.Core <c>ActionsData</c> (MIT).
     /// </summary>

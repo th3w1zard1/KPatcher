@@ -346,7 +346,7 @@ namespace KCompiler.Cli
         private static string HelpText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("KCompiler.NET — managed NSS→NCS compiler (nwnnsscomp-compatible).");
+            sb.AppendLine("KCompiler.NET — managed NSS->NCS compiler (nwnnsscomp-compatible).");
             sb.AppendLine();
             sb.AppendLine("Compile (examples):");
             sb.AppendLine("  kcompiler -c script.nss -o script.ncs");

@@ -337,7 +337,7 @@ namespace NCSDecomp.UI
 
                         NssOutputPlain.Text = nss;
                         RefreshHighlightedView();
-                        StatusText.Text = "Decompiled " + bytes.Length + " bytes → " + nss.Length + " characters.";
+                        StatusText.Text = "Decompiled " + bytes.Length + " bytes -> " + nss.Length + " characters.";
                     }
                     catch (Exception exNss)
                     {

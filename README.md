@@ -13,10 +13,10 @@ This project is a **faithful, line-by-line translation** of the original Python 
 - **Comment Preservation**: Original Python comments and documentation are preserved where applicable
 - **No Feature Creep**: No additional features or "improvements" beyond the original specification
 - **Framework Translation Only**: Changes are limited to:
-  - Python → C# syntax translation
-  - Tkinter → Avalonia UI framework adaptation
-  - Python standard library → .NET equivalent APIs
-  - Threading model adaptation (Python threading → C# async/await)
+  - Python -> C# syntax translation
+  - Tkinter -> Avalonia UI framework adaptation
+  - Python standard library -> .NET equivalent APIs
+  - Threading model adaptation (Python threading -> C# async/await)
 
 The only exception to strict 1:1 parity is RTF rendering: the C# version attempts to render RTF content natively using Avalonia's RichTextBox control before falling back to stripped plain text (matching Python's behavior), whereas the Python version strips RTF immediately due to Tkinter limitations.
 
@@ -25,8 +25,8 @@ The only exception to strict 1:1 parity is RTF rendering: the C# version attempt
 - **KPatcher** - Main Avalonia desktop application (also HoloPatcher-style headless CLI)
 - **KPatcher.UI** - Packable Avalonia UI library
 - **KPatcher.Core** - Packable core patching engine and data/model library
-- **KCompiler.Core** / **KCompiler.NET** (`kcompiler`) - Managed NSS→NCS compiler CLI
-- **NCSDecomp.Core** / **NCSDecomp.NET** (NCSDecompCLI) / **NCSDecomp.UI** - Managed NCS→NSS decompiler (DeNCS port)
+- **KCompiler.Core** / **KCompiler.NET** (`kcompiler`) - Managed NSS->NCS compiler CLI
+- **NCSDecomp.Core** / **NCSDecomp.NET** (NCSDecompCLI) / **NCSDecomp.UI** - Managed NCS->NSS decompiler (DeNCS port)
 - **KEditChanges** / **KEditChanges.NET** (`keditchanges-cli`) - Umbrella CLI (compile + decomp + placeholder info)
 
 See [AGENTS.md](AGENTS.md) for build/publish commands and **“Which binary do I run?”**
@@ -56,7 +56,7 @@ See [AGENTS.md](AGENTS.md) for build/publish commands and **“Which binary do I
 
 - ✅ Permission fixing tools (Windows ReadOnly + Unix chmod)
 - ✅ iOS case sensitivity fixing (Tools menu uses full recursive rename)
-- ✅ Auto-update system (Help → Check for updates; NetSparkle disabled on .NET 5+)
+- ✅ Auto-update system (Help -> Check for updates; NetSparkle disabled on .NET 5+)
 - ✅ RTF file handling (single RtfStripper in Core; InstallLogWriter tests)
 - ✅ Test coverage (SystemHelpers, RtfStripper, InstallLogWriter)
 
@@ -195,10 +195,10 @@ Example consumption:
 
 This codebase is a direct translation from the original Python/Tkinter implementation located in `vendor/PyKotor/Tools/KPatcher/src/kpatcher/`. The following technical adaptations were made solely for language and framework compatibility:
 
-1. **UI Framework**: Tkinter → Avalonia (required for cross-platform .NET UI)
-2. **Language**: Python → C# (.NET) (syntax translation only, no logic changes)
+1. **UI Framework**: Tkinter -> Avalonia (required for cross-platform .NET UI)
+2. **Language**: Python -> C# (.NET) (syntax translation only, no logic changes)
 3. **Architecture**: Maintains original structure; MVVM pattern used only where Avalonia requires it
-4. **Threading**: Python threading → C# Tasks/async-await (equivalent functionality)
+4. **Threading**: Python threading -> C# Tasks/async-await (equivalent functionality)
 5. **Logging**: Original observable pattern preserved in C# implementation
 
 **Important**: All functional behavior, error handling, edge cases, and business logic remain identical to the Python source. This is not a rewrite or reimplementation—it is a faithful translation.

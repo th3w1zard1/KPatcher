@@ -11,8 +11,8 @@ using Xunit;
 namespace KPatcher.Core.Tests.Formats
 {
     /// <summary>
-    /// Managed-only vanilla coverage (/<c>lfg</c>): NSS → <see cref="NCSAuto.CompileNss"/> → full
-    /// <see cref="NCSManagedDecompiler.DecompileToNss"/> → recompile → <see cref="NcsRoundTripAssertHelpers.AssertNcsStructurallyEqual"/>.
+    /// Managed-only vanilla coverage (/<c>lfg</c>): NSS -> <see cref="NCSAuto.CompileNss"/> -> full
+    /// <see cref="NCSManagedDecompiler.DecompileToNss"/> -> recompile -> <see cref="NcsRoundTripAssertHelpers.AssertNcsStructurallyEqual"/>.
     /// Does not use <c>nwnnsscomp.exe</c>. Requires <c>vendor/Vanilla_KOTOR_Script_Source</c> submodule; when absent, tests return immediately.
     /// </summary>
     [Trait("Category", "Vendor")]

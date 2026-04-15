@@ -10,7 +10,7 @@ namespace KPatcher.Core.Tests.Formats
     /// <summary>
     /// NCS binary roundtrip tests ported from Andastra <c>NCSRoundtripTests</c>, plus decoder-token checks and
     /// <see cref="RoundTripUtil.CompareManagedRecompileToOriginalDecoderText"/> (managed recompile vs decoder text).
-    /// Full decompile → recompile with on-disk <c>nwscript</c> mirrors NCSDecomp.NET <c>NCSDecompCliRoundTripTests</c>
+    /// Full decompile -> recompile with on-disk <c>nwscript</c> mirrors NCSDecomp.NET <c>NCSDecompCliRoundTripTests</c>
     /// in <see cref="NcsDecompNetStyleRoundTripTests"/>.
     /// </summary>
     public sealed class NCSRoundtripTests

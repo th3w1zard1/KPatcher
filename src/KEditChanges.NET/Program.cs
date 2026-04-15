@@ -139,8 +139,8 @@ namespace KEditChanges.Net
             Console.WriteLine("Usage: keditchanges-cli <command> [options]");
             Console.WriteLine();
             Console.WriteLine("Commands:");
-            Console.WriteLine("  compile | kcompiler   NSS→NCS (same flags as standalone kcompiler / nwnnsscomp).");
-            Console.WriteLine("  ncsdecomp | decomp    NCS→NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
+            Console.WriteLine("  compile | kcompiler   NSS->NCS (same flags as standalone kcompiler / nwnnsscomp).");
+            Console.WriteLine("  ncsdecomp | decomp    NCS->NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
             Console.WriteLine("  info                  Show KEditChanges library status.");
             Console.WriteLine("  -h, --help            Show this help.");
             Console.WriteLine("  -V, --version         Print tool version.");

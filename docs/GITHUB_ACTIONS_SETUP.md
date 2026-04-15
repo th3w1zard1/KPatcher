@@ -159,9 +159,9 @@ Users receive auto-update notifications
 
 Use these prefixes for automatic versioning:
 
-- `feat:` → Minor version (1.0.0 → 1.1.0)
-- `fix:` → Patch version (1.0.0 → 1.0.1)
-- `BREAKING CHANGE:` → Major version (1.0.0 → 0.1.0)
+- `feat:` -> Minor version (1.0.0 -> 1.1.0)
+- `fix:` -> Patch version (1.0.0 -> 1.0.1)
+- `BREAKING CHANGE:` -> Major version (1.0.0 -> 0.1.0)
 
 Examples:
 

@@ -66,7 +66,7 @@ Tools/KPatcher/
 │       └── Mods/                # Modification operations
 │
 ├── README.md                    # Project documentation
-├── MIGRATION_GUIDE.md           # Python → C# migration guide
+├── MIGRATION_GUIDE.md           # Python -> C# migration guide
 └── QUICKSTART.md                # This file
 ```
 

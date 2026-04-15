@@ -73,7 +73,7 @@ The build script will automatically load this file.
 ## Getting Your NuGet API Key
 
 1. Sign in to [nuget.org](https://www.nuget.org)
-2. Go to Account Settings → API Keys
+2. Go to Account Settings -> API Keys
 3. Create a new API key (or use an existing one)
 4. Copy the key (you won't be able to see it again!)
 

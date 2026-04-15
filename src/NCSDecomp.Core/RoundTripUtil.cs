@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // See NOTICE and licenses/DeNCS-MIT.txt in the project root.
 //
-// Port of DeNCS RoundTripUtil.java — managed NCS→NSS helpers (Java used FileDecompiler + temp files).
+// Port of DeNCS RoundTripUtil.java — managed NCS->NSS helpers (Java used FileDecompiler + temp files).
 
 using System;
 using System.Diagnostics;

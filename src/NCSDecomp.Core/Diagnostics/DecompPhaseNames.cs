@@ -5,7 +5,7 @@ namespace NCSDecomp.Core.Diagnostics
         public const string CliParse = "cli.parse";
         public const string IoReadNcs = "io.read_ncs";
         public const string DecompDecode = "decomp.decode";
-        /// <summary>Decoder only: NCS bytes → DeNCS token string (before SableCC).</summary>
+        /// <summary>Decoder only: NCS bytes -> DeNCS token string (before SableCC).</summary>
         public const string DecompBytecodeToTokens = "decomp.bytecode_to_tokens";
         /// <summary>SableCC lexer + parser only.</summary>
         public const string DecompSableCc = "decomp.sablecc";
@@ -31,7 +31,7 @@ namespace NCSDecomp.Core.Diagnostics
         public const string UiRoundTrip = "ui.round_trip";
 
         public const string DecompPrint = "decomp.print";
-        /// <summary>Full decode → analysis → print pipeline finished (NSS text ready).</summary>
+        /// <summary>Full decode -> analysis -> print pipeline finished (NSS text ready).</summary>
         public const string DecompComplete = "decomp.complete";
 
         public const string IoWriteNss = "io.write_nss";

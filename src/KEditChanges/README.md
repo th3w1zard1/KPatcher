@@ -8,4 +8,4 @@
 
 **Build:** `dotnet build src/KEditChanges/KEditChanges.csproj`
 
-**Mapping:** nwnnsscomp.exe → **KCompiler** (KCompiler.Core). ChangeEdit.exe → **KEditChanges** (this project).
+**Mapping:** nwnnsscomp.exe -> **KCompiler** (KCompiler.Core). ChangeEdit.exe -> **KEditChanges** (this project).

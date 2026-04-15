@@ -17,7 +17,7 @@ using ParserImpl = global::NCSDecomp.Core.Parser.Parser;
 namespace NCSDecomp.Core
 {
     /// <summary>
-    /// DeNCS pipeline stages on shared KPatcher.Core bytecode: decode → lexer → parser AST.
+    /// DeNCS pipeline stages on shared KPatcher.Core bytecode: decode -> lexer -> parser AST.
     /// Full NSS emission: run <see cref="FileDecompiler"/> after parse.
     /// </summary>
     public static class NcsParsePipeline
@@ -37,7 +37,7 @@ namespace NCSDecomp.Core
         }
 
         /// <summary>
-        /// Run decode → SableCC lexer → parser and return the root <see cref="Start"/> node.
+        /// Run decode -> SableCC lexer -> parser and return the root <see cref="Start"/> node.
         /// </summary>
         public static Start ParseAst(byte[] ncsBytes, IActionsData actions = null, ILogger log = null)
         {

@@ -101,7 +101,7 @@
 
 - **Re-verified (unchanged):** `PublishBundledCliTools` (`net9.0` only), staging + `Copy` with `%(RecursiveDir)`, sidecar project paths, `keditchanges-cli` assembly name, `ci.yml` KCompiler pack scope, zip/artifact naming — all **match** prior plan sections.
 - ~~**Dual verify gap:** Treat **`build-all-platforms.yml`** the same as **`test-builds.yml`** for bundle regression…~~ **Superseded** (eighth–ninth pass + **`--help`**); both pipelines now assert sidecars on **net9**.
-- **MSBuild hook pattern:** Prefer a **uniquely named** target with **`AfterTargets="Publish"`** (not redefining built-ins); use **`DependsOnTargets`** for your own chains. Community/SDK edge cases make **`AfterPublish`** timing less dependable than **`Publish`** completion — align any future signing/bundle hooks with **`PrepareForBundle`** → **`GenerateSingleFileBundle`** when mutating the single-file host ([Single-file overview](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview), [Extend the build process](https://learn.microsoft.com/visualstudio/msbuild/how-to-extend-the-visual-studio-build-process)).
+- **MSBuild hook pattern:** Prefer a **uniquely named** target with **`AfterTargets="Publish"`** (not redefining built-ins); use **`DependsOnTargets`** for your own chains. Community/SDK edge cases make **`AfterPublish`** timing less dependable than **`Publish`** completion — align any future signing/bundle hooks with **`PrepareForBundle`** -> **`GenerateSingleFileBundle`** when mutating the single-file host ([Single-file overview](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview), [Extend the build process](https://learn.microsoft.com/visualstudio/msbuild/how-to-extend-the-visual-studio-build-process)).
 - **Flat-folder collision discipline:** Merging **multiple self-contained** publishes into one directory risks **last-writer-wins** on shared runtime files; keep **RID / self-contained / TFM** aligned across nested publishes or isolate sidecars (subfolders / artifacts layout) if collisions appear ([Deploying .NET apps](https://learn.microsoft.com/dotnet/core/deploying/)).
 - **Artifacts output (optional):** **`UseArtifactsOutput`** / **`--artifacts-path`** remains a structured alternative to a single shared **`PublishDir`** when scaling CI matrix uploads ([Artifacts output layout](https://learn.microsoft.com/dotnet/core/sdk/artifacts-output)).
 - **Runtime path assumptions:** Code or tests that rely on **`Assembly.Location`** for files next to a **single-file** host may break; prefer **`AppContext.BaseDirectory`** for loose sidecars and satellites ([Single-file overview](https://learn.microsoft.com/dotnet/core/deploying/single-file/overview)).
@@ -199,7 +199,7 @@
 | Concern | Location |
 |---------|----------|
 | Bundle target | [`src/KPatcher/KPatcher.csproj`](../../src/KPatcher/KPatcher.csproj) — `PublishBundledCliTools`, `AfterTargets="Publish"`, `Condition` on `net9.0` |
-| Staging | `$(MSBuildProjectDirectory)` + `$(IntermediateOutputPath)` → `sidecar_kcompiler\`, `sidecar_ncsdecomp\` |
+| Staging | `$(MSBuildProjectDirectory)` + `$(IntermediateOutputPath)` -> `sidecar_kcompiler\`, `sidecar_ncsdecomp\` |
 | Sidecar props | `_SidecarPublishProps`: Configuration, TargetFramework, RuntimeIdentifier, SelfContained, PublishReadyToRun, PublishTrimmed, `UseAppHost=true` |
 | HoloPatcher CLI | [`src/KPatcher/KPatcherCLI.cs`](../../src/KPatcher/KPatcherCLI.cs), [`src/KPatcher/Program.cs`](../../src/KPatcher/Program.cs) |
 | Shared NCS CLI | [`src/NCSDecomp.Core/NcsDecompCli.cs`](../../src/NCSDecomp.Core/NcsDecompCli.cs); host [`src/NCSDecomp.NET/Program.cs`](../../src/NCSDecomp.NET/Program.cs) |
@@ -208,7 +208,7 @@
 
 **Gaps vs brainstorm open questions**
 
-- Rename **`keditchanges-cli` → `keditchanges.exe`:** still open (post-publish rename vs assembly/project rename).
+- Rename **`keditchanges-cli` -> `keditchanges.exe`:** still open (post-publish rename vs assembly/project rename).
 - **`parse_known_args` parity:** behavioral follow-up, not MSBuild.
 - **ChangeEdit parity:** KEditChanges library still placeholder beyond bundling scope.
 
@@ -282,7 +282,7 @@
 The base plan defines:
 
 - **Layering:** `KPatcher.Core`, `KCompiler.Core`, `KPatcher.UI` (library), `KPatcher` (exe host), `KCompiler.NET`, `NCSDecomp.Core` / `NCSDecomp.NET`, `KEditChanges` + `KEditChanges.NET`.
-- **Anti-patterns:** no `KPatcher.UI` → `KPatcher` or `KCompiler.NET` project references.
+- **Anti-patterns:** no `KPatcher.UI` -> `KPatcher` or `KCompiler.NET` project references.
 - **CLIs:** HoloPatcher-style KPatcher CLI; `kcompiler`; `NCSDecompCLI`; `--help` parity; solution membership; publish bundle; umbrella `keditchanges-cli`.
 
 ---
@@ -293,7 +293,7 @@ The base plan defines:
 
 **Best practices**
 
-- **Separate assemblies** for domain logic (`*.Core`), UI (`*.UI`), and hosts (`*.NET` / app project) match .NET guidance for testability, reuse (e.g. NuGet `KPatcher.UI`), and clear dependency direction (UI → Core, never Core → UI).
+- **Separate assemblies** for domain logic (`*.Core`), UI (`*.UI`), and hosts (`*.NET` / app project) match .NET guidance for testability, reuse (e.g. NuGet `KPatcher.UI`), and clear dependency direction (UI -> Core, never Core -> UI).
 - Microsoft’s **libraries tutorial** describes factoring logic into a core project with thin entry facades — same idea as Core / UI / CLI ([Develop libraries with the .NET CLI](https://learn.microsoft.com/dotnet/core/tutorials/libraries)).
 
 **Performance**

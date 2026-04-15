@@ -6,7 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>KCompiler.Core</AssemblyName>
     <RootNamespace>KCompiler</RootNamespace>
-    <Description>Cross-platform managed NSS→NCS compiler (nwnnsscomp-compatible CLI surface). Types for NSS/NCS live in KPatcher.Core.* namespaces for use by KPatcher.Core.</Description>
+    <Description>Cross-platform managed NSS->NCS compiler (nwnnsscomp-compatible CLI surface). Types for NSS/NCS live in KPatcher.Core.* namespaces for use by KPatcher.Core.</Description>
     <IsPackable>true</IsPackable>
     <PackageId>KCompiler.Core</PackageId>
     <Version>0.1.0</Version>

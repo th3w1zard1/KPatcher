@@ -1,4 +1,4 @@
-# DeNCS Java → KPatcher C# accounting (/lfg)
+# DeNCS Java -> KPatcher C# accounting (/lfg)
 
 This document satisfies **“every relevant `.java` file accounted for”** by mapping **`vendor/DeNCS/src/main/java`** into shipped C# projects. It is the authoritative checklist for port completeness under **managed-first** product policy (no HKLM registry spoofing; no default dependency on `nwnnsscomp.exe`).
 
@@ -10,9 +10,9 @@ This document satisfies **“every relevant `.java` file accounted for”** by m
 | `src/NCSDecomp.Core/**/*.cs` (excl. `obj/`) | **~470+** | Library port + SableCC-style AST, analysis, utils |
 | `vendor/DeNCS/src/test/java/**/*.java` | (separate) | Exhaustive round-trip harness; see below |
 
-## Folder-level mapping (271 files → C#)
+## Folder-level mapping (271 files -> C#)
 
-Every Java file under `.../ncs/<subpkg>/` maps to the same conceptual subfolder under **`src/NCSDecomp.Core`**, with the usual renames (`Logger` → `NcsDecompLogger`, `Type` → `DecompType`, `AExpression` → `IAExpression`, etc.):
+Every Java file under `.../ncs/<subpkg>/` maps to the same conceptual subfolder under **`src/NCSDecomp.Core`**, with the usual renames (`Logger` -> `NcsDecompLogger`, `Type` -> `DecompType`, `AExpression` -> `IAExpression`, etc.):
 
 | Java subpackage (`.../ncs/…`) | C# location |
 |------------------------------|-------------|
@@ -50,7 +50,7 @@ Every Java file under `.../ncs/<subpkg>/` maps to the same conceptual subfolder 
 |------|-----|
 | `DeNCSCLIRoundTripTest.java` | `tests/KPatcher.Tests/Formats/NCSDecompCliRoundTripTest.cs` (merged partials: includes, filter, normalize, diff/bytecode). **Opt-in:** `RUN_NCSDECOMP_JAVA_ROUNDTRIP_SUITE=1`, traits **`ExternalCompiler`**, **`DeNCSJavaParity`**. Compile/recompile steps may still shell out to **`nwnnsscomp`** when enabled; **decompile** uses managed **`RoundTripUtil.DecompileNcsToNssFile`**. |
 
-**Managed vanilla coverage (default CI when submodule present):** `VanillaNssManagedDecompileRoundTripTests` — KCompiler compile → `NCSManagedDecompiler.DecompileToNss` → recompile → structural NCS compare (`NcsRoundTripAssertHelpers`).
+**Managed vanilla coverage (default CI when submodule present):** `VanillaNssManagedDecompileRoundTripTests` — KCompiler compile -> `NCSManagedDecompiler.DecompileToNss` -> recompile -> structural NCS compare (`NcsRoundTripAssertHelpers`).
 
 ## NCS/NSS test fixtures in `KPatcher.Tests` (≥ /lfg “~8 classes”)
 
@@ -72,4 +72,4 @@ Expect **all** `KPatcher.Tests` to pass; NCS/NSS coverage is included in that as
 
 ## Maintenance
 
-If `vendor/DeNCS` adds Java under `src/main/java`, extend this table (new subpackage → new Core folder) or add a row under **superseded** if policy excludes it (e.g. new Windows-only spoof helper).
+If `vendor/DeNCS` adds Java under `src/main/java`, extend this table (new subpackage -> new Core folder) or add a row under **superseded** if policy excludes it (e.g. new Windows-only spoof helper).

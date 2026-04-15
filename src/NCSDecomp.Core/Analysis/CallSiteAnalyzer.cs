@@ -34,7 +34,7 @@ namespace NCSDecomp.Core.Analysis
         }
 
         /// <summary>
-        /// Runs analysis across globals, main, and all subroutines; returns callee offset → max inferred arg count.
+        /// Runs analysis across globals, main, and all subroutines; returns callee offset -> max inferred arg count.
         /// </summary>
         public Dictionary<int, int> Analyze()
         {

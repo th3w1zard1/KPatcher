@@ -10,7 +10,7 @@ using Xunit;
 namespace KPatcher.Core.Tests.Formats
 {
     /// <summary>
-    /// Parity with <c>KNCSDecomp.RoundTripTests/NCSDecompCliRoundTripTests</c> (NCSDecomp.NET): compile → write NCS →
+    /// Parity with <c>KNCSDecomp.RoundTripTests/NCSDecompCliRoundTripTests</c> (NCSDecomp.NET): compile -> write NCS ->
     /// decompile via <see cref="RoundTripUtil.DecompileNcsToNss"/> using on-disk <c>k1_nwscript.nss</c> / <c>k2_nwscript.nss</c>
     /// (same layout as BioWare.NET + KOTORModSync <c>RoundTripUtil</c> tests that load nwscript from <c>tools/</c>).
     /// Optional strict bytecode equality: env <c>KNCSDECOMP_STRICT_ROUNDTRIP=1</c> (same name as upstream).

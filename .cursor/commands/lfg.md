@@ -8,9 +8,9 @@ As an AI code assistant, please follow these instructions to carry out the porti
 
 - **Registry spoofer:** **Do not add or rely on registry spoofing.** Target state is **zero** registry-spoofer surface area for this workstream. The original DeNCS/Java flow used it to fake install paths so **external** `nwnnsscomp.exe` could run; KPatcher’s path is **in-process managed compilation**, not shelling out to BioWare-era tools.
 
-- **NSS → NCS:** Use **`src/KCompiler.Core`** and **`src/KCompiler.NET`** (managed compiler). Do **not** require, prefer, or document `nwnnsscomp.exe` as part of completion criteria. Integration in **`src/KPatcher.Core/Formats/NCS`** should use the same managed compiler story as the rest of the patcher.
+- **NSS -> NCS:** Use **`src/KCompiler.Core`** and **`src/KCompiler.NET`** (managed compiler). Do **not** require, prefer, or document `nwnnsscomp.exe` as part of completion criteria. Integration in **`src/KPatcher.Core/Formats/NCS`** should use the same managed compiler story as the rest of the patcher.
 
-- **NCS → NSS:** Use **`src/NCSDecomp.Core`** (library) plus **`src/NCSDecomp.NET`** (CLI host) and **`src/KPatcher.Core/Formats/NCS`** for patcher-facing APIs—not external decomp tools for core flows.
+- **NCS -> NSS:** Use **`src/NCSDecomp.Core`** (library) plus **`src/NCSDecomp.NET`** (CLI host) and **`src/KPatcher.Core/Formats/NCS`** for patcher-facing APIs—not external decomp tools for core flows.
 
 
 

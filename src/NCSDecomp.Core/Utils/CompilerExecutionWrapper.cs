@@ -85,7 +85,7 @@ namespace NCSDecomp.Core.Utils
 
         /// <summary>
         /// Always returns <see cref="NoOpRegistrySpoofer"/>. DeNCS/Java used HKLM spoofing for legacy BioWare-era compilers;
-        /// KPatcher relies on in-process managed compilation for NSS→NCS and does not ship registry spoofing as a product feature.
+        /// KPatcher relies on in-process managed compilation for NSS->NCS and does not ship registry spoofing as a product feature.
         /// </summary>
         public IRegistrySpoofer CreateRegistrySpoofer() => new NoOpRegistrySpoofer();
 

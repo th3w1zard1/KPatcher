@@ -13,7 +13,7 @@
     <PackageId>KCompiler.NET</PackageId>
     <Version>0.1.0</Version>
     <Authors>th3w1zard1</Authors>
-    <Description>Cross-platform CLI: managed NSS→NCS compiler, drop-in friendly with common nwnnsscomp.exe argument styles.</Description>
+    <Description>Cross-platform CLI: managed NSS->NCS compiler, drop-in friendly with common nwnnsscomp.exe argument styles.</Description>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>kotor;nss;ncs;nwnnsscomp;dotnet-tool</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

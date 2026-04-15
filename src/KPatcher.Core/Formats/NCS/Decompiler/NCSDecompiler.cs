@@ -9,7 +9,7 @@ using KPatcher.Core.Formats.NCS;
 namespace KPatcher.Core.Formats.NCS.Decompiler
 {
     /// <summary>
-    /// Decoder facade: NCS bytecode → tokenized command string (DeNCS lexer/parser input).
+    /// Decoder facade: NCS bytecode -> tokenized command string (DeNCS lexer/parser input).
     /// Full managed NSS: <see cref="NCSManagedDecompiler"/> (NCSDecomp.Core pipeline).
     /// Parse tree only: <c>NCSDecomp.Core.NcsParsePipeline</c>.
     /// </summary>

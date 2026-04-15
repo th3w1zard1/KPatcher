@@ -584,7 +584,7 @@ function Invoke-Compare {
                 ""
             }
             
-            $jumpStr = if ($Instruction.Jump) { " jump=→[$($Instruction.Jump.Offset)]" } else { "" }
+            $jumpStr = if ($Instruction.Jump) { " jump=->[$($Instruction.Jump.Offset)]" } else { "" }
             return "[$Index] $($Instruction.InsType) args=[$argsStr]$jumpStr offset=$($Instruction.Offset)"
         }
         

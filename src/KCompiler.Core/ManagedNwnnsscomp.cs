@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace KCompiler
 {
     /// <summary>
-    /// Cross-platform managed NSS→NCS compilation (no nwnnsscomp.exe).
+    /// Cross-platform managed NSS->NCS compilation (no nwnnsscomp.exe).
     /// Use from KPatcher, tools, or the KCompiler.NET CLI.
     /// </summary>
     public static class ManagedNwnnsscomp

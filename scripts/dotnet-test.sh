@@ -8,7 +8,7 @@
 #   ./scripts/dotnet-test.sh [extra timeout args] -- dotnet-test-args...
 #   ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 #
-# Requires GNU timeout (Linux: util-linux; macOS: brew install coreutils → use gtimeout by setting TIMEOUT_CMD).
+# Requires GNU timeout (Linux: util-linux; macOS: brew install coreutils -> use gtimeout by setting TIMEOUT_CMD).
 
 set -euo pipefail
 

@@ -3,6 +3,7 @@
 Parse TPF0 (Lazarus/CodeTyphon) binary DFM format to extract key properties.
 TPF0 format: 4-byte signature "TPF0", then length-prefixed property names and values.
 """
+
 from __future__ import annotations
 
 import sys

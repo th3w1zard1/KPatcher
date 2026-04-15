@@ -15,7 +15,7 @@ using NCSDecomp.Core.Utils;
 namespace NCSDecomp.Core
 {
     /// <summary>
-    /// Shared CLI implementation for NCS→NSS (used by NCSDecompCLI and umbrella tools).
+    /// Shared CLI implementation for NCS->NSS (used by NCSDecompCLI and umbrella tools).
     /// </summary>
     public static class NcsDecompCli
     {

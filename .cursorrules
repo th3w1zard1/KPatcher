@@ -86,11 +86,11 @@ This is a hard requirement for .NET Framework 4.x compatibility. The following C
 
 When fixing code, convert C# 8+ syntax to C# 7.3 compatible alternatives, including but not limited to:
 
-- `string?` → `string` (use `[CanBeNull]` attribute if needed and add `using JetBrains.Annotations;` if not already present)
-- `value!` → `value` (remove null-forgiving operator)
-- Switch expressions → switch statements
-- `using var x = ...` → `using (var x = ...) { }`
-- `namespace SomeNamespace;` → `namespace SomeNamespace { ... }`
+- `string?` -> `string` (use `[CanBeNull]` attribute if needed and add `using JetBrains.Annotations;` if not already present)
+- `value!` -> `value` (remove null-forgiving operator)
+- Switch expressions -> switch statements
+- `using var x = ...` -> `using (var x = ...) { }`
+- `namespace SomeNamespace;` -> `namespace SomeNamespace { ... }`
 
 ## Testing
 

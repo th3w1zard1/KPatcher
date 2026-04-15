@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // See NOTICE and licenses/DeNCS-MIT.txt in the project root.
 //
-// Port of DeNCS FileDecompiler.java (decode → analysis → MainPass → NSS). No external compilers.
+// Port of DeNCS FileDecompiler.java (decode -> analysis -> MainPass -> NSS). No external compilers.
 
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ using NCSDecomp.Core.Utils;
 namespace NCSDecomp.Core
 {
     /// <summary>
-    /// Orchestrates managed NCS → NSS decompilation (DeNCS FileDecompiler core path).
+    /// Orchestrates managed NCS -> NSS decompilation (DeNCS FileDecompiler core path).
     /// </summary>
     public sealed class FileDecompiler
     {

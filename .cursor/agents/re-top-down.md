@@ -10,7 +10,7 @@ When invoked:
 2. Use AgentDecompile MCP tools: search-strings, list-functions, search-symbols, get-function, decompile-function, list-cross-references, get-call-graph.
 3. Discovery: find all symbols and strings related to the target (error messages, button labels, "tslpatchdata", "TLK", "2DA", etc.). Identify the top-level entry points (e.g. Delphi event handlers, main).
 4. Decompile core entry points first; then for each, get callees and decompile recursively until you reach file/registry/memory primitives.
-5. Map the full pipeline: UI → business logic → file/format handling → OS APIs.
+5. Map the full pipeline: UI -> business logic -> file/format handling -> OS APIs.
 6. If the goal is KPatcher parity: for each high-level flow, identify the equivalent in `src/` (KPatcher.Core, UI, vendor PyKotor/tslpatcher) and list specific code paths that need to match or be fixed.
 
 Output:

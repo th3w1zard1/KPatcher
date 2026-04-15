@@ -198,7 +198,7 @@ namespace KPatcher.Core.Tests.Formats
             return runner.RunRoundTripSuite(useResume);
         }
 
-        /// <summary>Full exhaustive round-trip suite (vanilla NSS → NCS → NSS → NCS, strict checks).</summary>
+        /// <summary>Full exhaustive round-trip suite (vanilla NSS -> NCS -> NSS -> NCS, strict checks).</summary>
         [Fact(DisplayName = "NCSDecompCliRoundTripTest.TestRoundTripSuite")]
         public void TestRoundTripSuite()
         {
@@ -4300,14 +4300,14 @@ namespace KPatcher.Core.Tests.Formats
             message.Append("  Original: ").Append(FormatByteValue(diff.OriginalByte));
             if (originalAction != null)
             {
-                message.Append(" → ").Append(originalAction);
+                message.Append(" -> ").Append(originalAction);
             }
 
             message.Append("\n");
             message.Append("  Round-trip: ").Append(FormatByteValue(diff.RoundTripByte));
             if (roundTripAction != null)
             {
-                message.Append(" → ").Append(roundTripAction);
+                message.Append(" -> ").Append(roundTripAction);
             }
 
             message.Append("\n\nFILES:\n");

@@ -104,7 +104,7 @@ using KPatcher.UI;
 
 1. **Get a NuGet API Key**:
    - Sign in to [nuget.org](https://www.nuget.org)
-   - Go to Account Settings → API Keys
+   - Go to Account Settings -> API Keys
    - Create a new API key
 
 2. **Publish packages**:

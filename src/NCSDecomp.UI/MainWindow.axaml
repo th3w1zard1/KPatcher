@@ -19,7 +19,7 @@
                 ToolTip.Tip="Recompile NSS with KCompiler and compare decoder output to the loaded .ncs" />
       </StackPanel>
       <TextBlock TextWrapping="Wrap" Opacity="0.75" FontSize="11"
-                 Text="Managed NCS→NSS (NCSDecomp.Core). Config: config/ncsdecomp.conf next to the app. No external nwnnsscomp." />
+                 Text="Managed NCS->NSS (NCSDecomp.Core). Config: config/ncsdecomp.conf next to the app. No external nwnnsscomp." />
     </StackPanel>
     <TextBlock DockPanel.Dock="Bottom" Name="StatusText" Margin="0,8,0,0" Opacity="0.9" Text="" />
     <TabControl Name="MainTabs" SelectionChanged="OnMainTabsSelectionChanged">

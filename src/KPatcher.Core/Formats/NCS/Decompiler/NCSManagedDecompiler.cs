@@ -10,7 +10,7 @@ using KPatcher.Core.Formats.NCS;
 namespace KPatcher.Core.Formats.NCS.Decompiler
 {
     /// <summary>
-    /// Managed full NCS→NSS decompilation (DeNCS port in <c>NCSDecomp.Core</c>).
+    /// Managed full NCS->NSS decompilation (DeNCS port in <c>NCSDecomp.Core</c>).
     /// Requires embedded <c>k1_nwscript.nss</c> / <c>tsl_nwscript.nss</c> in the NCSDecomp.Core assembly
     /// (see <c>src/NCSDecomp.Core/Resources/</c>).
     /// </summary>

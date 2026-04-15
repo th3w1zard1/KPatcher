@@ -11,7 +11,7 @@ using Xunit;
 namespace KPatcher.Core.Tests.Formats
 {
     /// <summary>
-    /// Full managed NCS→NSS (<see cref="NCSManagedDecompiler"/> / DeNCS <c>FileDecompiler</c> parse path).
+    /// Full managed NCS->NSS (<see cref="NCSManagedDecompiler"/> / DeNCS <c>FileDecompiler</c> parse path).
     /// Kept narrow while parser parity is validated against <c>vendor/DeNCS</c>.
     /// </summary>
     public sealed class NcsManagedFullDecompileSmokeTests

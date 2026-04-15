@@ -34,7 +34,7 @@ You need to add the following secrets to your GitHub repository for the workflow
 ## Verification
 
 After adding secrets, you can verify they're set by:
-1. Going to the repository Settings → Secrets and variables → Actions
+1. Going to the repository Settings -> Secrets and variables -> Actions
 2. You should see `NETSPARKLE_PRIVATE_KEY` listed (value is hidden)
 
 ## Security Notes

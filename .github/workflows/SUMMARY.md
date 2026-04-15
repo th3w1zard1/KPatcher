@@ -15,8 +15,8 @@ This repository uses GitHub Actions for:
 │  Push/PR        │
 └────────┬────────┘
          │
-         ├─→ ci.yml (tests, linting)
-         └─→ test-builds.yml (build validation)
+         ├─-> ci.yml (tests, linting)
+         └─-> test-builds.yml (build validation)
          
 ┌─────────────────┐
 │  Release Please  │
@@ -24,12 +24,12 @@ This repository uses GitHub Actions for:
 │   commits)      │
 └────────┬────────┘
          │
-         ├─→ Creates release PR
+         ├─-> Creates release PR
          │
-         └─→ On merge:
-             ├─→ build-all-platforms.yml (10 builds)
-             ├─→ Upload artifacts to release
-             └─→ Generate appcast.xml
+         └─-> On merge:
+             ├─-> build-all-platforms.yml (10 builds)
+             ├─-> Upload artifacts to release
+             └─-> Generate appcast.xml
 ```
 
 ## Build Matrix
@@ -68,7 +68,7 @@ This repository uses GitHub Actions for:
 ## Quick Start
 
 1. **Generate keys**: `.\scripts\setup-netsparkle-keys.ps1 -Export`
-2. **Add secrets**: GitHub Settings → Secrets → Actions
+2. **Add secrets**: GitHub Settings -> Secrets -> Actions
 3. **Update code**: Set `Ed25519PublicKey` in `UpdateManager.cs`
 4. **Test**: Create a PR to trigger test builds
 5. **Release**: Use conventional commits, merge release PR
