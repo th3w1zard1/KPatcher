@@ -1,12 +1,1 @@
-[submodule "vendor/PyKotor"]
-	path = vendor/PyKotor
-	url = https://github.com/OldRepublicDevs/PyKotor
-[submodule "vendor/Vanilla_KOTOR_Script_Source"]
-	path = vendor/Vanilla_KOTOR_Script_Source
-	url = https://github.com/KOTORCommunityPatches/Vanilla_KOTOR_Script_Source
-[submodule "vendor/DeNCS"]
-	path = vendor/DeNCS
-	url = https://github.com/OldRepublicDevs/DeNCS
-[submodule "vendor/bioware-kaitai-formats"]
-	path = vendor/bioware-kaitai-formats
-	url = https://github.com/OldRepublicDevs/bioware-kaitai-formats
+
