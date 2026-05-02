@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TIncorii() { SetText("INCORII"); }
         public TIncorii(int line, int pos) { SetText("INCORII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TIncorii(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTIncorii(this);
             }

@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using Avalonia.Markup.Xaml;
 using KCompiler.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -28,7 +28,7 @@ namespace NCSDecomp.UI
         private const int TabAst = 3;
 
         private readonly ILogger _log;
-        private NcsDecompSettings _settings;
+        private readonly NcsDecompSettings _settings;
         private string _ncsPath;
         /// <summary>Last NCS bytes used for a decompile attempt (parse tree is built lazily from this).</summary>
         private byte[] _bytesForAst;
@@ -57,18 +57,26 @@ namespace NCSDecomp.UI
         private void OnMainTabsSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (MainTabs == null || NssOutputPlain == null)
+            {
                 return;
+            }
             // When switching to Highlighted, refresh from plain text so edits apply.
             if (MainTabs.SelectedIndex == TabHighlighted)
+            {
                 RefreshHighlightedView();
+            }
             else if (MainTabs.SelectedIndex == TabAst)
+            {
                 TryPopulateAstTree();
+            }
         }
 
         private void RefreshHighlightedView()
         {
             if (NssHighlighted == null || NssOutputPlain == null)
+            {
                 return;
+            }
 
             string text = NssOutputPlain.Text ?? string.Empty;
             NssHighlighted.Inlines.Clear();
@@ -77,7 +85,10 @@ namespace NCSDecomp.UI
                 var run = new Run(seg.Text);
                 IBrush brush = BrushForHighlight(seg.Kind);
                 if (brush != null)
+                {
                     run.Foreground = brush;
+                }
+
                 NssHighlighted.Inlines.Add(run);
             }
         }
@@ -85,7 +96,9 @@ namespace NCSDecomp.UI
         private void RefreshBytecodeView(string tokenStream)
         {
             if (NssBytecodeView == null)
+            {
                 return;
+            }
 
             tokenStream = tokenStream ?? string.Empty;
             NssBytecodeView.Inlines.Clear();
@@ -94,11 +107,17 @@ namespace NCSDecomp.UI
                 var run = new Run(seg.Text);
                 IBrush brush = BrushForBytecode(seg.Kind);
                 if (brush != null)
+                {
                     run.Foreground = brush;
+                }
+
                 if (seg.Kind == NcsBytecodeHighlightKind.Instruction
                     || seg.Kind == NcsBytecodeHighlightKind.Function
                     || seg.Kind == NcsBytecodeHighlightKind.TypeIndicator)
+                {
                     run.FontWeight = FontWeight.Bold;
+                }
+
                 NssBytecodeView.Inlines.Add(run);
             }
         }
@@ -106,25 +125,35 @@ namespace NCSDecomp.UI
         private void ClearBytecodeView()
         {
             if (NssBytecodeView == null)
+            {
                 return;
+            }
+
             NssBytecodeView.Inlines.Clear();
         }
 
         private static TreeViewItem ToAstTreeItem(AstOutlineNode node)
         {
             if (node == null)
+            {
                 return new TreeViewItem { Header = "(null)" };
+            }
 
             var item = new TreeViewItem { Header = node.Label };
             foreach (AstOutlineNode child in node.Children)
+            {
                 item.Items.Add(ToAstTreeItem(child));
+            }
+
             return item;
         }
 
         private void TryPopulateAstTree()
         {
             if (AstTree == null)
+            {
                 return;
+            }
 
             if (_bytesForAst == null || _bytesForAst.Length == 0)
             {
@@ -134,7 +163,9 @@ namespace NCSDecomp.UI
             }
 
             if (_astTreeBuiltForGeneration == _decompileGeneration)
+            {
                 return;
+            }
 
             AstTree.Items.Clear();
             try
@@ -230,7 +261,10 @@ namespace NCSDecomp.UI
                 });
 
                 if (files == null || files.Count == 0)
+                {
                     return;
+                }
+
                 string local = files[0].TryGetLocalPath();
                 if (string.IsNullOrEmpty(local))
                 {
@@ -244,7 +278,10 @@ namespace NCSDecomp.UI
                 _bytesForAst = null;
                 _astTreeBuiltForGeneration = -1;
                 if (AstTree != null)
+                {
                     AstTree.Items.Clear();
+                }
+
                 StatusText.Text = "Loaded: " + Path.GetFileName(local);
                 if (_log.IsEnabled(LogLevel.Debug))
                 {
@@ -404,7 +441,7 @@ namespace NCSDecomp.UI
                         _settings.K2NwscriptPath,
                         _log);
                     sw.Stop();
-                    _log.LogInformation(
+                    _log.LogDebug(
                         "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} CompileSucceeded={CompileOk} DecoderMatch={Match} NssChars={Chars} NcsBytes={Bytes}",
                         DecompPhaseNames.UiRoundTrip,
                         cid,
@@ -462,14 +499,19 @@ namespace NCSDecomp.UI
 
                 string ext = string.IsNullOrWhiteSpace(_settings.FileExtension) ? ".nss" : _settings.FileExtension;
                 if (!ext.StartsWith(".", StringComparison.Ordinal))
+                {
                     ext = "." + ext;
+                }
 
                 string suggestName = "out" + ext;
                 if (!string.IsNullOrEmpty(_ncsPath))
                 {
                     suggestName = Path.GetFileNameWithoutExtension(_ncsPath) + ext;
                     if (!string.IsNullOrEmpty(_settings.FilenamePrefix))
+                    {
                         suggestName = _settings.FilenamePrefix + suggestName;
+                    }
+
                     if (!string.IsNullOrEmpty(_settings.FilenameSuffix))
                     {
                         string baseName = Path.GetFileNameWithoutExtension(suggestName);
@@ -490,7 +532,9 @@ namespace NCSDecomp.UI
                 });
 
                 if (file == null)
+                {
                     return;
+                }
 
                 string path = file.TryGetLocalPath();
                 if (string.IsNullOrEmpty(path))

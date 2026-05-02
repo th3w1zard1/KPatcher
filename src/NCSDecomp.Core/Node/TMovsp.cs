@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TMovsp() { SetText("MOVSP"); }
         public TMovsp(int line, int pos) { SetText("MOVSP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TMovsp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTMovsp(this);
             }

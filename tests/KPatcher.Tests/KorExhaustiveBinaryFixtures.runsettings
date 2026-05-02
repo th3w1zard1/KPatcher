@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Committed mod-side bytes under test_files/exhaustive_pattern_inlines/.../tslpatchdata (omit *.exe). Kor: PopulateMultiOptionKorGffBundleFromK1Install.ps1. Namespace: PopulateNamespaceMainAltGffBundleFromK1Install.ps1 + Alternate Override from packaged mod. GFF/git+tex: PopulateGffGitModuleTextureBundleFromK1Install.ps1 + Override from packaged mod. Heads row: InstallList P_Helena.tga, p_helenah.mdl, p_helenah.mdx under tslpatchdata/override. -->
+    <TestCaseFilter>(Category=KorExhaustiveBinaryFixtures|Category=NamespaceMainAltBinaryFixtures|Category=GffGitModuleTextureBinaryFixtures|Category=HeadsAppearanceBinaryFixtures)</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

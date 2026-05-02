@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TIncibp() { SetText("INCIBP"); }
         public TIncibp(int line, int pos) { SetText("INCIBP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TIncibp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTIncibp(this);
             }

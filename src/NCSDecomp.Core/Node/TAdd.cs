@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TAdd() { SetText("ADD"); }
         public TAdd(int line, int pos) { SetText("ADD"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TAdd(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTAdd(this);
             }

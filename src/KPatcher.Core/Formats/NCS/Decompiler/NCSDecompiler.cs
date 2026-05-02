@@ -25,7 +25,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         public static string Decompile(byte[] ncsBytes, IActionsData actions = null)
         {
             if (ncsBytes == null || ncsBytes.Length == 0)
+            {
                 throw new ArgumentException("NCS bytes null or empty.", nameof(ncsBytes));
+            }
+
             var decoder = new Decoder(ncsBytes);
             return decoder.Decode(actions);
         }
@@ -37,7 +40,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         public static string Decompile(NCS ncs, IActionsData actions = null)
         {
             if (ncs == null)
+            {
                 throw new ArgumentNullException(nameof(ncs));
+            }
+
             byte[] bytes = new NCSBinaryWriter(ncs).Write();
             return Decompile(bytes, actions);
         }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Optional: run with a real KotOR II tree via KPATCHER_K2_VENDOR_ROOT (see TslpatcherIntegrationModVendorInstallTests). -->
+    <TestCaseFilter>Category=VendorK2Game</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

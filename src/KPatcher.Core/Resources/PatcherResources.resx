@@ -417,21 +417,35 @@ Patching RIMs is highly incompatible, not recommended, and widely considered bad
     <value>usage: KPatcher [options] [game_dir] [tslpatchdata] [namespace_option_index]
 
 HoloPatcher-compatible command-line interface.
+When no arguments are provided, the GUI launches automatically.
 
 Options:
+  --gui                         Launch the graphical interface (default when no args given)
   --game-dir PATH               Path to the KOTOR game directory
   --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
   --namespace-option-index N    Namespace index (0-based)
-  --console                     Run in console/headless mode only (no GUI window)
-  --install                     Run install in headless CLI (requires game and mod paths)
-  --uninstall                   Run uninstall in headless CLI
-  --validate                    Validate mod configuration in headless CLI
+  --console                     Alias for headless CLI mode (no GUI)
+  --install                     Install mod (default when game and mod paths are given)
+  --uninstall                   Uninstall mod from game directory
+  --validate                    Validate mod configuration without installing
+  --list-namespaces             List available namespaces for a mod and exit
+  --dry-run                     Show configuration summary without installing
   -h, --help                    Show this message and exit
 
 Positional arguments (equivalent to --game-dir and --tslpatchdata):
   game_dir                      Game installation directory
   tslpatchdata                  Mod folder or path to tslpatchdata
-  namespace_option_index        Optional third argument: namespace index</value>
+  namespace_option_index        Optional third argument: namespace index
+
+Examples:
+  KPatcher                                          Launch GUI
+  KPatcher --gui                                    Launch GUI explicitly
+  KPatcher --tslpatchdata /path/to/mod --list-namespaces
+  KPatcher --game-dir /path/to/kotor --tslpatchdata /path/to/mod
+  KPatcher --game-dir /path/to/kotor --tslpatchdata /path/to/mod --install
+  KPatcher --game-dir /path/to/kotor --tslpatchdata /path/to/mod --uninstall
+  KPatcher --tslpatchdata /path/to/mod --dry-run
+  KPatcher /path/to/kotor /path/to/mod 0</value>
   </data>
   <data name="CliInfoInstallingMod" xml:space="preserve">
     <value>[Info] Installing mod from {0} to {1}</value>

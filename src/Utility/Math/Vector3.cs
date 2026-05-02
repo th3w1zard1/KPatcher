@@ -151,7 +151,7 @@ namespace KPatcher.Core.Common
         public static bool Within(this Vector3 vector, System.Collections.Generic.IList<Vector3> container)
         {
             // For structs, we check by value equality since identity doesn't apply
-            // This matches the Python behavior where Vector3 objects with same coordinates are considered equal
+            // Value equality: same coordinates compare equal
             foreach (var item in container)
             {
                 if (vector.Equals(item))

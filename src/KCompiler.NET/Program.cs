@@ -57,7 +57,7 @@ namespace KCompiler.Net
                             parsed.NwscriptPath,
                             log);
                         swHost.Stop();
-                        log.LogInformation(
+                        log.LogDebug(
                             "Tool=kcompiler Operation=cli_complete Phase=host CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} ExitCode=0",
                             ToolCorrelation.ReadOptional() ?? "",
                             swHost.ElapsedMilliseconds);

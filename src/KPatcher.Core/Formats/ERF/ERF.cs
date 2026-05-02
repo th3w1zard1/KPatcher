@@ -152,6 +152,11 @@ namespace KPatcher.Core.Formats.ERF
 
         public IEnumerator<ERFResource> GetEnumerator() => _resources.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void Save(string path)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>

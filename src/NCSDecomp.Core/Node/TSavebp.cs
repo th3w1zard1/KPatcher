@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TSavebp() { SetText("SAVEBP"); }
         public TSavebp(int line, int pos) { SetText("SAVEBP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TSavebp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTSavebp(this);
             }

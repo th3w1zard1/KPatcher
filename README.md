@@ -18,16 +18,21 @@ This project is a **faithful, line-by-line translation** of the original Python 
   - Python standard library -> .NET equivalent APIs
   - Threading model adaptation (Python threading -> C# async/await)
 
-The only exception to strict 1:1 parity is RTF rendering: the C# version attempts to render RTF content natively using Avalonia's RichTextBox control before falling back to stripped plain text (matching Python's behavior), whereas the Python version strips RTF immediately due to Tkinter limitations.
+The only exception to strict 1:1 parity is RTF rendering: the C# version attempts to render RTF content natively using Avalonia's RichTextBox control before falling back to stripped plain text, whereas the Python version strips RTF immediately due to Tkinter limitations.
 
 ## Project Structure
 
-- **KPatcher** - Main Avalonia desktop application (also HoloPatcher-style headless CLI)
+- **KPatcher** - Main Avalonia desktop application (also headless CLI)
 - **KPatcher.UI** - Packable Avalonia UI library
 - **KPatcher.Core** - Packable core patching engine and data/model library
 - **KCompiler.Core** / **KCompiler.NET** (`kcompiler`) - Managed NSS->NCS compiler CLI
 - **NCSDecomp.Core** / **NCSDecomp.NET** (NCSDecompCLI) / **NCSDecomp.UI** - Managed NCS->NSS decompiler (DeNCS port)
 - **KEditChanges** / **KEditChanges.NET** (`keditchanges-cli`) - Umbrella CLI (compile + decomp + placeholder info)
+
+Reverse-engineering references:
+
+- [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md)
+- [docs/NWNNSSCOMP_RE.md](docs/NWNNSSCOMP_RE.md)
 
 See [AGENTS.md](AGENTS.md) for build/publish commands and **“Which binary do I run?”**
 
@@ -75,6 +80,12 @@ This repository uses git submodules for reference and test assets:
 | `vendor/Vanilla_KOTOR_Script_Source` | Decompiled vanilla NSS (K1/TSL) for compile/roundtrip tests. |
 | `vendor/DeNCS` | NCS decompiler reference (Java); C# decoder port lives under `src/KPatcher.Core/Formats/NCS/Decompiler/`. |
 
+Additional checked-in vendor reference:
+
+| Path | Purpose |
+|------|---------|
+| `vendor/TSLPatcher` | Reverse-engineered Delphi reference source for `TSLPatcher.exe` and `ChangeEdit.exe`; verification workflow is documented in [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md). |
+
 Clone with submodules to run vanilla NSS compile tests and to have full parity references:
 
 ```bash
@@ -87,7 +98,7 @@ Note: `vendor/PyKotor` has nested submodules; if `submodule update --recursive` 
 
 ## Testing
 
-The project includes comprehensive unit tests covering all core functionality. See [TESTING.md](TESTING.md) for detailed information.
+The project includes comprehensive unit tests covering all core functionality. See [docs/TESTING.md](docs/TESTING.md) for runsettings, tiers, and harness commands.
 
 ### Running Tests
 
@@ -122,7 +133,7 @@ Current test coverage includes:
 - ✅ RtfStripper (RTF-to-plain-text)
 - ✅ InstallLogWriter (Error/Warning prefixes, log file creation)
 
-**Platform-specific notes:** Some tests are Windows-only (e.g. permission ReadOnly clearing). NCS roundtrip and external compiler tests may be skipped or fail when `nwnnsscomp.exe` is not available. See TESTING.md if present for details.
+**Platform-specific notes:** Some tests are Windows-only (e.g. permission ReadOnly clearing). NCS roundtrip and external compiler tests may be skipped or fail when `nwnnsscomp.exe` is not available. See [docs/TESTING.md](docs/TESTING.md) for details.
 
 ## Building
 

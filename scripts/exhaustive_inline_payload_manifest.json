@@ -1,0 +1,37 @@
+{
+  "description": "Maps neutral exhaustive_pattern_inlines payload IDs to organized upstream archives used for extraction.",
+  "payloads": [
+    {
+      "neutralPayloadId": "multi_option_kor_gff_bundle",
+      "game": "K1",
+      "sourceArchive": "deadlystream_k1/1293-jcs-korriban-back-in-black-for-k1.zip",
+      "deadlyStreamFileId": 1293,
+      "extractedUtc": "2026-03-25T00:00:00Z",
+      "notes": "Full tslpatchdata copy; omit .exe only."
+    },
+    {
+      "neutralPayloadId": "namespace_main_alt_gff_bundle",
+      "game": "K1",
+      "sourceArchive": "deadlystream_k1/1289-sith-soldier-texture-restoration.zip",
+      "deadlyStreamFileId": 1289,
+      "extractedUtc": "2026-03-25T00:00:00Z",
+      "notes": "Main + Alternate namespace payload with modules and alternate override assets."
+    },
+    {
+      "neutralPayloadId": "gff_git_module_texture_bundle",
+      "game": "K1",
+      "sourceArchive": "deadlystream_k1/1179-diversified-wounded-republic-soldiers-on-taris.zip",
+      "deadlyStreamFileId": 1179,
+      "extractedUtc": "2026-03-25T00:00:00Z",
+      "notes": "Includes tar_m02ac.mod and full listed Override model/texture files."
+    },
+    {
+      "neutralPayloadId": "heads_appearance_utc_row",
+      "game": "K1",
+      "sourceArchive": "deadlystream_k1/1218-helena-shan-improvement.zip",
+      "deadlyStreamFileId": 1218,
+      "extractedUtc": "2026-03-25T00:00:00Z",
+      "notes": "Includes helena.utc and InstallList head assets."
+    }
+  ]
+}

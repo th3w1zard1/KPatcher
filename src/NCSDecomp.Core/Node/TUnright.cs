@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TUnright() { SetText("USHRIGHTII"); }
         public TUnright(int line, int pos) { SetText("USHRIGHTII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TUnright(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTUnright(this);
             }

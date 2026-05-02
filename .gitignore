@@ -110,6 +110,10 @@ keys/
 *_key.txt
 *_private_key.txt
 
+# Free Pascal compiled output (vendor/TSLPatcher)
+*.ppu
+*.o
+
 # Build outputs
 dist/
 build/
@@ -131,6 +135,7 @@ temp_avrichtextbox
 temp_*/
 # DeNCS Java-parity round-trip: cloned Vanilla_KOTOR_Script_Source + compile/decompile artifacts
 test-work/
+.firecrawl/
 build_errors.txt
 test-output.txt
 csharpkotor_all_modules.txt
@@ -149,3 +154,29 @@ docs/brainstorms
 docs/tslpatcher_forms
 .cursor/plans
 SIMPLIFIED_IMPLEMENTATIONS.md
+
+# Temp/scratch files from agent sessions and ad-hoc diagnostics
+tmp_*.txt
+tmp_*.b64
+tmp_*.cs
+tmp_*.csx
+build_output.txt
+build_reset*.txt
+build_errors2.txt
+test_output.txt
+test_run_output.txt
+full_test*.txt
+realmod_*.txt
+diag_*.txt
+transcript_files.json
+run_tests.ps1
+untitled-*.prompt.md
+
+# Agent/tool session state dirs
+.agentdecompile/
+ralphy-spec/
+openspec/
+tmp_dump/
+tests/KPatcher.Tests/EmbeddedIntegrationMods/**/tslpatchdata/
+tests/KPatcher.Tests/test_files/
+tests/KPatcher.Tests/Integration/

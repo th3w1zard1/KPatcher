@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TFloatConstant(string text) { SetText(text ?? ""); }
         public TFloatConstant(string text, int line, int pos) { SetText(text ?? ""); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TFloatConstant(GetText(), GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTFloatConstant(this);
             }

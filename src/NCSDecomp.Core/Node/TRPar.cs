@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TRPar() { SetText(")"); }
         public TRPar(int line, int pos) { SetText(")"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TRPar(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTRPar(this);
             }

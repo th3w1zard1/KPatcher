@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TRsadd() { SetText("RSADD"); }
         public TRsadd(int line, int pos) { SetText("RSADD"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TRsadd(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTRsadd(this);
             }

@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TNot() { SetText("NOT"); }
         public TNot(int line, int pos) { SetText("NOT"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TNot(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTNot(this);
             }

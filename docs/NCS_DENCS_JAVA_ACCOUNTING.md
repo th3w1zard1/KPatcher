@@ -48,7 +48,7 @@ Every Java file under `.../ncs/<subpkg>/` maps to the same conceptual subfolder 
 
 | Java | C# |
 |------|-----|
-| `DeNCSCLIRoundTripTest.java` | `tests/KPatcher.Tests/Formats/NCSDecompCliRoundTripTest.cs` (merged partials: includes, filter, normalize, diff/bytecode). **Opt-in:** `RUN_NCSDECOMP_JAVA_ROUNDTRIP_SUITE=1`, traits **`ExternalCompiler`**, **`DeNCSJavaParity`**. Compile/recompile steps may still shell out to **`nwnnsscomp`** when enabled; **decompile** uses managed **`RoundTripUtil.DecompileNcsToNssFile`**. |
+| DeNCS CLI round-trip (vendor tree) | `tests/KPatcher.Tests/Formats/NCSDecompCliRoundTripTest.cs` (includes, filter, normalize, diff/bytecode). Runs with **`dotnet test`** (traits **`ExternalCompiler`**, **`DeNCSRoundTrip`**). Compile/recompile shell out to **`nwnnsscomp`**; **decompile** uses managed **`RoundTripUtil.DecompileNcsToNssFile`**. |
 
 **Managed vanilla coverage (default CI when submodule present):** `VanillaNssManagedDecompileRoundTripTests` — KCompiler compile -> `NCSManagedDecompiler.DecompileToNss` -> recompile -> structural NCS compare (`NcsRoundTripAssertHelpers`).
 

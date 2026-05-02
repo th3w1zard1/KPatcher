@@ -46,11 +46,7 @@ namespace KPatcher.Tests
         [Fact]
         public void NcsBytecodeSegment_DecodedFixtureNcs_MarksInstructions()
         {
-            string path = TestFileHelper.GetPath("test.ncs");
-            if (!File.Exists(path))
-                return;
-
-            byte[] ncs = File.ReadAllBytes(path);
+            byte[] ncs = CompiledNcsTestFixture.ReferenceK1NcsBytes();
             ActionsData actions = ActionsData.LoadForGame(tsl: false, k1Path: null, k2Path: null);
             string tokens = NcsParsePipeline.DecodeToTokenStream(ncs, actions);
 

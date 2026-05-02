@@ -116,7 +116,7 @@ namespace KPatcher.Core.Tests.Formats
 
                     // Validate jump instructions have valid jump targets
                     var jumpInstructions = ncs.Instructions.Where(i => i.IsJumpInstruction()).ToList();
-                    jumpInstructions.Should().OnlyContain(i => i.Jump != null || i.Args.Count > 0, 
+                    jumpInstructions.Should().OnlyContain(i => i.Jump != null || i.Args.Count > 0,
                         $"jump instructions must have jump target or args: {path}");
 
                     compiled++;
@@ -156,9 +156,9 @@ namespace KPatcher.Core.Tests.Formats
                             else if (o is int oi && r is long rl)
                                 rl.Should().Be(oi, $"instruction {i} arg {j} must match (long/int): {path}");
                             else if (o is int oi32 && r is uint ru && (oi32 == -1 && ru == 0xFFFFFFFF || (uint)oi32 == ru))
-                                { /* -1 and 0xFFFFFFFF equivalent for object/const */ }
+                            { /* -1 and 0xFFFFFFFF equivalent for object/const */ }
                             else if (o is long o64 && r is uint ru2 && (o64 == -1 && ru2 == 0xFFFFFFFF || (uint)o64 == ru2))
-                                { /* same */ }
+                            { /* same */ }
                             else
                                 r.Should().Be(o, $"instruction {i} arg {j} must match: {path}");
                         }
@@ -187,7 +187,7 @@ namespace KPatcher.Core.Tests.Formats
                     {
                         var origIdx = ncs.Instructions.IndexOf(constInstructions[i]);
                         var roundIdx = ncs2.Instructions.IndexOf(constInstructions2[i]);
-                        constInstructions2[i].Args.Count.Should().Be(constInstructions[i].Args.Count, 
+                        constInstructions2[i].Args.Count.Should().Be(constInstructions[i].Args.Count,
                             $"constant instruction {origIdx} args count must match: {path}");
                         for (int j = 0; j < constInstructions[i].Args.Count; j++)
                         {
@@ -282,7 +282,7 @@ namespace KPatcher.Core.Tests.Formats
 
                     // Validate jump instructions have valid jump targets
                     var jumpInstructions = ncs.Instructions.Where(i => i.IsJumpInstruction()).ToList();
-                    jumpInstructions.Should().OnlyContain(i => i.Jump != null || i.Args.Count > 0, 
+                    jumpInstructions.Should().OnlyContain(i => i.Jump != null || i.Args.Count > 0,
                         $"jump instructions must have jump target or args: {path}");
 
                     compiled++;
@@ -322,9 +322,9 @@ namespace KPatcher.Core.Tests.Formats
                             else if (o is int oi && r is long rl)
                                 rl.Should().Be(oi, $"instruction {i} arg {j} must match (long/int): {path}");
                             else if (o is int oi32 && r is uint ru && (oi32 == -1 && ru == 0xFFFFFFFF || (uint)oi32 == ru))
-                                { /* -1 and 0xFFFFFFFF equivalent for object/const */ }
+                            { /* -1 and 0xFFFFFFFF equivalent for object/const */ }
                             else if (o is long o64 && r is uint ru2 && (o64 == -1 && ru2 == 0xFFFFFFFF || (uint)o64 == ru2))
-                                { /* same */ }
+                            { /* same */ }
                             else
                                 r.Should().Be(o, $"instruction {i} arg {j} must match: {path}");
                         }
@@ -353,7 +353,7 @@ namespace KPatcher.Core.Tests.Formats
                     {
                         var origIdx = ncs.Instructions.IndexOf(constInstructions[i]);
                         var roundIdx = ncs2.Instructions.IndexOf(constInstructions2[i]);
-                        constInstructions2[i].Args.Count.Should().Be(constInstructions[i].Args.Count, 
+                        constInstructions2[i].Args.Count.Should().Be(constInstructions[i].Args.Count,
                             $"constant instruction {origIdx} args count must match: {path}");
                         for (int j = 0; j < constInstructions[i].Args.Count; j++)
                         {

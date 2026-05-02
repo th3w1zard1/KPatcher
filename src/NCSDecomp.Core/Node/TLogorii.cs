@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TLogorii() { SetText("LOGORII"); }
         public TLogorii(int line, int pos) { SetText("LOGORII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TLogorii(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTLogorii(this);
             }

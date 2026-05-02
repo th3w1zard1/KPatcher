@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -89,15 +90,22 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             while (Objects.Any(obj => obj is IncludeScript))
             {
                 List<IncludeScript> includes = Objects.OfType<IncludeScript>().ToList();
+                // IncludeScript.Compile prepends parsed content: root.Objects = t.Objects.Concat(root.Objects).
+                // Therefore the last #include in source must be merged first so the first #include ends up
+                // before the second in the final list (same textual order as nwnnsscomp).
                 IncludeScript include = includes.Last();
                 Objects.Remove(include);
                 included.Add(include);
                 include.Compile(ncs, this);
             }
 
-            List<TopLevelObject> scriptGlobals = Objects.OfType<GlobalVariableDeclaration>()
-                .Concat<TopLevelObject>(Objects.OfType<GlobalVariableInitialization>())
-                .Concat(Objects.OfType<StructDefinition>())
+            // Preserve source order: struct definitions must be registered in StructMap before globals that use them
+            // (e.g. k_inc_generic: struct tLastRound before global tPR). Grouping all globals before all structs was wrong.
+            List<TopLevelObject> scriptGlobals = Objects
+                .Where(obj =>
+                    obj is StructDefinition ||
+                    obj is GlobalVariableDeclaration ||
+                    obj is GlobalVariableInitialization)
                 .ToList();
             List<TopLevelObject> others = Objects.Where(obj => !included.Contains(obj) && !scriptGlobals.Contains(obj)).ToList();
 
@@ -109,7 +117,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
             if (hasGlobals)
             {
-                // Compile globals first (they'll be after the entry stub we insert at index 0)
+                // Compile struct defs + globals in source order (after the entry stub we insert at index 0)
                 foreach (TopLevelObject globalDef in scriptGlobals)
                 {
                     if (firstGlobalInstruction == null)
@@ -130,7 +138,8 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 ncs.Add(NCSInstructionType.SAVEBP, new List<object>());
             }
 
-            // Compile functions
+            // Forward decls register only (lazy stub on first JSR); function bodies stay in source order so
+            // main() may call helpers defined later in the same file (see NCSCompilerTests).
             foreach (TopLevelObject obj in others)
             {
                 obj.Compile(ncs, this);
@@ -156,6 +165,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             if (FunctionMap.ContainsKey("main"))
             {
                 NCSInstruction mainStart = FirstNonNop(FunctionMap["main"].Instruction, ncs);
+                if (mainStart == null)
+                {
+                    throw new EntryPointError("main() was registered without a materialized entry instruction.");
+                }
+
                 FunctionMap["main"] = new FunctionReference(mainStart, FunctionMap["main"].Definition);
 
                 // The external compiler (nwnnsscomp) always places entry stub at BEGINNING (index 0)
@@ -207,6 +221,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             else if (FunctionMap.ContainsKey("StartingConditional"))
             {
                 NCSInstruction scStart = FirstNonNop(FunctionMap["StartingConditional"].Instruction, ncs);
+                if (scStart == null)
+                {
+                    throw new EntryPointError("StartingConditional() was registered without a materialized entry instruction.");
+                }
+
                 FunctionMap["StartingConditional"] = new FunctionReference(scStart, FunctionMap["StartingConditional"].Definition);
                 // Adding RETN first, then JSR, then RSADDI at the same index, so final order is RSADDI, JSR, RETN
                 // The external compiler places entry stub at BEGINNING (index 0) for StartingConditional too
@@ -227,8 +246,14 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
         }
 
-        private static NCSInstruction FirstNonNop(NCSInstruction start, NCS ncs)
+        [CanBeNull]
+        private static NCSInstruction FirstNonNop([CanBeNull] NCSInstruction start, NCS ncs)
         {
+            if (start == null)
+            {
+                return null;
+            }
+
             int idx = ncs.GetInstructionIndex(start);
             if (idx < 0)
             {
@@ -379,6 +404,16 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
             // JSR consumes all arguments, so subtract their total size
             block.TempStack -= offset;
+
+            // Materialize the forward-declaration stub only after arguments are emitted, immediately before JSR.
+            // If the stub sits before the call's pushes, the function body is inserted between main's entry NOP and
+            // those pushes; FirstNonNop(main) then skips into the callee and the entry JSR never runs main's code.
+            if (startInstruction == null)
+            {
+                startInstruction = ncs.Add(NCSInstructionType.NOP, new List<object>());
+                FunctionMap[name] = new FunctionReference(startInstruction, definition);
+            }
+
             ncs.Add(NCSInstructionType.JSR, new List<object>(), startInstruction);
 
             return returnType;
@@ -727,6 +762,17 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new NSS.CompileError(msg);
             }
 
+            // Forward declarations often supply defaults (e.g. k_inc_generic); the definition may repeat the
+            // parameter list without defaults. nwnnsscomp uses prototype defaults at call sites — copy them here.
+            List<FunctionParameter> protoParamsForDefaults = GetParameters(prototypeDef);
+            for (int pi = 0; pi < Parameters.Count; pi++)
+            {
+                if (Parameters[pi].DefaultValue == null && protoParamsForDefaults[pi].DefaultValue != null)
+                {
+                    Parameters[pi].DefaultValue = protoParamsForDefaults[pi].DefaultValue;
+                }
+            }
+
             // Function has forward declaration, insert the compiled definition after the stub
             NCS temp = new NCS();
             NCSInstruction retn = new NCSInstruction(NCSInstructionType.RETN);
@@ -734,7 +780,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             temp.Instructions.Add(retn);
 
             NCSInstruction stubInstruction = root.FunctionMap[name].Instruction;
-            int stubIndex = ncs.GetInstructionIndex(stubInstruction);
+            int stubIndex = stubInstruction != null ? ncs.GetInstructionIndex(stubInstruction) : -1;
             if (debug)
             {
                 System.Console.WriteLine($"CompileFunctionWithPrototype for {name}: stubIndex={stubIndex} countBefore={ncs.Instructions.Count}");
@@ -752,18 +798,15 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 newStart = temp.Instructions[0];
             }
 
-            // Redirect any existing jumps that pointed to the prototype stub to the new function start
+            // Redirect jumps that pointed at the prototype stub (same reference as FunctionMap) to the body entry.
+            // Do not retarget every instruction with an "orphan" jump target: other jumps may legitimately need
+            // different repair, and mis-routing them here breaks calls (e.g. prototype + main() calling helper).
             int updated = 0;
+            NCSInstruction oldStub = root.FunctionMap[name].Instruction;
             foreach (NCSInstruction inst in ncs.Instructions)
             {
-                if (ReferenceEquals(inst.Jump, root.FunctionMap[name].Instruction))
+                if (oldStub != null && ReferenceEquals(inst.Jump, oldStub))
                 {
-                    inst.Jump = newStart;
-                    updated++;
-                }
-                else if (inst.Jump != null && !ncs.Instructions.Contains(inst.Jump))
-                {
-                    // Jump target no longer exists (prototype stub removed) – redirect to new function start.
                     inst.Jump = newStart;
                     updated++;
                 }

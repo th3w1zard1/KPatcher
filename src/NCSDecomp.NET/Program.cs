@@ -47,7 +47,7 @@ namespace NCSDecomp.NET
                         swHost.Stop();
                         if (code == 0)
                         {
-                            log.LogInformation(
+                            log.LogDebug(
                                 "Tool=NCSDecompCLI Operation=cli_complete Phase=host CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} ExitCode=0",
                                 ToolCorrelation.ReadOptional() ?? "",
                                 swHost.ElapsedMilliseconds);

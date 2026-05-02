@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using KPatcher.Core.Formats.NCS.Decompiler;
+using KPatcher.Core.Tests.Common;
 using NCSDecomp.Core.Lexer;
 using NCSDecomp.Core.Node;
 using Xunit;
@@ -40,11 +41,7 @@ namespace KPatcher.Tests.Formats
         [Fact]
         public void Decoder_TestNcs_StartsWithTPrologue()
         {
-            string path = Path.Combine(AppContext.BaseDirectory, "test_files", "test.ncs");
-            if (!File.Exists(path))
-                return;
-
-            byte[] bytes = File.ReadAllBytes(path);
+            byte[] bytes = CompiledNcsTestFixture.ReferenceK1NcsBytes();
             var dec = new Decoder(bytes);
             string s = dec.Decode(null);
             Assert.StartsWith("T 8 ", s);

@@ -11,7 +11,6 @@ namespace KPatcher.UI
 
     /// <summary>
     /// Configuration and version information for KPatcher.
-    /// Equivalent to kpatcher/config.py
     /// </summary>
     public static class Config
     {

@@ -426,9 +426,6 @@ namespace KPatcher.Core.Patcher
                     }
 
                     // Must run preprocessed scripts directly before GFFList so we don't interfere with !FieldPath assignments to 2DAMEMORY.
-                    // if not finished_preprocessed_scripts and isinstance(patch, ModificationsNSS):
-                    //         self._prepare_compilelist(config, self.log, memory, self.game)
-                    //         finished_preprocessed_scripts = True
                     if (!finishedPreprocessedScripts && patch is ModificationsNSS)
                     {
                         tempScriptFolder = PrepareCompileList(cfg, memory);
@@ -443,11 +440,13 @@ namespace KPatcher.Core.Patcher
                         log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                             "Install: outputContainerPath={0}, saveAs={1}", outputContainerPath, saveAs));
 
-                        // TSLPatcher: do not overwrite dialog.tlk directly
-                        if (patch is ModificationsTLK && string.Equals(saveAs, "dialog.tlk", StringComparison.OrdinalIgnoreCase))
+                        // TSLPatcher: do not overwrite dialog.tlk directly, but still apply TLK changes in memory so
+                        // later patches can resolve TLK tokens from the same install queue.
+                        bool skipDialogTlkWrite = patch is ModificationsTLK
+                            && string.Equals(saveAs, "dialog.tlk", StringComparison.OrdinalIgnoreCase);
+                        if (skipDialogTlkWrite)
                         {
                             log.AddNote(string.Format(System.Globalization.CultureInfo.CurrentCulture, KPatcher.Core.Common.TSLPatcherMessages.SkippingFileNoOverwriteDialogTlk, saveAs));
-                            continue;
                         }
 
                         HandleCapsuleResult result = HandleCapsuleAndBackup(patch, outputContainerPath, destination, saveAs);
@@ -497,6 +496,13 @@ namespace KPatcher.Core.Patcher
                         if (patchedData is bool b && b)
                         {
                             log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.SkippingFilePatchResource, patch.SourceFile));
+                            continue;
+                        }
+
+                        if (skipDialogTlkWrite)
+                        {
+                            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                                "Install: applied TLK patch for memory only; skipping write for {0}", saveAs));
                             continue;
                         }
 
@@ -861,6 +867,25 @@ namespace KPatcher.Core.Patcher
         }
 
         /// <summary>
+        /// Resolves a path under the mod package for install/NSS/etc. sources.
+        /// When <see cref="TslPatchDataPath"/> is set and contains the file, that wins; otherwise <see cref="modPath"/>.
+        /// </summary>
+        private string ResolveModContentPath(string sourceFolder, string sourceFile)
+        {
+            string underModRoot = Path.Combine(modPath, sourceFolder, sourceFile);
+            if (!string.IsNullOrWhiteSpace(TslPatchDataPath))
+            {
+                string underTsl = Path.Combine(TslPatchDataPath, sourceFolder, sourceFile);
+                if (File.Exists(underTsl))
+                {
+                    return underTsl;
+                }
+            }
+
+            return underModRoot;
+        }
+
+        /// <summary>
         /// Loads a resource file using BinaryReader.
         /// </summary>
         [NotNull]
@@ -902,10 +927,10 @@ namespace KPatcher.Core.Patcher
                         "LookupResource: loading from mod (replaceOrMissingOutput) sourceFolder={0} sourceFile={1}",
                         sourceFolder, sourceFile));
 
-                    // Path resolution: mod_path / sourcefolder / sourcefile
-                    // mod_path is typically the tslpatchdata folder (parent of changes.ini).
-                    // If sourcefolder = ".", this resolves to mod_path itself (tslpatchdata folder).
-                    string sourcePath = Path.Combine(modPath, sourceFolder, sourceFile);
+                    // Path resolution: prefer tslpatchdata when TslPatchDataPath is set (assets live there),
+                    // then mod root — matches INI comments and HoloPatcher-style layouts where modPath is the
+                    // extracted mod folder and tslpatchdata is a subdirectory.
+                    string sourcePath = ResolveModContentPath(sourceFolder, sourceFile);
                     return LoadResourceFile(sourcePath);
                 }
 

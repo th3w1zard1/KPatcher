@@ -240,7 +240,7 @@ namespace KPatcher.Core.Formats.GFF
             {
                 // Simple types (stored inline as 4-byte values in the field entry)
                 // The writer writes all simple types as 4-byte values, so we read 4 bytes and extract
-                // However, Python reader reads 1-2 bytes which may be a bug - we'll read 4 bytes to match writer
+                // Read 4 bytes per field entry to match the writer layout
                 switch (fieldType)
                 {
                     case GFFFieldType.UInt8:

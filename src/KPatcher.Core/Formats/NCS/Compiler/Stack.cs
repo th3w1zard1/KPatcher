@@ -1096,18 +1096,16 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             }
 
             int remaining = Math.Abs(offset);
-            // Python uses negative indexing starting from -1 (top of stack)
-            // In C#, we convert negative index to positive: index = _stack.Count + pythonIndex
-            // So pythonIndex -1 becomes _stack.Count - 1, pythonIndex -2 becomes _stack.Count - 2, etc.
-            int index = -1; // Python-style negative index (will be converted when accessing)
+            // Negative indices count from the top: -1 is top, -2 below it, etc.
+            // Convert to a non-negative list index: listIndex = _stack.Count + index
+            int index = -1;
 
             while (true)
             {
-                // Convert Python negative index to C# positive index
                 int listIndex = _stack.Count + index;
                 if (listIndex < 0 || listIndex >= _stack.Count)
                 {
-                    // Equivalent to Python's: if -index > len(self._stack)
+                    // Offset walks past the bottom of the stack
                     throw new ArgumentException($"Stack offset {offset} is out of range");
                 }
 

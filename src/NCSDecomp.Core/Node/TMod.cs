@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TMod() { SetText("MOD"); }
         public TMod(int line, int pos) { SetText("MOD"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TMod(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTMod(this);
             }

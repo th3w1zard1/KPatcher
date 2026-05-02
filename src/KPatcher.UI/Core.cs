@@ -888,7 +888,7 @@ namespace KPatcher.UI
 
         /// <summary>
         /// Strips RTF formatting from text.
-        /// Uses RtfStripper class which matches Python's striprtf implementation.
+        /// Uses <see cref="RtfStripper"/> for RTF stripping.
         /// </summary>
         private static string StripRtf(string rtfText)
         {

@@ -9,7 +9,7 @@ using KPatcher.UI.Resources;
 namespace KPatcher.UI.Views.Dialogs
 {
     /// <summary>
-    /// Simple utility dialog that mirrors tkinter's multi-option message boxes.
+    /// Simple utility dialog for multi-option prompts.
     /// </summary>
     public sealed class ChoiceDialog : Window
     {

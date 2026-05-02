@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
@@ -37,13 +38,13 @@ namespace KPatcher.UI.Views
             // Subscribe to data context changes to set up auto-scroll and log formatting
             DataContextChanged += OnDataContextChanged;
 
-            // Set up window centering on startup (matches Python's set_window)
+            // Center window on startup
             Opened += OnWindowOpened;
         }
 
         private async void OnWindowOpened(object sender, EventArgs e)
         {
-            // Center window on screen - matches Python's set_window behavior
+            // Center window on the primary screen working area
             if (Screens.Primary != null)
             {
                 var screen = Screens.Primary.WorkingArea;
@@ -56,7 +57,7 @@ namespace KPatcher.UI.Views
             await ShowAlphaWarning();
         }
 
-        private async System.Threading.Tasks.Task ShowAlphaWarning()
+        private async Task ShowAlphaWarning()
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
@@ -625,14 +626,14 @@ namespace KPatcher.UI.Views
                 // Log the full exception details for debugging
                 Console.WriteLine($"[RTF] Full exception details: {ex}");
 
-                // Fall back to stripped text (matches Python behavior - Python strips RTF because tkinter can't render it)
+                // Fall back to stripped plain text (Avalonia RichTextBox may not render RTF)
                 viewModel.IsRtfContent = false;
                 try
                 {
                     string stripped = RtfStripper.StripRtf(rtfContent);
                     Console.WriteLine($"[RTF] Falling back to stripped text, length: {stripped.Length}");
                     // Set as plain text content - not as a log entry
-                    // This matches Python's set_stripped_rtf_text behavior
+                    // Show stripped content as a plain log note
                     viewModel.ClearLogText();
                     viewModel.AddLogEntry(stripped, KPatcher.Core.Logger.LogType.Note);
                 }

@@ -136,7 +136,7 @@ namespace KPatcher.Core.Mods.GFF
         ///
         /// Processing Logic:
         /// ----------------
-        ///     - It checks if the path is valid PureWindowsPath
+        ///     - Validates and walks each path segment
         ///     - Loops through each part of the path
         ///     - Acquires the container at each step from the parent container
         ///     - Returns the container at the end or None if not found along the path
@@ -312,8 +312,7 @@ namespace KPatcher.Core.Mods.GFF
     }
 
     /// <summary>
-    /// Adds a new struct to a GFF list.
-    /// 1:1 port from Python AddStructToListGFF
+    /// Adds a new struct to a GFF list (HoloPatcher-compatible).
     /// </summary>
     public class AddStructToListGFF : ModifyGFF
     {
@@ -380,7 +379,7 @@ namespace KPatcher.Core.Mods.GFF
                 logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.GffPathNotFoundDefaultingToRootFormat, workingPath));
             }
 
-            // if isinstance(navigated_container, GFFList):
+            // Branch: navigated container is a list
             if (navigatedContainer is GFFList gffList)
             {
                 listContainer = gffList;
@@ -409,7 +408,7 @@ namespace KPatcher.Core.Mods.GFF
                     // new_struct = GFFStruct(len(list_container._structs)-1)
                     newStruct = new GFFStruct(listContainer.Count - 1);
                 }
-                // elif isinstance(lookup, GFFStruct):
+                // Branch: lookup is an existing struct
                 else if (lookup is GFFStruct gffStruct)
                 {
                     newStruct = gffStruct;
@@ -426,7 +425,7 @@ namespace KPatcher.Core.Mods.GFF
                 logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.IniSectionThrewException, Identifier, e));
             }
 
-            // if not isinstance(new_struct, GFFStruct):
+            // Missing or invalid new struct
             if (newStruct is null)
             {
                 logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.FailedToAddNewStructToList, workingPath, Identifier, newStruct?.ToString() ?? "null", newStruct?.ToString() ?? "null", newStruct?.GetType().Name ?? "null"));
@@ -460,7 +459,7 @@ namespace KPatcher.Core.Mods.GFF
             // for add_field in self.modifiers:
             foreach (ModifyGFF addField in Modifiers)
             {
-                // assert isinstance(add_field, (AddFieldGFF, AddStructToListGFF, Memory2DAModifierGFF, ModifyFieldGFF)), f"{type(add_field).__name__}: {add_field}"
+                // Modifier must be one of the supported GFF patch types
                 if (
                     !(addField is AddFieldGFF)
                     && !(addField is AddStructToListGFF)
@@ -490,7 +489,7 @@ namespace KPatcher.Core.Mods.GFF
                 else if (addField is AddStructToListGFF addStructToListGFF)
                 {
                     // We need to find a way to update the path
-                    addStructToListGFF.Path = newpath; // FIXME: This is a limitation - in Python it's mutable but in C# it's not
+                    addStructToListGFF.Path = newpath; // FIXME: property setter; reference impl mutated path in place
                 }
 
                 // add_field.apply(root_container, memory, logger)
@@ -502,8 +501,7 @@ namespace KPatcher.Core.Mods.GFF
     }
 
     /// <summary>
-    /// Adds a new field to a GFF structure.
-    /// 1:1 port from Python AddFieldGFF
+    /// Adds a new field to a GFF structure (HoloPatcher-compatible).
     /// </summary>
     public class AddFieldGFF : ModifyGFF
     {
@@ -572,7 +570,7 @@ namespace KPatcher.Core.Mods.GFF
                 }
                 else
                 {
-                    logger.AddVerbose($"Found PureWindowsPath object in value() lookup from non-FieldValue2DAMemory object? Path: \"{storedFieldpath}\" INI section: [{Identifier}]");
+                    logger.AddVerbose($"Path string in value() lookup from non-FieldValue2DAMemory object? Path: \"{storedFieldpath}\" INI section: [{Identifier}]");
                 }
                 (string fromParentPath, string fromLabel) = SplitPath(storedFieldpath);
                 // Can be null if not found
@@ -603,12 +601,8 @@ namespace KPatcher.Core.Mods.GFF
                     continue;
                 }
 
-                // # HACK(th3w1zard1): resolves any >>##INDEXINLIST##<<, not sure why lengths aren't the same though (hence use of zip_longest)? Whatever, it works.
-                // newpath = PureWindowsPath("")
-                // for part, resolvedpart in zip_longest(add_field.path.parts, self.path.parts):
-                //     newpath /= resolvedpart or part
+                // Merge child path with parent path segment-by-segment (longest-length zip; prefer parent segment when present).
                 string childPath = addField is AddFieldGFF af ? af.Path : (addField is AddStructToListGFF asl ? asl.Path : string.Empty);
-                // Python zip_longest logic: newpath parts are resolvedpart or part
                 List<string> newpathParts = new List<string>();
                 string[] childParts = string.IsNullOrEmpty(childPath) ? Array.Empty<string>() : childPath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] selfParts = string.IsNullOrEmpty(Path) ? Array.Empty<string>() : Path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
@@ -682,9 +676,7 @@ namespace KPatcher.Core.Mods.GFF
                 logger.AddVerbose($"Assign {displayDestName}={displaySrcName}");
 
                 // memory.memory_2da[self.dest_token_id] = self.path
-                // Python stores PureWindowsPath object, which when converted to string uses backslashes on Windows
-                // Match Python's behavior: PureWindowsPath uses backslashes, so store as-is (Path already has backslashes from ConfigReader)
-                // Python's PureWindowsPath("Nested\Field") converts to string as "Nested\Field" (single backslash)
+                // Store path string as-is (Windows backslashes preserved from config parsing)
                 string windowsPath = Path ?? "";
                 memory.Memory2DA[DestTokenId] = windowsPath;
                 return;
@@ -695,13 +687,11 @@ namespace KPatcher.Core.Mods.GFF
             // logger.add_verbose(f"GFFList ptr !fieldpath: Assign {display_dest_name}={display_src_name} initiated. iniPath: {self.path}, section: [{self.identifier}]")
             logger.AddVerbose($"GFFList ptr !fieldpath: Assign {displayDestName}={displaySrcName} initiated. iniPath: {Path}, section: [{Identifier}]");
 
-            // ptr_to_dest: PureWindowsPath | Any = memory.memory_2da.get(self.dest_token_id, None) if self.dest_token_id is not None else self.path
+            // ptr_to_dest from memory or ini path
             // Can be null if not found
             object ptrToDest = memory.Memory2DA.TryGetValue(DestTokenId, out string destPath) ? destPath : Path;
 
-            // if isinstance(ptr_to_dest, PureWindowsPath):
-            // In Python, PureWindowsPath("AppearanceType") is still a path (path.name="AppearanceType", path.parent="")
-            // So we need to check if ptrToDest is a string (path) and try to navigate to it
+            // String token may be a GFF path (including a single label like "AppearanceType"); navigate when it looks like a path
             if (ptrToDest is string destPathStr)
             {
                 // dest_field = self._navigate_to_field(root_container, ptr_to_dest)
@@ -714,7 +704,7 @@ namespace KPatcher.Core.Mods.GFF
                     throw new ArgumentException($"Cannot assign 2DAMEMORY{DestTokenId}=2DAMEMORY{SrcTokenId.Value}: LEFT side of assignment's path '{ptrToDest}' does not point to a valid GFF Field!");
                 }
 
-                // assert isinstance(dest_field, _GFFField)
+                // dest_field resolved to a GFF field
                 // logger.add_verbose(f"LEFT SIDE 2DAMEMORY{self.src_token_id} lookup at '{ptr_to_dest}' returned '{dest_field.value()}'")
                 logger.AddVerbose($"LEFT SIDE 2DAMEMORY{SrcTokenId.Value} lookup at '{ptrToDest}' returned '{destFieldInfo.Value.value}'");
             }
@@ -731,7 +721,7 @@ namespace KPatcher.Core.Mods.GFF
             }
 
             // # Lookup assigning value
-            // ptr_to_src: PureWindowsPath | Any = memory.memory_2da.get(self.src_token_id, None)
+            // ptr_to_src from memory
             if (!memory.Memory2DA.TryGetValue(SrcTokenId.Value, out string ptrToSrc))
             {
                 ptrToSrc = null;
@@ -744,7 +734,7 @@ namespace KPatcher.Core.Mods.GFF
                 throw new ArgumentException($"Cannot assign {displayDestName}={displaySrcName} because RIGHT side of assignment is undefined.");
             }
 
-            // if isinstance(ptr_to_src, PureWindowsPath):
+            // Path-shaped string: !FieldPath indirection
             if (ptrToSrc is string srcPathStr && (srcPathStr.Contains('/') || srcPathStr.Contains('\\')))
             {
                 // logger.add_verbose(f"Assigner {display_src_name} is a pointer !FieldPath to another field located at '{ptr_to_src}'")
@@ -753,8 +743,7 @@ namespace KPatcher.Core.Mods.GFF
                 // source_field = self._navigate_to_field(root_container, ptr_to_src)
                 sourceFieldInfo = NavigateToField(rootStruct, ptrToSrc);
 
-                // assert not isinstance(source_field, PureWindowsPath)
-                // assert isinstance(source_field, _GFFField)
+                // source_field must be a resolved GFF field
                 if (sourceFieldInfo is null)
                 {
                     throw new InvalidOperationException($"Source field at '{ptrToSrc}' is not a valid GFF Field");
@@ -766,7 +755,7 @@ namespace KPatcher.Core.Mods.GFF
                 logger.AddVerbose($"Assigner {displaySrcName} holds literal value '{ptrToSrc}'. other stored info debug: Path: '{Path}' INI section: [{Identifier}]");
             }
 
-            // if isinstance(dest_field, _GFFField):
+            // Assign into resolved destination field when present
             if (destFieldInfo.HasValue)
             {
                 // logger.add_verbose("assign dest ptr field.")
@@ -803,8 +792,7 @@ namespace KPatcher.Core.Mods.GFF
     }
 
     /// <summary>
-    /// Modifies an existing field in a GFF structure.
-    /// 1:1 port from Python ModifyFieldGFF
+    /// Modifies an existing field in a GFF structure (HoloPatcher-compatible).
     /// </summary>
     public class ModifyFieldGFF : ModifyGFF
     {
@@ -812,7 +800,6 @@ namespace KPatcher.Core.Mods.GFF
         public FieldValue Value { get; }
         public string Identifier { get; }
 
-        // Python line 520-528: def __init__(self, path, value, identifier: str = "")
         public ModifyFieldGFF(string path, FieldValue value, string identifier = "")
         {
             Path = path;
@@ -868,7 +855,7 @@ namespace KPatcher.Core.Mods.GFF
             // value: Any = self.value.value(memory, field_type)
             object value = Value.Value(memory, fieldType);
 
-            // if isinstance(value, PureWindowsPath): - Handle !FieldPath
+            // Path-shaped string: !FieldPath
             if (value is string strValue && (strValue.Contains('/') || strValue.Contains('\\')))
             {
                 string storedFieldpath = strValue;
@@ -878,7 +865,7 @@ namespace KPatcher.Core.Mods.GFF
                 }
                 else
                 {
-                    logger.AddVerbose($"Found PureWindowsPath object in value() lookup from non-FieldValue2DAMemory object? Path: \"{storedFieldpath}\" INI section: [{Identifier}]");
+                    logger.AddVerbose($"Path string in value() lookup from non-FieldValue2DAMemory object? Path: \"{storedFieldpath}\" INI section: [{Identifier}]");
                 }
                 (string fromParentPath, string fromLabel) = SplitPath(storedFieldpath);
                 // Can be null if not found
@@ -916,7 +903,7 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // assert isinstance(value, LocalizedString)
+            // LocalizedString field
             if (!(value is LocalizedString locString))
             {
                 logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedLocalizedStringButGotFormat, value?.GetType().Name ?? "null"));
@@ -930,7 +917,7 @@ namespace KPatcher.Core.Mods.GFF
             }
             else
             {
-                // assert isinstance(value, LocalizedStringDelta)
+                // LocalizedStringDelta field
                 if (!(value is LocalizedStringDelta delta))
                 {
                     logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedLocalizedStringDeltaButGotFormat, value.GetType().Name));

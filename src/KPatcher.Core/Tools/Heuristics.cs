@@ -120,7 +120,7 @@ namespace KPatcher.Core.Tools
             if (Check("AppIcon50x50@2x~ipad.png")) game1Ios++;
             if (Check("AppIcon50x50~ipad.png")) game1Ios++;
 
-            // K1 Android: TODO (empty in Python)
+            // K1 Android: TODO (not implemented in reference HoloPatcher)
 
             // K2 PC
             int game2Pc = 0;

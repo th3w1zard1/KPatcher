@@ -140,7 +140,7 @@ namespace KPatcher.Core.Formats.TLK
 
         private static Encoding GetEncodingForLanguage(Language language)
         {
-            // Match Python's Language.get_encoding() method
+            // Match KOTOR TLK language encoding conventions
             switch (language)
             {
                 case Language.English:

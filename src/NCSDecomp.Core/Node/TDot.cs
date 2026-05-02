@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TDot() { SetText("."); }
         public TDot(int line, int pos) { SetText("."); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TDot(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTDot(this);
             }

@@ -11,7 +11,6 @@ namespace KPatcher.UI.Update
 {
     /// <summary>
     /// Strongly typed representation of the JSON payload embedded in Config.cs.
-    /// Mirrors the structure produced by kpatcher/config.py.
     /// </summary>
     public sealed class RemoteUpdateInfo
     {

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using FluentAssertions;
 using KPatcher.Core.Formats.RIM;
 using KPatcher.Core.Resources;
@@ -9,104 +10,89 @@ using static global::KPatcher.Core.Formats.RIM.RIMAuto;
 
 namespace KPatcher.Core.Tests.Formats
 {
-
     /// <summary>
     /// Tests for RIM binary I/O operations.
     /// 1:1 port from tests/resource/formats/test_rim.py
     /// </summary>
     public class RIMFormatTests
     {
-        private static readonly string BinaryTestFile = TestFileHelper.GetPath("test.rim");
         private static readonly string DoesNotExistFile = "./thisfiledoesnotexist";
-        private static readonly string CorruptBinaryTestFile = TestFileHelper.GetPath("test_corrupted.rim");
 
         [Fact]
         public void TestBinaryIO()
         {
-            // test_binary_io
-            if (!File.Exists(BinaryTestFile))
-            {
-                // Skip if test file doesn't exist
-                return;
-            }
-
-            // rim: RIM = RIMBinaryReader(BINARY_TEST_FILE).load()
-            RIM rim = new RIMBinaryReader(BinaryTestFile).Load();
+            RIM rim = BinaryFormatFixtures.BuildCanonicalRim();
             ValidateIO(rim);
 
-            // data: bytearray = bytearray()
-            // write_rim(rim, data)
             byte[] data = BytesRim(rim);
 
-            // rim = read_rim(data)
             rim = ReadRim(data);
             ValidateIO(rim);
         }
 
+        [Fact]
+        public void WriteRoundTrip_BytesMatchSourceFile()
+        {
+            byte[] onDisk = new RIMBinaryWriter(BinaryFormatFixtures.BuildCanonicalRim()).Write();
+            RIM rim = new RIMBinaryReader(onDisk).Load();
+            byte[] serialized = BytesRim(rim);
+            serialized.Should().Equal(onDisk);
+        }
+
         private static void ValidateIO(RIM rim)
         {
-            // validate_io
-            // assert len(rim) == 3
             rim.Count.Should().Be(3);
-            // assert rim.get("1", ResourceType.TXT) == b"abc"
-            rim.Get("1", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("abc"));
-            // assert rim.get("2", ResourceType.TXT) == b"def"
-            rim.Get("2", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("def"));
-            // assert rim.get("3", ResourceType.TXT) == b"ghi"
-            rim.Get("3", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("ghi"));
+            rim.Get("1", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("abc"));
+            rim.Get("2", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("def"));
+            rim.Get("3", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("ghi"));
         }
 
         [Fact]
         public void TestReadRaises()
         {
-            // test_read_raises from Python
-            // read_rim(".") raises PermissionError on Windows, IsADirectoryError on Unix
             Action act1 = () => ReadRim(".");
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            if (
+                System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.Windows
+                )
+            )
             {
                 act1.Should().Throw<UnauthorizedAccessException>();
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // read_rim(DOES_NOT_EXIST_FILE) raises FileNotFoundError
             Action act2 = () => ReadRim(DoesNotExistFile);
             act2.Should().Throw<FileNotFoundException>();
 
-            // read_rim(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
-            if (File.Exists(CorruptBinaryTestFile))
-            {
-                Action act3 = () => ReadRim(CorruptBinaryTestFile);
-                act3.Should().Throw<ArgumentOutOfRangeException>();
-            }
+            byte[] corrupt = FormatCorruptBinarySamples.CorruptRim;
+            Action act3 = () => ReadRim(corrupt);
+            act3.Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [Fact]
         public void TestWriteRaises()
         {
-            // test_write_raises from Python
             var rim = new RIM();
 
-            // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // write_rim(RIM(), ".", ResourceType.RIM)
             Action act1 = () => WriteRim(rim, ".", ResourceType.RIM);
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            if (
+                System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.Windows
+                )
+            )
             {
                 act1.Should().Throw<UnauthorizedAccessException>();
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // write_rim(RIM(), ".", ResourceType.INVALID)
             Action act2 = () => WriteRim(rim, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }
-
     }
 }
-

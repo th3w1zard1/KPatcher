@@ -109,7 +109,7 @@ namespace KPatcher.UI.ViewModels
         }
 
         /// <summary>
-        /// Color for the log text - changes based on log type for consistency with Python
+        /// Color for the log text by log type
         /// </summary>
         public Avalonia.Media.IBrush LogTextColor
         {
@@ -386,9 +386,8 @@ namespace KPatcher.UI.ViewModels
         }
 
         /// <summary>
-        /// Adds a log entry with formatting. Matches Python's write_log behavior.
-        /// The View's FormatLogText() method uses the FormattedLogEntry list to render
-        /// colored, styled text matching Python's tkinter tag_configure implementation.
+        /// Adds a log entry with formatting (log type drives color in the view).
+        /// The view's FormatLogText() uses the FormattedLogEntry list for styled rendering.
         /// </summary>
         public void AddLogEntry(string message, LogType logType = LogType.Note)
         {
@@ -563,7 +562,7 @@ namespace KPatcher.UI.ViewModels
                     throw new InvalidOperationException(UIResources.SelectedNamespaceNotFound);
                 }
 
-                // Use Core.InstallMod which handles path resolution correctly (matches Python)
+                // Core.InstallMod applies path resolution
                 // installer = ModInstaller(namespace_mod_path, game_path, ini_file_path, logger)
                 // where namespace_mod_path = ini_file_path.parent (parent of the ini file)
                 string tslPatchDataPath = Path.Combine(ModPath, "tslpatchdata");

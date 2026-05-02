@@ -4,8 +4,8 @@
 
 using System;
 using System.IO;
-using NCSDecomp.Core;
 using KPatcher.Core.Formats.NCS;
+using NCSDecomp.Core;
 
 namespace KPatcher.Core.Formats.NCS.Decompiler
 {

@@ -118,10 +118,10 @@ namespace KPatcher.Core.Formats.NCS.Compiler
     /// </summary>
     public class FunctionReference
     {
-        public NCSInstruction Instruction { get; }
+        [CanBeNull] public NCSInstruction Instruction { get; }
         public object Definition { get; } // FunctionForwardDeclaration or FunctionDefinition
 
-        public FunctionReference(NCSInstruction instruction, object definition)
+        public FunctionReference([CanBeNull] NCSInstruction instruction, object definition)
         {
             Instruction = instruction;
             Definition = definition;
@@ -161,10 +161,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 throw new NSS.CompileError($"Function '{functionName}' already has a prototype or been defined.");
             }
 
-            root.FunctionMap[functionName] = new FunctionReference(
-                ncs.Add(NCSInstructionType.NOP, new List<object>()),
-                this
-            );
+            // Defer emitting a stub NOP until the first JSR; CodeRoot.CompileJsr materializes it after arguments, before JSR
+            // so the callee body is not inserted between the caller's entry NOP and the call (FirstNonNop(main) must see the call).
+            root.FunctionMap[functionName] = new FunctionReference(null, this);
         }
     }
 }

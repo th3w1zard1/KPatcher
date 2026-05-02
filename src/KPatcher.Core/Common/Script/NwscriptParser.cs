@@ -42,6 +42,7 @@ namespace KPatcher.Core.Common.Script
 
             var constants = new List<ScriptConstant>();
             var functions = new List<ScriptFunction>();
+            var namedConstants = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             int i = 0;
             while (i < lexer.Tokens.Count)
@@ -51,8 +52,9 @@ namespace KPatcher.Core.Common.Script
                 {
                     var constInfo = constResult.Value.info;
                     DataType dataType = ConvertDataType(constInfo.DataType);
-                    object value = ConvertConstantValue(constInfo.DataType, constInfo.Value);
+                    object value = ConvertConstantValue(constInfo.DataType, constInfo.Value, namedConstants);
                     constants.Add(new ScriptConstant(dataType, constInfo.Name, value));
+                    namedConstants[constInfo.Name] = value;
                     i = constResult.Value.nextIdx;
                     continue;
                 }
@@ -65,7 +67,7 @@ namespace KPatcher.Core.Common.Script
                     var parameters = funcInfo.Params.Select(p => new ScriptParam(
                         ConvertDataType(p.DataType),
                         p.Name,
-                        p.DefaultValue != null ? ConvertConstantValue(p.DataType, p.DefaultValue) : null
+                        p.DefaultValue != null ? ConvertConstantValue(p.DataType, p.DefaultValue, namedConstants) : null
                     )).ToList();
                     functions.Add(new ScriptFunction(returnType, funcInfo.Name, parameters, "", ""));
                     i = funcResult.Value.nextIdx;
@@ -476,19 +478,64 @@ namespace KPatcher.Core.Common.Script
             }
         }
 
-        private static object ConvertConstantValue(string datatype, string value)
+        private static object ConvertConstantValue(
+            string datatype,
+            string value,
+            IReadOnlyDictionary<string, object> namedConstants = null)
         {
             value = value.Trim();
             switch (datatype?.ToLower())
             {
                 case "int":
+                    if (string.Equals(value, "TRUE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return 1;
+                    }
+
+                    if (string.Equals(value, "FALSE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return 0;
+                    }
+
                     if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                     {
                         return Convert.ToInt32(value, 16);
                     }
-                    return int.Parse(value);
+
+                    if (int.TryParse(
+                            value,
+                            System.Globalization.NumberStyles.Integer,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out int literalInt))
+                    {
+                        return literalInt;
+                    }
+
+                    if (TryResolveNamedInt(namedConstants, value, out int fromConst))
+                    {
+                        return fromConst;
+                    }
+
+                    throw new FormatException($"The input string '{value}' was not in a correct format.");
                 case "float":
-                    return float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+                    // NSS allows C-style float suffixes (e.g. 1.67f) in extracted constant tokens.
+                    string fv = value;
+                    if (fv.Length > 0 && (fv[fv.Length - 1] == 'f' || fv[fv.Length - 1] == 'F'))
+                    {
+                        fv = fv.Substring(0, fv.Length - 1).TrimEnd();
+                    }
+
+                    if (float.TryParse(fv, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float literalFloat))
+                    {
+                        return literalFloat;
+                    }
+
+                    if (TryResolveNamedFloat(namedConstants, value, out float fromNamedFloat))
+                    {
+                        return fromNamedFloat;
+                    }
+
+                    throw new FormatException($"The input string '{value}' was not in a correct format.");
                 case "string":
                     // Remove quotes
                     if (value.StartsWith("\"") && value.EndsWith("\""))
@@ -498,6 +545,67 @@ namespace KPatcher.Core.Common.Script
                     return value;
                 default:
                     return value;
+            }
+        }
+
+        private static bool TryResolveNamedInt(IReadOnlyDictionary<string, object> namedConstants, string name, out int result)
+        {
+            result = default;
+            if (namedConstants == null || string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            if (!namedConstants.TryGetValue(name, out object v))
+            {
+                return false;
+            }
+
+            switch (v)
+            {
+                case int i:
+                    result = i;
+                    return true;
+                case long l:
+                    result = checked((int)l);
+                    return true;
+                case float f:
+                    result = checked((int)f);
+                    return true;
+                case double d:
+                    result = checked((int)d);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool TryResolveNamedFloat(IReadOnlyDictionary<string, object> namedConstants, string name, out float result)
+        {
+            result = default;
+            if (namedConstants == null || string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            if (!namedConstants.TryGetValue(name, out object v))
+            {
+                return false;
+            }
+
+            switch (v)
+            {
+                case float f:
+                    result = f;
+                    return true;
+                case double d:
+                    result = (float)d;
+                    return true;
+                case int i:
+                    result = i;
+                    return true;
+                default:
+                    return false;
             }
         }
 

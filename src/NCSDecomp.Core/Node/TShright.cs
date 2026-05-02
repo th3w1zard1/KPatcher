@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TShright() { SetText("SHRIGHTII"); }
         public TShright(int line, int pos) { SetText("SHRIGHTII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TShright(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTShright(this);
             }

@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TDecibp() { SetText("DECIBP"); }
         public TDecibp(int line, int pos) { SetText("DECIBP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TDecibp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTDecibp(this);
             }

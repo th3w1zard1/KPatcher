@@ -17,17 +17,12 @@ namespace KPatcher.Core.Tests.Formats
     /// </summary>
     public class TwoDAFormatTests
     {
-        private static readonly string TestTwoDAFile = TestFileHelper.GetPath("test.2da");
-        private static readonly string CorruptTwoDAFile = TestFileHelper.GetPath("test_corrupted.2da");
-
         [Fact]
         public void TestBinaryIO()
         {
-            // Read 2DA file
-            TwoDA twoda = new TwoDABinaryReader(TestTwoDAFile).Load();
+            TwoDA twoda = BinaryFormatFixtures.BuildCanonicalTwoDA();
             ValidateIO(twoda);
 
-            // Write and re-read to validate round-trip
             byte[] data = new TwoDABinaryWriter(twoda).Write();
             twoda = new TwoDABinaryReader(data).Load();
             ValidateIO(twoda);
@@ -51,28 +46,22 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestReadRaises()
         {
-            // test_read_raises from Python
-            // Test directory access
             Action act1 = () => new TwoDABinaryReader(".").Load();
-            act1.Should().Throw<Exception>(); // UnauthorizedAccessException or IOException
+            act1.Should().Throw<Exception>();
 
-            // Test file not found
             Action act2 = () => new TwoDABinaryReader("./thisfiledoesnotexist").Load();
             act2.Should().Throw<FileNotFoundException>();
 
-            // Test corrupted file (reader throws IOException when stream boundaries exceeded)
-            Action act3 = () => new TwoDABinaryReader(CorruptTwoDAFile).Load();
+            byte[] corrupt = FormatCorruptBinarySamples.CorruptTwoDa;
+            Action act3 = () => new TwoDABinaryReader(corrupt).Load();
             act3.Should().Throw<IOException>();
         }
 
         [Fact]
         public void TestWriteRaises()
         {
-            // test_write_raises from Python
             var twoda = new TwoDA(new List<string> { "col1", "col2" });
 
-            // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // write_2da(TwoDA(), ".", ResourceType.TwoDA)
             Action act1 = () => WriteTwoDA(twoda, ".", ResourceType.TwoDA);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -80,11 +69,9 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // write_2da(TwoDA(), ".", ResourceType.INVALID)
             Action act2 = () => WriteTwoDA(twoda, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }
@@ -92,7 +79,6 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestRowMax()
         {
-            // test_row_max from Python
             var twoda = new TwoDA();
             twoda.AddRow("0");
             twoda.AddRow("1");
@@ -100,7 +86,5 @@ namespace KPatcher.Core.Tests.Formats
 
             twoda.LabelMax().Should().Be(3);
         }
-
     }
 }
-

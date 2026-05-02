@@ -234,7 +234,7 @@ namespace NCSDecomp.Core
                 }
                 else
                 {
-                    log.LogInformation(
+                    log.LogDebug(
                         "Tool=NCSDecompCLI Phase={Phase} CorrelationId={CorrelationId} Output={Output} Chars={Chars} Message=Wrote NSS",
                         DecompPhaseNames.IoWriteNss,
                         correlationId ?? "",

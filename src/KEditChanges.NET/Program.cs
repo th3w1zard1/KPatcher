@@ -56,36 +56,36 @@ namespace KEditChanges.Net
                 case "decomp":
                     return RunWithCorrelation(() => RunNcsDecomp(rest));
                 case "info":
-                {
-                    using (ILoggerFactory lf = CreateLoggerFactory())
                     {
-                        ILogger log = lf.CreateLogger("keditchanges-cli");
-                        log.LogDebug(
-                            "Tool=keditchanges-cli Phase=verb_entry Verb=info CorrelationId={CorrelationId}",
-                            ToolCorrelation.ReadOptional() ?? "(unset)");
-                        log.LogDebug(
-                            "Tool=keditchanges-cli Operation=info Verb=info CorrelationId={CorrelationId}",
-                            ToolCorrelation.ReadOptional() ?? "(unset)");
-                        log.LogInformation(
-                            "Tool=keditchanges-cli Operation=info Message={Message}",
-                            KEditChanges.ChangeEditPlaceholder.Info);
-                        Console.WriteLine(KEditChanges.ChangeEditPlaceholder.Info);
-                    }
+                        using (ILoggerFactory lf = CreateLoggerFactory())
+                        {
+                            ILogger log = lf.CreateLogger("keditchanges-cli");
+                            log.LogDebug(
+                                "Tool=keditchanges-cli Phase=verb_entry Verb=info CorrelationId={CorrelationId}",
+                                ToolCorrelation.ReadOptional() ?? "(unset)");
+                            log.LogDebug(
+                                "Tool=keditchanges-cli Operation=info Verb=info CorrelationId={CorrelationId}",
+                                ToolCorrelation.ReadOptional() ?? "(unset)");
+                            log.LogDebug(
+                                "Tool=keditchanges-cli Operation=info Message={Message}",
+                                KEditChanges.ChangeEditPlaceholder.Info);
+                            Console.WriteLine(KEditChanges.ChangeEditPlaceholder.Info);
+                        }
 
-                    return 0;
-                }
+                        return 0;
+                    }
                 default:
-                {
-                    using (ILoggerFactory lf = CreateLoggerFactory())
                     {
-                        ILogger log = lf.CreateLogger("keditchanges-cli");
-                        log.LogWarning("Tool=keditchanges-cli Phase=dispatch Message=unknown verb {Verb}", verb);
-                    }
+                        using (ILoggerFactory lf = CreateLoggerFactory())
+                        {
+                            ILogger log = lf.CreateLogger("keditchanges-cli");
+                            log.LogWarning("Tool=keditchanges-cli Phase=dispatch Message=unknown verb {Verb}", verb);
+                        }
 
-                    Console.Error.WriteLine("Error: Unknown command: " + verb);
-                    PrintRootHelp();
-                    return 1;
-                }
+                        Console.Error.WriteLine("Error: Unknown command: " + verb);
+                        PrintRootHelp();
+                        return 1;
+                    }
             }
         }
 
@@ -195,7 +195,7 @@ namespace KEditChanges.Net
                         parsed.NwscriptPath,
                         log);
                     swCompile.Stop();
-                    log.LogInformation(
+                    log.LogDebug(
                         "Tool=keditchanges-cli.compile Operation=cli_complete Phase=host CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} ExitCode=0",
                         ToolCorrelation.ReadOptional() ?? "",
                         swCompile.ElapsedMilliseconds);
@@ -229,7 +229,7 @@ namespace KEditChanges.Net
                     swDecomp.Stop();
                     if (code == 0)
                     {
-                        log.LogInformation(
+                        log.LogDebug(
                             "Tool=keditchanges-cli.ncsdecomp Operation=cli_complete Phase=host CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} ExitCode=0",
                             ToolCorrelation.ReadOptional() ?? "",
                             swDecomp.ElapsedMilliseconds);

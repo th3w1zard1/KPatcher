@@ -119,6 +119,12 @@ namespace KPatcher.Core.Formats.TLK
             byte[] data = writer.Write();
             File.WriteAllBytes(path, data);
         }
+
+        public static TLK FromBytes(byte[] data)
+        {
+            var reader = new TLKBinaryReader(data);
+            return reader.Load();
+        }
     }
 }
 

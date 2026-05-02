@@ -89,7 +89,7 @@ namespace KPatcher.Core.Formats.TLK
 
             uint entryFlags = 0;
             if (entry.TextPresent)
-            {   
+            {
                 entryFlags |= 0x0001;
             }
 

@@ -85,7 +85,7 @@ namespace KPatcher.Core.Formats.SSF
         }
 
         /// <summary>
-        /// Reads a UInt32 and converts 0xFFFFFFFF to -1 (matches Python max_neg1 behavior).
+        /// Reads a UInt32 and converts 0xFFFFFFFF to -1 (sentinel for "no sound").
         /// </summary>
         private int ReadInt32MaxNeg1()
         {

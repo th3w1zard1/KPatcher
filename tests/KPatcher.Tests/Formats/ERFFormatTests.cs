@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using FluentAssertions;
 using KPatcher.Core.Formats.ERF;
 using KPatcher.Core.Resources;
@@ -16,51 +17,31 @@ namespace KPatcher.Core.Tests.Formats
     /// </summary>
     public class ERFFormatTests
     {
-        private static readonly string BinaryTestFile = TestFileHelper.GetPath("test.erf");
         private static readonly string DoesNotExistFile = "./thisfiledoesnotexist";
-        private static readonly string CorruptBinaryTestFile = TestFileHelper.GetPath("test_corrupted.erf");
 
         [Fact]
         public void TestBinaryIO()
         {
-            // test_binary_io
-            if (!File.Exists(BinaryTestFile))
-            {
-                // Skip if test file doesn't exist
-                return;
-            }
-
-            // erf = ERFBinaryReader(BINARY_TEST_FILE).load()
-            ERF erf = new ERFBinaryReader(BinaryTestFile).Load();
+            ERF erf = BinaryFormatFixtures.BuildCanonicalErf();
             ValidateIO(erf);
 
-            // data = bytearray()
-            // write_erf(erf, data)
             byte[] data = BytesErf(erf);
 
-            // erf = ERFBinaryReader(data).load()
             erf = new ERFBinaryReader(data).Load();
             ValidateIO(erf);
         }
 
         private static void ValidateIO(ERF erf)
         {
-            // validate_io
-            // assert len(erf) == 3
             erf.Count.Should().Be(3);
-            // assert erf.get("1", ResourceType.TXT) == b"abc"
-            erf.Get("1", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("abc"));
-            // assert erf.get("2", ResourceType.TXT) == b"def"
-            erf.Get("2", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("def"));
-            // assert erf.get("3", ResourceType.TXT) == b"ghi"
-            erf.Get("3", ResourceType.TXT).Should().Equal(System.Text.Encoding.ASCII.GetBytes("ghi"));
+            erf.Get("1", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("abc"));
+            erf.Get("2", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("def"));
+            erf.Get("3", ResourceType.TXT).Should().Equal(Encoding.ASCII.GetBytes("ghi"));
         }
 
         [Fact]
         public void TestReadRaises()
         {
-            // test_read_raises from Python
-            // read_erf(".") raises PermissionError on Windows, IsADirectoryError on Unix
             Action act1 = () => ReadErf(".");
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -68,29 +49,22 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // read_erf(DOES_NOT_EXIST_FILE) raises FileNotFoundError
             Action act2 = () => ReadErf(DoesNotExistFile);
             act2.Should().Throw<FileNotFoundException>();
 
-            // read_erf(CORRUPT_BINARY_TEST_FILE) raises ValueError (reader throws ArgumentOutOfRangeException for invalid offset)
-            if (File.Exists(CorruptBinaryTestFile))
-            {
-                Action act3 = () => ReadErf(CorruptBinaryTestFile);
-                act3.Should().Throw<ArgumentOutOfRangeException>();
-            }
+            byte[] corrupt = FormatCorruptBinarySamples.CorruptErf;
+            Action act3 = () => ReadErf(corrupt);
+            act3.Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [Fact]
         public void TestWriteRaises()
         {
-            // test_write_raises from Python
             var erf = new ERF(ERFType.ERF);
 
-            // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // write_erf(ERF(ERFType.ERF), ".", ResourceType.ERF)
             Action act1 = () => WriteErf(erf, ".", ResourceType.ERF);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -98,15 +72,11 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // write_erf(ERF(ERFType.ERF), ".", ResourceType.INVALID)
             Action act2 = () => WriteErf(erf, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }
-
     }
 }
-

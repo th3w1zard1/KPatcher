@@ -1,0 +1,107 @@
+# Long-running or environment-heavy test tiers. Default PR CI stays on Default.runsettings + KPatcher.Tests only.
+name: Optional test tiers
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_vendor_k2:
+        description: Run VendorK2Game integration (requires KPATCHER_K2_VENDOR_ROOT secret)
+        type: boolean
+        default: false
+      run_kor_exhaustive_binaries:
+        description: Run exhaustive inline installs that require committed mod bytes (KorExhaustiveBinaryFixtures.runsettings — Kor, namespace, gff_git+tex, heads InstallList under test_files/exhaustive_pattern_inlines)
+        type: boolean
+        default: false
+  schedule:
+    # Weekly Monday 06:00 UTC — DeNCS harness + optional exe smoke (no vendor game required).
+    - cron: '0 6 * * 1'
+
+jobs:
+  exhaustive-dencs:
+    name: DeNCS round-trip (Exhaustive.runsettings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test (no 600s wrapper — may exceed agent cap)
+        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/Exhaustive.runsettings --verbosity normal
+
+  tsl-patcher-exe-golden:
+    name: TSLPatcher exe smoke (optional env)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test
+        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/TslPatcherExeGolden.runsettings --verbosity normal
+
+  kor-exhaustive-binary-fixtures:
+    name: Exhaustive inline committed mod bytes (Kor, namespace, GFF/git, heads)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_kor_exhaustive_binaries == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test
+        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/KorExhaustiveBinaryFixtures.runsettings --verbosity normal
+
+  vendor-k2-game:
+    name: Vendor KotOR II integration
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_vendor_k2 == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test
+        env:
+          KPATCHER_K2_VENDOR_ROOT: ${{ secrets.KPATCHER_K2_VENDOR_ROOT }}
+        run: pwsh -NoProfile -File ./scripts/DotnetTest.ps1 tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/VendorK2Game.runsettings --verbosity normal

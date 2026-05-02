@@ -34,8 +34,6 @@ namespace KPatcher.Core.Mods.TLK
 
         public List<ModifyTLK> Modifiers { get; set; } = new List<ModifyTLK>();
         public string SourcefileF { get; set; } = DEFAULT_SOURCEFILE_F;
-        public new string SourceFile { get; set; } = DEFAULT_SOURCEFILE;
-        public new string SaveAs { get; set; } = DEFAULT_SAVEAS_FILE;
 
         public ModificationsTLK(
             [CanBeNull] string filename = null,
@@ -46,6 +44,11 @@ namespace KPatcher.Core.Mods.TLK
             Destination = DEFAULT_DESTINATION;
             Modifiers = modifiers ?? new List<ModifyTLK>();
             SourcefileF = DEFAULT_SOURCEFILE_F; // Polish version of k1
+            if (string.IsNullOrWhiteSpace(SourceFile))
+            {
+                SourceFile = DEFAULT_SOURCEFILE;
+            }
+
             SaveAs = DEFAULT_SAVEAS_FILE;
         }
 

@@ -10,6 +10,7 @@ using KPatcher.Core.Logger;
 using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Reader;
 using KPatcher.Core.Resources;
+using KPatcher.Core.Tests.Common;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Reader
@@ -65,20 +66,8 @@ namespace KPatcher.Core.Tests.Reader
             ("Modified 10", "vo_mod_10"),
         });
 
-            // Copy test files like Python does (lines 119-120)
-            string testFilesDir = Path.Combine("..", "..", "..", "test_files");
-            string complexTlkPath = Path.Combine(testFilesDir, "complex.tlk");
-            string appendTlkPath = Path.Combine(testFilesDir, "append.tlk");
-
-            if (File.Exists(complexTlkPath))
-            {
-                File.Copy(complexTlkPath, Path.Combine(_modPath, "complex.tlk"), true);
-            }
-
-            if (File.Exists(appendTlkPath))
-            {
-                File.Copy(appendTlkPath, Path.Combine(_modPath, "append.tlk"), true);
-            }
+            ConfigReaderTlkFixtureTlks.WriteComplexTlk(Path.Combine(_modPath, "complex.tlk"));
+            ConfigReaderTlkFixtureTlks.WriteDefaultAppendTlk(Path.Combine(_modPath, "append.tlk"));
         }
 
         public void Dispose()
@@ -161,6 +150,28 @@ AppendFile4=tlk_modifications_file.tlk
             modifiersDict[2].Text.Should().Be("Modified 6");
             modifiersDict[2].Voiceover.Should().Be("vo_mod_6");
             modifiersDict[2].Replace.Should().BeFalse();
+        }
+
+        [Fact]
+        public void TlkList_StrRefOnly_Restores_Default_SourceFile_And_SaveAs()
+        {
+            string iniText = @"
+[Settings]
+LogLevel=4
+
+[TLKList]
+StrRef0=0
+
+[append.tlk]
+0=0
+";
+            IniData ini = _parser.Parse(iniText);
+            var reader = new ConfigReader(ini, _tempDir, new PatchLogger(), _modPath);
+            PatcherConfig result = reader.Load(new PatcherConfig());
+
+            result.PatchesTLK.SourceFile.Should().Be(ModificationsTLK.DEFAULT_SOURCEFILE);
+            result.PatchesTLK.SaveAs.Should().Be(ModificationsTLK.DEFAULT_SAVEAS_FILE);
+            result.PatchesTLK.Modifiers.Should().HaveCount(1);
         }
 
         [Fact]

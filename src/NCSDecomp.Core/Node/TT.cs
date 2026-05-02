@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TT() { SetText("T"); }
         public TT(int line, int pos) { SetText("T"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TT(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTT(this);
             }

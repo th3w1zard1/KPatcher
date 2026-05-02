@@ -10,49 +10,35 @@ namespace KPatcher.Core.Tests.Formats
 
     /// <summary>
     /// Tests for NCS binary I/O operations.
-    /// 1:1 port of test_ncs.py from tests/resource/formats/test_ncs.py
+    /// Reference bytes come from in-process NSS compilation (<see cref="CompiledNcsTestFixture"/>), not from disk fixtures.
     /// </summary>
     public class NCSFormatTests
     {
-        private static readonly string BinaryTestFile = TestFileHelper.GetPath("test.ncs");
-        private const int ExpectedInstructionCount = 1541;
-
-        /// <summary>
-        /// test_binary_io
-        /// Ensure binary NCS IO produces byte-identical output.
-        /// </summary>
         [Fact]
         public void TestBinaryIO()
         {
-            if (!File.Exists(BinaryTestFile))
-            {
-                // Skip if test file doesn't exist
-                return;
-            }
+            byte[] originalData = CompiledNcsTestFixture.ReferenceK1NcsBytes();
+            originalData.Length.Should().BeGreaterThan(13, "NCS header present");
 
-            // ncs = NCSBinaryReader(BINARY_TEST_FILE).load()
             NCS ncs;
-            using (var reader = new NCSBinaryReader(BinaryTestFile))
+            using (var reader = new NCSBinaryReader(originalData))
             {
                 ncs = reader.Load();
             }
-            ValidateIO(ncs);
 
-            // write_ncs(ncs, file_path)
+            ncs.Instructions.Should().NotBeNull();
+            ncs.Instructions.Count.Should().BeGreaterThan(0);
+
             string tempPath = Path.Combine(Path.GetTempPath(), $"output_{Guid.NewGuid()}.ncs");
             try
             {
                 NCSAuto.WriteNcs(ncs, tempPath);
 
-                // data = bytes_ncs(ncs)
                 byte[] data = NCSAuto.BytesNcs(ncs);
 
-                // ncs = read_ncs(data)
                 NCS ncs2 = NCSAuto.ReadNcs(data);
-                ValidateIO(ncs2);
+                ncs2.Instructions.Count.Should().Be(ncs.Instructions.Count);
 
-                // Validate byte-identical output
-                byte[] originalData = File.ReadAllBytes(BinaryTestFile);
                 data.Should().Equal(originalData, "NCS binary I/O should produce byte-identical output");
             }
             finally
@@ -63,17 +49,5 @@ namespace KPatcher.Core.Tests.Formats
                 }
             }
         }
-
-        private static void ValidateIO(NCS ncs)
-        {
-            // self.assertEqual(EXPECTED_INSTRUCTION_COUNT, len(ncs.instructions))
-            ncs.Instructions.Count.Should().Be(ExpectedInstructionCount);
-
-            // self.assertEqual(BinaryReader.load_file(BINARY_TEST_FILE), bytes_ncs(ncs))
-            // This validates byte-identical output - now implemented in TestBinaryIO
-        }
     }
 }
-
-
-

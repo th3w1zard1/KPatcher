@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TExcorii() { SetText("EXCORII"); }
         public TExcorii(int line, int pos) { SetText("EXCORII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TExcorii(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTExcorii(this);
             }

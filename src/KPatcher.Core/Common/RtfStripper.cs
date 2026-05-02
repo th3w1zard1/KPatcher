@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 namespace KPatcher.Core.Common
 {
     /// <summary>
-    /// Equivalent to utility/string_util.py striprtf function.
     /// Single source of truth for RTF-to-plain-text stripping; used by UI and Utility.
     /// </summary>
     public static class RtfStripper

@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TAction() { SetText("ACTION"); }
         public TAction(int line, int pos) { SetText("ACTION"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TAction(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTAction(this);
             }

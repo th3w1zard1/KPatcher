@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -539,6 +540,45 @@ namespace KPatcher.Core.Tests.Formats
             _totalTests = 0;
         }
 
+        /// <summary>
+        /// Long suites hold large graphs per case; without periodic release the test host can OOM-crash mid-run.
+        /// Clears include-stage dedupe (safe: only skips redundant copies) and nudges GC / LOH compaction periodically.
+        /// </summary>
+        private static void MitigateLongRunningSuiteMemoryPressure(int casesCompletedOneBased)
+        {
+            if (casesCompletedOneBased <= 0)
+            {
+                return;
+            }
+
+            if ((casesCompletedOneBased % 25) == 0)
+            {
+                try
+                {
+                    StagedIncludes.Clear();
+                }
+                catch
+                {
+                    // ignore
+                }
+
+                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
+            }
+
+            if ((casesCompletedOneBased % 100) == 0)
+            {
+                try
+                {
+                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                    GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+                }
+                catch
+                {
+                    GC.Collect();
+                }
+            }
+        }
+
         private static int ResolveVanillaGitCloneTimeoutMs()
         {
             string ev = Environment.GetEnvironmentVariable("KP_VANILLA_GIT_CLONE_TIMEOUT_SECONDS");
@@ -917,22 +957,26 @@ namespace KPatcher.Core.Tests.Formats
                 return new RoundTripResult(string.Empty, null, skippedKnownGap: true);
             }
 
-            var outCapture = new StringWriter();
-            var errCapture = new StringWriter();
+            // Buffering per-case console in a StringWriter makes long suites (20k+ cases) retain huge LOH strings
+            // and can crash the test host. Discard detailed lines unless KP_ROUNDTRIP_VERBOSE_CONSOLE=1.
             TextWriter originalOut = Console.Out;
             TextWriter originalErr = Console.Error;
+            bool verboseConsole = string.Equals(
+                Environment.GetEnvironmentVariable("KP_ROUNDTRIP_VERBOSE_CONSOLE"),
+                "1",
+                StringComparison.Ordinal);
+            TextWriter sinkOut = verboseConsole ? originalOut : TextWriter.Null;
+            TextWriter sinkErr = verboseConsole ? originalErr : TextWriter.Null;
             try
             {
-                Console.SetOut(outCapture);
-                Console.SetError(errCapture);
+                Console.SetOut(sinkOut);
+                Console.SetError(sinkErr);
                 RoundTripSingle(nssPath, gameFlag, scratchRoot);
-                string captured = outCapture.ToString() + errCapture.ToString();
-                return new RoundTripResult(captured, null);
+                return new RoundTripResult(string.Empty, null);
             }
             catch (Exception e)
             {
-                string captured = outCapture.ToString() + errCapture.ToString();
-                return new RoundTripResult(captured, e);
+                return new RoundTripResult(string.Empty, e);
             }
             finally
             {
@@ -1973,6 +2017,8 @@ namespace KPatcher.Core.Tests.Formats
                         PrintPerformanceSummary();
                         return 1;
                     }
+
+                    MitigateLongRunningSuiteMemoryPressure(_testsProcessed);
                 }
 
                 Console.WriteLine();
@@ -2119,6 +2165,8 @@ namespace KPatcher.Core.Tests.Formats
                         PrintPerformanceSummary();
                         return 1;
                     }
+
+                    MitigateLongRunningSuiteMemoryPressure(_testsProcessed);
                 }
 
                 Console.WriteLine();

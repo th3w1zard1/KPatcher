@@ -602,7 +602,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
             _stack.StoreState();
 
             int index = _cursorIndex;
-            
+
             // Get instruction at index + 2 (skip the next instruction after STORE_STATE)
             int tempIndex = index + 2;
             if (tempIndex >= _ncs.Instructions.Count)
@@ -846,7 +846,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler
     }
 
     /// <summary>
-    /// Reference equality comparer for NCSInstruction (matches Python id-based lookup).
+    /// Reference equality comparer for NCSInstruction (identity-based lookup).
     /// </summary>
     internal sealed class ReferenceInstructionComparer : IEqualityComparer<NCSInstruction>
     {

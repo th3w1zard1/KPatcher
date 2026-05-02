@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TCpdownsp() { SetText("CPDOWNSP"); }
         public TCpdownsp(int line, int pos) { SetText("CPDOWNSP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TCpdownsp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTCpdownsp(this);
             }

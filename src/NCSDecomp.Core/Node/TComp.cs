@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TComp() { SetText("COMP"); }
         public TComp(int line, int pos) { SetText("COMP"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TComp(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTComp(this);
             }

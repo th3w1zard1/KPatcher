@@ -1820,7 +1820,7 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
                     left = new BinaryOperatorExpression(left, right, Operator.EQUAL, OperatorMappings.Equal);
                     continue;
                 }
-                // != is tokenized as a single NOT_EQUALS token (lexer.py line 519-520)
+                // != is tokenized as a single NOT_EQUALS token (while == is two '=' tokens)
                 if (MatchOperator(NssOperators.NotEqual))
                 {
                     // != operator (single token)
@@ -2431,7 +2431,9 @@ namespace KPatcher.Core.Formats.NCS.Compiler.NSS
         private string UnescapeString(string str)
         {
             if (string.IsNullOrEmpty(str))
+            {
                 return str;
+            }
 
             var result = new System.Text.StringBuilder(str.Length);
             for (int i = 0; i < str.Length; i++)

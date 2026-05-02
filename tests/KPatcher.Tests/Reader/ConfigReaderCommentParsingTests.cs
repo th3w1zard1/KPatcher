@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Text;
 using FluentAssertions;
+using IniParser.Model;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Reader;
 using Xunit;
@@ -133,6 +135,46 @@ ModName=Test Mod
             // Act & Assert
             Action act = () => ConfigReader.FromFilePath(_iniFilePath, logger);
             act.Should().NotThrow("because inline comments should be handled correctly");
+        }
+
+        [Fact]
+        public void ParseIniText_WithUnicodeBomBeforeSettingsSection_ParsesSuccessfully()
+        {
+            string iniContent = "\uFEFF[Settings]\r\nModName=BOM Test\r\n";
+
+            IniData ini = ConfigReader.ParseIniText(iniContent, caseInsensitive: false);
+
+            ini.Sections.Should().Contain(s => s.SectionName.Equals("Settings", StringComparison.OrdinalIgnoreCase));
+            ini["Settings"]["ModName"].Should().Be("BOM Test");
+        }
+
+        [Fact]
+        public void FromFilePath_WithUtf8FileBomBeforeSettingsSection_ParsesSuccessfully()
+        {
+            var utf8WithBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+            string iniContent = "[Settings]\r\nModName=File BOM\r\n";
+            File.WriteAllText(_iniFilePath, iniContent, utf8WithBom);
+
+            var logger = new PatchLogger();
+            ConfigReader reader = ConfigReader.FromFilePath(_iniFilePath, logger);
+
+            reader.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void ParseIniText_MatchesModInstallerStyleUtf8Decode_WithBomBytes_ParsesSuccessfully()
+        {
+            string iniContent = "[Settings]\r\nModName=Byte BOM\r\n";
+            byte[] utf8Bom = Encoding.UTF8.GetPreamble();
+            byte[] body = Encoding.UTF8.GetBytes(iniContent);
+            var combined = new byte[utf8Bom.Length + body.Length];
+            Buffer.BlockCopy(utf8Bom, 0, combined, 0, utf8Bom.Length);
+            Buffer.BlockCopy(body, 0, combined, utf8Bom.Length, body.Length);
+            string iniText = Encoding.UTF8.GetString(combined);
+
+            IniData ini = ConfigReader.ParseIniText(iniText, caseInsensitive: false);
+
+            ini["Settings"]["ModName"].Should().Be("Byte BOM");
         }
     }
 }

@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TBoolandii() { SetText("BOOLANDII"); }
         public TBoolandii(int line, int pos) { SetText("BOOLANDII"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TBoolandii(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTBoolandii(this);
             }

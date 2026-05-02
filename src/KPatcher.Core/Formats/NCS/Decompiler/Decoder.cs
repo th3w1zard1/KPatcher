@@ -34,10 +34,16 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private static bool DetectFormat(byte[] data)
         {
             if (data.Length < 8)
+            {
                 throw new InvalidDataException("NCS data too short for header.");
+            }
+
             if (data[0] != 'N' || data[1] != 'C' || data[2] != 'S' || data[3] != ' ' ||
                 data[4] != 'V' || data[5] != '1' || data[6] != '.' || data[7] != '0')
+            {
                 throw new InvalidDataException("The data file is not an NCS V1.0 file.");
+            }
+
             if (data.Length >= 13 && data[8] == 0x42)
             {
                 // KPatcher/reone: magic 0x42 + 4-byte size, then instructions with opcode+qualifier
@@ -61,7 +67,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
             if (_hasQualifier)
             {
                 if (_data.Length < 13)
+                {
                     throw new InvalidDataException("NCS file too short.");
+                }
+
                 _pos = 13;
             }
             else
@@ -91,7 +100,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private static int ReadBigEndianInt32(byte[] data, int offset)
         {
             if (data == null || offset < 0 || offset + 4 > data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF reading 32-bit value.");
+            }
+
             return (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
         }
 
@@ -103,14 +115,20 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
             if (_hasQualifier)
             {
                 if (_pos + 2 > _data.Length)
+                {
                     return false;
+                }
+
                 opcode = _data[_pos++];
                 qualifier = _data[_pos++];
             }
             else
             {
                 if (_pos >= _data.Length)
+                {
                     return false;
+                }
+
                 opcode = _data[_pos++];
             }
 
@@ -187,7 +205,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
                         byte b = _hasQualifier ? qualifier : ReadByte();
                         strbuffer.Append(" ").Append(b);
                         if (b == 36)
+                        {
                             AppendUnsignedShort(strbuffer);
+                        }
+
                         break;
                     case 27:
                     case 29:
@@ -234,7 +255,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private byte ReadByte()
         {
             if (_pos >= _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             return _data[_pos++];
         }
 
@@ -246,15 +270,22 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private void AppendByteOrQualifier(StringBuilder sb, byte qualifier)
         {
             if (_hasQualifier)
+            {
                 sb.Append(" ").Append(qualifier);
+            }
             else
+            {
                 sb.Append(" ").Append(ReadByte());
+            }
         }
 
         private void AppendUnsignedInt(StringBuilder sb)
         {
             if (_pos + 4 > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             uint v = (uint)((_data[_pos] << 24) | (_data[_pos + 1] << 16) | (_data[_pos + 2] << 8) | _data[_pos + 3]);
             _pos += 4;
             sb.Append(" ").Append(v);
@@ -263,7 +294,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private void AppendSignedInt(StringBuilder sb)
         {
             if (_pos + 4 > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             int v = (_data[_pos] << 24) | (_data[_pos + 1] << 16) | (_data[_pos + 2] << 8) | _data[_pos + 3];
             _pos += 4;
             sb.Append(" ").Append(v);
@@ -272,7 +306,10 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private void AppendUnsignedShort(StringBuilder sb)
         {
             if (_pos + 2 > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             int v = (_data[_pos] << 8) | _data[_pos + 1];
             _pos += 2;
             sb.Append(" ").Append(v);
@@ -281,24 +318,36 @@ namespace KPatcher.Core.Formats.NCS.Decompiler
         private void AppendFloat(StringBuilder sb)
         {
             if (_pos + 4 > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             int bits = (_data[_pos] << 24) | (_data[_pos + 1] << 16) | (_data[_pos + 2] << 8) | _data[_pos + 3];
             _pos += 4;
             float f = BitConverter.Int32BitsToSingle(bits);
             string result = f.ToString("G15");
             if (result.IndexOf('.') < 0 && Math.Abs(f) < 1.0f && f != 0.0f)
+            {
                 result = "0." + result;
+            }
+
             sb.Append(" ").Append(result);
         }
 
         private void AppendString(StringBuilder sb)
         {
             if (_pos + 2 > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             int size = (_data[_pos] << 8) | _data[_pos + 1];
             _pos += 2;
             if (_pos + size > _data.Length)
+            {
                 throw new InvalidDataException("Unexpected EOF");
+            }
+
             string s = Encoding.ASCII.GetString(_data, _pos, size);
             _pos += size;
             sb.Append(" \"").Append(s).Append("\"");

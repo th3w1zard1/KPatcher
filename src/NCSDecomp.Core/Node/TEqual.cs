@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TEqual() { SetText("EQUAL"); }
         public TEqual(int line, int pos) { SetText("EQUAL"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TEqual(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTEqual(this);
             }

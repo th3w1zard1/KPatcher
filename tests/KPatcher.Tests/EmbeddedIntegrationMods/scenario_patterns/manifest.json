@@ -1,0 +1,582 @@
+[
+  {
+    "Id": "k1_p000",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p001",
+    "ChangesIniRelative": "Regular/regular.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p002",
+    "ChangesIniRelative": "hulas/changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p003",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p009",
+    "ChangesIniRelative": "install_comp.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p010",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p011",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p012",
+    "ChangesIniRelative": "Female_Vanilla_Model/Option_2.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p013",
+    "ChangesIniRelative": "k_bbb/k_bbb_ng.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p014",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p015",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p016",
+    "ChangesIniRelative": "1 - Main/changes_1.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p017",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p018",
+    "ChangesIniRelative": "1 - Slim Necks/changes_1.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p019",
+    "ChangesIniRelative": "remove/changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p020",
+    "ChangesIniRelative": "extra_textures/extra_textures.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p021",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p022",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p023",
+    "ChangesIniRelative": "main_install.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p024",
+    "ChangesIniRelative": "install.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p025",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p026",
+    "ChangesIniRelative": "juh_all/juh_all.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p027",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p028",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p029",
+    "ChangesIniRelative": "black/blackchanges.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p030",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p031",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p032",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p033",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p034",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p035",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p036",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p037",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p038",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p039",
+    "ChangesIniRelative": "changes_dsmssg.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p040",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p041",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p042",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p043",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p044",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p045",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p046",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p047",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p048",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p049",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p050",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p051",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p052",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p053",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p054",
+    "ChangesIniRelative": "Swoop platform FULL/changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p055",
+    "ChangesIniRelative": "K1 Vanilla with K2 shield/changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p056",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p057",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p058",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p059",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p060",
+    "ChangesIniRelative": "full.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p061",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p062",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p063",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p064",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p065",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p066",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p067",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "k1_p068",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "K1"
+  },
+  {
+    "Id": "tsl_p001",
+    "ChangesIniRelative": "Version1/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p002",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p003",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p004",
+    "ChangesIniRelative": "EETweaks/EETweakschanges.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p005",
+    "ChangesIniRelative": "_exp_solid.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p006",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p007",
+    "ChangesIniRelative": "1 - Slim Necks/changes_1.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p008",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p009",
+    "ChangesIniRelative": "assassin_visas.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p010",
+    "ChangesIniRelative": "changes_sword.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p011",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p012",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p013",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p014",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p015",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p016",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p017",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p018",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p019",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p020",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p021",
+    "ChangesIniRelative": "full/class_based.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p022",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p023",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p024",
+    "ChangesIniRelative": "changes_armor.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p025",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p026",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p027",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p028",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p029",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p030",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p031",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p032",
+    "ChangesIniRelative": "ND/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p033",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p034",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p035",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p036",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p037",
+    "ChangesIniRelative": "Demise/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p038",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p039",
+    "ChangesIniRelative": "transparentwindows_reflections/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p040",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p041",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p042",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p043",
+    "ChangesIniRelative": "Part1/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p044",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p045",
+    "ChangesIniRelative": "1-Kaevee_Removal/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p046",
+    "ChangesIniRelative": "m4comp/m4changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p047",
+    "ChangesIniRelative": "Default/changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p048",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p049",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p050",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p051",
+    "ChangesIniRelative": "changes.ini",
+    "SourceGame": "TSL"
+  },
+  {
+    "Id": "tsl_p052",
+    "ChangesIniRelative": "changes_a.ini",
+    "SourceGame": "TSL"
+  }
+]

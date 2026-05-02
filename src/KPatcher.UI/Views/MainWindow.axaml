@@ -28,7 +28,7 @@
     </Window.Resources>
 
     <DockPanel>
-        <!-- Menu Bar - Matches Python's menu structure -->
+        <!-- Menu bar -->
         <Menu DockPanel.Dock="Top">
             <!-- Tools Menu -->
             <MenuItem Header="{x:Static ui:UIResources.MenuTools}">
@@ -65,7 +65,7 @@
                 <MenuItem Header="{x:Static ui:UIResources.LanguagePolish}" Command="{Binding SetLanguageCommand}" CommandParameter="pl"/>
             </MenuItem>
 
-            <!-- About Menu (separate from Help in Python) -->
+            <!-- About menu (separate from Help) -->
             <MenuItem Header="{x:Static ui:UIResources.MenuAbout}">
                 <MenuItem Header="{x:Static ui:UIResources.CheckForUpdates}" Command="{Binding CheckUpdatesCommand}"/>
                 <MenuItem Header="{x:Static ui:UIResources.KPatcherHome}" Command="{Binding OpenUrlCommand}" CommandParameter="https://deadlystream.com/files/file/2243-kpatcher"/>

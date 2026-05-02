@@ -72,7 +72,7 @@ namespace KPatcher.Core.Formats.NCS
             for (int i = 0; i < Instructions.Count; i++)
             {
                 NCSInstruction inst = Instructions[i];
-                if (inst.Jump != null && !Instructions.Contains(inst.Jump))
+                if (inst.Jump != null && GetInstructionIndex(inst.Jump) < 0)
                 {
                     issues.Add($"Instruction #{i} ({inst.InsType}) jumps to instruction not in list");
                 }

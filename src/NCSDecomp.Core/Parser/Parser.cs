@@ -297,9 +297,9 @@ namespace NCSDecomp.Core.Parser
                 }
                 else if (_action[0] == Reduce)
                 {
-                        // Reduce (NewN) must run before GoTo: pops RHS; GoTo reads the new stack top. Java's
-                        // push(goTo(), newN()) evaluates newN first; C# Push(GoTo(), NewN()) would not — use locals.
-                        switch (_action[1])
+                    // Reduce (NewN) must run before GoTo: pops RHS; GoTo reads the new stack top. Java's
+                    // push(goTo(), newN()) evaluates newN first; C# Push(GoTo(), NewN()) would not — use locals.
+                    switch (_action[1])
                     {
                         case 0:
                             {

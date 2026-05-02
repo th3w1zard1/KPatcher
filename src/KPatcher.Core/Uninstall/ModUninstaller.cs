@@ -40,7 +40,7 @@ namespace KPatcher.Core.Uninstall
 
         /// <summary>
         /// Check if a folder name is a valid backup folder name based on a datetime pattern.
-        /// 1:1 port from Python is_valid_backup_folder
+        /// Same behavior as HoloPatcher for validating backup folders.
         /// </summary>
         /// <param name="folder">Path object of the folder to validate</param>
         /// <param name="datetimePattern">String pattern to match folder name against (default: "yyyy-MM-dd_HH.mm.ss")</param>
@@ -60,7 +60,7 @@ namespace KPatcher.Core.Uninstall
 
         /// <summary>
         /// Returns the most recent valid backup folder.
-        /// 1:1 port from Python get_most_recent_backup
+        /// Same behavior as HoloPatcher for selecting the most recent backup.
         /// </summary>
         /// <param name="backupFolder">Path to the backup folder</param>
         /// <param name="showErrorDialog">Function to show error dialog (optional)</param>
@@ -125,7 +125,7 @@ namespace KPatcher.Core.Uninstall
 
         /// <summary>
         /// Restores a game backup folder to the existing game files.
-        /// 1:1 port from Python restore_backup
+        /// Same behavior as HoloPatcher for restoring a backup tree.
         /// </summary>
         /// <param name="backupFolder">Path to the backup folder</param>
         /// <param name="existingFiles">Set of existing file paths</param>
@@ -197,7 +197,7 @@ namespace KPatcher.Core.Uninstall
 
         /// <summary>
         /// Get information about the most recent valid backup.
-        /// 1:1 port from Python get_backup_info
+        /// Same behavior as HoloPatcher for reading backup metadata.
         /// </summary>
         /// <param name="showErrorDialog">Function to show error dialog (optional)</param>
         /// <param name="showYesNoDialog">Function to show yes/no dialog (optional)</param>
@@ -277,7 +277,7 @@ namespace KPatcher.Core.Uninstall
 
         /// <summary>
         /// Uninstalls the selected mod using the most recent backup folder created during the last install.
-        /// 1:1 port from Python uninstall_selected_mod
+        /// Same behavior as HoloPatcher for uninstalling the selected mod.
         /// </summary>
         /// <param name="showErrorDialog">Function to show error dialog</param>
         /// <param name="showYesNoDialog">Function to show yes/no dialog</param>

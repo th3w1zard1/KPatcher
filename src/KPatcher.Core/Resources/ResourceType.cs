@@ -151,7 +151,7 @@ namespace KPatcher.Core.Resources
         /// </summary>
         public static ResourceType FromId(int typeId)
         {
-            // Search through all static fields to match Python's behavior
+            // Search through all static fields for a matching identifier
             // Can be null if not found
             ResourceType fields = typeof(ResourceType).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
                 .Where(f => f.FieldType == typeof(ResourceType))
@@ -176,7 +176,7 @@ namespace KPatcher.Core.Resources
         }
 
         /// <summary>
-        /// Alias for FromId to match Python API.
+        /// Alias for <see cref="FromId"/> (alternate name used by some callers).
         /// </summary>
         public static ResourceType FromTypeId(int typeId) => FromId(typeId);
 
@@ -188,7 +188,7 @@ namespace KPatcher.Core.Resources
         {
             string ext = extension.TrimStart('.').ToLower();
 
-            // Search through all static fields to match Python's behavior
+            // Search through all static fields for a matching identifier
             // Can be null if not found
             ResourceType fields = typeof(ResourceType).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
                 .Where(f => f.FieldType == typeof(ResourceType))

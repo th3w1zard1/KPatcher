@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    vendor/PyKotor is a git submodule (reference-only for docs/tools). Exclude it from Source Link maps so
+    generated *.sourcelink.json and symbols do not embed the third-party PyKotor repository URL.
+  -->
+  <Target Name="_KPatcherExcludePyKotorSubmoduleFromSourceLink"
+          AfterTargets="InitializeSourceControlInformation"
+          BeforeTargets="_GenerateSourceLinkFile">
+    <ItemGroup>
+      <_KPatcherPyKotorSourceRoot Include="@(SourceRoot)"
+                                  Condition="$([System.String]::Copy('%(SourceRoot.Identity)').Replace('\','/').IndexOf('vendor/PyKotor/', System.StringComparison.OrdinalIgnoreCase)) &gt;= 0" />
+      <_KPatcherPyKotorSourceRoot Include="@(SourceRoot)"
+                                  Condition="$([System.String]::Copy('%(SourceRoot.Identity)').Replace('\','/').EndsWith('vendor/PyKotor', System.StringComparison.OrdinalIgnoreCase))" />
+    </ItemGroup>
+    <ItemGroup>
+      <SourceRoot Remove="@(_KPatcherPyKotorSourceRoot)" />
+      <_KPatcherPyKotorSourceRoot Remove="@(_KPatcherPyKotorSourceRoot)" />
+    </ItemGroup>
+  </Target>
+</Project>

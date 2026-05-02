@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.ERF;
 using KPatcher.Core.Formats.RIM;
 using KPatcher.Core.Resources;
-using JetBrains.Annotations;
 
 namespace KPatcher.Core.Common.Capsule
 {

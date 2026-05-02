@@ -2,6 +2,6 @@
 <RunSettings>
   <RunConfiguration>
     <!-- Default CI/agent runs must finish under the repo 10-minute wrapper cap. Exhaustive vanilla↔NCS harness: see Exhaustive.runsettings -->
-    <TestCaseFilter>Category!=DeNCSRoundTrip</TestCaseFilter>
+    <TestCaseFilter>Category!=DeNCSRoundTrip&amp;Category!=VendorK2Game&amp;Category!=TslPatcherExeReference&amp;Category!=KorExhaustiveBinaryFixtures&amp;Category!=NamespaceMainAltBinaryFixtures&amp;Category!=GffGitModuleTextureBinaryFixtures&amp;Category!=HeadsAppearanceBinaryFixtures&amp;Category!=GeneratedGenericModExhaustive</TestCaseFilter>
   </RunConfiguration>
 </RunSettings>

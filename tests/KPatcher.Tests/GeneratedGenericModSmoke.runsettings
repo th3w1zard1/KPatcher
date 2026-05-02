@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Generated generic-mod installer smoke rows only (Category=GeneratedGenericModInstallerSmoke). Uses committed projected fixture trees. -->
+    <TestCaseFilter>Category=GeneratedGenericModInstallerSmoke</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

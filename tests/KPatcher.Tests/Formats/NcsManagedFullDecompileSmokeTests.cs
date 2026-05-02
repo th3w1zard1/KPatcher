@@ -4,6 +4,7 @@ using FluentAssertions;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Decompiler;
+using KPatcher.Core.Tests.Common;
 using NCSDecomp.Core;
 using NCSDecomp.Core.Node;
 using Xunit;
@@ -17,13 +18,9 @@ namespace KPatcher.Core.Tests.Formats
     public sealed class NcsManagedFullDecompileSmokeTests
     {
         [Fact]
-        public void ParseAst_TestNcs_WhenCopiedToOutput_Succeeds()
+        public void ParseAst_ReferenceK1CompiledNcs_Succeeds()
         {
-            string path = Path.Combine(AppContext.BaseDirectory, "test_files", "test.ncs");
-            if (!File.Exists(path))
-                return;
-
-            byte[] bytes = File.ReadAllBytes(path);
+            byte[] bytes = CompiledNcsTestFixture.ReferenceK1NcsBytes();
             Start ast = NcsParsePipeline.ParseAst(bytes, ActionsData.LoadFromEmbedded(false));
             ast.Should().NotBeNull();
         }

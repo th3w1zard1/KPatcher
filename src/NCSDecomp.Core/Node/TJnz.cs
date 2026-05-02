@@ -11,7 +11,9 @@ namespace NCSDecomp.Core.Node
         public TJnz() { SetText("JNZ"); }
         public TJnz(int line, int pos) { SetText("JNZ"); SetLine(line); SetPos(pos); }
         protected override Token CloneToken() { return new TJnz(GetLine(), GetPos()); }
-        public override void Apply(Switch sw) { if (sw is IAnalysis a)
+        public override void Apply(Switch sw)
+        {
+            if (sw is IAnalysis a)
             {
                 a.CaseTJnz(this);
             }

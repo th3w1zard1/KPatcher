@@ -17,17 +17,12 @@ namespace KPatcher.Core.Tests.Formats
     /// </summary>
     public class GFFFormatTests
     {
-        private static readonly string TestGffFile = TestFileHelper.GetPath("test.gff");
-        private static readonly string CorruptGffFile = TestFileHelper.GetPath("test_corrupted.gff");
-
         [Fact]
         public void TestBinaryIO()
         {
-            // Read GFF file
-            GFF gff = new GFFBinaryReader(TestGffFile).Load();
+            GFF gff = BinaryFormatFixtures.BuildCanonicalScalarGff();
             ValidateIO(gff);
 
-            // Write and re-read to validate round-trip
             byte[] data = new GFFBinaryWriter(gff).Write();
             gff = new GFFBinaryReader(data).Load();
             ValidateIO(gff);
@@ -41,7 +36,7 @@ namespace KPatcher.Core.Tests.Formats
             gff.Root.GetInt16("int16").Should().Be(-32768);
             gff.Root.GetUInt32("uint32").Should().Be(0xFFFFFFFF);
             gff.Root.GetInt32("int32").Should().Be(-2147483648);
-            gff.Root.GetUInt64("uint64").Should().Be(4294967296);
+            gff.Root.GetUInt64("uint64").Should().Be(4294967296UL);
 
             gff.Root.GetSingle("single").Should().BeApproximately(12.34567f, 0.00001f);
             gff.Root.GetDouble("double").Should().BeApproximately(12.345678901234, 0.00000000001);
@@ -67,28 +62,22 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestReadRaises()
         {
-            // test_read_raises from Python
-            // Test directory access
             Action act1 = () => new GFFBinaryReader(".").Load();
-            act1.Should().Throw<Exception>(); // UnauthorizedAccessException or IOException
+            act1.Should().Throw<Exception>();
 
-            // Test file not found
             Action act2 = () => new GFFBinaryReader("./thisfiledoesnotexist").Load();
             act2.Should().Throw<FileNotFoundException>();
 
-            // Test corrupted file
-            Action act3 = () => new GFFBinaryReader(CorruptGffFile).Load();
+            byte[] corrupt = FormatCorruptBinarySamples.CorruptGff;
+            Action act3 = () => new GFFBinaryReader(corrupt).Load();
             act3.Should().Throw<InvalidDataException>();
         }
 
         [Fact]
         public void TestWriteRaises()
         {
-            // test_write_raises from Python
             var gff = new GFF();
 
-            // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // write_gff(GFF(), ".", ResourceType.GFF)
             Action act1 = () => WriteGff(gff, ".", ResourceType.GFF);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -96,11 +85,9 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // write_gff(GFF(), ".", ResourceType.INVALID)
             Action act2 = () => WriteGff(gff, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }
@@ -108,13 +95,7 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestToRawDataSimpleReadSizeUnchanged()
         {
-            // test_to_raw_data_simple_read_size_unchanged from Python
-            if (!File.Exists(TestGffFile))
-            {
-                return; // Skip if test file doesn't exist
-            }
-
-            byte[] originalData = File.ReadAllBytes(TestGffFile);
+            byte[] originalData = new GFFBinaryWriter(BinaryFormatFixtures.BuildCanonicalScalarGff()).Write();
             GFF gff = new GFFBinaryReader(originalData).Load();
 
             byte[] rawData = new GFFBinaryWriter(gff).Write();
@@ -125,23 +106,17 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void TestWriteToFileValidPathSizeUnchanged()
         {
-            // test_write_to_file_valid_path_size_unchanged from Python
-            string gitTestFile = TestFileHelper.GetPath("test.git");
-            if (!File.Exists(gitTestFile))
-            {
-                return; // Skip if test file doesn't exist
-            }
+            byte[] originalData = new GFFBinaryWriter(BinaryFormatFixtures.BuildCanonicalScalarGff()).Write();
+            GFF gff = new GFFBinaryReader(originalData).Load();
+            byte[] serialized = new GFFBinaryWriter(gff).Write();
 
-            long originalSize = new FileInfo(gitTestFile).Length;
-            GFF gff = new GFFBinaryReader(gitTestFile).Load();
-
-            string tempFile = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.git");
+            string tempFile = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.gff");
             try
             {
-                File.WriteAllBytes(tempFile, new GFFBinaryWriter(gff).Write());
+                File.WriteAllBytes(tempFile, serialized);
 
                 File.Exists(tempFile).Should().BeTrue("GFF output file was not created.");
-                new FileInfo(tempFile).Length.Should().Be(originalSize, "File size has changed.");
+                new FileInfo(tempFile).Length.Should().Be(serialized.Length);
             }
             finally
             {
@@ -151,7 +126,5 @@ namespace KPatcher.Core.Tests.Formats
                 }
             }
         }
-
     }
 }
-

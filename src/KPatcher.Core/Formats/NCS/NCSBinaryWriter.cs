@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace KPatcher.Core.Formats.NCS
@@ -21,8 +20,6 @@ namespace KPatcher.Core.Formats.NCS
         private const int NCS_HEADER_SIZE = 13;
 
         private readonly NCS _ncs;
-        private readonly Dictionary<int, int> _offsets = new Dictionary<int, int>();
-        private readonly Dictionary<int, int> _sizes = new Dictionary<int, int>();
 
         public NCSBinaryWriter(NCS ncs)
         {
@@ -34,14 +31,14 @@ namespace KPatcher.Core.Formats.NCS
             using (var ms = new MemoryStream())
             using (var writer = new BinaryWriter(ms, Encoding.ASCII, leaveOpen: true))
             {
+                IReadOnlyList<NCSInstruction> instructions = _ncs.Instructions;
+                int n = instructions.Count;
+                int[] offsets = new int[n];
                 int offset = NCS_HEADER_SIZE;
-                foreach (NCSInstruction instruction in _ncs.Instructions)
+                for (int i = 0; i < n; i++)
                 {
-                    int instId = RuntimeHelpers.GetHashCode(instruction);
-                    int instructionSize = DetermineSize(instruction);
-                    _sizes[instId] = instructionSize;
-                    _offsets[instId] = offset;
-                    offset += instructionSize;
+                    offsets[i] = offset;
+                    offset += DetermineSize(instructions[i]);
                 }
 
                 writer.Write(Encoding.ASCII.GetBytes("NCS "));
@@ -49,16 +46,34 @@ namespace KPatcher.Core.Formats.NCS
                 writer.Write(NCS_HEADER_MAGIC_BYTE);
                 WriteBigEndianUInt32(writer, (uint)offset);
 
-                foreach (NCSInstruction instruction in _ncs.Instructions)
+                for (int i = 0; i < n; i++)
                 {
-                    WriteInstruction(writer, instruction);
+                    WriteInstruction(writer, instructions[i], i, offsets, instructions);
                 }
 
                 return ms.ToArray();
             }
         }
 
-        private void WriteInstruction(BinaryWriter writer, NCSInstruction instruction)
+        private static int IndexOfJumpTarget(IReadOnlyList<NCSInstruction> instructions, NCSInstruction jump)
+        {
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (ReferenceEquals(instructions[i], jump))
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException("Jump target instruction is not present in the instruction list.");
+        }
+
+        private static void WriteInstruction(
+            BinaryWriter writer,
+            NCSInstruction instruction,
+            int instructionIndex,
+            int[] offsets,
+            IReadOnlyList<NCSInstruction> instructions)
         {
             (NCSByteCode byteCode, byte qualifier) = instruction.InsType.GetValue();
             writer.Write((byte)byteCode);
@@ -117,11 +132,10 @@ namespace KPatcher.Core.Formats.NCS
                 {
                     throw new InvalidOperationException($"{instruction} has a NoneType jump.");
                 }
-                int instructionId = RuntimeHelpers.GetHashCode(instruction);
-                int jumpId = RuntimeHelpers.GetHashCode(instruction.Jump);
-                int currentOffset = _offsets[instructionId];
-                int jumpOffset = _offsets[jumpId];
-                int relative = jumpOffset - currentOffset;
+                int currentOffset = offsets[instructionIndex];
+                int jumpIndex = IndexOfJumpTarget(instructions, instruction.Jump);
+                int jumpFileOffset = offsets[jumpIndex];
+                int relative = jumpFileOffset - currentOffset;
                 WriteBigEndianInt32(writer, ToSigned32Bit(relative));
             }
             else if (instruction.InsType == NCSInstructionType.DESTRUCT)

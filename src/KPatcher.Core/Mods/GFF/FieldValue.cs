@@ -94,7 +94,7 @@ namespace KPatcher.Core.Mods.GFF
             }
             if (fieldType == GFFFieldType.ResRef && !(value is ResRef))
             {
-                // This is here to support empty statements like 'resref=' in ini (allow_no_entries=True in configparser)
+                // Support empty statements like 'resref=' in ini (empty value allowed)
                 if (value is string resRefStr)
                 {
                     return string.IsNullOrWhiteSpace(resRefStr) ? ResRef.FromBlank() : new ResRef(resRefStr);

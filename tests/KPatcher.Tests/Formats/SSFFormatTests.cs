@@ -3,6 +3,7 @@ using System.IO;
 using FluentAssertions;
 using KPatcher.Core.Formats.SSF;
 using KPatcher.Core.Resources;
+using KPatcher.Core.Tests.Common;
 using Xunit;
 using static global::KPatcher.Core.Formats.SSF.SSFAuto;
 
@@ -15,23 +16,14 @@ namespace KPatcher.Core.Tests.Formats
     /// </summary>
     public class SSFFormatTests
     {
-        private const string BinaryTestFile = "../../../test_data/test.ssf";
-        private const string CorruptBinaryTestFile = "../../../test_data/test_corrupted.ssf";
         private const string DoesNotExistFile = "./thisfiledoesnotexist";
 
-        /// <summary>
-        /// test_binary_io
-        /// Tests reading from actual test.ssf file and round-trip through bytes
-        /// </summary>
         [Fact]
         public void TestBinaryIO()
         {
-            // Read from actual test file
-            var reader = new SSFBinaryReader(BinaryTestFile);
-            SSF ssf = reader.Load();
+            SSF ssf = BinaryFormatFixtures.BuildCanonicalSsf();
             ValidateIO(ssf);
 
-            // Write to bytes and read back
             var writer = new SSFBinaryWriter(ssf);
             byte[] data = writer.Write();
 
@@ -40,24 +32,30 @@ namespace KPatcher.Core.Tests.Formats
             ValidateIO(newSsf);
         }
 
-        /// <summary>
-        /// test_read_raises
-        /// Tests various error conditions when reading SSF files
-        /// </summary>
+        [Fact]
+        public void WriteRoundTrip_BytesMatchSourceFile()
+        {
+            SSF ssf = BinaryFormatFixtures.BuildCanonicalSsf();
+            byte[] onDisk = ssf.ToBytes();
+            var reader = new SSFBinaryReader(onDisk);
+            SSF loaded = reader.Load();
+            var writer = new SSFBinaryWriter(loaded);
+            byte[] serialized = writer.Write();
+            serialized.Should().Equal(onDisk);
+        }
+
         [Fact]
         public void TestReadRaises()
         {
-            // Test directory access
             Action act1 = () => new SSFBinaryReader(".").Load();
-            act1.Should().Throw<UnauthorizedAccessException>(); // Or IOException depending on OS
+            act1.Should().Throw<UnauthorizedAccessException>();
 
-            // Test file not found
             Action act2 = () => new SSFBinaryReader(DoesNotExistFile).Load();
             act2.Should().Throw<FileNotFoundException>();
 
-            // Test corrupted file (invalid data; reader may throw ArgumentOutOfRangeException before version check)
-            Action act3 = () => new SSFBinaryReader(CorruptBinaryTestFile).Load();
-            act3.Should().Throw<Exception>(); // InvalidDataException or ArgumentOutOfRangeException
+            byte[] corrupt = FormatCorruptBinarySamples.CorruptSsf;
+            Action act3 = () => new SSFBinaryReader(corrupt).Load();
+            act3.Should().Throw<Exception>();
         }
 
         private static void ValidateIO(SSF ssf)
@@ -92,18 +90,11 @@ namespace KPatcher.Core.Tests.Formats
             ssf.Get(SSFSound.POISONED).Should().Be(123048);
         }
 
-        /// <summary>
-        /// test_write_raises
-        /// Tests various error conditions when writing SSF files
-        /// </summary>
         [Fact]
         public void TestWriteRaises()
         {
-            // test_write_raises from Python
             var ssf = new SSF();
 
-            // Test writing to directory (should raise PermissionError on Windows, IsADirectoryError on Unix)
-            // write_ssf(SSF(), ".", ResourceType.SSF)
             Action act1 = () => WriteSsf(ssf, ".", ResourceType.SSF);
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -111,15 +102,11 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>(); // IsADirectoryError equivalent
+                act1.Should().Throw<IOException>();
             }
 
-            // Test invalid resource type (Python raises ValueError for ResourceType.INVALID)
-            // write_ssf(SSF(), ".", ResourceType.INVALID)
             Action act2 = () => WriteSsf(ssf, ".", ResourceType.INVALID);
             act2.Should().Throw<ArgumentException>().WithMessage("*Unsupported format*");
         }
-
     }
 }
-

@@ -62,17 +62,25 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                 }
             }
 
-            // Compile arguments in FORWARD order (first param first)
-            // The stack is LIFO, so when popping, args come out in reverse order.
-            // The interpreter reverses args_snap to match function.Params order.
-            // Example: PrintFloat(fFloat, nWidth, nDecimals)
-            // - Compiler pushes: fFloat, nWidth, nDecimals (in forward order)
-            // - Stack (LIFO): top=[nDecimals, nWidth, fFloat]
-            // - Interpreter pops: nDecimals, nWidth, fFloat
-            // - Before reverse: args_snap = [nDecimals, nWidth, fFloat]
-            // - After reverse: args_snap = [fFloat, nWidth, nDecimals] - CORRECT!
+            // nwnnsscomp compiles `action` parameters before earlier parameters when any param is `action`
+            // (e.g. DelayCommand body before the delay float), matching bytecode layout while keeping the
+            // stack correct (last pushed = last param = top). Other engine calls use left-to-right order.
+            bool reverseArgOrder = false;
+            for (int p = 0; p < Function.Params.Count; p++)
+            {
+                if (Function.Params[p].DataType == DataType.Action)
+                {
+                    reverseArgOrder = true;
+                    break;
+                }
+            }
+
+            IEnumerable<int> argIndices = reverseArgOrder
+                ? Enumerable.Range(0, Arguments.Count).Reverse()
+                : Enumerable.Range(0, Arguments.Count);
+
             int thisStack = 0;
-            for (int i = 0; i < Arguments.Count; i++)
+            foreach (int i in argIndices)
             {
                 Expression arg = Arguments[i];
                 ScriptParam param = Function.Params[i];
@@ -170,7 +178,33 @@ namespace KPatcher.Core.Formats.NCS.Compiler
                         new FloatExpression(vector.Y),
                         new FloatExpression(vector.Z));
                 case DataType.Object:
-                    return new ObjectExpression(Convert.ToInt32(param.Default));
+                    if (param.Default is int objId)
+                    {
+                        return new ObjectExpression(objId);
+                    }
+
+                    string objDefault = param.Default.ToString()?.Trim() ?? "";
+                    if (string.Equals(objDefault, "OBJECT_SELF", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new ObjectExpression(0);
+                    }
+
+                    if (string.Equals(objDefault, "OBJECT_INVALID", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new ObjectExpression(1);
+                    }
+
+                    if (int.TryParse(
+                            objDefault,
+                            System.Globalization.NumberStyles.Integer,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out int parsedObj))
+                    {
+                        return new ObjectExpression(parsedObj);
+                    }
+
+                    throw new NSS.CompileError(
+                        $"Unsupported object default value '{objDefault}' for parameter '{param.Name}' in '{Function.Name}'");
                 default:
                     throw new NSS.CompileError(
                         $"Unsupported default parameter type '{param.DataType}' for '{param.Name}' in '{Function.Name}'\n" +

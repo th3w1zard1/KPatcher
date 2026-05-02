@@ -91,6 +91,12 @@ namespace KPatcher.Core.Reader
         /// <returns>Parsed IniData object</returns>
         public static IniData ParseIniText(string iniText, bool caseInsensitive = false, string sourcePath = null)
         {
+            if (iniText is null)
+            {
+                throw new ArgumentNullException(nameof(iniText));
+            }
+
+            iniText = IniTextNormalizer.StripLeadingBom(iniText);
             if (string.IsNullOrEmpty(iniText))
             {
                 throw new ArgumentException("INI text cannot be null or empty", nameof(iniText));
@@ -298,7 +304,11 @@ namespace KPatcher.Core.Reader
             }
             if (Config.RequiredFiles.Count != Config.RequiredMessages.Count)
             {
-                throw new InvalidOperationException($"Required files definitions must match required msg count ({Config.RequiredFiles.Count}/{Config.RequiredMessages.Count})");
+                _log.AddWarning(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "ConfigReader.LoadSettings: tolerating mismatched Required/RequiredMsg counts for compatibility ({0}/{1}).",
+                    Config.RequiredFiles.Count,
+                    Config.RequiredMessages.Count));
             }
             Config.SaveProcessedScripts = int.TryParse(settingsIni.GetValueOrDefault("SaveProcessedScripts"), out int sps) ? sps : 0;
             Config.LogLevel = int.TryParse(settingsIni.GetValueOrDefault("LogLevel"), out int logLevelInt)
@@ -437,6 +447,19 @@ namespace KPatcher.Core.Reader
             tlkListEdits.Remove("!DefaultSourceFolder");
             Config.PatchesTLK.PopTslPatcherVars(tlkListEdits, defaultDestination, defaultSourcefolder);
 
+            // PatcherModifications' ctor assigns null when ModificationsTLK() is created without a filename; PopTslPatcherVars
+            // leaves SourceFile/SaveAs unset when the INI omits !SourceFile/!SaveAs. Empty saveAs breaks ModInstaller's
+            // dialog.tlk skip (saveAs must be "dialog.tlk") and yields LookupResource errors for StrRef-only [TLKList].
+            if (string.IsNullOrWhiteSpace(Config.PatchesTLK.SourceFile))
+            {
+                Config.PatchesTLK.SourceFile = ModificationsTLK.DEFAULT_SOURCEFILE;
+            }
+
+            if (string.IsNullOrWhiteSpace(Config.PatchesTLK.SaveAs))
+            {
+                Config.PatchesTLK.SaveAs = ModificationsTLK.DEFAULT_SAVEAS_FILE;
+            }
+
             bool syntaxErrorCaught = false;
 
             void ProcessTlkEntries(string tlkFilename, int dialogTlkIndex, int modTlkIndex, bool isReplacement)
@@ -457,7 +480,7 @@ namespace KPatcher.Core.Reader
                 {
                     tlkFilePath = Path.Combine(_modPath, tlkFilename);
                 }
-                // Make path absolute to match Python behavior (Path objects are always absolute)
+                // Make path absolute (consistent with other patcher path resolution)
                 modifier.TlkFilePath = Path.GetFullPath(tlkFilePath);
                 Config.PatchesTLK.Modifiers.Add(modifier);
             }
@@ -535,6 +558,16 @@ namespace KPatcher.Core.Reader
                 {
                     throw new InvalidOperationException($"Could not parse '{key}={value}' in [TLKList]", ex);
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(Config.PatchesTLK.SourceFile))
+            {
+                Config.PatchesTLK.SourceFile = ModificationsTLK.DEFAULT_SOURCEFILE;
+            }
+
+            if (string.IsNullOrWhiteSpace(Config.PatchesTLK.SaveAs))
+            {
+                Config.PatchesTLK.SaveAs = ModificationsTLK.DEFAULT_SAVEAS_FILE;
             }
 
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -831,9 +864,7 @@ namespace KPatcher.Core.Reader
                                 if (fieldPathSection.TryGetValue("Path", out string pathValue))
                                 {
                                     // raw_path: str = ini_data.pop("Path", "").strip()
-                                    // path: PureWindowsPath = PureWindowsPath(raw_path)
-                                    // Python's ConfigParser reads values as-is, but C# IniParser may escape backslashes
-                                    // Unescape double backslashes to match Python's behavior
+                                    // INI values are literal; unescape doubled backslashes that the parser may emit
                                     path = pathValue.Replace("\\\\", "\\");
                                 }
                             }
@@ -1231,7 +1262,7 @@ namespace KPatcher.Core.Reader
         /// ----
         ///     identifier: str - Identifier of the section in the current recursion from the ini file
         ///     ini_data: CaseInsensitiveDict - Data from the ini section
-        ///     current_path: PureWindowsPath or None - Current path in the GFF
+        ///     current_path: Current path string in the GFF, or null at the root
         ///
         /// Returns:
         /// -------
@@ -1280,10 +1311,9 @@ namespace KPatcher.Core.Reader
             }
             // if field_type == GFFFieldType.Struct:
             //     path /= ">>##INDEXINLIST##<<"
-            // Note: Python appends this BEFORE checking if label is empty, so it's appended to ALL Struct paths
-            // However, when label is set, AddFieldGFF.apply will use the full path (including >>##INDEXINLIST##<<)
-            // which won't exist. This seems like a Python bug, but we match it exactly.
-            // The path resolution in AddFieldGFF.apply uses zip_longest to merge parent and nested paths.
+            // Append before checking if label is empty, so it applies to all Struct paths (HoloPatcher-compatible).
+            // When label is set, AddFieldGFF.Apply may still resolve a path that includes >>##INDEXINLIST##<<.
+            // Child paths are merged with parent paths in AddFieldGFF.Apply (longest-length segment merge).
             if (fieldType == GFFFieldType.Struct)
             {
                 path = string.IsNullOrEmpty(path) ? ">>##INDEXINLIST##<<" : Path.Combine(path, ">>##INDEXINLIST##<<").Replace("\\", "/");
@@ -1305,7 +1335,7 @@ namespace KPatcher.Core.Reader
                     else if (lowerIteratedValue == "!fieldpath")
                     {
                         // modifier = Memory2DAModifierGFF(identifier, dst_token_id=int(key[9:]), path=path / label)
-                        // Python uses PureWindowsPath path concatenation which uses backslashes
+                        // Windows-style path join for this modifier (backslashes)
                         string combinedPath = string.IsNullOrEmpty(path) ? label : $"{path}\\{label}";
                         var modifier = new Memory2DAModifierGFF(identifier, combinedPath, Parse2DAMemoryTokenId(iteratedKey.Substring(9))); // Assign current path to 2damemory.
                         modifiers.Insert(0, modifier);
@@ -1598,9 +1628,9 @@ namespace KPatcher.Core.Reader
                 return new FieldValueConstant(intVal);
             }
 
-            // Float (Python's float is 64-bit double, so we use double here to match)
+            // Float (IEEE 64-bit double, same as TSLPatcher .ini float literals)
             string parsedFloatStr = NormalizeTslPatcherFloat(rawValue);
-            if (double.TryParse(parsedFloatStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double doubleVal)) // Python's float is 64-bit
+            if (double.TryParse(parsedFloatStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double doubleVal))
             {
                 return new FieldValueConstant(doubleVal);
             }
@@ -1704,7 +1734,10 @@ namespace KPatcher.Core.Reader
                 }
                 else if (fieldType == GFFFieldType.UInt32 || fieldType == GFFFieldType.Int32)
                 {
-                    value = ParseIntValue(rawValue);
+                    // TSLPatcher INIs use unsigned DWORD max (4294967295) for fields like GFF Delay — must not parse as Int32.
+                    value = fieldType == GFFFieldType.UInt32
+                        ? uint.Parse(rawValue, CultureInfo.InvariantCulture)
+                        : (object)ParseIntValue(rawValue);
                 }
                 else
                 {

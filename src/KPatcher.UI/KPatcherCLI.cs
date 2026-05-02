@@ -18,15 +18,18 @@ namespace KPatcher
             public string TslPatchData { get; set; }
             public int? NamespaceOptionIndex { get; set; }
             public bool Console { get; set; }
+            public bool Gui { get; set; }
             public bool Uninstall { get; set; }
             public bool Install { get; set; }
             public bool Validate { get; set; }
             public bool Help { get; set; }
+            public bool ListNamespaces { get; set; }
+            public bool DryRun { get; set; }
         }
 
         /// <summary>True if any argument suggests the user intended CLI usage (beyond bare <c>--console</c>).</summary>
         internal static bool HasCliWorkIndicators(CommandLineArgs a) =>
-            a.Install || a.Uninstall || a.Validate
+            a.Install || a.Uninstall || a.Validate || a.ListNamespaces || a.DryRun
             || !string.IsNullOrEmpty(a.GameDir)
             || !string.IsNullOrEmpty(a.TslPatchData)
             || a.NamespaceOptionIndex.HasValue;
@@ -54,6 +57,9 @@ namespace KPatcher
                     case "--console":
                         result.Console = true;
                         break;
+                    case "--gui":
+                        result.Gui = true;
+                        break;
                     case "--uninstall":
                         result.Uninstall = true;
                         break;
@@ -62,6 +68,12 @@ namespace KPatcher
                         break;
                     case "--validate":
                         result.Validate = true;
+                        break;
+                    case "--list-namespaces":
+                        result.ListNamespaces = true;
+                        break;
+                    case "--dry-run":
+                        result.DryRun = true;
                         break;
                     case "--help":
                     case "-h":

@@ -7,7 +7,6 @@ using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Resources;
-using Moq;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Patcher

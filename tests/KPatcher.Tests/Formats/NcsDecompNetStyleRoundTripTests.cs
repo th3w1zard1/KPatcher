@@ -10,9 +10,8 @@ using Xunit;
 namespace KPatcher.Core.Tests.Formats
 {
     /// <summary>
-    /// Parity with <c>KNCSDecomp.RoundTripTests/NCSDecompCliRoundTripTests</c> (NCSDecomp.NET): compile -> write NCS ->
-    /// decompile via <see cref="RoundTripUtil.DecompileNcsToNss"/> using on-disk <c>k1_nwscript.nss</c> / <c>k2_nwscript.nss</c>
-    /// (same layout as BioWare.NET + KOTORModSync <c>RoundTripUtil</c> tests that load nwscript from <c>tools/</c>).
+    /// Parity with <c>KNCSDecomp.RoundTripTests/NCSDecompCliRoundTripTests</c> (NCSDecomp.NET): compile → write NCS →
+    /// decompile via <see cref="RoundTripUtil.DecompileNcsToNss"/> with <c>null</c> nwscript paths (NCSDecomp loads embedded action tables).
     /// Optional strict bytecode equality: env <c>KNCSDECOMP_STRICT_ROUNDTRIP=1</c> (same name as upstream).
     /// </summary>
     public sealed class NcsDecompNetStyleRoundTripTests
@@ -25,17 +24,9 @@ void main()
 }
 ";
 
-        private static string K1NwscriptPath =>
-            Path.Combine(AppContext.BaseDirectory, "test_files", "k1_nwscript.nss");
-
-        private static string K2NwscriptPath =>
-            Path.Combine(AppContext.BaseDirectory, "test_files", "k2_nwscript.nss");
-
         [Fact]
-        public void RoundTrip_K1_OnDiskNwscript_DecompilesAndRecompiles()
+        public void RoundTrip_K1_EmbeddedActions_DecompilesAndRecompiles()
         {
-            Assert.True(File.Exists(K1NwscriptPath), "Missing test resource: " + K1NwscriptPath);
-
             NCS original = NCSAuto.CompileNss(SimpleScript, Game.K1, null, null, null);
             byte[] originalBytes = NCSAuto.BytesNcs(original);
             originalBytes.Should().NotBeNullOrEmpty();
@@ -48,7 +39,7 @@ void main()
                 string inputNcsPath = Path.Combine(tempRoot, "input.ncs");
                 File.WriteAllBytes(inputNcsPath, originalBytes);
 
-                string decompiled = RoundTripUtil.DecompileNcsToNss(inputNcsPath, "k1", K1NwscriptPath, null);
+                string decompiled = RoundTripUtil.DecompileNcsToNss(inputNcsPath, "k1", null, null);
                 decompiled.Should().NotBeNullOrWhiteSpace("decompiled NSS should not be empty");
 
                 NCS recompiled = NCSAuto.CompileNss(decompiled, Game.K1, null, null, null);
@@ -64,10 +55,8 @@ void main()
         }
 
         [Fact]
-        public void RoundTrip_Tsl_OnDiskNwscript_DecompilesAndRecompiles()
+        public void RoundTrip_Tsl_EmbeddedActions_DecompilesAndRecompiles()
         {
-            Assert.True(File.Exists(K2NwscriptPath), "Missing test resource: " + K2NwscriptPath);
-
             NCS original = NCSAuto.CompileNss(SimpleScript, Game.TSL, null, null, null);
             byte[] originalBytes = NCSAuto.BytesNcs(original);
             originalBytes.Should().NotBeNullOrEmpty();
@@ -80,7 +69,7 @@ void main()
                 string inputNcsPath = Path.Combine(tempRoot, "input.ncs");
                 File.WriteAllBytes(inputNcsPath, originalBytes);
 
-                string decompiled = RoundTripUtil.DecompileNcsToNss(inputNcsPath, "tsl", K1NwscriptPath, K2NwscriptPath);
+                string decompiled = RoundTripUtil.DecompileNcsToNss(inputNcsPath, "tsl", null, null);
                 decompiled.Should().NotBeNullOrWhiteSpace();
 
                 NCS recompiled = NCSAuto.CompileNss(decompiled, Game.TSL, null, null, null);
@@ -118,7 +107,6 @@ void main()
             }
             catch
             {
-                // best-effort cleanup for temp dir
             }
         }
     }
