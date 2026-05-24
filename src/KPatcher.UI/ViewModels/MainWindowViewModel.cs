@@ -532,7 +532,7 @@ namespace KPatcher.UI.ViewModels
                 _cachedInfoRtfContent = RtfContent ?? string.Empty;
                 _cachedInfoIsRtf = IsRtfContent;
 
-                string changesFileName = selectedNs.ChangesFilePath();
+                string changesFileName = Core.GetResolvedChangesDisplayPath(ModPath, _loadedNamespaces, SelectedNamespace, _logger);
                 string infoFileName = selectedNs.RtfFilePath();
                 _configurationSummaryText = Core.BuildConfigurationSummary(changesFileName, infoFileName, _currentConfigReader.Config);
                 IsRtfContent = false;

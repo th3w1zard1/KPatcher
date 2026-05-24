@@ -38,6 +38,7 @@ namespace KPatcher.Tests
             Assert.Contains("--tslpatchdata", text);
             Assert.Contains("--game-dir", text);
             Assert.Contains("--help", text);
+            Assert.Contains("--parity-report", text);
         }
 
         [Fact]
@@ -58,6 +59,30 @@ namespace KPatcher.Tests
         public void HasCliWorkIndicators_True_WithPositionalPaths()
         {
             var a = KPatcherCLI.ParseArgs(new[] { "C:\\game", "C:\\mod" });
+            Assert.True(KPatcherCLI.HasCliWorkIndicators(a));
+        }
+
+        [Fact]
+        public void ParseArgs_SetsParityReport()
+        {
+            var a = KPatcherCLI.ParseArgs(new[] { "--parity-report" });
+            Assert.True(a.ParityReport);
+        }
+
+        [Fact]
+        public void ParseArgs_DoesNotTreatNamespaceIndexFlagValueAsPositionalPath()
+        {
+            var a = KPatcherCLI.ParseArgs(new[] { "--dry-run", "--tslpatchdata", "/mod", "--namespace-option-index", "1" });
+
+            Assert.Null(a.GameDir);
+            Assert.Equal("/mod", a.TslPatchData);
+            Assert.Equal(1, a.NamespaceOptionIndex);
+        }
+
+        [Fact]
+        public void HasCliWorkIndicators_True_WithParityReport()
+        {
+            var a = KPatcherCLI.ParseArgs(new[] { "--parity-report" });
             Assert.True(KPatcherCLI.HasCliWorkIndicators(a));
         }
     }

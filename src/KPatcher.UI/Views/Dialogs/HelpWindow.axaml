@@ -4,8 +4,8 @@
         xmlns:core="clr-namespace:KPatcher.Core.Common;assembly=KPatcher.Core"
         x:Class="KPatcher.UI.Views.Dialogs.HelpWindow"
         Title="{x:Static ui:UIResources.HelpWindowTitle}"
-        Width="440"
-        Height="200"
+        Width="520"
+        Height="420"
         MinWidth="360"
         CanResize="True"
         WindowStartupLocation="CenterOwner">
@@ -13,10 +13,17 @@
         <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                        VerticalScrollBarVisibility="Auto"
                        MaxHeight="320">
-            <TextBlock Text="{x:Static core:TSLPatcherMessages.FilePatcherDescription}"
-                       TextWrapping="Wrap"
-                       FontSize="13"
-                       LineHeight="20"/>
+            <StackPanel Spacing="12">
+                <TextBlock Text="{x:Static core:TSLPatcherMessages.FilePatcherDescription}"
+                           TextWrapping="Wrap"
+                           FontSize="13"
+                           LineHeight="20"/>
+                <TextBlock x:Name="ParityLedgerTextBlock"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas, 'Cascadia Code', 'Segoe UI', sans-serif"
+                           FontSize="12"
+                           LineHeight="18"/>
+            </StackPanel>
         </ScrollViewer>
         <Button Content="{x:Static ui:UIResources.OK}"
                 Click="OnOkClick"

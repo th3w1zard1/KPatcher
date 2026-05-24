@@ -284,43 +284,17 @@ namespace KPatcher.UI
             [CanBeNull] ConfigReader configReader = null,
             [CanBeNull] PatchLogger diagnosticLogger = null)
         {
-            PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
-            if (namespaceOption is null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
-            }
-
+            PatcherNamespace namespaceOption = GetNamespaceOption(namespaces, selectedNamespaceName);
             diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "Core.LoadNamespaceConfig: enter modPath={0} selectedNamespace={1} reuseConfigReader={2}",
                 modPath, selectedNamespaceName, configReader != null));
 
-            string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
-            // Use the directory that contains the changes file (supports IniName like "subfolder/changes.ini" with path in filename)
-            string fullChangesPath = Path.Combine(tslPatchDataPathResolved, namespaceOption.ChangesFilePath());
-            string namespaceDir = Path.GetDirectoryName(fullChangesPath) ?? tslPatchDataPathResolved;
-            string baseName = Path.GetFileNameWithoutExtension(Path.GetFileName(namespaceOption.IniFilename) ?? "changes");
-            var namespaceDirPath = new CaseAwarePath(namespaceDir);
-            string lang = ConfigLanguageCode;
-
-            string resolvedChangesPath;
-            var (localizedPath, localizedChangesName) = ResolveLocalizedConfigFile(namespaceDirPath, baseName, lang, tryYaml: true, diagnosticLogger);
-            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "Core.LoadNamespaceConfig: ResolveLocalizedConfigFile(changes) fullPath={0} fileName={1}",
-                localizedPath ?? "(null)", localizedChangesName ?? "(null)"));
-
-            if (localizedPath != null)
-            {
-                resolvedChangesPath = localizedPath;
-            }
-            else
-            {
-                var changesIniPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath());
-                resolvedChangesPath = changesIniPath.GetResolvedPath();
-            }
-
-            diagnosticLogger?.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "Core.LoadNamespaceConfig: resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
-                resolvedChangesPath, namespaceDir, baseName, tslPatchDataPathResolved));
+            string resolvedChangesPath = ResolveNamespaceChangesPath(
+                modPath,
+                namespaces,
+                selectedNamespaceName,
+                diagnosticLogger,
+                out string tslPatchDataPathResolved);
 
             ConfigReader reader = configReader ?? ConfigReader.FromFilePath(resolvedChangesPath, diagnosticLogger, tslPatchDataPath: tslPatchDataPathResolved);
             if (configReader is null)
@@ -410,6 +384,105 @@ namespace KPatcher.UI
                 InfoContent = infoContent,
                 IsRtf = isRtf
             };
+        }
+
+        /// <summary>
+        /// Loads a namespace configuration without writing equivalent YAML or any other mod-tree side effects.
+        /// Intended for read-only CLI flows such as dry-run reporting.
+        /// </summary>
+        public static PatcherConfig LoadNamespaceConfigReadOnly(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            string resolvedChangesPath = ResolveNamespaceChangesPath(
+                modPath,
+                namespaces,
+                selectedNamespaceName,
+                diagnosticLogger,
+                out string tslPatchDataPathResolved);
+
+            diagnosticLogger?.AddDiagnostic(string.Format(
+                CultureInfo.InvariantCulture,
+                "Core.LoadNamespaceConfigReadOnly: path={0} selectedNamespace={1}",
+                resolvedChangesPath,
+                selectedNamespaceName));
+
+            ConfigReader reader = ConfigReader.FromFilePath(
+                resolvedChangesPath,
+                diagnosticLogger,
+                tslPatchDataPath: tslPatchDataPathResolved);
+            return reader.Load(reader.Config ?? new PatcherConfig());
+        }
+
+        public static string GetResolvedChangesDisplayPath(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            string resolvedChangesPath = ResolveNamespaceChangesPath(
+                modPath,
+                namespaces,
+                selectedNamespaceName,
+                diagnosticLogger,
+                out string tslPatchDataPathResolved);
+            return Path.GetRelativePath(tslPatchDataPathResolved, resolvedChangesPath);
+        }
+
+        private static PatcherNamespace GetNamespaceOption(List<PatcherNamespace> namespaces, string selectedNamespaceName)
+        {
+            PatcherNamespace namespaceOption = namespaces.FirstOrDefault(x => x.Name == selectedNamespaceName);
+            if (namespaceOption is null)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
+            }
+
+            return namespaceOption;
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger,
+            out string tslPatchDataPathResolved)
+        {
+            PatcherNamespace namespaceOption = GetNamespaceOption(namespaces, selectedNamespaceName);
+            tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger);
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            PatcherNamespace namespaceOption,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            string fullChangesPath = Path.Combine(tslPatchDataPathResolved, namespaceOption.ChangesFilePath());
+            string namespaceDir = Path.GetDirectoryName(fullChangesPath) ?? tslPatchDataPathResolved;
+            string baseName = Path.GetFileNameWithoutExtension(Path.GetFileName(namespaceOption.IniFilename) ?? "changes");
+            var namespaceDirPath = new CaseAwarePath(namespaceDir);
+            string lang = ConfigLanguageCode;
+
+            var (localizedPath, localizedChangesName) = ResolveLocalizedConfigFile(namespaceDirPath, baseName, lang, tryYaml: true, diagnosticLogger);
+            diagnosticLogger?.AddDiagnostic(string.Format(
+                CultureInfo.InvariantCulture,
+                "Core.ResolveNamespaceChangesPath: ResolveLocalizedConfigFile(changes) fullPath={0} fileName={1}",
+                localizedPath ?? "(null)",
+                localizedChangesName ?? "(null)"));
+
+            string resolvedChangesPath = localizedPath ?? new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
+            diagnosticLogger?.AddDiagnostic(string.Format(
+                CultureInfo.InvariantCulture,
+                "Core.ResolveNamespaceChangesPath: resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
+                resolvedChangesPath,
+                namespaceDir,
+                baseName,
+                tslPatchDataPathResolved));
+
+            return resolvedChangesPath;
         }
 
         /// <summary>
@@ -1216,5 +1289,3 @@ namespace KPatcher.UI
         }
     }
 }
-
-

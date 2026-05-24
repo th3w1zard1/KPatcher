@@ -5,8 +5,10 @@ using System.Threading;
 using Avalonia;
 using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
+using KPatcher.Core.Namespaces;
 using KPatcher.Core.Resources;
 using KPatcher.UI;
+using KPatcher.UI.Parity;
 using KPatcher.UI.ViewModels;
 using AppCore = KPatcher.UI.Core;
 
@@ -184,7 +186,7 @@ namespace KPatcher
                 return;
             }
 
-            bool forceCliOps = cmdlineArgs.Install || cmdlineArgs.Uninstall || cmdlineArgs.Validate;
+            bool forceCliOps = KPatcherCLI.HasRequestedCliOperation(cmdlineArgs);
             if (forceCliOps)
             {
                 ExecuteCli(cmdlineArgs);
@@ -224,18 +226,43 @@ namespace KPatcher
 
         private static void ExecuteCli(KPatcherCLI.CommandLineArgs args)
         {
+            int exitCode = RunCli(args, Console.Out, Console.Error);
+            Environment.Exit(exitCode);
+        }
+
+        internal static int RunCli(KPatcherCLI.CommandLineArgs args, TextWriter output, TextWriter error)
+        {
             var logger = new PatchLogger();
-            logger.DiagnosticLogged += (s, l) => Console.WriteLine($"[DIAG] {l.Message}");
-            logger.VerboseLogged += (s, l) => Console.WriteLine($"[VERBOSE] {l.Message}");
-            logger.NoteLogged += (s, l) => Console.WriteLine($"[NOTE] {l.Message}");
-            logger.WarningLogged += (s, l) => Console.WriteLine($"[WARNING] {l.Message}");
-            logger.ErrorLogged += (s, l) => Console.Error.WriteLine($"[ERROR] {l.Message}");
+            logger.DiagnosticLogged += (s, l) => output.WriteLine("[DIAG] " + l.Message);
+            logger.VerboseLogged += (s, l) => output.WriteLine("[VERBOSE] " + l.Message);
+            logger.NoteLogged += (s, l) => output.WriteLine("[NOTE] " + l.Message);
+            logger.WarningLogged += (s, l) => output.WriteLine("[WARNING] " + l.Message);
+            logger.ErrorLogged += (s, l) => error.WriteLine("[ERROR] " + l.Message);
+
+            int operationCount = KPatcherCLI.CountRequestedCliOperations(args);
+            if (operationCount > 1)
+            {
+                error.WriteLine(PatcherResources.CliErrorCannotRunMultipleOperations);
+                return (int)AppCore.ExitCode.NumberOfArgs;
+            }
+
+            KPatcherCLI.CliOperation operation = KPatcherCLI.GetRequestedCliOperation(args);
+            if (operation == KPatcherCLI.CliOperation.None)
+            {
+                error.WriteLine(PatcherResources.CliErrorMustSpecifyOperation);
+                return (int)AppCore.ExitCode.NumberOfArgs;
+            }
+
+            if (operation == KPatcherCLI.CliOperation.ParityReport)
+            {
+                output.WriteLine(ParityLedger.BuildReport());
+                return (int)AppCore.ExitCode.Success;
+            }
 
             if (string.IsNullOrEmpty(args.TslPatchData))
             {
-                Console.Error.WriteLine("[Error] No mod path specified. Use --tslpatchdata <path>");
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
+                error.WriteLine(PatcherResources.CliErrorNoModPath);
+                return (int)AppCore.ExitCode.NumberOfArgs;
             }
 
             AppCore.ModInfo modInfo;
@@ -245,32 +272,53 @@ namespace KPatcher
             }
             catch (FileNotFoundException ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFailedToLoadMod, ex.Message));
-                Environment.Exit((int)AppCore.ExitCode.NamespacesIniNotFound);
-                return;
+                error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFailedToLoadMod, ex.Message));
+                return (int)AppCore.ExitCode.NamespacesIniNotFound;
             }
 
-            string selectedNamespace;
-            if (args.NamespaceOptionIndex.HasValue)
+            if (operation == KPatcherCLI.CliOperation.ListNamespaces)
             {
-                if (args.NamespaceOptionIndex.Value >= modInfo.Namespaces.Count)
-                {
-                    Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorNamespaceIndexOutOfRange, args.NamespaceOptionIndex.Value, modInfo.Namespaces.Count - 1));
-                    Environment.Exit((int)AppCore.ExitCode.NamespaceIndexOutOfRange);
-                    return;
-                }
-                selectedNamespace = modInfo.Namespaces[args.NamespaceOptionIndex.Value].Name;
+                WriteNamespaces(output, modInfo.Namespaces);
+                return (int)AppCore.ExitCode.Success;
             }
-            else
+
+            PatcherNamespace selectedNamespaceOption;
+            if (!TryGetSelectedNamespace(args, modInfo.Namespaces, error, out selectedNamespaceOption))
             {
-                selectedNamespace = modInfo.Namespaces[0].Name;
+                return (int)AppCore.ExitCode.NamespaceIndexOutOfRange;
+            }
+
+            if (operation == KPatcherCLI.CliOperation.DryRun)
+            {
+                try
+                {
+                    var config = AppCore.LoadNamespaceConfigReadOnly(
+                        modInfo.ModPath,
+                        modInfo.Namespaces,
+                        selectedNamespaceOption.Name,
+                        logger);
+                    string resolvedChangesPath = AppCore.GetResolvedChangesDisplayPath(
+                        modInfo.ModPath,
+                        modInfo.Namespaces,
+                        selectedNamespaceOption.Name,
+                        logger);
+                    output.WriteLine(AppCore.BuildConfigurationSummary(
+                        resolvedChangesPath,
+                        selectedNamespaceOption.RtfFilePath(),
+                        config));
+                    return (int)AppCore.ExitCode.Success;
+                }
+                catch (Exception ex)
+                {
+                    WriteCliException(error, ex);
+                    return (int)AppCore.ExitCode.ExceptionDuringInstall;
+                }
             }
 
             if (string.IsNullOrEmpty(args.GameDir))
             {
-                Console.Error.WriteLine(PatcherResources.CliErrorNoGameDirectory);
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
+                error.WriteLine(PatcherResources.CliErrorNoGameDirectory);
+                return (int)AppCore.ExitCode.NumberOfArgs;
             }
 
             string gamePath;
@@ -280,85 +328,115 @@ namespace KPatcher
             }
             catch (ArgumentException ex)
             {
-                Console.Error.WriteLine($"[Error] Invalid game directory: {ex.GetType().Name}: {ex.Message}");
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
+                error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorInvalidGameDirectory, ex.GetType().Name, ex.Message));
+                return (int)AppCore.ExitCode.NumberOfArgs;
             }
 
             if (!AppCore.ValidateInstallPaths(modInfo.ModPath, gamePath, logger))
             {
-                Console.Error.WriteLine(PatcherResources.CliErrorInvalidModOrGamePaths);
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
-            }
-
-            int numActions = (args.Install ? 1 : 0) + (args.Uninstall ? 1 : 0) + (args.Validate ? 1 : 0);
-            if (numActions > 1)
-            {
-                Console.Error.WriteLine(PatcherResources.CliErrorCannotRunMultipleOperations);
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
-            }
-            if (numActions == 0)
-            {
-                Console.Error.WriteLine(PatcherResources.CliErrorMustSpecifyOperation);
-                Environment.Exit((int)AppCore.ExitCode.NumberOfArgs);
-                return;
+                error.WriteLine(PatcherResources.CliErrorInvalidModOrGamePaths);
+                return (int)AppCore.ExitCode.NumberOfArgs;
             }
 
             try
             {
-                if (args.Install)
+                if (operation == KPatcherCLI.CliOperation.Install)
                 {
-                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallingMod, modInfo.ModPath, gamePath));
+                    output.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallingMod, modInfo.ModPath, gamePath));
                     var cancellationToken = new CancellationToken();
                     AppCore.InstallResult result = AppCore.InstallMod(
                         modInfo.ModPath,
                         gamePath,
                         modInfo.Namespaces,
-                        selectedNamespace,
+                        selectedNamespaceOption.Name,
                         logger,
                         cancellationToken);
 
-                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallCompleted, result.NumErrors, result.NumWarnings, result.NumPatches));
-                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallTime, AppCore.FormatInstallTime(result.InstallTime)));
+                    output.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallCompleted, result.NumErrors, result.NumWarnings, result.NumPatches));
+                    output.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoInstallTime, AppCore.FormatInstallTime(result.InstallTime)));
 
                     if (result.NumErrors > 0)
                     {
-                        Environment.Exit((int)AppCore.ExitCode.InstallCompletedWithErrors);
+                        return (int)AppCore.ExitCode.InstallCompletedWithErrors;
                     }
-                    Environment.Exit((int)AppCore.ExitCode.Success);
+                    return (int)AppCore.ExitCode.Success;
                 }
-                else if (args.Uninstall)
+                else if (operation == KPatcherCLI.CliOperation.Uninstall)
                 {
-                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoUninstallingMod, gamePath));
+                    output.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInfoUninstallingMod, gamePath));
                     bool fullyRan = AppCore.UninstallMod(modInfo.ModPath, gamePath, logger);
                     if (fullyRan)
                     {
-                        Console.WriteLine(PatcherResources.CliInfoUninstallCompletedSuccessfully);
+                        output.WriteLine(PatcherResources.CliInfoUninstallCompletedSuccessfully);
                     }
                     else
                     {
-                        Console.WriteLine(PatcherResources.CliWarningUninstallCompletedWithWarnings);
+                        output.WriteLine(PatcherResources.CliWarningUninstallCompletedWithWarnings);
                     }
-                    Environment.Exit((int)AppCore.ExitCode.Success);
+                    return (int)AppCore.ExitCode.Success;
                 }
-                else if (args.Validate)
+                else if (operation == KPatcherCLI.CliOperation.Validate)
                 {
-                    Console.WriteLine(PatcherResources.CliInfoValidatingMod);
-                    AppCore.ValidateConfig(modInfo.ModPath, modInfo.Namespaces, selectedNamespace, logger);
-                    Console.WriteLine(PatcherResources.CliInfoValidationCompletedSuccessfully);
-                    Environment.Exit((int)AppCore.ExitCode.Success);
+                    output.WriteLine(PatcherResources.CliInfoValidatingMod);
+                    AppCore.ValidateConfig(modInfo.ModPath, modInfo.Namespaces, selectedNamespaceOption.Name, logger);
+                    output.WriteLine(PatcherResources.CliInfoValidationCompletedSuccessfully);
+                    return (int)AppCore.ExitCode.Success;
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFormat, ex.GetType().Name, ex.Message));
-                if (ex.InnerException != null)
+                WriteCliException(error, ex);
+                return (int)AppCore.ExitCode.ExceptionDuringInstall;
+            }
+
+            return (int)AppCore.ExitCode.Success;
+        }
+
+        private static bool TryGetSelectedNamespace(
+            KPatcherCLI.CommandLineArgs args,
+            System.Collections.Generic.List<PatcherNamespace> namespaces,
+            TextWriter error,
+            out PatcherNamespace selectedNamespace)
+        {
+            if (args.NamespaceOptionIndex.HasValue)
+            {
+                if (args.NamespaceOptionIndex.Value < 0 || args.NamespaceOptionIndex.Value >= namespaces.Count)
                 {
-                    Console.Error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInnerException, ex.InnerException.Message));
+                    error.WriteLine(string.Format(
+                        CultureInfo.CurrentCulture,
+                        PatcherResources.CliErrorNamespaceIndexOutOfRange,
+                        args.NamespaceOptionIndex.Value,
+                        namespaces.Count - 1));
+                    selectedNamespace = null;
+                    return false;
                 }
-                Environment.Exit((int)AppCore.ExitCode.ExceptionDuringInstall);
+
+                selectedNamespace = namespaces[args.NamespaceOptionIndex.Value];
+                return true;
+            }
+
+            selectedNamespace = namespaces[0];
+            return true;
+        }
+
+        private static void WriteNamespaces(TextWriter output, System.Collections.Generic.List<PatcherNamespace> namespaces)
+        {
+            for (int i = 0; i < namespaces.Count; i++)
+            {
+                PatcherNamespace patcherNamespace = namespaces[i];
+                string displayName = string.IsNullOrWhiteSpace(patcherNamespace.Name)
+                    ? patcherNamespace.ChangesFilePath()
+                    : patcherNamespace.Name;
+                output.WriteLine(string.Format(CultureInfo.CurrentCulture, "{0}: {1}", i, displayName));
+            }
+        }
+
+        private static void WriteCliException(TextWriter error, Exception ex)
+        {
+            error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliErrorFormat, ex.GetType().Name, ex.Message));
+            if (ex.InnerException != null)
+            {
+                error.WriteLine(string.Format(CultureInfo.CurrentCulture, PatcherResources.CliInnerException, ex.InnerException.Message));
             }
         }
 

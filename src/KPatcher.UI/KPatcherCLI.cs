@@ -1,5 +1,4 @@
 using System.IO;
-using System.Linq;
 using JetBrains.Annotations;
 using KPatcher.Core.Resources;
 
@@ -25,18 +24,75 @@ namespace KPatcher
             public bool Help { get; set; }
             public bool ListNamespaces { get; set; }
             public bool DryRun { get; set; }
+            public bool ParityReport { get; set; }
+        }
+
+        internal enum CliOperation
+        {
+            None = 0,
+            Install = 1,
+            Uninstall = 2,
+            Validate = 3,
+            ListNamespaces = 4,
+            DryRun = 5,
+            ParityReport = 6,
         }
 
         /// <summary>True if any argument suggests the user intended CLI usage (beyond bare <c>--console</c>).</summary>
         internal static bool HasCliWorkIndicators(CommandLineArgs a) =>
-            a.Install || a.Uninstall || a.Validate || a.ListNamespaces || a.DryRun
+            a.Install || a.Uninstall || a.Validate || a.ListNamespaces || a.DryRun || a.ParityReport
             || !string.IsNullOrEmpty(a.GameDir)
             || !string.IsNullOrEmpty(a.TslPatchData)
             || a.NamespaceOptionIndex.HasValue;
 
+        internal static bool HasRequestedCliOperation(CommandLineArgs a)
+        {
+            return CountRequestedCliOperations(a) > 0;
+        }
+
+        internal static int CountRequestedCliOperations(CommandLineArgs a)
+        {
+            return (a.Install ? 1 : 0)
+                 + (a.Uninstall ? 1 : 0)
+                 + (a.Validate ? 1 : 0)
+                 + (a.ListNamespaces ? 1 : 0)
+                 + (a.DryRun ? 1 : 0)
+                 + (a.ParityReport ? 1 : 0);
+        }
+
+        internal static CliOperation GetRequestedCliOperation(CommandLineArgs a)
+        {
+            if (a.Install)
+            {
+                return CliOperation.Install;
+            }
+            if (a.Uninstall)
+            {
+                return CliOperation.Uninstall;
+            }
+            if (a.Validate)
+            {
+                return CliOperation.Validate;
+            }
+            if (a.ListNamespaces)
+            {
+                return CliOperation.ListNamespaces;
+            }
+            if (a.DryRun)
+            {
+                return CliOperation.DryRun;
+            }
+            if (a.ParityReport)
+            {
+                return CliOperation.ParityReport;
+            }
+            return CliOperation.None;
+        }
+
         internal static CommandLineArgs ParseArgs(string[] args)
         {
             var result = new CommandLineArgs();
+            var positional = new System.Collections.Generic.List<string>();
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -75,17 +131,25 @@ namespace KPatcher
                     case "--dry-run":
                         result.DryRun = true;
                         break;
+                    case "--parity-report":
+                        result.ParityReport = true;
+                        break;
                     case "--help":
                     case "-h":
                         result.Help = true;
                         break;
+                    default:
+                        if (!args[i].StartsWith("--", System.StringComparison.Ordinal))
+                        {
+                            positional.Add(args[i]);
+                        }
+                        break;
                 }
             }
 
-            int positionalCount = args.Count(a => !a.StartsWith("--", System.StringComparison.Ordinal));
+            int positionalCount = positional.Count;
             if (positionalCount >= 2)
             {
-                string[] positional = args.Where(a => !a.StartsWith("--", System.StringComparison.Ordinal)).ToArray();
                 result.GameDir = positional[0];
                 result.TslPatchData = positional[1];
                 if (positionalCount >= 3 && int.TryParse(positional[2], out int posIndex))
