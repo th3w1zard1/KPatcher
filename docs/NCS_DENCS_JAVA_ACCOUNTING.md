@@ -64,7 +64,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-23 — all 271 Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default CI:
+**Last /lfg verification:** 2026-05-24 — all 271 Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Dead external-compiler UI strings removed from `PatcherResources` (commit `68c227e3`). Default CI:
 
 ```bash
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
