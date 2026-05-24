@@ -20,21 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Windows 7 - .NET Framework 4.8
-          - os: windows-latest
-            framework: net48
-            platform: win7
-            arch: x64
-            rid: win7-x64
-            selfcontained: false
-          - os: windows-latest
-            framework: net48
-            platform: win7
-            arch: x86
-            rid: win7-x86
-            selfcontained: false
-          
-          # Windows 10/11 - .NET 9
+          # Windows 10/11 - .NET 9 (KPatcher.UI is net9.0 only)
           - os: windows-latest
             framework: net9.0
             platform: win
@@ -94,10 +80,6 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Setup .NET Framework (Windows only)
-        if: matrix.framework == 'net48'
-        uses: microsoft/setup-msbuild@v2
-
       - name: Update version in csproj
         run: |
           $version = "${{ inputs.version }}"
@@ -115,29 +97,22 @@ jobs:
         shell: pwsh
 
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
+        run: |
+          dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -r ${{ matrix.rid }}
+          dotnet restore src/KCompiler.NET/KCompiler.NET.csproj -r ${{ matrix.rid }}
+          dotnet restore src/NCSDecomp.NET/NCSDecomp.NET.csproj -r ${{ matrix.rid }}
 
       - name: Build
         run: |
-          if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/KPatcher.UI/KPatcher.UI.csproj `
-              /t:Publish `
-              /p:Configuration=Release `
-              /p:TargetFramework=${{ matrix.framework }} `
-              /p:RuntimeIdentifier=${{ matrix.rid }} `
-              /p:SelfContained=${{ matrix.selfcontained }} `
-              /p:PublishDir=dist\build\${{ matrix.framework }}\${{ matrix.rid }}\
-          } else {
-            dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
-              -c Release `
-              -f ${{ matrix.framework }} `
-              -r ${{ matrix.rid }} `
-              --self-contained ${{ matrix.selfcontained }} `
-              -p:PublishSingleFile=true `
-              -p:IncludeNativeLibrariesForSelfExtract=true `
-              -p:PublishReadyToRun=true `
-              -o dist/build/${{ matrix.framework }}/${{ matrix.rid }}
-          }
+          dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
+            -c Release `
+            -f ${{ matrix.framework }} `
+            -r ${{ matrix.rid }} `
+            --self-contained ${{ matrix.selfcontained }} `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishReadyToRun=true `
+            -o dist/build/${{ matrix.framework }}/${{ matrix.rid }}
         shell: pwsh
 
       - name: Verify publish output
@@ -150,7 +125,7 @@ jobs:
             Write-Error "Output directory not found: $outputDir"
             exit 1
           }
-          $isWindows = $platform -eq "win7" -or $platform -eq "win"
+          $isWindows = $platform -eq "win"
           $suffix = if ($isWindows) { ".exe" } else { "" }
           $required = @(
             (Join-Path $outputDir $(if ($isWindows) { "KPatcher.exe" } else { "KPatcher" }))
@@ -176,9 +151,15 @@ jobs:
             foreach ($p in $required) { chmod +x $p }
           }
           foreach ($p in $required) {
-            & $p @('--help')
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "--help smoke failed for ${p} (exit $LASTEXITCODE)"
+            if ($IsWindows) {
+              $proc = Start-Process -FilePath $p -ArgumentList '--help' -Wait -PassThru
+              $exitCode = $proc.ExitCode
+            } else {
+              & $p @('--help')
+              $exitCode = $LASTEXITCODE
+            }
+            if ($null -eq $exitCode -or $exitCode -ne 0) {
+              Write-Error "--help smoke failed for ${p} (exit $exitCode)"
               exit 1
             }
             Write-Host "OK --help: $p"

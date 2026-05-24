@@ -4,6 +4,8 @@
 
 KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTOR mods. See `README.md` for full project details and `docs/` for additional documentation.
 
+- `docs/solutions/` collects searchable writeups of past bugs, best practices, workflow patterns, and design decisions.
+
 ## Test fixture policy (ZERO external file dependencies)
 
 - **All test data** must be defined and constructed ephemerally in `.cs` files — in memory at test time. There must be **zero committed test fixture files** on disk. The `test_files/` directory must not exist.

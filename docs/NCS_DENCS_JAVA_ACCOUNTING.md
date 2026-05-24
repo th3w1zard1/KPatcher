@@ -64,11 +64,13 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
+**Last /lfg verification:** 2026-05-24 — all 271 Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Dead external-compiler UI strings removed from `PatcherResources` (commit `68c227e3`). Default CI:
+
 ```bash
-dotnet test KPatcher.sln -c Debug
+bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-Expect **all** `KPatcher.Tests` to pass; NCS/NSS coverage is included in that assembly.
+Expect **all** default-tier `KPatcher.Tests` to pass; NCS/NSS coverage is included in that assembly. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 

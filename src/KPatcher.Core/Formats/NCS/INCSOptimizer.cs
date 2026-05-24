@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using JetBrains.Annotations;
-using KPatcher.Core.Common;
-
 namespace KPatcher.Core.Formats.NCS
 {
     /// <summary>
@@ -22,27 +18,6 @@ namespace KPatcher.Core.Formats.NCS
         {
             InstructionsCleared = 0;
         }
-    }
-
-    /// <summary>
-    /// Abstract base class for NCS compilers.
-    /// </summary>
-    public abstract class NCSCompiler
-    {
-        /// <summary>
-        /// Compiles an NSS script file to an NCS bytecode file.
-        /// </summary>
-        /// <param name="sourcePath">Path to the source NSS file</param>
-        /// <param name="outputPath">Path to output the compiled NCS file</param>
-        /// <param name="game">Target game (K1 or TSL)</param>
-        /// <param name="optimizers">Optional list of optimizers to apply</param>
-        /// <param name="debug">Enable debug output</param>
-        public abstract void CompileScript(
-            string sourcePath,
-            string outputPath,
-            Game game,
-            [CanBeNull] List<NCSOptimizer> optimizers = null,
-            bool debug = false);
     }
 }
 

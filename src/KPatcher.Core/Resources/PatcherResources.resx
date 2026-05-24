@@ -73,9 +73,6 @@
   <data name="SkippingFileNoOverwriteDialogTlk" xml:space="preserve">
     <value>Skipping file {0}, this Installer will not overwrite dialog.tlk directly.</value>
   </data>
-  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve">
-    <value>Could not locate nwnnsscomp.exe in the TSLPatchData folder! Unable to compile script.</value>
-  </data>
   <data name="Invalid2DAMemoryToken" xml:space="preserve">
     <value>Invalid 2DAMEMORY token found! Token indexes must be non-negative (0, 1, 2, ...).</value>
   </data>
@@ -210,6 +207,18 @@
   </data>
   <data name="CouldNotCreateInstallLogFile" xml:space="preserve">
     <value>Could not create install log file: {0}</value>
+  </data>
+  <data name="CouldNotCreateInstallFlightRecordFile" xml:space="preserve">
+    <value>Could not create install record file: {0}</value>
+  </data>
+  <data name="InstallFlightRecordPath" xml:space="preserve">
+    <value>Record Path: {0}</value>
+  </data>
+  <data name="InstallFlightRecordWrittenFormat" xml:space="preserve">
+    <value>Install record written to {0}</value>
+  </data>
+  <data name="InstallFlightRecordDirectoryNotFound" xml:space="preserve">
+    <value>Install record directory not found: {0}</value>
   </data>
   <data name="ChangesConfigFileNotFound" xml:space="preserve">
     <value>Changes config file not found: {0}</value>
@@ -402,10 +411,10 @@ Patching RIMs is highly incompatible, not recommended, and widely considered bad
     <value>[Error] Invalid mod or game paths</value>
   </data>
   <data name="CliErrorCannotRunMultipleOperations" xml:space="preserve">
-    <value>[Error] Cannot run more than one of [--install, --uninstall, --validate]</value>
+    <value>[Error] Cannot run more than one CLI operation at a time.</value>
   </data>
   <data name="CliErrorMustSpecifyOperation" xml:space="preserve">
-    <value>[Error] Must specify one of [--install, --uninstall, --validate] for CLI mode</value>
+    <value>[Error] Must specify one CLI operation for CLI mode. Use --help for available actions.</value>
   </data>
   <data name="CliErrorConsoleRequiresCliArgs" xml:space="preserve">
     <value>[Error] --console requires additional CLI arguments (for example --install with paths). Use --help for options.</value>
@@ -425,11 +434,12 @@ Options:
   --tslpatchdata PATH           Path to tslpatchdata (or mod folder)
   --namespace-option-index N    Namespace index (0-based)
   --console                     Alias for headless CLI mode (no GUI)
-  --install                     Install mod (default when game and mod paths are given)
+  --install                     Install mod
   --uninstall                   Uninstall mod from game directory
   --validate                    Validate mod configuration without installing
   --list-namespaces             List available namespaces for a mod and exit
   --dry-run                     Show configuration summary without installing
+  --parity-report               Print the curated parity-confidence report and exit
   -h, --help                    Show this message and exit
 
 Positional arguments (equivalent to --game-dir and --tslpatchdata):
@@ -636,9 +646,6 @@ Examples:
   <data name="ExpectedGffObjectButGotFormat" xml:space="preserve">
     <value>Expected GFF object for ModificationsGFF, but got {0}</value>
   </data>
-  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve">
-    <value>An error occurred while compiling '{0}' with the built-in compiler, trying external compiler...</value>
-  </data>
   <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve">
     <value>Expected SSF object for ModificationsSSF, but got {0}</value>
   </data>
@@ -656,15 +663,6 @@ Examples:
   </data>
   <data name="ManagedCompilationFailedFormat" xml:space="preserve">
     <value>Managed compilation failed for '{0}': {1}</value>
-  </data>
-  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve">
-    <value>Compiled '{0}' using external nwnnsscomp.exe (managed compile failed).</value>
-  </data>
-  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve">
-    <value>External nwnnsscomp also failed for '{0}': {1}</value>
-  </data>
-  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve">
-    <value>The nwnnsscomp.exe is not the expected KPatcher version (detected: {0}).</value>
   </data>
   <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve">
     <value>Expected TwoDA object for Modifications2DA, but got {0}</value>

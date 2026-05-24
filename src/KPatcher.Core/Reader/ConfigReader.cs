@@ -32,7 +32,7 @@ namespace KPatcher.Core.Reader
         private readonly HashSet<string> _previouslyParsedSections = new HashSet<string>();
         private readonly IniData _ini;
         private readonly string _modPath;
-        // path to the tslpatchdata, optional but we'll use it here for the nwnnsscomp.exe if it exists.
+        // Optional path to the tslpatchdata folder (mod asset root for compile-list source resolution).
         [CanBeNull]
         private readonly string _tslPatchDataPath;
         private readonly PatchLogger _log;
@@ -51,7 +51,6 @@ namespace KPatcher.Core.Reader
             _previouslyParsedSections = new HashSet<string>();
             _ini = ini ?? throw new ArgumentNullException(nameof(ini));
             _modPath = modPath ?? throw new ArgumentNullException(nameof(modPath));
-            // path to the tslpatchdata, optional but we'll use it here for the nwnnsscomp.exe if it exists.
             _tslPatchDataPath = tslPatchDataPath;
             _log = logger ?? new PatchLogger();
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -937,20 +936,7 @@ namespace KPatcher.Core.Reader
             string defaultSourceFolder = compilelistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
             compilelistSectionDict.Remove("!DefaultSourceFolder");
 
-            // Path resolution: mod_path / default_source_folder / "nwnnsscomp.exe"
-            // mod_path is typically the tslpatchdata folder (parent of changes.ini).
-            // If default_source_folder = ".", this resolves to mod_path itself (tslpatchdata folder).
-            // Can be null if file doesn't exist
-            string nwnnsscompExepath = defaultSourceFolder == "."
-                ? Path.Combine(_modPath, "nwnnsscomp.exe")
-                : Path.Combine(_modPath, defaultSourceFolder, "nwnnsscomp.exe");
-            if (!File.Exists(nwnnsscompExepath))
-            {
-                nwnnsscompExepath = _tslPatchDataPath != null ? Path.Combine(_tslPatchDataPath, "nwnnsscomp.exe") : null; // KPatcher default
-            }
-
-            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ConfigReader.LoadCompileList: nwnnsscompExepath={0}", nwnnsscompExepath ?? "null"));
+            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler (no nwnnsscomp.exe resolution)");
 
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
@@ -969,11 +955,6 @@ namespace KPatcher.Core.Reader
                     modifications.PopTslPatcherVars(fileSectionDict, defaultDestination, defaultSourceFolder);
                 }
 
-                if (nwnnsscompExepath is null)
-                {
-                    throw new InvalidOperationException($"{nameof(nwnnsscompExepath)}: {nwnnsscompExepath}");
-                }
-                modifications.NwnnsscompPath = nwnnsscompExepath;
                 Config.PatchesNSS.Add(modifications);
             }
 

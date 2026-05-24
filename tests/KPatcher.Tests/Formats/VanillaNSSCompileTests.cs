@@ -41,7 +41,35 @@ namespace KPatcher.Core.Tests.Formats
             return null;
         }
 
-        public static bool VanillaSubmodulePresent => !string.IsNullOrEmpty(VanillaRoot) && Directory.Exists(VanillaRoot);
+        /// <summary>
+        /// True when the vanilla script submodule is checked out (not just an empty git submodule placeholder).
+        /// </summary>
+        public static bool VanillaSubmodulePresent =>
+            HasPopulatedVanillaContent(VanillaRoot);
+
+        private static bool HasPopulatedVanillaContent(string root)
+        {
+            if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
+            {
+                return false;
+            }
+
+            foreach (string gameDir in new[] { "K1", "TSL" })
+            {
+                string dir = Path.Combine(root, gameDir);
+                if (!Directory.Exists(dir))
+                {
+                    continue;
+                }
+
+                foreach (string _ in Directory.EnumerateFiles(dir, "*.nss", SearchOption.AllDirectories))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>Same path as <see cref="ResolveVanillaScriptRoot"/>; null when submodule not present.</summary>
         public static string VanillaScriptSourceRoot => VanillaRoot;

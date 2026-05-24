@@ -18,13 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Test a subset of builds for PRs
-          - os: windows-latest
-            framework: net48
-            platform: win7
-            arch: x64
-            rid: win7-x64
-            selfcontained: false
+          # Test a subset of builds for PRs (net9.0 only; KPatcher.UI no longer targets net48)
           - os: windows-latest
             framework: net9.0
             platform: win
@@ -53,12 +47,11 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Setup .NET Framework (Windows only)
-        if: matrix.framework == 'net48'
-        uses: microsoft/setup-msbuild@v2
-
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -p:Configuration=Release
+        run: |
+          dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -p:Configuration=Release -r ${{ matrix.rid }}
+          dotnet restore src/KCompiler.NET/KCompiler.NET.csproj -p:Configuration=Release -r ${{ matrix.rid }}
+          dotnet restore src/NCSDecomp.NET/NCSDecomp.NET.csproj -p:Configuration=Release -r ${{ matrix.rid }}
 
       - name: Restore test dependencies
         run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
@@ -70,25 +63,15 @@ jobs:
 
       - name: Build
         run: |
-          if ("${{ matrix.framework }}" -eq "net48") {
-            msbuild src/KPatcher.UI/KPatcher.UI.csproj `
-              /t:Publish `
-              /p:Configuration=Release `
-              /p:TargetFramework=${{ matrix.framework }} `
-              /p:RuntimeIdentifier=${{ matrix.rid }} `
-              /p:SelfContained=${{ matrix.selfcontained }} `
-              /p:PublishDir=dist\test-build\${{ matrix.framework }}\${{ matrix.rid }}\
-          } else {
-            dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
-              -c Release `
-              -f ${{ matrix.framework }} `
-              -r ${{ matrix.rid }} `
-              --self-contained ${{ matrix.selfcontained }} `
-              -p:PublishSingleFile=true `
-              -p:IncludeNativeLibrariesForSelfExtract=true `
-              -p:PublishReadyToRun=true `
-              -o dist/test-build/${{ matrix.framework }}/${{ matrix.rid }}
-          }
+          dotnet publish src/KPatcher.UI/KPatcher.UI.csproj `
+            -c Release `
+            -f ${{ matrix.framework }} `
+            -r ${{ matrix.rid }} `
+            --self-contained ${{ matrix.selfcontained }} `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishReadyToRun=true `
+            -o dist/test-build/${{ matrix.framework }}/${{ matrix.rid }}
         shell: pwsh
 
       - name: Verify build output
@@ -100,7 +83,7 @@ jobs:
             exit 1
           }
           
-          $exeName = if ("${{ matrix.platform }}" -eq "win7" -or "${{ matrix.platform }}" -eq "win") {
+          $exeName = if ("${{ matrix.platform }}" -eq "win") {
             "KPatcher.exe"
           } elseif ("${{ matrix.platform }}" -eq "linux") {
             "KPatcher"
@@ -128,7 +111,7 @@ jobs:
 
           $smokeTargets = @($exePath)
           if ("${{ matrix.framework }}" -eq "net9.0") {
-            $suffix = if ("${{ matrix.platform }}" -eq "win7" -or "${{ matrix.platform }}" -eq "win") { ".exe" } else { "" }
+            $suffix = if ("${{ matrix.platform }}" -eq "win") { ".exe" } else { "" }
             foreach ($sidecar in @("kcompiler$suffix", "NCSDecompCLI$suffix")) {
               $sidePath = Join-Path $outputDir $sidecar
               if (-not (Test-Path -LiteralPath $sidePath)) {
@@ -149,9 +132,15 @@ jobs:
             foreach ($t in $smokeTargets) { chmod +x $t }
           }
           foreach ($t in $smokeTargets) {
-            & $t @('--help')
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "--help smoke failed for ${t} (exit $LASTEXITCODE)"
+            if ($IsWindows) {
+              $proc = Start-Process -FilePath $t -ArgumentList '--help' -Wait -PassThru
+              $exitCode = $proc.ExitCode
+            } else {
+              & $t @('--help')
+              $exitCode = $LASTEXITCODE
+            }
+            if ($null -eq $exitCode -or $exitCode -ne 0) {
+              Write-Error "--help smoke failed for ${t} (exit $exitCode)"
               exit 1
             }
             Write-Host "OK --help: $t"
