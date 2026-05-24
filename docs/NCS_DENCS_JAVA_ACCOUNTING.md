@@ -78,7 +78,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-24 — `5c04a726` on branch `feat/lfg-dencs-final-signoff-008` (plan `008`, fifth `/lfg` sign-off; tests re-run at base `c4b06c49`). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux default suite, `d89a13c8`).
+**Last /lfg verification:** 2026-05-24 — `master` @ `ae8be34c` (plans `008`–`009`, sixth `/lfg` merge closeout via PR #12). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux default suite, `d89a13c8`).
 
 **NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-24). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `WindowsOnly`, etc.).
 
@@ -88,7 +88,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-**753/753 passed** in `KPatcher.Tests` (2026-05-24) at `c4b06c49` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**753/753 passed** in `KPatcher.Tests` (2026-05-24) at `ae8be34c` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 
