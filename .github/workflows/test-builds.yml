@@ -132,9 +132,15 @@ jobs:
             foreach ($t in $smokeTargets) { chmod +x $t }
           }
           foreach ($t in $smokeTargets) {
-            & $t @('--help')
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "--help smoke failed for ${t} (exit $LASTEXITCODE)"
+            if ($IsWindows) {
+              $proc = Start-Process -FilePath $t -ArgumentList '--help' -Wait -PassThru
+              $exitCode = $proc.ExitCode
+            } else {
+              & $t @('--help')
+              $exitCode = $LASTEXITCODE
+            }
+            if ($null -eq $exitCode -or $exitCode -ne 0) {
+              Write-Error "--help smoke failed for ${t} (exit $exitCode)"
               exit 1
             }
             Write-Host "OK --help: $t"
