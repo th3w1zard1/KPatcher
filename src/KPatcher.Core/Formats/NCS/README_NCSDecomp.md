@@ -31,4 +31,4 @@
 
 Embed under `src/NCSDecomp.Core/Resources/`: `lexer.dat`, `parser.dat`, `k1_nwscript.nss`, `tsl_nwscript.nss` (see `NCSDecomp.Core.csproj` conditional `EmbeddedResource`).
 
-Port status: `src/NCSDecomp.Core/PORTING_STATUS.md`.
+Port status and Java accounting: `docs/NCS_DENCS_JAVA_ACCOUNTING.md`.
