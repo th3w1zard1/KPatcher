@@ -86,7 +86,9 @@ jobs:
         shell: bash
 
       - name: Restore dependencies
-        run: dotnet restore src/KCompiler.Core/KCompiler.Core.csproj
+        run: |
+          dotnet restore src/KCompiler.Core/KCompiler.Core.csproj
+          dotnet restore src/KCompiler.NET/KCompiler.NET.csproj
 
       - name: Build KCompiler.Core
         run: dotnet build src/KCompiler.Core/KCompiler.Core.csproj --no-restore -c Release
