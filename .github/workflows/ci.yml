@@ -102,6 +102,9 @@ jobs:
       - name: Pack KCompiler.Core
         run: dotnet pack src/KCompiler.Core/KCompiler.Core.csproj --no-build -c Release
 
+      - name: Restore KCompiler.NET
+        run: dotnet restore src/KCompiler.NET/KCompiler.NET.csproj
+
       - name: Build KCompiler.NET
         run: dotnet build src/KCompiler.NET/KCompiler.NET.csproj --no-restore -c Release
 
