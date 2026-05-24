@@ -16,6 +16,7 @@ namespace KPatcher.Core.Tests.Common
     /// - tests/common/test_path_isinstance.py
     /// - tests/common/test_path_mixed_slash_handling.py
     /// </summary>
+    [Trait("Category", "WindowsOnly")]
     public class CaseAwarePathTests
     {
         #region Basic Construction and Validation
@@ -315,6 +316,7 @@ namespace KPatcher.Core.Tests.Common
         #region Mixed Slash Handling - Edge Cases
 
         [Theory]
+        [Trait("Category", "WindowsOnly")]
         [InlineData("C:/", "C:")]
         [InlineData("C:\\", "C:")]
         [InlineData("C:", "C:")]
@@ -331,6 +333,7 @@ namespace KPatcher.Core.Tests.Common
         }
 
         [Fact]
+        [Trait("Category", "WindowsOnly")]
         public void PathNormalization_PreservesCase()
         {
             // Python test: Various edge case tests
