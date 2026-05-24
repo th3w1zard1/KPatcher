@@ -64,13 +64,25 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-24 — all 271 Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Dead external-compiler UI strings removed from `PatcherResources` (commit `68c227e3`). Default CI:
+**Last /lfg verification:** 2026-05-23 — branch `master` @ `1109c2d7` (post-merge #10). All **271** Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op).
+
+**NCS/NSS test gate (managed tooling):** `215/215` passed with:
+
+```bash
+dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj -c Debug \
+  --settings tests/KPatcher.Tests/Default.runsettings \
+  --filter "FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Ncs"
+```
+
+(`KCompiler.Tests` 4/4, `NCSDecomp.Tests` 1/1 in the same solution build.)
+
+**Full default-tier suite** (repo wrapper):
 
 ```bash
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-Expect **all** default-tier `KPatcher.Tests` to pass; NCS/NSS coverage is included in that assembly. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+On Linux agents, this run may report unrelated failures (e.g. `CaseAwarePathTests` Windows `C:` paths, format `TestWriteRaises` expecting `IOException` when `UnauthorizedAccessException` is thrown on `bin/Debug` paths). **No NCS/NSS test failures** were observed in the filtered run above. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 
