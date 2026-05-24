@@ -64,7 +64,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-23 — branch `feat/lfg-dencs-post-merge-verification` (plan `006`). All **271** Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op).
+**Last /lfg verification:** 2026-05-24 — `master` @ `d89a13c8` (squash merge PR #11; plans `005`–`007`). All **271** Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op).
 
 **NCS/NSS test gate (managed tooling):** filtered suite passes via repo wrapper + `Default.runsettings` (excludes `DeNCSRoundTrip` and other heavy categories).
 
