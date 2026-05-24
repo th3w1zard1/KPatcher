@@ -1,7 +1,7 @@
 ---
 title: "feat: DeNCS /lfg merge closeout (PR #11 → master)"
 type: feat
-status: active
+status: completed
 date: 2026-05-23
 origin: docs/NCS_DENCS_JAVA_ACCOUNTING.md
 ---
