@@ -950,7 +950,7 @@ namespace KPatcher.Core.Reader
             }
 
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ConfigReader.LoadCompileList: nwnnsscompExepath={0}", nwnnsscompExepath ?? "null"));
+                "ConfigReader.LoadCompileList: nwnnsscompExepath={0} (optional legacy; compile uses managed KCompiler)", nwnnsscompExepath ?? "null"));
 
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
@@ -969,11 +969,11 @@ namespace KPatcher.Core.Reader
                     modifications.PopTslPatcherVars(fileSectionDict, defaultDestination, defaultSourceFolder);
                 }
 
-                if (nwnnsscompExepath is null)
+                if (!string.IsNullOrEmpty(nwnnsscompExepath) && File.Exists(nwnnsscompExepath))
                 {
-                    throw new InvalidOperationException($"{nameof(nwnnsscompExepath)}: {nwnnsscompExepath}");
+                    modifications.NwnnsscompPath = nwnnsscompExepath;
                 }
-                modifications.NwnnsscompPath = nwnnsscompExepath;
+
                 Config.PatchesNSS.Add(modifications);
             }
 

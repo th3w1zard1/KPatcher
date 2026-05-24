@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -41,6 +40,7 @@ namespace KPatcher.Core.Mods.NSS
 
         public new string Action { get; set; } = "Compile";
         public new bool SkipIfNotReplace { get; set; } = true;
+        /// <summary>Legacy optional path; compile uses managed KCompiler only.</summary>
         [CanBeNull]
         public string NwnnsscompPath { get; set; }
         [CanBeNull]
@@ -86,12 +86,9 @@ namespace KPatcher.Core.Mods.NSS
                 string tempScriptFile = Path.Combine(tempFolder, SourceFile);
                 File.WriteAllText(tempScriptFile, mutableSource.Value, Encoding.GetEncoding("windows-1252"));
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                    "ModificationsNSS.PatchResource: wrote temp NSS path={0} tempFolder={1} isWindows={2}",
-                    tempScriptFile, tempFolder, RuntimeInformation.IsOSPlatform(OSPlatform.Windows)));
+                    "ModificationsNSS.PatchResource: wrote temp NSS path={0} tempFolder={1}",
+                    tempScriptFile, tempFolder));
 
-                // Try built-in compiler first
-                bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-                bool builtInSucceeded = false;
                 byte[] compiledBytes = null;
 
                 try
@@ -122,72 +119,6 @@ namespace KPatcher.Core.Mods.NSS
                     logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
                 }
 
-                // If built-in failed and on Windows, try external compiler
-                if (!builtInSucceeded && isWindows)
-                {
-                    bool nwnnsscompExists = !string.IsNullOrEmpty(NwnnsscompPath) && File.Exists(NwnnsscompPath);
-                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                        "ModificationsNSS.PatchResource: external path gate nwnnsscompExists={0} path={1}", nwnnsscompExists, NwnnsscompPath ?? ""));
-                    if (!nwnnsscompExists)
-                    {
-                        logger.AddError(TSLPatcherMessages.NwnnsscompNotFoundInTslPatchData);
-                    }
-                    else
-                    {
-                        logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ErrorOccurredWhileCompilingTryingExternalFormat, SourceFile));
-                    }
-
-                    if (nwnnsscompExists)
-                    {
-                        try
-                        {
-                            var externalCompiler = new ExternalNCSCompiler(NwnnsscompPath);
-                            KnownExternalCompilers detectedCompiler;
-                            try
-                            {
-                                detectedCompiler = externalCompiler.GetInfo();
-                            }
-                            catch (ArgumentException)
-                            {
-                                detectedCompiler = KnownExternalCompilers.KPATCHER;
-                            }
-
-                            if (detectedCompiler != KnownExternalCompilers.KPATCHER)
-                            {
-                                logger.AddWarning(
-                                    "The nwnnsscomp.exe in the tslpatchdata folder is not the expected KPatcher version.\n" +
-                                    $"KPatcher has detected that the provided nwnnsscomp.exe is the '{detectedCompiler}' version.\n" +
-                                    "KPatcher will compile regardless, but this may not yield the expected result.");
-                            }
-
-                            compiledBytes = CompileWithExternal(tempScriptFile, externalCompiler, logger, game);
-                            if (compiledBytes != null)
-                            {
-                                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                                    "ModificationsNSS.PatchResource: external compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
-                                return compiledBytes;
-                            }
-
-                            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                                "ModificationsNSS.PatchResource: external compile returned null sourceFile={0}", SourceFile));
-                        }
-                        catch (Exception e)
-                        {
-                            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                                "ModificationsNSS.PatchResource: external compile exception sourceFile={0} type={1} message={2}",
-                                SourceFile, e.GetType().FullName, e.Message));
-                            logger.AddError(e.Message);
-                        }
-                    }
-                }
-                else if (!isWindows)
-                {
-                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                        "ModificationsNSS.PatchResource: non-Windows host; skipping external nwnnsscomp sourceFile={0}", SourceFile));
-                    logger.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.PatchingFromUnixCompilingFormat, SourceFile));
-                }
-
-                // Return compiled bytes if built-in succeeded, otherwise return source
                 if (compiledBytes != null)
                 {
                     return compiledBytes;
@@ -274,59 +205,6 @@ namespace KPatcher.Core.Mods.NSS
                 nssSource.Value = nssSource.Value.Substring(0, start) + replacementValue.ToString() + nssSource.Value.Substring(end);
 
                 match = Regex.Match(nssSource.Value, searchPattern);
-            }
-        }
-
-        private byte[] CompileWithExternal(
-            string tempScriptFile,
-            ExternalNCSCompiler nwnnsscompiler,
-            PatchLogger logger,
-            Game game)
-        {
-            string tempDir = Path.GetTempPath();
-            string tempCompiledFilepath = Path.Combine(tempDir, "temp_script.ncs");
-
-            try
-            {
-                (string stdout, string stderr) = nwnnsscompiler.CompileScriptWithOutput(tempScriptFile, tempCompiledFilepath, game, 5);
-                bool isIncludeFile = stdout.Contains("File is an include file, ignored");
-                if (isIncludeFile)
-                {
-                    return null;
-                }
-
-                if (stdout.Trim().Length > 0)
-                {
-                    foreach (string line in stdout.Split('\n'))
-                    {
-                        if (line.Trim().Length > 0)
-                        {
-                            logger.AddVerbose(line);
-                        }
-                    }
-                }
-
-                if (stderr.Trim().Length > 0)
-                {
-                    foreach (string line in stderr.Split('\n'))
-                    {
-                        if (line.Trim().Length > 0)
-                        {
-                            logger.AddError($"nwnnsscomp error: {line}");
-                        }
-                    }
-                }
-
-                if (File.Exists(tempCompiledFilepath))
-                {
-                    return File.ReadAllBytes(tempCompiledFilepath);
-                }
-
-                return null;
-            }
-            catch (ExternalNCSCompiler.EntryPointException)
-            {
-                return null;
             }
         }
     }
