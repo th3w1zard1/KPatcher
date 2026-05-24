@@ -1,9 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using JetBrains.Annotations;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Logger;
@@ -18,14 +16,11 @@ namespace KPatcher.Core.Formats.NCS.Compiler
     /// </summary>
     public class NCSCompiler
     {
-        [CanBeNull]
-        private readonly string _nwnnsscompPath;
         private readonly string _tempScriptFolder;
         private readonly PatchLogger _logger;
 
-        public NCSCompiler([CanBeNull] string nwnnsscompPath, string tempScriptFolder, PatchLogger logger)
+        public NCSCompiler(string tempScriptFolder, PatchLogger logger)
         {
-            _nwnnsscompPath = nwnnsscompPath;
             _tempScriptFolder = tempScriptFolder ?? throw new ArgumentNullException(nameof(tempScriptFolder));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -68,38 +63,6 @@ namespace KPatcher.Core.Formats.NCS.Compiler
 
             _logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCompileReturningUncompiledFormat, filename));
             return Encoding.GetEncoding("windows-1252").GetBytes(nssSource);
-        }
-
-        /// <summary>
-        /// Validates that the nwnnsscomp.exe is the KPatcher version.
-        /// </summary>
-        public bool ValidateCompiler()
-        {
-            if (string.IsNullOrEmpty(_nwnnsscompPath) || !File.Exists(_nwnnsscompPath))
-            {
-                return false;
-            }
-
-            try
-            {
-                // Try to get version info
-                var fileInfo = FileVersionInfo.GetVersionInfo(_nwnnsscompPath);
-                string productName = fileInfo.ProductName;
-
-                if (productName.Contains("KPATCHER", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                // If not the expected version, log a warning but still return true (let it work)
-                _logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.NwnnsscompNotExpectedVersionFormat, productName ?? "UNKNOWN"));
-                return true;
-            }
-            catch
-            {
-                // Couldn't validate, but don't fail
-                return true;
-            }
         }
     }
 }

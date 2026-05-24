@@ -40,9 +40,6 @@ namespace KPatcher.Core.Mods.NSS
 
         public new string Action { get; set; } = "Compile";
         public new bool SkipIfNotReplace { get; set; } = true;
-        /// <summary>Legacy optional path; compile uses managed KCompiler only.</summary>
-        [CanBeNull]
-        public string NwnnsscompPath { get; set; }
         [CanBeNull]
         public string TempScriptFolder { get; set; }
 

@@ -937,20 +937,7 @@ namespace KPatcher.Core.Reader
             string defaultSourceFolder = compilelistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
             compilelistSectionDict.Remove("!DefaultSourceFolder");
 
-            // Path resolution: mod_path / default_source_folder / "nwnnsscomp.exe"
-            // mod_path is typically the tslpatchdata folder (parent of changes.ini).
-            // If default_source_folder = ".", this resolves to mod_path itself (tslpatchdata folder).
-            // Can be null if file doesn't exist
-            string nwnnsscompExepath = defaultSourceFolder == "."
-                ? Path.Combine(_modPath, "nwnnsscomp.exe")
-                : Path.Combine(_modPath, defaultSourceFolder, "nwnnsscomp.exe");
-            if (!File.Exists(nwnnsscompExepath))
-            {
-                nwnnsscompExepath = _tslPatchDataPath != null ? Path.Combine(_tslPatchDataPath, "nwnnsscomp.exe") : null; // KPatcher default
-            }
-
-            _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ConfigReader.LoadCompileList: nwnnsscompExepath={0} (optional legacy; compile uses managed KCompiler)", nwnnsscompExepath ?? "null"));
+            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler (no nwnnsscomp.exe resolution)");
 
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
@@ -967,11 +954,6 @@ namespace KPatcher.Core.Reader
                 {
                     Dictionary<string, string> fileSectionDict = SectionToDictionary(_ini[optionalFileSectionName]);
                     modifications.PopTslPatcherVars(fileSectionDict, defaultDestination, defaultSourceFolder);
-                }
-
-                if (!string.IsNullOrEmpty(nwnnsscompExepath) && File.Exists(nwnnsscompExepath))
-                {
-                    modifications.NwnnsscompPath = nwnnsscompExepath;
                 }
 
                 Config.PatchesNSS.Add(modifications);
