@@ -78,9 +78,9 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-24 — `master` @ `ae8be34c` (plans `008`–`009`, sixth `/lfg` merge closeout via PR #12). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux default suite, `d89a13c8`).
+**Last /lfg verification:** 2026-05-23 — `master` @ `6ae6014a` (plan `010`, seventh `/lfg` re-run). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux suite), PR #12 (checklist on `master`).
 
-**NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-24). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `WindowsOnly`, etc.).
+**NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-23). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `WindowsOnly`, etc.).
 
 **Full default-tier suite** (repo wrapper, Linux):
 
@@ -88,7 +88,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-**753/753 passed** in `KPatcher.Tests` (2026-05-24) at `ae8be34c` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**753/753 passed** in `KPatcher.Tests` (2026-05-23) at `6ae6014a` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 
