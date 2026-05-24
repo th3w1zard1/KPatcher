@@ -58,7 +58,10 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -p:Configuration=Release
+        run: |
+          dotnet restore src/KPatcher.UI/KPatcher.UI.csproj -p:Configuration=Release
+          dotnet restore src/KCompiler.NET/KCompiler.NET.csproj -p:Configuration=Release
+          dotnet restore src/NCSDecomp.NET/NCSDecomp.NET.csproj -p:Configuration=Release
 
       - name: Restore test dependencies
         run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj

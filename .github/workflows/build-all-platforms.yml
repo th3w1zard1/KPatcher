@@ -115,7 +115,10 @@ jobs:
         shell: pwsh
 
       - name: Restore dependencies
-        run: dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
+        run: |
+          dotnet restore src/KPatcher.UI/KPatcher.UI.csproj
+          dotnet restore src/KCompiler.NET/KCompiler.NET.csproj
+          dotnet restore src/NCSDecomp.NET/NCSDecomp.NET.csproj
 
       - name: Build
         run: |

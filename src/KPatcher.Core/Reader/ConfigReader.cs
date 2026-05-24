@@ -32,7 +32,7 @@ namespace KPatcher.Core.Reader
         private readonly HashSet<string> _previouslyParsedSections = new HashSet<string>();
         private readonly IniData _ini;
         private readonly string _modPath;
-        // path to the tslpatchdata, optional but we'll use it here for the nwnnsscomp.exe if it exists.
+        // Optional path to the tslpatchdata folder (mod asset root for compile-list source resolution).
         [CanBeNull]
         private readonly string _tslPatchDataPath;
         private readonly PatchLogger _log;
@@ -51,7 +51,6 @@ namespace KPatcher.Core.Reader
             _previouslyParsedSections = new HashSet<string>();
             _ini = ini ?? throw new ArgumentNullException(nameof(ini));
             _modPath = modPath ?? throw new ArgumentNullException(nameof(modPath));
-            // path to the tslpatchdata, optional but we'll use it here for the nwnnsscomp.exe if it exists.
             _tslPatchDataPath = tslPatchDataPath;
             _log = logger ?? new PatchLogger();
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
