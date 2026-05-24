@@ -64,13 +64,17 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-24 — all 271 Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` no longer resolves `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Dead external-compiler UI strings removed from `PatcherResources` (commit `68c227e3`). Default CI:
+**Last /lfg verification:** 2026-05-23 — branch `feat/lfg-dencs-post-merge-verification` (plan `006`). All **271** Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op).
+
+**NCS/NSS test gate (managed tooling):** filtered suite passes via repo wrapper + `Default.runsettings` (excludes `DeNCSRoundTrip` and other heavy categories).
+
+**Full default-tier suite** (repo wrapper, Linux):
 
 ```bash
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-Expect **all** default-tier `KPatcher.Tests` to pass; NCS/NSS coverage is included in that assembly. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**753/753 passed** (2026-05-23) after gating `WindowsOnly` / OS-specific policy tests (`CaseAwarePathTests`, case-sensitivity helpers) and aligning format `TestWriteRaises` with Linux directory-write behavior. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 

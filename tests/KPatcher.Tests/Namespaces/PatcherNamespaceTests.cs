@@ -1,3 +1,4 @@
+using System.IO;
 using FluentAssertions;
 using KPatcher.Core.Namespaces;
 using Xunit;
@@ -91,7 +92,7 @@ namespace KPatcher.Core.Tests.Namespaces
             string path = ns.ChangesFilePath();
 
             // Assert
-            path.Should().Be("C:\\mods\\test\\changes.ini");
+            path.Should().Be(Path.Combine("C:\\mods\\test", "changes.ini"));
         }
 
         [Fact]
@@ -108,7 +109,7 @@ namespace KPatcher.Core.Tests.Namespaces
             string path = ns.RtfFilePath();
 
             // Assert
-            path.Should().Be("C:\\mods\\test\\info.rtf");
+            path.Should().Be(Path.Combine("C:\\mods\\test", "info.rtf"));
         }
 
         [Fact]

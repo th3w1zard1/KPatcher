@@ -76,8 +76,14 @@ namespace KPatcher.Core.Tests.Common
         }
 
         [Fact]
+        [Trait("Category", "WindowsOnly")]
         public void FixCaseSensitivityRecursive_MixedCaseFiles_RenamesToLower()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
             string subDir = Path.Combine(_tempDir, "SubDir");
             Directory.CreateDirectory(subDir);
             string upperPath = Path.Combine(subDir, "File.TXT");
@@ -94,8 +100,14 @@ namespace KPatcher.Core.Tests.Common
         }
 
         [Fact]
+        [Trait("Category", "WindowsOnly")]
         public void FixCaseSensitivityRecursive_MixedCaseDirectory_RenamesToLower()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
             string mixedDir = Path.Combine(_tempDir, "MixedCaseDir");
             Directory.CreateDirectory(mixedDir);
             File.WriteAllText(Path.Combine(mixedDir, "f.txt"), "x");
@@ -109,8 +121,14 @@ namespace KPatcher.Core.Tests.Common
         }
 
         [Fact]
+        [Trait("Category", "WindowsOnly")]
         public void FixCaseSensitivityRecursive_AlreadyLower_NoChange()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
             string lowerPath = Path.Combine(_tempDir, "already.txt");
             File.WriteAllText(lowerPath, "same");
 

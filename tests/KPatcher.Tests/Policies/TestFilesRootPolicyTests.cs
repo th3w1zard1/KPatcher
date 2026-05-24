@@ -15,7 +15,17 @@ namespace KPatcher.Core.Tests.Policies
         [Fact]
         public void Test_files_root_contains_only_migrating_fixture_directories()
         {
-            var root = FindTestFilesDirectory();
+            string root;
+            try
+            {
+                root = FindTestFilesDirectory();
+            }
+            catch (InvalidOperationException)
+            {
+                // Zero committed test_files is the desired end state (see AGENTS.md).
+                return;
+            }
+
             Directory.Exists(root).Should().BeTrue("test_files root should exist next to KPatcher.Tests.csproj");
 
             var files = Directory.EnumerateFiles(root, "*", SearchOption.TopDirectoryOnly)

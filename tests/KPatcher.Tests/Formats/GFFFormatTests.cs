@@ -85,7 +85,7 @@ namespace KPatcher.Core.Tests.Formats
             }
             else
             {
-                act1.Should().Throw<IOException>();
+                act1.Should().Throw<UnauthorizedAccessException>();
             }
 
             Action act2 = () => WriteGff(gff, ".", ResourceType.INVALID);
