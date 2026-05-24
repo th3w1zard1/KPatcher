@@ -108,7 +108,6 @@
         public static string NoTLKFileLoaded => ResourceManager.GetString(nameof(NoTLKFileLoaded), _resourceCulture);
         public static string NoValidGameFolderSelected => ResourceManager.GetString(nameof(NoValidGameFolderSelected), _resourceCulture);
         public static string NoValueAssignedColumn2DA => ResourceManager.GetString(nameof(NoValueAssignedColumn2DA), _resourceCulture);
-        public static string NwnnsscompNotFoundInTslPatchData => ResourceManager.GetString(nameof(NwnnsscompNotFoundInTslPatchData), _resourceCulture);
         public static string OperationTimedOut => ResourceManager.GetString(nameof(OperationTimedOut), _resourceCulture);
         public static string OperationWasCancelled => ResourceManager.GetString(nameof(OperationWasCancelled), _resourceCulture);
         public static string PatchOperationFormat => ResourceManager.GetString(nameof(PatchOperationFormat), _resourceCulture);

@@ -57,7 +57,6 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="CliWarningDisplayDriverNotAvailable" xml:space="preserve"><value>[Avertissement] Pilote d'affichage non disponible, impossible d'exécuter en mode GUI : {0}</value></data>
   <data name="CliWarningUninstallCompletedWithWarnings" xml:space="preserve"><value>[Avertissement] Désinstallation terminée avec des avertissements</value></data>
   <data name="CompileListSectionMissing" xml:space="preserve"><value>Section [CompileList] manquante dans l'ini.</value></data>
-  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve"><value>Compilé '{0}' en utilisant nwnnsscomp.exe externe (compilation gérée échouée).</value></data>
   <data name="ConfigReaderFinishedLoadingIni" xml:space="preserve"><value>Le ConfigReader a terminé le chargement de l'INI</value></data>
   <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve"><value>Impossible de compiler '{0}'. Retour de la source NSS non compilée.</value></data>
   <data name="CouldNotCreateBackupFolder" xml:space="preserve"><value>Impossible de créer le dossier de sauvegarde : {0}</value></data>
@@ -79,7 +78,6 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="ErrorAddingNewLine2DA" xml:space="preserve"><value>Erreur lors de l’ajout d’une nouvelle ligne 2DA dans le modificateur « {0} » !</value></data>
   <data name="ErrorLookingUpColumnLabelForColumnIndex" xml:space="preserve"><value>Erreur lors de la recherche de l’étiquette de colonne pour l’index {0}.</value></data>
   <data name="ErrorLookingUpRowLabelForRowIndex" xml:space="preserve"><value>Erreur lors de la recherche de l’étiquette de ligne pour l’index {0}.</value></data>
-  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve"><value>Une erreur s'est produite lors de la compilation de '{0}' avec le compilateur intégré, tentative du compilateur externe...</value></data>
   <data name="ErrorParsingIniFile" xml:space="preserve"><value>Erreur d’analyse du fichier INI : {0}</value></data>
   <data name="ExceptionInformationHeader" xml:space="preserve"><value>  Informations :</value></data>
   <data name="ExpectedByteArrayButGotFormat" xml:space="preserve"><value>byte[] attendu pour ModificationsNCS, mais {0} obtenu</value></data>
@@ -91,7 +89,6 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve"><value>Objet SSF attendu pour ModificationsSSF, mais {0} obtenu</value></data>
   <data name="ExpectedTlkObjectButGotFormat" xml:space="preserve"><value>Objet TLK attendu pour ModificationsTLK, mais {0} obtenu</value></data>
   <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve"><value>Objet TwoDA attendu pour Modifications2DA, mais {0} obtenu</value></data>
-  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve"><value>Le nwnnsscomp externe a également échoué pour '{0}': {1}</value></data>
   <data name="FailedToAddNewStructToList" xml:space="preserve"><value>Échec de l'ajout d'un nouveau struct à la liste '{0}' dans [{1}]. Raison : GFFStruct attendu mais '{2}' ({3}) de type {4} obtenu. Ignoré...</value></data>
   <data name="FailedToBuildModule" xml:space="preserve"><value>Échec de la construction du module '{0}' : {1}</value></data>
   <data name="FailedToCopyLine2DA" xml:space="preserve"><value>Erreur ! Échec de la copie de ligne dans la 2DA ! Ignoré...</value></data>
@@ -155,8 +152,6 @@ Positional arguments (equivalent to --game-dir and --tslpatchdata):
   <data name="NoTLKFileLoaded" xml:space="preserve"><value>Aucun fichier TLK chargé. Impossible de continuer.</value></data>
   <data name="NoValidGameFolderSelected" xml:space="preserve"><value>Erreur ! Aucun dossier de jeu valide sélectionné ! Installation annulée.</value></data>
   <data name="NoValueAssignedColumn2DA" xml:space="preserve"><value>Aucune valeur assignée à la colonne {0} pour la nouvelle ligne 2DA dans le modificateur « {1} »...</value></data>
-  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve"><value>Le nwnnsscomp.exe n'est pas la version KPatcher attendue (détectée: {0}).</value></data>
-  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve"><value>Impossible de trouver nwnnsscomp.exe dans le dossier TSLPatchData ! Impossible de compiler le script.</value></data>
   <data name="OperationTimedOut" xml:space="preserve"><value>Opération expirée : {0}</value></data>
   <data name="OperationWasCancelled" xml:space="preserve"><value>Opération annulée : {0}</value></data>
   <data name="OrphanedIniSectionsFormat" xml:space="preserve"><value>Des sections INI orphelines ont été trouvées dans les modifications :

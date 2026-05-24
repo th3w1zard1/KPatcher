@@ -73,9 +73,6 @@
   <data name="SkippingFileNoOverwriteDialogTlk" xml:space="preserve">
     <value>Skipping file {0}, this Installer will not overwrite dialog.tlk directly.</value>
   </data>
-  <data name="NwnnsscompNotFoundInTslPatchData" xml:space="preserve">
-    <value>Could not locate nwnnsscomp.exe in the TSLPatchData folder! Unable to compile script.</value>
-  </data>
   <data name="Invalid2DAMemoryToken" xml:space="preserve">
     <value>Invalid 2DAMEMORY token found! Token indexes must be non-negative (0, 1, 2, ...).</value>
   </data>
@@ -649,9 +646,6 @@ Examples:
   <data name="ExpectedGffObjectButGotFormat" xml:space="preserve">
     <value>Expected GFF object for ModificationsGFF, but got {0}</value>
   </data>
-  <data name="ErrorOccurredWhileCompilingTryingExternalFormat" xml:space="preserve">
-    <value>An error occurred while compiling '{0}' with the built-in compiler, trying external compiler...</value>
-  </data>
   <data name="ExpectedSsfObjectButGotFormat" xml:space="preserve">
     <value>Expected SSF object for ModificationsSSF, but got {0}</value>
   </data>
@@ -669,15 +663,6 @@ Examples:
   </data>
   <data name="ManagedCompilationFailedFormat" xml:space="preserve">
     <value>Managed compilation failed for '{0}': {1}</value>
-  </data>
-  <data name="CompiledUsingExternalNwnnsscompFormat" xml:space="preserve">
-    <value>Compiled '{0}' using external nwnnsscomp.exe (managed compile failed).</value>
-  </data>
-  <data name="ExternalNwnnsscompAlsoFailedFormat" xml:space="preserve">
-    <value>External nwnnsscomp also failed for '{0}': {1}</value>
-  </data>
-  <data name="NwnnsscompNotExpectedVersionFormat" xml:space="preserve">
-    <value>The nwnnsscomp.exe is not the expected KPatcher version (detected: {0}).</value>
   </data>
   <data name="ExpectedTwoDAObjectButGotFormat" xml:space="preserve">
     <value>Expected TwoDA object for Modifications2DA, but got {0}</value>

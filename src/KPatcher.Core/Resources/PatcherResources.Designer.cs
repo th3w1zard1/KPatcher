@@ -66,7 +66,6 @@ namespace KPatcher.Core.Resources
         public static string CliWarningDisplayDriverNotAvailable => ResourceManager.GetString(nameof(CliWarningDisplayDriverNotAvailable), _resourceCulture);
         public static string CliInfoValidationCompletedSuccessfully => ResourceManager.GetString(nameof(CliInfoValidationCompletedSuccessfully), _resourceCulture);
         public static string CliInnerException => ResourceManager.GetString(nameof(CliInnerException), _resourceCulture);
-        public static string CompiledUsingExternalNwnnsscompFormat => ResourceManager.GetString(nameof(CompiledUsingExternalNwnnsscompFormat), _resourceCulture);
         public static string CliWarningUninstallCompletedWithWarnings => ResourceManager.GetString(nameof(CliWarningUninstallCompletedWithWarnings), _resourceCulture);
         public static string CompileListSectionMissing => ResourceManager.GetString(nameof(CompileListSectionMissing), _resourceCulture);
         public static string ConfigReaderFinishedLoadingIni => ResourceManager.GetString(nameof(ConfigReaderFinishedLoadingIni), _resourceCulture);
@@ -90,7 +89,6 @@ namespace KPatcher.Core.Resources
         public static string ErrorAddingNewLine2DA => ResourceManager.GetString(nameof(ErrorAddingNewLine2DA), _resourceCulture);
         public static string ErrorLookingUpColumnLabelForColumnIndex => ResourceManager.GetString(nameof(ErrorLookingUpColumnLabelForColumnIndex), _resourceCulture);
         public static string ErrorLookingUpRowLabelForRowIndex => ResourceManager.GetString(nameof(ErrorLookingUpRowLabelForRowIndex), _resourceCulture);
-        public static string ErrorOccurredWhileCompilingTryingExternalFormat => ResourceManager.GetString(nameof(ErrorOccurredWhileCompilingTryingExternalFormat), _resourceCulture);
         public static string ErrorParsingIniFile => ResourceManager.GetString(nameof(ErrorParsingIniFile), _resourceCulture);
         public static string ExceptionInformationHeader => ResourceManager.GetString(nameof(ExceptionInformationHeader), _resourceCulture);
         public static string ExpectedGffStructButGot => ResourceManager.GetString(nameof(ExpectedGffStructButGot), _resourceCulture);
@@ -113,7 +111,6 @@ namespace KPatcher.Core.Resources
         public static string ExpectedSsfObjectButGotFormat => ResourceManager.GetString(nameof(ExpectedSsfObjectButGotFormat), _resourceCulture);
         public static string ExpectedTlkObjectButGotFormat => ResourceManager.GetString(nameof(ExpectedTlkObjectButGotFormat), _resourceCulture);
         public static string ExpectedTwoDAObjectButGotFormat => ResourceManager.GetString(nameof(ExpectedTwoDAObjectButGotFormat), _resourceCulture);
-        public static string ExternalNwnnsscompAlsoFailedFormat => ResourceManager.GetString(nameof(ExternalNwnnsscompAlsoFailedFormat), _resourceCulture);
         public static string GffPathNotFoundDefaultingToRootFormat => ResourceManager.GetString(nameof(GffPathNotFoundDefaultingToRootFormat), _resourceCulture);
         public static string UnableToModifyGffFieldFormat => ResourceManager.GetString(nameof(UnableToModifyGffFieldFormat), _resourceCulture);
         public static string UnableToUseFieldPathFrom2DAMemoryFormat => ResourceManager.GetString(nameof(UnableToUseFieldPathFrom2DAMemoryFormat), _resourceCulture);
@@ -176,8 +173,6 @@ namespace KPatcher.Core.Resources
         public static string NoTLKFileLoaded => ResourceManager.GetString(nameof(NoTLKFileLoaded), _resourceCulture);
         public static string NoValidGameFolderSelected => ResourceManager.GetString(nameof(NoValidGameFolderSelected), _resourceCulture);
         public static string NoValueAssignedColumn2DA => ResourceManager.GetString(nameof(NoValueAssignedColumn2DA), _resourceCulture);
-        public static string NwnnsscompNotExpectedVersionFormat => ResourceManager.GetString(nameof(NwnnsscompNotExpectedVersionFormat), _resourceCulture);
-        public static string NwnnsscompNotFoundInTslPatchData => ResourceManager.GetString(nameof(NwnnsscompNotFoundInTslPatchData), _resourceCulture);
         public static string OperationTimedOut => ResourceManager.GetString(nameof(OperationTimedOut), _resourceCulture);
         public static string OperationWasCancelled => ResourceManager.GetString(nameof(OperationWasCancelled), _resourceCulture);
         public static string OrphanedIniSectionsFormat => ResourceManager.GetString(nameof(OrphanedIniSectionsFormat), _resourceCulture);
