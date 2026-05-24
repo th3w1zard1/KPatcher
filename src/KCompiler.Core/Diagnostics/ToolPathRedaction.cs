@@ -23,7 +23,19 @@ namespace KCompiler.Diagnostics
 
             try
             {
-                return Path.GetFileName(path) ?? path;
+                // Get the filename, but handle both forward and backward slashes
+                // (important for cross-platform path handling, e.g., Windows paths on Linux)
+                int lastSlashIndex = Math.Max(
+                    path.LastIndexOf('/'),
+                    path.LastIndexOf('\\')
+                );
+                
+                if (lastSlashIndex >= 0 && lastSlashIndex < path.Length - 1)
+                {
+                    return path.Substring(lastSlashIndex + 1);
+                }
+                
+                return path;
             }
             catch
             {
