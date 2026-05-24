@@ -7,7 +7,7 @@ This document satisfies **“every relevant `.java` file accounted for”** by m
 | Area | Count | Notes |
 |------|------:|--------|
 | `vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/**/*.java` | **271** | All NCS DeNCS library + CLI-adjacent Java in-tree |
-| `src/NCSDecomp.Core/**/*.cs` (excl. `obj/`) | **~470+** | Library port + SableCC-style AST, analysis, utils |
+| `src/NCSDecomp.Core/**/*.cs` (excl. `obj/`) | **277** | Library port + SableCC-style AST, analysis, utils |
 | `vendor/DeNCS/src/test/java/**/*.java` | (separate) | Exhaustive round-trip harness; see below |
 
 ## Folder-level mapping (271 files -> C#)
@@ -62,11 +62,25 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 - `RoundTripUtilManagedCompareTests`, `NCSDecompSyntaxHighlighterTests`, `NcsAstOutlineTests`
 - Opt-in: `NCSDecompCliRoundTripTest`
 
+## Completion checklist (/lfg command)
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| All relevant `.java` accounted or superseded | **Met** | **271** files mapped in tables above; empty local `vendor/DeNCS` does not change accounting (layout documented from repo history). |
+| NSS→NCS via managed KCompiler | **Met** | `NCSCompiler`, `ModificationsNSS` → `NCSAuto.CompileNss`; `ConfigReader` logs managed compile (no `nwnnsscomp` resolution). |
+| NCS→NSS via NCSDecomp.Core + patcher API | **Met** | `NCSManagedDecompiler`, `NCSDecompiler`; Core hosts `FileDecompiler` / `RoundTripUtil` pipeline. |
+| No product registry spoofer | **Met** | `CompilerExecutionWrapper.CreateRegistrySpoofer()` → `NoOpRegistrySpoofer` only. |
+| ≥8 NCS/NSS test classes | **Met** | **14** classes listed under **NCS/NSS test fixtures** (includes opt-in harness). |
+| Roundtrip tests exist and pass (default tier) | **Met** | `NCSRoundtripTests`, `VanillaNssManagedDecompileRoundTripTests`, `NcsDecompNetStyleRoundTripTests`, `RoundTripUtilManagedCompareTests`, etc. |
+| Full solution tests pass | **Met** | Wrapper command below; **753/753** `KPatcher.Tests` (Default.runsettings) on Linux at sign-off HEAD. |
+
+**Opt-in (not default CI):** `NCSDecompCliRoundTripTest` may shell out to `nwnnsscomp` when installed (`ExternalCompiler`, `DeNCSRoundTrip` traits). Excluded from `Default.runsettings`; not part of product compile/decompile paths.
+
 ## Verification
 
-**Last /lfg verification:** 2026-05-24 — `master` @ `d89a13c8` (squash merge PR #11; plans `005`–`007`). All **271** Java sources accounted for; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op).
+**Last /lfg verification:** 2026-05-24 — `5c04a726` on branch `feat/lfg-dencs-final-signoff-008` (plan `008`, fifth `/lfg` sign-off; tests re-run at base `c4b06c49`). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux default suite, `d89a13c8`).
 
-**NCS/NSS test gate (managed tooling):** filtered suite passes via repo wrapper + `Default.runsettings` (excludes `DeNCSRoundTrip` and other heavy categories).
+**NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-24). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `WindowsOnly`, etc.).
 
 **Full default-tier suite** (repo wrapper, Linux):
 
@@ -74,7 +88,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-**753/753 passed** (2026-05-23) after gating `WindowsOnly` / OS-specific policy tests (`CaseAwarePathTests`, case-sensitivity helpers) and aligning format `TestWriteRaises` with Linux directory-write behavior. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`, traits `ExternalCompiler` + `DeNCSRoundTrip`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**753/753 passed** in `KPatcher.Tests` (2026-05-24) at `c4b06c49` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 
