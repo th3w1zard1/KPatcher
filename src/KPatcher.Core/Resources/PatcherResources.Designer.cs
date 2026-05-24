@@ -72,6 +72,7 @@ namespace KPatcher.Core.Resources
         public static string ConfigReaderFinishedLoadingIni => ResourceManager.GetString(nameof(ConfigReaderFinishedLoadingIni), _resourceCulture);
         public static string CouldNotCreateBackupFolder => ResourceManager.GetString(nameof(CouldNotCreateBackupFolder), _resourceCulture);
         public static string CouldNotCreateInstallLogFile => ResourceManager.GetString(nameof(CouldNotCreateInstallLogFile), _resourceCulture);
+        public static string CouldNotCreateInstallFlightRecordFile => ResourceManager.GetString(nameof(CouldNotCreateInstallFlightRecordFile), _resourceCulture);
         public static string CouldNotDetermineEncoding => ResourceManager.GetString(nameof(CouldNotDetermineEncoding), _resourceCulture);
         public static string CouldNotFindChangesIniFile => ResourceManager.GetString(nameof(CouldNotFindChangesIniFile), _resourceCulture);
         public static string CouldNotFindDirectory => ResourceManager.GetString(nameof(CouldNotFindDirectory), _resourceCulture);
@@ -137,9 +138,12 @@ namespace KPatcher.Core.Resources
         public static string InstallationCompletedSuccessfully => ResourceManager.GetString(nameof(InstallationCompletedSuccessfully), _resourceCulture);
         public static string InstallationDate => ResourceManager.GetString(nameof(InstallationDate), _resourceCulture);
         public static string InstallationFailedFormat => ResourceManager.GetString(nameof(InstallationFailedFormat), _resourceCulture);
+        public static string InstallationTerminationRequest => ResourceManager.GetString(nameof(InstallationTerminationRequest), _resourceCulture);
         public static string InstallationLogHeader => ResourceManager.GetString(nameof(InstallationLogHeader), _resourceCulture);
         public static string InstallationLogHeaderSeparator => ResourceManager.GetString(nameof(InstallationLogHeaderSeparator), _resourceCulture);
-        public static string InstallationTerminationRequest => ResourceManager.GetString(nameof(InstallationTerminationRequest), _resourceCulture);
+        public static string InstallFlightRecordDirectoryNotFound => ResourceManager.GetString(nameof(InstallFlightRecordDirectoryNotFound), _resourceCulture);
+        public static string InstallFlightRecordPath => ResourceManager.GetString(nameof(InstallFlightRecordPath), _resourceCulture);
+        public static string InstallFlightRecordWrittenFormat => ResourceManager.GetString(nameof(InstallFlightRecordWrittenFormat), _resourceCulture);
         public static string InstructionJumpsToNotInList => ResourceManager.GetString(nameof(InstructionJumpsToNotInList), _resourceCulture);
         public static string InstructionLimitExceeded => ResourceManager.GetString(nameof(InstructionLimitExceeded), _resourceCulture);
         public static string InstructionNotImplemented => ResourceManager.GetString(nameof(InstructionNotImplemented), _resourceCulture);

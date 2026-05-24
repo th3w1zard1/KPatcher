@@ -211,6 +211,18 @@
   <data name="CouldNotCreateInstallLogFile" xml:space="preserve">
     <value>Could not create install log file: {0}</value>
   </data>
+  <data name="CouldNotCreateInstallFlightRecordFile" xml:space="preserve">
+    <value>Could not create install record file: {0}</value>
+  </data>
+  <data name="InstallFlightRecordPath" xml:space="preserve">
+    <value>Record Path: {0}</value>
+  </data>
+  <data name="InstallFlightRecordWrittenFormat" xml:space="preserve">
+    <value>Install record written to {0}</value>
+  </data>
+  <data name="InstallFlightRecordDirectoryNotFound" xml:space="preserve">
+    <value>Install record directory not found: {0}</value>
+  </data>
   <data name="ChangesConfigFileNotFound" xml:space="preserve">
     <value>Changes config file not found: {0}</value>
   </data>

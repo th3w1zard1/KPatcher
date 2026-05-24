@@ -39,6 +39,8 @@ namespace KPatcher.Core.Patcher
         private readonly PatchLogger log;
         [CanBeNull]
         private InstallLogWriter installLog;
+        [CanBeNull]
+        private InstallFlightRecorder installFlightRecorder;
 
         [CanBeNull]
         private PatcherConfig config;
@@ -315,6 +317,8 @@ namespace KPatcher.Core.Patcher
             CancellationToken? cancellationToken = null,
             [CanBeNull] Action<int> progressCallback = null)
         {
+            InstallFlightRecorderOutcome terminalOutcome = InstallFlightRecorderOutcome.Success;
+            string terminalDetail = null;
             try
             {
                 if (Game is null)
@@ -327,6 +331,19 @@ namespace KPatcher.Core.Patcher
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                     "Install: start game={0} gamePath={1} modPath={2} changesIni={3}",
                     Game, gamePath, modPath, changesIniPath));
+
+                if (installFlightRecorder == null)
+                {
+                    try
+                    {
+                        string recordDirectory = Path.GetDirectoryName(changesIniPath) ?? modPath;
+                        installFlightRecorder = new InstallFlightRecorder(recordDirectory, gamePath, Game, log);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCreateInstallFlightRecordFile, ex.Message));
+                    }
+                }
 
                 PatcherMemory memory = new PatcherMemory();
                 PatcherConfig cfg = Config();
@@ -380,13 +397,6 @@ namespace KPatcher.Core.Patcher
                         patch.SkipIfNotReplace));
 
                     cancellationToken?.ThrowIfCancellationRequested();
-
-                    // if should_cancel is not None and should_cancel.is_set(): sys.exit()
-                    if (cancellationToken?.IsCancellationRequested == true)
-                    {
-                        log.AddNote(PatcherResources.InstallationTerminationRequest);
-                        Environment.Exit(0);
-                    }
 
                     // Log when we start processing different patch types
                     if (processingInstallList && patch is InstallFile)
@@ -571,14 +581,48 @@ namespace KPatcher.Core.Patcher
                 log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.SuccessfullyCompletedFormat, numPatchesCompleted, numPatchesCompleted == 1 ? "patch" : "total patches"));
                 installLog?.WriteInfo(PatcherResources.InstallationCompletedSuccessfully);
             }
+            catch (OperationCanceledException)
+            {
+                terminalOutcome = InstallFlightRecorderOutcome.Cancelled;
+                log.AddNote(PatcherResources.InstallationTerminationRequest);
+                throw;
+            }
             catch (Exception ex)
             {
+                terminalOutcome = InstallFlightRecorderOutcome.Failure;
+                terminalDetail = ex.Message;
                 // Ensure errors are logged to install log even if installation fails
                 installLog?.WriteError(string.Format(CultureInfo.CurrentCulture, PatcherResources.InstallationFailedFormat, ex.Message));
                 throw;
             }
             finally
             {
+                if (installFlightRecorder != null)
+                {
+                    try
+                    {
+                        installFlightRecorder.MarkOutcome(terminalOutcome, terminalDetail);
+                    }
+                    catch
+                    {
+                        // Keep recorder finalization best-effort.
+                    }
+
+                    try
+                    {
+                        installFlightRecorder.Dispose();
+                    }
+                    catch
+                    {
+                        // Ignore recorder dispose failures.
+                    }
+
+                    if (terminalOutcome != InstallFlightRecorderOutcome.Unknown)
+                    {
+                        log.AddNote(string.Format(CultureInfo.CurrentCulture, PatcherResources.InstallFlightRecordWrittenFormat, installFlightRecorder.RecordPath));
+                    }
+                }
+
                 // Always dispose the install log to ensure it's flushed and closed
                 installLog?.Dispose();
             }

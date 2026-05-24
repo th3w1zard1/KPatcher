@@ -193,6 +193,28 @@ namespace KPatcher.Tests
             }
         }
 
+        [Fact]
+        public void RunCli_Install_PrintsInstallRecordPath()
+        {
+            using (var mod = new TemporaryCliInstallDirectory())
+            {
+                mod.CreateInstallableMod();
+
+                var stdout = new StringWriter();
+                var stderr = new StringWriter();
+
+                int exitCode = Program.RunCli(
+                    KPatcherCLI.ParseArgs(new[] { "--install", "--tslpatchdata", mod.ModRootPath, "--game-dir", mod.GameRootPath }),
+                    stdout,
+                    stderr);
+
+                Assert.Equal(0, exitCode);
+                Assert.Contains("Install record written to", stdout.ToString());
+                Assert.True(File.Exists(Path.Combine(mod.TslPatchDataPath, "installrecord.txt")));
+                Assert.Equal(string.Empty, stderr.ToString());
+            }
+        }
+
         private sealed class TemporaryModDirectory : IDisposable
         {
             public string ModRootPath { get; }
@@ -246,6 +268,46 @@ Description=Optional install
                     if (Directory.Exists(ModRootPath))
                     {
                         Directory.Delete(ModRootPath, recursive: true);
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private sealed class TemporaryCliInstallDirectory : IDisposable
+        {
+            public string RootPath { get; }
+            public string ModRootPath { get; }
+            public string TslPatchDataPath { get; }
+            public string GameRootPath { get; }
+
+            public TemporaryCliInstallDirectory()
+            {
+                RootPath = Path.Combine(Path.GetTempPath(), "KPatcher_CliInstall_" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                ModRootPath = Path.Combine(RootPath, "mod");
+                TslPatchDataPath = Path.Combine(ModRootPath, "tslpatchdata");
+                GameRootPath = Path.Combine(RootPath, "game");
+
+                Directory.CreateDirectory(TslPatchDataPath);
+                Directory.CreateDirectory(GameRootPath);
+                File.WriteAllText(Path.Combine(GameRootPath, "swkotor2.exe"), string.Empty);
+            }
+
+            public void CreateInstallableMod()
+            {
+                File.WriteAllText(Path.Combine(TslPatchDataPath, "changes.ini"), "[Settings]\nLogLevel=3\n");
+                File.WriteAllText(Path.Combine(TslPatchDataPath, "info.rtf"), "{\\rtf1\\ansi CLI Test}");
+            }
+
+            public void Dispose()
+            {
+                try
+                {
+                    if (Directory.Exists(RootPath))
+                    {
+                        Directory.Delete(RootPath, true);
                     }
                 }
                 catch
