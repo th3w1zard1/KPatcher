@@ -20,8 +20,6 @@ namespace KPatcher.Core.Common
 
         public static string SkippingFileNoOverwriteDialogTlk => PatcherResources.SkippingFileNoOverwriteDialogTlk;
 
-        public static string NwnnsscompNotFoundInTslPatchData => PatcherResources.NwnnsscompNotFoundInTslPatchData;
-
         public static string Invalid2DAMemoryToken => PatcherResources.Invalid2DAMemoryToken;
 
         public static string PatcherFinished => PatcherResources.PatcherFinished;
