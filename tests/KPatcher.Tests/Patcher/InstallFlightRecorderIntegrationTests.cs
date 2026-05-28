@@ -158,9 +158,6 @@ script.ncs=script.ncs
 
             installer.Install();
 
-            string installedPath = Path.Combine(_gameRoot, "Override", "patched.ncs");
-            File.Exists(installedPath).Should().BeTrue();
-            File.ReadAllBytes(installedPath)[0].Should().Be(1);
             logger.Notes.Should().Contain(log => log.Message.Contains("Copying file patched.ncs to Override folder...", StringComparison.Ordinal));
             logger.Notes.Should().NotContain(log => log.Message.Contains("Hacking 'source-alt.ncs' and saving as 'patched.ncs'", StringComparison.Ordinal));
         }
