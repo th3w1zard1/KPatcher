@@ -70,5 +70,58 @@ namespace KPatcher.Core.Tests.Mods
             Assert.True(result is bool skipped && skipped);
             Assert.Contains(logger.Errors, log => log.Message.IndexOf("helper", StringComparison.OrdinalIgnoreCase) >= 0);
         }
+
+        [Fact]
+        public void PatchResource_DuplicateIncludeNames_PrefersScriptDirectoryOverRoot()
+        {
+            string scriptFolder = Path.Combine(_tempDir, "scripts", "main");
+            Directory.CreateDirectory(scriptFolder);
+
+            File.WriteAllText(
+                Path.Combine(scriptFolder, "helper.nss"),
+                "int HelperValue() { return 123; }\n");
+            File.WriteAllText(
+                Path.Combine(_tempDir, "helper.nss"),
+                "string HelperValue() { return \"wrong\"; }\n");
+
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                TempScriptFolder = _tempDir,
+                SourceFolder = Path.Combine("scripts", "main"),
+                CompilerWorkingDirectory = _tempDir
+            };
+            byte[] source = Encoding.GetEncoding("windows-1252").GetBytes(
+                "#include \"helper\"\nvoid main() { int value = HelperValue(); PrintInteger(value); }\n");
+
+            object result = patch.PatchResource(source, new PatcherMemory(), new PatchLogger(), Game.K1);
+
+            byte[] compiled = Assert.IsType<byte[]>(result);
+            Assert.NotEmpty(compiled);
+        }
+
+        [Fact]
+        public void PatchResource_MissingInclude_ReturnsSkipAndLogsCompilerError()
+        {
+            string scriptFolder = Path.Combine(_tempDir, "scripts", "main");
+            Directory.CreateDirectory(scriptFolder);
+
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                TempScriptFolder = _tempDir,
+                SourceFolder = Path.Combine("scripts", "main"),
+                CompilerWorkingDirectory = _tempDir
+            };
+            byte[] source = Encoding.GetEncoding("windows-1252").GetBytes(
+                "#include \"missing_helper\"\nvoid main() { PrintInteger(1); }\n");
+            var logger = new PatchLogger();
+
+            object result = patch.PatchResource(source, new PatcherMemory(), logger, Game.K1);
+
+            Assert.True(result is bool skipped && skipped);
+            Assert.Contains(
+                logger.Errors,
+                log => log.Message.IndexOf("missing_helper", StringComparison.OrdinalIgnoreCase) >= 0
+                    && log.Message.IndexOf("Could not find included script", StringComparison.OrdinalIgnoreCase) >= 0);
+        }
     }
 }
