@@ -1,9 +1,9 @@
 ---
 title: "fix: vendor TSLPatcher submodule metadata"
 type: fix
-status: active
+status: completed
 date: 2026-05-27
-origin: user request (/compound-engineering:lfg vendor TSLPatcher submodule)
+origin: user request (/compound-engineering/lfg vendor TSLPatcher submodule)
 ---
 
 # fix: vendor TSLPatcher submodule metadata
@@ -106,6 +106,6 @@ The repository already records multiple `vendor/` gitlinks in the git tree, but 
 
 ## Status deltas
 
-- Landed: plan created.
-- Partial/uncertain: existing vendor gitlink URLs still need to be reconstructed from repo-local evidence.
-- Next-step change: implementation will start with `.gitmodules`, then add `vendor/TSLPatcher`, then run a narrow submodule validation.
+- Landed: plan created, `.gitmodules` rebuilt for the tracked vendor gitlinks, `vendor/TSLPatcher` added as a submodule, README aligned, and the submodule plumbing validation passed.
+- Partial/uncertain: browser testing is not applicable for this git-metadata/doc slice; other vendor submodules remain intentionally uninitialized in the checkout.
+- Next-step change: commit, push, and open the branch PR.
