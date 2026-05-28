@@ -14,6 +14,11 @@ namespace KPatcher.Core.Tests.Mods
     {
         private readonly string _tempDir;
 
+        static ModificationsNSSTests()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         public ModificationsNSSTests()
         {
             _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

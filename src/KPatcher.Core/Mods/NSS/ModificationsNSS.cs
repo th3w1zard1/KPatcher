@@ -41,6 +41,15 @@ namespace KPatcher.Core.Mods.NSS
         public new const string DEFAULT_DESTINATION = "Override";
         public static string DefaultDestination => DEFAULT_DESTINATION;
 
+        private static Encoding Windows1252Encoding
+        {
+            get
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                return Encoding.GetEncoding("windows-1252");
+            }
+        }
+
         private sealed class ManagedCompileOptions
         {
             public Game Game { get; set; }
@@ -86,7 +95,7 @@ namespace KPatcher.Core.Mods.NSS
                 SourceFile, SaveAs, source.Length, Action, game, SkipIfNotReplace));
 
             // Decode the NSS source bytes
-            string sourceText = Encoding.GetEncoding("windows-1252").GetString(source);
+            string sourceText = Windows1252Encoding.GetString(source);
             var mutableSource = new MutableString(sourceText);
             Apply(mutableSource, memory, logger, game);
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -113,7 +122,7 @@ namespace KPatcher.Core.Mods.NSS
                 {
                     Directory.CreateDirectory(tempScriptDirectory);
                 }
-                File.WriteAllText(tempScriptFile, mutableSource.Value, Encoding.GetEncoding("windows-1252"));
+                File.WriteAllText(tempScriptFile, mutableSource.Value, Windows1252Encoding);
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                     "ModificationsNSS.PatchResource: wrote temp NSS path={0} tempFolder={1}",
                     tempScriptFile, tempFolder));
@@ -200,7 +209,7 @@ namespace KPatcher.Core.Mods.NSS
             }
 
             // If not compiling, just return the modified source
-            byte[] nssOut = Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
+            byte[] nssOut = Windows1252Encoding.GetBytes(mutableSource.Value);
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "ModificationsNSS.PatchResource: non-Compile action returning NSS bytes sourceFile={0} outBytes={1}", SourceFile, nssOut.Length));
             return nssOut;
