@@ -10,6 +10,7 @@ using KCompiler.Cli;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler;
+using NssCompileError = KPatcher.Core.Formats.NCS.Compiler.NSS.CompileError;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Resources;
@@ -145,7 +146,7 @@ namespace KPatcher.Core.Mods.NSS
                         "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                     return compiledBytes;
                 }
-                catch (CompileError e)
+                catch (Exception e) when (e is CompileError || e is NssCompileError)
                 {
                     LogCompilerFeedback(logger, e.Message);
                     logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
