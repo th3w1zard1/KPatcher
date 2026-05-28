@@ -401,7 +401,8 @@ namespace KPatcher.UI
                 namespaces,
                 selectedNamespaceName,
                 diagnosticLogger,
-                out string tslPatchDataPathResolved);
+                out string tslPatchDataPathResolved,
+                allowDefaultFallback: false);
 
             diagnosticLogger?.AddDiagnostic(string.Format(
                 CultureInfo.InvariantCulture,
@@ -427,7 +428,8 @@ namespace KPatcher.UI
                 namespaces,
                 selectedNamespaceName,
                 diagnosticLogger,
-                out string tslPatchDataPathResolved);
+                out string tslPatchDataPathResolved,
+                allowDefaultFallback: false);
             return Path.GetRelativePath(tslPatchDataPathResolved, resolvedChangesPath);
         }
 
@@ -449,15 +451,41 @@ namespace KPatcher.UI
             [CanBeNull] PatchLogger diagnosticLogger,
             out string tslPatchDataPathResolved)
         {
+            return ResolveNamespaceChangesPath(
+                modPath,
+                namespaces,
+                selectedNamespaceName,
+                diagnosticLogger,
+                out tslPatchDataPathResolved,
+                allowDefaultFallback: true);
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger,
+            out string tslPatchDataPathResolved,
+            bool allowDefaultFallback)
+        {
             PatcherNamespace namespaceOption = GetNamespaceOption(namespaces, selectedNamespaceName);
             tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
-            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger);
+            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger, allowDefaultFallback);
         }
 
         private static string ResolveNamespaceChangesPath(
             string modPath,
             PatcherNamespace namespaceOption,
             [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger, allowDefaultFallback: true);
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            PatcherNamespace namespaceOption,
+            [CanBeNull] PatchLogger diagnosticLogger,
+            bool allowDefaultFallback)
         {
             string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
             string fullChangesPath = Path.Combine(tslPatchDataPathResolved, namespaceOption.ChangesFilePath());
@@ -480,6 +508,19 @@ namespace KPatcher.UI
                     "Core.ResolveNamespaceChangesPath: resolved namespace-specific changes path={0}",
                     localizedPath));
                 return localizedPath;
+            }
+
+            if (!allowDefaultFallback)
+            {
+                string resolvedChangesPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
+                diagnosticLogger?.AddDiagnostic(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Core.ResolveNamespaceChangesPath: strict resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
+                    resolvedChangesPath,
+                    namespaceDir,
+                    baseName,
+                    tslPatchDataPathResolved));
+                return resolvedChangesPath;
             }
 
             string fallbackChangesPath = ResolveDefaultNamespaceChangesPath(tslPatchDataPathResolved, diagnosticLogger);
