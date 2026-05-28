@@ -180,3 +180,4 @@ tmp_dump/
 tests/KPatcher.Tests/EmbeddedIntegrationMods/**/tslpatchdata/
 tests/KPatcher.Tests/test_files/
 tests/KPatcher.Tests/Integration/
+agentdecompile_projects/

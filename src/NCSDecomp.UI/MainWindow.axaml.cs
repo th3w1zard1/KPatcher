@@ -4,14 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using KCompiler.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -34,6 +38,7 @@ namespace NCSDecomp.UI
         private byte[] _bytesForAst;
         private int _decompileGeneration;
         private int _astTreeBuiltForGeneration = -1;
+        private bool _isBusy;
 
         public MainWindow()
         {
@@ -50,8 +55,170 @@ namespace NCSDecomp.UI
             OpenNcsButton.Click += OnOpenNcsClick;
             DecompileButton.Click += OnDecompileClick;
             SaveNssButton.Click += OnSaveNssClick;
+            CopyNssButton.Click += OnCopyNssClick;
             RoundTripButton.Click += OnRoundTripClick;
             GameCombo.SelectionChanged += OnGameChanged;
+
+            AddHandler(DragDrop.DragOverEvent, OnDragOver);
+            AddHandler(DragDrop.DropEvent, OnDrop);
+
+            UpdateCommandStates();
+        }
+
+        /// <summary>Load an .ncs from startup args, drag-drop, or tests.</summary>
+        public void LoadNcsFromPath(string localPath, bool decompileAfterLoad)
+        {
+            if (string.IsNullOrWhiteSpace(localPath) || !File.Exists(localPath))
+            {
+                StatusText.Text = "File not found: " + (localPath ?? "(null)");
+                return;
+            }
+
+            string ext = Path.GetExtension(localPath);
+            if (!string.Equals(ext, ".ncs", StringComparison.OrdinalIgnoreCase))
+            {
+                StatusText.Text = "Expected a .ncs file.";
+                return;
+            }
+
+            _ncsPath = Path.GetFullPath(localPath);
+            NcsPathText.Text = _ncsPath;
+            ClearBytecodeView();
+            _bytesForAst = null;
+            _astTreeBuiltForGeneration = -1;
+            if (AstTree != null)
+            {
+                AstTree.Items.Clear();
+            }
+
+            NssOutputPlain.Text = string.Empty;
+            RefreshHighlightedView();
+            StatusText.Text = "Loaded: " + Path.GetFileName(_ncsPath);
+            UpdateCommandStates();
+
+            if (decompileAfterLoad)
+            {
+                _ = RunDecompileAsync();
+            }
+        }
+
+        private bool HasNcsLoaded
+        {
+            get { return !string.IsNullOrEmpty(_ncsPath) && File.Exists(_ncsPath); }
+        }
+
+        private bool HasNssOutput
+        {
+            get { return (NssOutputPlain.Text ?? string.Empty).Trim().Length > 0; }
+        }
+
+        private void SetBusy(bool busy)
+        {
+            _isBusy = busy;
+            if (BusyBar != null)
+            {
+                BusyBar.IsVisible = busy;
+            }
+
+            UpdateCommandStates();
+        }
+
+        private void UpdateCommandStates()
+        {
+            bool hasNcs = HasNcsLoaded;
+            bool hasNss = HasNssOutput;
+            bool canWork = !_isBusy;
+
+            if (OpenNcsButton != null)
+            {
+                OpenNcsButton.IsEnabled = canWork;
+            }
+
+            if (MenuOpenNcs != null)
+            {
+                MenuOpenNcs.IsEnabled = canWork;
+            }
+
+            if (DecompileButton != null)
+            {
+                DecompileButton.IsEnabled = canWork && hasNcs;
+            }
+
+            if (MenuDecompile != null)
+            {
+                MenuDecompile.IsEnabled = canWork && hasNcs;
+            }
+
+            if (SaveNssButton != null)
+            {
+                SaveNssButton.IsEnabled = canWork && hasNss;
+            }
+
+            if (MenuSaveNss != null)
+            {
+                MenuSaveNss.IsEnabled = canWork && hasNss;
+            }
+
+            if (CopyNssButton != null)
+            {
+                CopyNssButton.IsEnabled = canWork && hasNss;
+            }
+
+            if (MenuCopyNss != null)
+            {
+                MenuCopyNss.IsEnabled = canWork && hasNss;
+            }
+
+            if (RoundTripButton != null)
+            {
+                RoundTripButton.IsEnabled = canWork && hasNss && _bytesForAst != null && _bytesForAst.Length > 0;
+            }
+
+            if (MenuRoundTrip != null)
+            {
+                MenuRoundTrip.IsEnabled = canWork && hasNss && _bytesForAst != null && _bytesForAst.Length > 0;
+            }
+        }
+
+        private void OnNssPlainTextChanged(object sender, TextChangedEventArgs e)
+        {
+            UpdateCommandStates();
+        }
+
+        private void OnDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.Contains(DataFormats.Files))
+            {
+                e.DragEffects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.DragEffects = DragDropEffects.None;
+            }
+        }
+
+        private async void OnDrop(object sender, DragEventArgs e)
+        {
+            if (_isBusy || !e.Data.Contains(DataFormats.Files))
+            {
+                return;
+            }
+
+            IEnumerable<IStorageItem> items = await e.Data.GetItemsAsync();
+            foreach (IStorageItem item in items)
+            {
+                if (item is IStorageFile file)
+                {
+                    string path = file.TryGetLocalPath();
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        LoadNcsFromPath(path, true);
+                        return;
+                    }
+                }
+            }
+
+            StatusText.Text = "Drop a .ncs file to open it.";
         }
 
         private void OnMainTabsSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -60,7 +227,7 @@ namespace NCSDecomp.UI
             {
                 return;
             }
-            // When switching to Highlighted, refresh from plain text so edits apply.
+
             if (MainTabs.SelectedIndex == TabHighlighted)
             {
                 RefreshHighlightedView();
@@ -236,10 +403,19 @@ namespace NCSDecomp.UI
         {
             FileDecompilerOptions.IsK2Selected = GameCombo.SelectedIndex == 1;
             _settings.CaptureFromRuntime();
+            if (HasNcsLoaded && HasNssOutput)
+            {
+                StatusText.Text = "Game changed — press Decompile (F5) to refresh output for the new actions table.";
+            }
         }
 
         private async void OnOpenNcsClick(object sender, RoutedEventArgs e)
         {
+            if (_isBusy)
+            {
+                return;
+            }
+
             try
             {
                 IStorageFolder start = null;
@@ -272,17 +448,7 @@ namespace NCSDecomp.UI
                     return;
                 }
 
-                _ncsPath = local;
-                NcsPathText.Text = local;
-                ClearBytecodeView();
-                _bytesForAst = null;
-                _astTreeBuiltForGeneration = -1;
-                if (AstTree != null)
-                {
-                    AstTree.Items.Clear();
-                }
-
-                StatusText.Text = "Loaded: " + Path.GetFileName(local);
+                LoadNcsFromPath(local, true);
                 if (_log.IsEnabled(LogLevel.Debug))
                 {
                     _log.LogDebug(
@@ -300,114 +466,191 @@ namespace NCSDecomp.UI
             }
         }
 
-        private void OnDecompileClick(object sender, RoutedEventArgs e)
+        private async void OnDecompileClick(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_ncsPath) || !File.Exists(_ncsPath))
+            await RunDecompileAsync();
+        }
+
+        private sealed class DecompileUiResult
+        {
+            public byte[] Bytes;
+            public string TokenStream;
+            public string Nss;
+            public string FatalError;
+            public string NssPhaseError;
+            public bool DecoderSucceeded;
+        }
+
+        private async Task RunDecompileAsync()
+        {
+            if (!HasNcsLoaded)
             {
                 StatusText.Text = "Open a valid .ncs file first.";
                 return;
             }
 
-            byte[] bytes = null;
+            if (_isBusy)
+            {
+                return;
+            }
+
+            SetBusy(true);
+            StatusText.Text = "Decompiling…";
+
+            string path = _ncsPath;
+            bool k2 = GameCombo.SelectedIndex == 1;
+            string k1Script = _settings.K1NwscriptPath;
+            string k2Script = _settings.K2NwscriptPath;
+
+            DecompileUiResult result;
             using (new UiCorrelationScope())
             {
                 string cid = ToolCorrelation.ReadOptional() ?? string.Empty;
                 try
                 {
-                    FileDecompilerOptions.IsK2Selected = GameCombo.SelectedIndex == 1;
-                    _settings.CaptureFromRuntime();
-                    bool k2 = FileDecompilerOptions.IsK2Selected;
-                    ActionsData actions = ActionsData.LoadForGame(k2, _settings.K1NwscriptPath, _settings.K2NwscriptPath, _log);
-                    var decompiler = new FileDecompiler(actions, _log);
-                    var swIo = Stopwatch.StartNew();
-                    bytes = File.ReadAllBytes(_ncsPath);
-                    swIo.Stop();
-                    if (_log.IsEnabled(LogLevel.Debug))
-                    {
-                        _log.LogDebug(
-                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Path={Path} ElapsedMs={ElapsedMs} Bytes={Bytes} K2={K2}",
-                            DecompPhaseNames.IoReadNcs,
-                            cid,
-                            ToolPathRedaction.FormatPath(_ncsPath),
-                            swIo.ElapsedMilliseconds,
-                            bytes.Length,
-                            k2);
-                    }
-
-                    _bytesForAst = bytes;
-                    _decompileGeneration++;
-                    _astTreeBuiltForGeneration = -1;
-                    if (MainTabs != null && MainTabs.SelectedIndex == TabAst)
-                    {
-                        TryPopulateAstTree();
-                    }
-
-                    var swTok = Stopwatch.StartNew();
-                    string tokenStream = NcsParsePipeline.DecodeToTokenStream(bytes, actions);
-                    swTok.Stop();
-                    if (_log.IsEnabled(LogLevel.Debug))
-                    {
-                        _log.LogDebug(
-                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} TokenChars={Chars}",
-                            DecompPhaseNames.DecompBytecodeToTokens,
-                            cid,
-                            swTok.ElapsedMilliseconds,
-                            tokenStream?.Length ?? 0);
-                    }
-
-                    RefreshBytecodeView(tokenStream);
-
-                    var swNss = Stopwatch.StartNew();
-                    try
-                    {
-                        string nss = decompiler.DecompileToNss(bytes);
-                        swNss.Stop();
-                        if (_log.IsEnabled(LogLevel.Debug))
-                        {
-                            _log.LogDebug(
-                                "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} NssChars={Chars}",
-                                DecompPhaseNames.UiDecompile,
-                                cid,
-                                swNss.ElapsedMilliseconds,
-                                nss.Length);
-                        }
-
-                        NssOutputPlain.Text = nss;
-                        RefreshHighlightedView();
-                        StatusText.Text = "Decompiled " + bytes.Length + " bytes -> " + nss.Length + " characters.";
-                    }
-                    catch (Exception exNss)
-                    {
-                        swNss.Stop();
-                        _log.LogError(
-                            exNss,
-                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=NSS generation failed after successful decode",
-                            DecompPhaseNames.DecompPrint,
-                            cid,
-                            swNss.ElapsedMilliseconds);
-                        StatusText.Text = "Decoder OK; NSS error: " + exNss.Message;
-                        NssOutputPlain.Text = string.Empty;
-                        RefreshHighlightedView();
-                    }
+                    result = await Task.Run(() => DecompileOnBackground(path, k2, k1Script, k2Script, cid)).ConfigureAwait(true);
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(
-                        ex,
-                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Message=decompile failed",
-                        DecompPhaseNames.UiDecompile,
-                        cid);
-                    StatusText.Text = "Error: " + ex.Message;
-                    NssOutputPlain.Text = string.Empty;
-                    RefreshHighlightedView();
-                    ClearBytecodeView();
-                    if (bytes == null)
-                    {
-                        _bytesForAst = null;
-                        _astTreeBuiltForGeneration = -1;
-                    }
+                    result = new DecompileUiResult { FatalError = ex.Message };
                 }
             }
+
+            ApplyDecompileResult(result);
+            SetBusy(false);
+        }
+
+        private DecompileUiResult DecompileOnBackground(string path, bool k2, string k1Script, string k2Script, string cid)
+        {
+            var output = new DecompileUiResult();
+            try
+            {
+                FileDecompilerOptions.IsK2Selected = k2;
+                ActionsData actions = ActionsData.LoadForGame(k2, k1Script, k2Script, _log);
+                var decompiler = new FileDecompiler(actions, _log);
+                var swIo = Stopwatch.StartNew();
+                output.Bytes = File.ReadAllBytes(path);
+                swIo.Stop();
+                if (_log.IsEnabled(LogLevel.Debug))
+                {
+                    _log.LogDebug(
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Path={Path} ElapsedMs={ElapsedMs} Bytes={Bytes} K2={K2}",
+                        DecompPhaseNames.IoReadNcs,
+                        cid,
+                        ToolPathRedaction.FormatPath(path),
+                        swIo.ElapsedMilliseconds,
+                        output.Bytes.Length,
+                        k2);
+                }
+
+                var swTok = Stopwatch.StartNew();
+                output.TokenStream = NcsParsePipeline.DecodeToTokenStream(output.Bytes, actions);
+                swTok.Stop();
+                output.DecoderSucceeded = true;
+                if (_log.IsEnabled(LogLevel.Debug))
+                {
+                    _log.LogDebug(
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} TokenChars={Chars}",
+                        DecompPhaseNames.DecompBytecodeToTokens,
+                        cid,
+                        swTok.ElapsedMilliseconds,
+                        output.TokenStream != null ? output.TokenStream.Length : 0);
+                }
+
+                var swNss = Stopwatch.StartNew();
+                try
+                {
+                    output.Nss = decompiler.DecompileToNss(output.Bytes);
+                    swNss.Stop();
+                    if (_log.IsEnabled(LogLevel.Debug))
+                    {
+                        _log.LogDebug(
+                            "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} NssChars={Chars}",
+                            DecompPhaseNames.UiDecompile,
+                            cid,
+                            swNss.ElapsedMilliseconds,
+                            output.Nss.Length);
+                    }
+                }
+                catch (Exception exNss)
+                {
+                    swNss.Stop();
+                    output.NssPhaseError = exNss.Message;
+                    _log.LogError(
+                        exNss,
+                        "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} ElapsedMs={ElapsedMs} Message=NSS generation failed after successful decode",
+                        DecompPhaseNames.DecompPrint,
+                        cid,
+                        swNss.ElapsedMilliseconds);
+                }
+            }
+            catch (Exception ex)
+            {
+                output.FatalError = ex.Message;
+                _log.LogError(
+                    ex,
+                    "Tool=NCSDecomp.UI Phase={Phase} CorrelationId={CorrelationId} Message=decompile failed",
+                    DecompPhaseNames.UiDecompile,
+                    cid);
+            }
+
+            return output;
+        }
+
+        private void ApplyDecompileResult(DecompileUiResult result)
+        {
+            if (result == null)
+            {
+                StatusText.Text = "Decompile failed (no result).";
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(result.FatalError))
+            {
+                StatusText.Text = "Error: " + result.FatalError;
+                NssOutputPlain.Text = string.Empty;
+                RefreshHighlightedView();
+                ClearBytecodeView();
+                _bytesForAst = null;
+                _astTreeBuiltForGeneration = -1;
+                UpdateCommandStates();
+                return;
+            }
+
+            _bytesForAst = result.Bytes;
+            _decompileGeneration++;
+            _astTreeBuiltForGeneration = -1;
+            if (MainTabs != null && MainTabs.SelectedIndex == TabAst)
+            {
+                TryPopulateAstTree();
+            }
+
+            if (result.DecoderSucceeded)
+            {
+                RefreshBytecodeView(result.TokenStream);
+            }
+            else
+            {
+                ClearBytecodeView();
+            }
+
+            if (!string.IsNullOrEmpty(result.NssPhaseError))
+            {
+                StatusText.Text = "Decoder OK; NSS error: " + result.NssPhaseError;
+                NssOutputPlain.Text = string.Empty;
+                RefreshHighlightedView();
+                UpdateCommandStates();
+                return;
+            }
+
+            if (result.Nss != null)
+            {
+                NssOutputPlain.Text = result.Nss;
+                RefreshHighlightedView();
+                StatusText.Text = "Decompiled " + result.Bytes.Length + " bytes -> " + result.Nss.Length + " characters.";
+            }
+
+            UpdateCommandStates();
         }
 
         private void OnRoundTripClick(object sender, RoutedEventArgs e)
@@ -587,6 +830,100 @@ namespace NCSDecomp.UI
                     DecompPhaseNames.IoWriteNss,
                     ToolCorrelation.ReadOptional() ?? string.Empty);
                 StatusText.Text = "Save failed: " + ex.Message;
+            }
+        }
+
+        private async void OnCopyNssClick(object sender, RoutedEventArgs e)
+        {
+            string text = NssOutputPlain.Text ?? string.Empty;
+            if (text.Length == 0)
+            {
+                StatusText.Text = "Nothing to copy.";
+                return;
+            }
+
+            try
+            {
+                if (Clipboard != null)
+                {
+                    await Clipboard.SetTextAsync(text);
+                    StatusText.Text = "Copied " + text.Length + " characters to clipboard.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = "Copy failed: " + ex.Message;
+            }
+        }
+
+        private void OnExitClick(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private async void OnAboutClick(object sender, RoutedEventArgs e)
+        {
+            string baseDir = NcsDecompSettings.GetDefaultAppBaseDirectory();
+            string configDir = NcsDecompSettings.GetConfigDirectory(baseDir);
+            string configPath = Path.Combine(configDir, NcsDecompSettings.ConfigFileName);
+            string aboutText =
+                "NCSDecomp — managed KotOR NCS decompiler\r\n\r\n"
+                + "• NCS → NSS via NCSDecomp.Core (no nwnnsscomp required)\r\n"
+                + "• Round-trip uses KCompiler for recompile\r\n"
+                + "• Registry spoofing is disabled (NoOpRegistrySpoofer)\r\n\r\n"
+                + "Config: " + configPath + "\r\n"
+                + "Host: " + baseDir;
+
+            var dialog = new Window
+            {
+                Title = "About NCSDecomp",
+                Width = 520,
+                Height = 280,
+                MinWidth = 400,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Content = new ScrollViewer
+                {
+                    Content = new TextBlock
+                    {
+                        Text = aboutText,
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(16)
+                    }
+                }
+            };
+
+            await dialog.ShowDialog(this);
+        }
+
+        private void OnOpenConfigFolderClick(object sender, RoutedEventArgs e)
+        {
+            string baseDir = NcsDecompSettings.GetDefaultAppBaseDirectory();
+            string configDir = NcsDecompSettings.GetConfigDirectory(baseDir);
+            try
+            {
+                Directory.CreateDirectory(configDir);
+                OpenPathInShell(configDir);
+                StatusText.Text = "Opened config folder.";
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = "Could not open config folder: " + ex.Message;
+            }
+        }
+
+        private static void OpenPathInShell(string path)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", path) { UseShellExecute = true });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", path);
+            }
+            else
+            {
+                Process.Start("xdg-open", path);
             }
         }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
   <RunConfiguration>
-    <!-- Default CI/agent runs must finish under the repo 10-minute wrapper cap. Exhaustive vanilla↔NCS harness: see Exhaustive.runsettings -->
-    <TestCaseFilter>Category!=DeNCSRoundTrip&amp;Category!=VendorK2Game&amp;Category!=TslPatcherExeReference&amp;Category!=KorExhaustiveBinaryFixtures&amp;Category!=NamespaceMainAltBinaryFixtures&amp;Category!=GffGitModuleTextureBinaryFixtures&amp;Category!=HeadsAppearanceBinaryFixtures&amp;Category!=GeneratedGenericModExhaustive&amp;Category!=WindowsOnly</TestCaseFilter>
+    <!-- Default CI/agent runs must finish under the repo 10-minute wrapper cap. Category=Vendor (vanilla NSS) and DeNCS exhaustive harness: Vendor.runsettings / Exhaustive.runsettings -->
+    <TestCaseFilter>Category!=DeNCSRoundTrip&amp;Category!=Vendor&amp;Category!=VendorK2Game&amp;Category!=TslPatcherExeReference&amp;Category!=KorExhaustiveBinaryFixtures&amp;Category!=NamespaceMainAltBinaryFixtures&amp;Category!=GffGitModuleTextureBinaryFixtures&amp;Category!=HeadsAppearanceBinaryFixtures&amp;Category!=GeneratedGenericModExhaustive&amp;Category!=WindowsOnly</TestCaseFilter>
   </RunConfiguration>
 </RunSettings>

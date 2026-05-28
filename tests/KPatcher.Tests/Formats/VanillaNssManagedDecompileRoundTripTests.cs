@@ -13,7 +13,7 @@ namespace KPatcher.Core.Tests.Formats
     /// <summary>
     /// Managed-only vanilla coverage (/<c>lfg</c>): NSS -> <see cref="NCSAuto.CompileNss"/> -> full
     /// <see cref="NCSManagedDecompiler.DecompileToNss"/> -> recompile -> <see cref="NcsRoundTripAssertHelpers.AssertNcsStructurallyEqual"/>.
-    /// Does not use <c>nwnnsscomp.exe</c>. Requires <c>vendor/Vanilla_KOTOR_Script_Source</c> submodule; when absent, tests return immediately.
+    /// Does not use <c>nwnnsscomp.exe</c>. Requires <c>vendor/Vanilla_KOTOR_Script_Source</c>; calls <see cref="VanillaNSSCompileTests.RequireVanillaSubmodule"/> when absent.
     /// </summary>
     [Trait("Category", "Vendor")]
     [Trait("Category", "ManagedNcs")]
@@ -54,10 +54,7 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void Vanilla_K1_ManagedDecompile_And_StructuralRecompile_WhenSubmodulePresent()
         {
-            if (!VanillaNSSCompileTests.VanillaSubmodulePresent)
-            {
-                return;
-            }
+            VanillaNSSCompileTests.RequireVanillaSubmodule();
 
             var paths = EnumerateNss("K1", MaxFilesK1).ToList();
             paths.Should().NotBeEmpty("K1 .nss files expected when vanilla submodule is present");
@@ -98,10 +95,7 @@ namespace KPatcher.Core.Tests.Formats
         [Fact]
         public void Vanilla_TSL_ManagedDecompile_And_StructuralRecompile_WhenSubmodulePresent()
         {
-            if (!VanillaNSSCompileTests.VanillaSubmodulePresent)
-            {
-                return;
-            }
+            VanillaNSSCompileTests.RequireVanillaSubmodule();
 
             var paths = EnumerateNss("TSL", MaxFilesTsl).ToList();
             paths.Should().NotBeEmpty("TSL .nss files expected when vanilla submodule is present");

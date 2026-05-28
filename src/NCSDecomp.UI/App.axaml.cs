@@ -1,5 +1,6 @@
 // Copyright 2021-2025 NCSDecomp / KPatcher
 
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -29,7 +30,36 @@ namespace NCSDecomp.UI
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                var main = new MainWindow();
+                desktop.MainWindow = main;
+                if (desktop.Args != null && desktop.Args.Length > 0)
+                {
+                    for (int i = 0; i < desktop.Args.Length; i++)
+                    {
+                        string arg = desktop.Args[i];
+                        if (string.IsNullOrWhiteSpace(arg))
+                        {
+                            continue;
+                        }
+
+                        if (string.Equals(arg, "-i", StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(arg, "--input", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (i + 1 < desktop.Args.Length)
+                            {
+                                main.LoadNcsFromPath(desktop.Args[i + 1], true);
+                            }
+
+                            break;
+                        }
+
+                        if (arg.Length > 0 && arg[0] != '-')
+                        {
+                            main.LoadNcsFromPath(arg, true);
+                            break;
+                        }
+                    }
+                }
             }
 
             base.OnFrameworkInitializationCompleted();

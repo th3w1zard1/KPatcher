@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Requires vendor/Vanilla_KOTOR_Script_Source with .nss content. Run via test-optional-tiers or locally after initializing vendor content. -->
+    <TestCaseFilter>Category=Vendor</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

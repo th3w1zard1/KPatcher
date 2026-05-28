@@ -72,15 +72,17 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 | No product registry spoofer | **Met** | `CompilerExecutionWrapper.CreateRegistrySpoofer()` → `NoOpRegistrySpoofer` only. |
 | ≥8 NCS/NSS test classes | **Met** | **14** classes listed under **NCS/NSS test fixtures** (includes opt-in harness). |
 | Roundtrip tests exist and pass (default tier) | **Met** | `NCSRoundtripTests`, `VanillaNssManagedDecompileRoundTripTests`, `NcsDecompNetStyleRoundTripTests`, `RoundTripUtilManagedCompareTests`, etc. |
-| Full solution tests pass | **Met** | Wrapper command below; **753/753** `KPatcher.Tests` (Default.runsettings) on Linux at sign-off HEAD. |
+| Full solution tests pass | **Met** | Wrapper command below; **749/749** `KPatcher.Tests` (Default.runsettings) on Linux at sign-off HEAD. |
+| Default CI fails on test regressions | **Met** | Primary `ci.yml` test step no longer uses `continue-on-error`. |
+| Vendor tier not vacuous in default CI | **Met** | `Category=Vendor` excluded from `Default.runsettings`; vendor tests use `RequireVanillaSubmodule()` and run via `Vendor.runsettings` when the tree is present. |
 
-**Opt-in (not default CI):** `NCSDecompCliRoundTripTest` may shell out to `nwnnsscomp` when installed (`ExternalCompiler`, `DeNCSRoundTrip` traits). Excluded from `Default.runsettings`; not part of product compile/decompile paths.
+**Opt-in (not default CI):** `NCSDecompCliRoundTripTest` may shell out to `nwnnsscomp` when installed (`ExternalCompiler`, `DeNCSRoundTrip` traits). `Category=Vendor` vanilla NSS compile/decompile tests use `Vendor.runsettings` (workflow_dispatch `run_vendor_nss` on optional tiers). Neither category is part of product compile/decompile paths.
 
 ## Verification
 
-**Last /lfg verification:** 2026-05-23 — `master` @ `6ae6014a` (plan `010`, seventh `/lfg` re-run). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Prior merges: PR #10 (managed policy), PR #11 (Linux suite), PR #12 (checklist on `master`).
+**Last /lfg verification:** 2026-05-23 — `master` @ plan `011` (eighth `/lfg`: CI/vendor truthfulness). Re-confirmed: all **271** Java sources accounted; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes. Prior merges: PR #10 (managed policy), PR #11 (Linux suite), PR #12 (checklist on `master`).
 
-**NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-23). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `WindowsOnly`, etc.).
+**NCS/NSS test gate (managed tooling):** **215** `KPatcher.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-05-23). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
 
 **Full default-tier suite** (repo wrapper, Linux):
 
@@ -88,7 +90,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-**753/753 passed** in `KPatcher.Tests` (2026-05-23) at `6ae6014a` via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug`. Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**749/749 passed** in `KPatcher.Tests` (2026-05-23) via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (four `Category=Vendor` facts opt in via `Vendor.runsettings`). Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 

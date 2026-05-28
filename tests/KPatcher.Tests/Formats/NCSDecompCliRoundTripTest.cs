@@ -59,7 +59,6 @@ namespace KPatcher.Core.Tests.Formats
     /// </remarks>
     [Trait("Category", "DeNCSRoundTrip")]
     [Trait("Category", "ExternalCompiler")]
-    [Trait("Category", "Vendor")]
     public sealed class NCSDecompCliRoundTripTest
     {
         private long _maxSuiteNanos;

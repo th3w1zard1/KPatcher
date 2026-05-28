@@ -13,7 +13,8 @@ Optional: leading `-TimeoutSeconds N` (capped at **600**). Exit code **124** mea
 
 | File | Role |
 |------|------|
-| `tests/KPatcher.Tests/Default.runsettings` | Default PR/local runs: excludes `DeNCSRoundTrip`, `VendorK2Game`, `TslPatcherExeGolden`, `KorExhaustiveBinaryFixtures`, `NamespaceMainAltBinaryFixtures`, `GffGitModuleTextureBinaryFixtures`, `HeadsAppearanceBinaryFixtures`. |
+| `tests/KPatcher.Tests/Default.runsettings` | Default PR/local runs: excludes `DeNCSRoundTrip`, `Vendor`, `VendorK2Game`, `TslPatcherExeGolden`, `KorExhaustiveBinaryFixtures`, `NamespaceMainAltBinaryFixtures`, `GffGitModuleTextureBinaryFixtures`, `HeadsAppearanceBinaryFixtures`. |
+| `tests/KPatcher.Tests/Vendor.runsettings` | Only `Category=Vendor` (vanilla NSS compile/decompile; requires populated `vendor/Vanilla_KOTOR_Script_Source`). |
 | `tests/KPatcher.Tests/Exhaustive.runsettings` | Only `Category=DeNCSRoundTrip` (long DeNCS/NSS harness). Example: `dotnet test ... --settings tests/KPatcher.Tests/Exhaustive.runsettings` |
 | `tests/KPatcher.Tests/VendorK2Game.runsettings` | Only `Category=VendorK2Game` (requires retail-style tree via env; see test comments). |
 | `tests/KPatcher.Tests/TslPatcherExeGolden.runsettings` | Only `Category=TslPatcherExeGolden` (optional `KPATCHER_TSLPATCHER_EXE`; tests no-op when unset). |
@@ -26,7 +27,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 ### GitHub Actions tiers
 
 - **PR / push (`ci.yml`):** `KPatcher.Tests` with default `VSTestSetting` (via `DotnetTest.ps1`), plus a **satellite smoke** job for `tests/KCompiler.Tests`, `tests/NCSDecomp.Tests`, and `tests/KEditChanges.Tests`.
-- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper) and **TslPatcher exe** smoke. **Vendor KotOR II** integration runs only when the workflow is dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. All exhaustive mod-install tests construct their payloads in memory using format builder APIs — no committed fixture files on disk. `GeneratedRealModSmoke.runsettings` is available for local or future CI runs of `GeneratedRealModInstallerSmoke`; `GeneratedRealModExhaustive.runsettings` is the reserved filter for future exhaustive generated tiers.
+- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper) and **TslPatcher exe** smoke. **Vanilla NSS** (`Vendor.runsettings`) runs when dispatched with `run_vendor_nss`; the job **fails** if the vanilla script tree has no `.nss` files (no silent skip). **Vendor KotOR II** integration runs only when dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. All exhaustive mod-install tests construct their payloads in memory using format builder APIs — no committed fixture files on disk. `GeneratedRealModSmoke.runsettings` is available for local or future CI runs of `GeneratedRealModInstallerSmoke`; `GeneratedRealModExhaustive.runsettings` is the reserved filter for future exhaustive generated tiers.
 
 ## No mocks in integration-style paths
 

@@ -12,9 +12,9 @@ namespace KPatcher.Core.Tests.Formats
 {
     /// <summary>
     /// Tests that compile and roundtrip NSS from vendor/Vanilla_KOTOR_Script_Source using KCompiler (NCSAuto.CompileNss).
-    /// Skipped when the submodule is not present. Run with submodules initialized for full coverage.
+    /// Vanilla-script facts call <see cref="RequireVanillaSubmodule"/>; run via <c>Vendor.runsettings</c> after populating vendor content.
+    /// Decode smoke facts below have no <c>Category=Vendor</c> trait and run on the default tier.
     /// </summary>
-    [Trait("Category", "Vendor")]
     public class VanillaNSSCompileTests
     {
         private static readonly string VanillaRoot = ResolveVanillaScriptRoot();
@@ -46,6 +46,16 @@ namespace KPatcher.Core.Tests.Formats
         /// </summary>
         public static bool VanillaSubmodulePresent =>
             HasPopulatedVanillaContent(VanillaRoot);
+
+        /// <summary>
+        /// Fails when <see cref="VanillaSubmodulePresent"/> is false (used by Category=Vendor tests).
+        /// </summary>
+        public static void RequireVanillaSubmodule()
+        {
+            VanillaSubmodulePresent.Should().BeTrue(
+                "vendor/Vanilla_KOTOR_Script_Source must contain K1/TSL .nss files. " +
+                "Populate vendor content before running Category=Vendor tests (see Vendor.runsettings).");
+        }
 
         private static bool HasPopulatedVanillaContent(string root)
         {
@@ -92,13 +102,10 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         [Fact]
+        [Trait("Category", "Vendor")]
         public void Vanilla_K1_CompileAndRoundtrip_WhenSubmodulePresent()
         {
-            if (!VanillaSubmodulePresent)
-            {
-                // Skip when vendor submodule not initialized
-                return;
-            }
+            RequireVanillaSubmodule();
 
             var paths = GetNssFiles("K1", 50).ToList();
             paths.Should().NotBeEmpty("K1 folder should contain .nss files when submodule is present");
@@ -259,12 +266,10 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         [Fact]
+        [Trait("Category", "Vendor")]
         public void Vanilla_TSL_CompileAndRoundtrip_WhenSubmodulePresent()
         {
-            if (!VanillaSubmodulePresent)
-            {
-                return;
-            }
+            RequireVanillaSubmodule();
 
             var paths = GetNssFiles("TSL", 50).ToList();
             paths.Should().NotBeEmpty("TSL folder should contain .nss files when submodule is present");

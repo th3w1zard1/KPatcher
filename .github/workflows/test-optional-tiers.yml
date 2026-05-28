@@ -12,6 +12,10 @@ on:
         description: Run exhaustive inline installs that require committed mod bytes (KorExhaustiveBinaryFixtures.runsettings — Kor, namespace, gff_git+tex, heads InstallList under test_files/exhaustive_pattern_inlines)
         type: boolean
         default: false
+      run_vendor_nss:
+        description: Run Vanilla NSS compile/decompile (Vendor.runsettings; needs vendor/Vanilla_KOTOR_Script_Source with .nss)
+        type: boolean
+        default: false
   schedule:
     # Weekly Monday 06:00 UTC — DeNCS harness + optional exe smoke (no vendor game required).
     - cron: '0 6 * * 1'
@@ -81,6 +85,48 @@ jobs:
 
       - name: Test
         run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/KorExhaustiveBinaryFixtures.runsettings --verbosity normal
+
+  vendor-nss-managed:
+    name: Vanilla NSS compile/decompile (Vendor.runsettings)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_vendor_nss == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Check vanilla script tree
+        id: vendor_nss
+        run: |
+          if find vendor/Vanilla_KOTOR_Script_Source -name '*.nss' -print -quit 2>/dev/null | grep -q .; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore
+        if: steps.vendor_nss.outputs.present == 'true'
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        if: steps.vendor_nss.outputs.present == 'true'
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test
+        if: steps.vendor_nss.outputs.present == 'true'
+        run: pwsh -NoProfile -File ./scripts/DotnetTest.ps1 tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/Vendor.runsettings --verbosity normal
+
+      - name: Fail (no vanilla NSS tree)
+        if: steps.vendor_nss.outputs.present != 'true'
+        run: |
+          echo "::error::run_vendor_nss was requested but vendor/Vanilla_KOTOR_Script_Source has no .nss files. Initialize submodules or populate vendor content."
+          exit 1
 
   vendor-k2-game:
     name: Vendor KotOR II integration
