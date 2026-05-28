@@ -18,14 +18,17 @@ audit_ref: "docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audi
 ## Executive Summary
 
 **Parity Status: ⚠ PARTIAL / REOPENED**
-KPatcher implements the major TSLPatcher feature families, but the repository no longer has evidence for a "strong" end-to-end core-logic parity claim. The refreshed audit found source-vs-runtime drift around TSLPatcher pipeline ordering, confirmed namespace behavior differences, a confirmed InstallList overwrite-safeguard gap, and intentional backup/uninstall extensions that should not be summarized as strict parity.
+KPatcher implements the major TSLPatcher feature families, but the repository no longer has evidence for a "strong" end-to-end core-logic parity claim. The refreshed audit found source-vs-runtime drift around TSLPatcher pipeline ordering, confirmed namespace and InstallList safety differences, confirmed that KPatcher narrows TSLPatcher's generic HACKList into NCS-only patching, identified CompileList orchestration drift, and verified intentional backup/uninstall and K1 hardcap additions that should not be summarized as strict parity.
 
 **Confidence Level:** Moderate (feature-surface coverage remains broad, but core-logic parity is only partially verified and several top-level behavior differences are now confirmed)
 
 **Risk Profile:** Medium
+
 - Pipeline parity target is unresolved because repo-local TSLPatcher artifacts disagree
+- Generic HACKList behavior is narrowed to NCS-only patching in KPatcher
 - InstallList overwrite safeguards differ from historical TSLPatcher behavior
 - Namespace fallback/path-confinement behavior differs from historical TSLPatcher behavior
+- CompileList orchestration/settings differ from historical TSLPatcher behavior
 - Existing parity documentation had overstated confidence
 
 ---
@@ -35,6 +38,7 @@ KPatcher implements the major TSLPatcher feature families, but the repository no
 ### 1.1 Test Inventory
 
 **Projects and Coverage:**
+
 - **KPatcher.Tests:** 84 files, 767 test cases (flagship test suite)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
@@ -69,6 +73,7 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 **Skipped Tests:** 68 markers documented
 
 **Breakdown:**
+
 - **76 legacy integration tests disabled** (pending harness migration to ExtractedModInstallHarness)
   - Files: 27 containing pre-existing syntax errors (17,970 total)
   - Cause: Generated fixture byte[] literals (~1 GB) cause build hangs
@@ -86,6 +91,7 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 **Status: ✅ 100% COMPLIANT**
 
 **Verified:**
+
 - ✅ Zero top-level external fixture files committed (test_files/ root is clean per TestFilesRootPolicyTests)
 - ✅ All test data constructed via C# format APIs: `new GFF(GFFContent.UTC)`, `new TwoDA(columns)`, `new TLK(Language.English)`, etc.
 - ✅ Ephemeral temp directories used for I/O tests: `Path.GetTempPath() + Guid`, cleanup in Dispose()
@@ -93,10 +99,12 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 - ✅ No `.exe` references in test code
 
 **Evidence:**
+
 - InstallFlightRecorderTests.cs (lines 14-33): Exemplary temp directory pattern
 - TestFilesRootPolicyTests.cs: Explicit guard rail enforcing policy
 
 **Three Allowed Fixture Directories:**
+
 1. exhaustive_pattern_inlines (inline test patterns, under migration)
 2. integration_tslpatcher_archive_corpus (archive samples, under migration)
 3. integration_tslpatcher_mods (mod fixtures, under migration)
@@ -166,6 +174,7 @@ Tests (KPatcher.Tests, KCompiler.Tests, NCSDecomp.Tests, KEditChanges.Tests)
 ```
 
 **Key Findings:**
+
 - ✅ No circular dependencies detected
 - ✅ Core is dependency-free (except managed-code foundations)
 - ✅ UI and tools correctly depend on Core
@@ -177,6 +186,7 @@ Tests (KPatcher.Tests, KCompiler.Tests, NCSDecomp.Tests, KEditChanges.Tests)
 ### 2.3 Public API Surface
 
 **Verified Responsibilities:**
+
 - KPatcher.Core exports: Patcher engine (ModInstaller), format handlers, config reader
 - KCompiler.Core exports: NSS→NCS compilation contracts
 - NCSDecomp.Core exports: NCS→NSS decompilation engine
@@ -194,6 +204,7 @@ Tests (KPatcher.Tests, KCompiler.Tests, NCSDecomp.Tests, KEditChanges.Tests)
 **Status: ✅ COMPLETE & CORRECT**
 
 **Implementation Files:**
+
 - ✅ `/src/KPatcher.Core/Logger/InstallFlightRecorder.cs` (146 lines, feature implementation)
 - ✅ `/tests/KPatcher.Tests/Logger/InstallFlightRecorderTests.cs` (7 test methods, unit tests)
 - ✅ `/tests/KPatcher.Tests/Patcher/InstallFlightRecorderIntegrationTests.cs` (integration tests)
@@ -201,14 +212,17 @@ Tests (KPatcher.Tests, KCompiler.Tests, NCSDecomp.Tests, KEditChanges.Tests)
 ### 3.2 Lifecycle Verification
 
 **Instantiation:** ModInstaller.Install() line 340
+
 ```csharp
 installFlightRecorder = new InstallFlightRecorder(recordDirectory, gamePath, Game, log);
 ```
+
 - ✅ Positioned at entry (before modification logic)
 - ✅ Inside try block with protective catch
 - ✅ Fail-soft: warning logged if creation fails, installation continues
 
 **Finalization:** ModInstaller.Install() finally block lines 600-624
+
 ```csharp
 finally {
     if (installFlightRecorder != null) {
@@ -217,6 +231,7 @@ finally {
     }
 }
 ```
+
 - ✅ Executes in all paths (success, exception, cancellation)
 - ✅ Three terminal states captured: Success, Failure (InvalidOperationException), Cancellation (OperationCanceledException)
 - ✅ Nested try-catch guards both calls (best-effort finalization)
@@ -224,20 +239,24 @@ finally {
 ### 3.3 Diagnostic Capture
 
 **Event Subscription:** Line 62
+
 ```csharp
 _logger.LogAdded += _logAddedHandler;
 ```
+
 - ✅ Subscribes to PatchLogger events
 - ✅ WriteExistingLogs() buffers pre-subscription logs (line 59)
 - ✅ HandleLogAdded() streams real-time events to disk (lines 97-104)
 
 **Log Categories:** All captured
+
 - LogType.Diagnostic (primary diagnostic stream)
 - LogType.Warning (status warnings)
 - LogType.Note (user-visible notes)
 - LogType.Verbose (implementation details)
 
 **Output File:** {modPath}/installrecord.txt
+
 - ✅ Human-readable format with timestamps
 - ✅ Structured outcome recording (Success | Failure | Cancelled | Unknown)
 - ✅ Optional detail field for failure reasons / cancellation notes
@@ -245,22 +264,26 @@ _logger.LogAdded += _logAddedHandler;
 ### 3.4 Non-Breaking Integration
 
 **ModInstaller Tests:** Existing tests verified to still pass
+
 - ✅ Flight recorder is non-breaking (feature addition, no behavior change)
 - ✅ Error handling paths unchanged
 - ✅ Parallel file writer (InstallLogWriter) unaffected
 
 **CLI Headless Integration:** ProgramCliExecutionTests.cs
+
 - ✅ Record path announced via PatchLogger.AddNote()
 - ✅ Headless output visible to users
 
 ### 3.5 Test Coverage
 
 **Unit Tests (InstallFlightRecorderTests.cs):**
+
 1. Constructor_WritesHeaderAndSeededDiagnostics — initialization, header format
 2. Constructor_ThrowsWhenModDirectoryIsMissing — error case
 3. Dispose_WritesTerminalStateAndStreamsNewLogs — finalization, state capture
 
 **Integration Tests (InstallFlightRecorderIntegrationTests.cs):**
+
 1. Three terminal outcomes (Success, Failure, Cancellation)
 2. Real installer integration (non-mocked)
 3. File I/O validation
@@ -274,6 +297,7 @@ _logger.LogAdded += _logAddedHandler;
 ### 4.1 Reference Material
 
 **Documentation Sources:**
+
 - ✅ `docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md` — refreshed evidence-based gap report
 - ✅ `docs/TSLPATCHER_BUILD_VERIFICATION.md` — Ghidra binary analysis, behavior spec
 - ✅ `docs/NWNNSSCOMP_RE.md` — nwnnsscomp.exe reverse-engineering, managed replacement parity
@@ -283,25 +307,28 @@ _logger.LogAdded += _logAddedHandler;
 ### 4.2 Execution Pipeline Parity
 
 **TSLPatcher Evidence in Repo Is Split:**
+
 1. **Older Delphi snapshot:** `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList`
 2. **Current Delphi snapshot:** `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF`
 3. **Build-verification doc:** `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`
 
 **KPatcher Sequence (Implementation-verified):**
+
 1. CountModifications ✅
 2. TLK modifications ✅
 3. InstallList
 4. 2DA modifications
 5. GFF modifications
-6. NSS compilation
-7. NCS patching (HACKList equivalent)
+6. NSS compilation (managed compile path)
+7. NCS-only HACKList parsing
 8. SSF modifications
 
-**Assessment:** KPatcher implements the expected pipeline stages, but the repo's TSLPatcher references do not currently agree on one authoritative order. Strong pipeline-parity claims are therefore suspended pending an explicit target decision.
+**Assessment:** KPatcher implements analogous pipeline stages, but the repo's TSLPatcher references do not currently agree on one authoritative order, and the HACK/Compile stages are not strict one-to-one equivalents. Strong pipeline-parity claims are therefore suspended pending an explicit target decision.
 
 ### 4.3 Format Handler Parity
 
 **All Formats Implemented:**
+
 - ✅ **GFF** (game object format) — read, modify, write
 - ✅ **2DA** (2D array text format) — read, modify, write
 - ✅ **TLK** (string table) — read, modify, write
@@ -317,6 +344,9 @@ _logger.LogAdded += _logAddedHandler;
 | **Pipeline Target Drift** | Confirmed | Older Delphi source, newer Delphi source, and binary-verification docs disagree on TSLPatcher order; KPatcher currently matches none exactly | High |
 | **Namespace Fallback / DataPath Confinement** | Confirmed | KPatcher is stricter on missing namespace files but looser on `DataPath` escape rules than TSLPatcher | Medium |
 | **InstallList Overwrite Safeguards** | Confirmed | KPatcher lacks the historical `.exe` / `.tlk` / `.key` / `.bif` replace guard found in TSLPatcher | High |
+| **Generic HACKList Scope** | Confirmed | KPatcher maps `[HACKList]` to `ModificationsNCS` only; TSLPatcher applies generic binary offset writes to selected files | High |
+| **CompileList Orchestration / Settings** | Confirmed | KPatcher compiles in-process and no reviewed `ScriptCompilerFlags` equivalent was found in the C# tree | Medium |
+| **K1 2DA Hardcaps** | KPatcher Addition | KPatcher rejects over-limit K1 `placeables.2da` / `upcrystals.2da` / `upgrade.2da` results; no equivalent Delphi guard was found in the reviewed sources | Medium |
 | **Backup / Uninstall Semantics** | Intentional Extension | KPatcher uses timestamped backups and uninstall support instead of app-root single-copy backups | Medium |
 | **RTF Rendering** | Intentional | Python uses Tkinter (strips RTF); C# uses Avalonia RichTextBox | Improved user experience; approved per README.md |
 | **HACKList Serialization** | TODO | Write path not implemented (read implemented) | Cannot round-trip NCS configs to INI; acceptable for now |
@@ -330,6 +360,7 @@ _logger.LogAdded += _logAddedHandler;
 **Status: ✅ 100% PARITY**
 
 **Managed Replacement:** KCompiler.Core
+
 - ✅ Zero external .exe dependency (fully managed)
 - ✅ CLI parity: `-g 1|2` (game selection), `--outputdir`, `--debug`, `--nwscript`
 - ✅ Behavior parity verified across test suite (KCompiler.Tests)
@@ -350,6 +381,7 @@ _logger.LogAdded += _logAddedHandler;
 **Status: ⚠ PARTIALLY VERIFIED**
 
 **Implemented:**
+
 - ✅ All format handlers (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS)
 - ✅ All mod patch types (2DA, GFF, TLK, SSF, NCS, NSS)
 - ✅ Config parsing (INI/YAML + localization)
@@ -358,13 +390,17 @@ _logger.LogAdded += _logAddedHandler;
 - ⚠ TSLPatcher pipeline stages implemented, but authoritative ordering is unresolved
 
 **Known Gaps:**
+
 - ⚠ Pipeline target drift across repo-local TSLPatcher artifacts
 - ⚠ InstallList overwrite safeguards differ from historical TSLPatcher behavior
 - ⚠ Namespace fallback and path-confinement behavior differ from historical TSLPatcher behavior
+- ⚠ Generic HACKList behavior is narrowed to NCS-only patching
+- ⚠ CompileList orchestration/settings differ from historical TSLPatcher behavior
+- ⚠ K1 2DA hardcap rules are a KPatcher-specific addition
 - ⚠ HACKList serialization (TODO — write path incomplete)
 - ⚠ LZMA compression (TODO — compression not implemented)
 
-**Assessment:** Broad implementation coverage remains, but the refreshed audit withdrew the earlier strong parity claim. Future release discussions should treat this track as partially verified rather than complete.
+**Assessment:** Broad implementation coverage remains, but the refreshed audit withdrew the earlier strong parity claim. Future release discussions should treat this track as partially verified rather than complete, with the largest confirmed logic differences now concentrated in pipeline targeting, InstallList safety, namespace resolution, HACKList scope, CompileList orchestration, and K1 2DA edge behavior.
 
 ---
 
@@ -375,6 +411,7 @@ _logger.LogAdded += _logAddedHandler;
 **Status: ✅ 100% COMPLETE**
 
 **Implemented:**
+
 - ✅ KCompiler.Core (NSS → NCS, nwnnsscomp.exe parity verified)
 - ✅ KCompiler.NET (CLI with full option support)
 - ✅ NCSDecomp.Core (NCS → NSS, DeNCS port complete)
@@ -394,6 +431,7 @@ _logger.LogAdded += _logAddedHandler;
 **Status: ✅ 70-80% IMPLEMENTATION IN PROGRESS**
 
 **Implemented:**
+
 - ✅ Avalonia 11.3.9 framework integrated
 - ✅ Multi-platform RIDs (win/linux/osx, x86/x64/arm64 support)
 - ✅ KPatcher.UI packable library (net9.0 + multi-target)
@@ -401,6 +439,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ MVVM architecture (ViewModels, Views, reactive bindings)
 
 **Deferred:**
+
 - ❌ NetSparkle auto-update (net48 only; disabled on .NET 5+)
 - ❌ Windows installer packaging (.msi/.exe)
 - ❌ macOS/Linux deployment and code signing
@@ -417,6 +456,7 @@ _logger.LogAdded += _logAddedHandler;
 **Status: ✅ 75-80% ROBUST FOUNDATION WITH MIGRATION WORK**
 
 **Implemented:**
+
 - ✅ 7 runsettings tiers (Default, Exhaustive, VendorK2Game, TslPatcherExeGolden, etc.)
 - ✅ GitHub Actions CI (ci.yml, test-optional-tiers.yml)
 - ✅ Zero external test fixture files policy (100% verified compliant)
@@ -426,6 +466,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ 767+ test cases providing broad coverage
 
 **In Progress:**
+
 - ⚠ Integration harness migration (76 tests disabled, pending ExtractedModInstallHarness)
 - ⚠ Generated fixture files (~1 GB byte[] literals) causing build hangs
 - ⚠ 27 files with pre-existing syntax errors (17,970 recorded)
@@ -487,29 +528,32 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Fixture policy compliance verified (100%)
 - ✅ Architecture consistency confirmed (no circular dependencies)
 - ✅ Flight recorder is complete and non-breaking
-- ✅ Parity with TSLPatcher baseline verified (85-90%, gaps documented)
+- ⚠ Parity with TSLPatcher baseline is only partially verified; see the detailed audit for confirmed core-logic gaps and intentional extensions
 - ✅ All active strategy tracks have implementations
-- ✅ No P1 blockers
+- ⚠ Release owners must explicitly accept the documented parity deviations or land follow-up fixes before treating parity as release-ready
 
-**Release Approval:** ✅ **APPROVED FOR RELEASE**
+**Release Approval:** ⚠ **CONDITIONAL**
 
-This ledger certifies that KPatcher is parity-faithful, architecturally sound, comprehensively tested, and ready for production deployment.
+This ledger certifies that KPatcher is architecturally sound and broadly implemented, but it does not certify strict TSLPatcher parity. Release readiness now depends on explicit acceptance of the documented parity gaps or on follow-up fixes landing first.
 
 ---
 
 ## 8. Audit Methodology
 
-**Audit Performed:** 2026-05-23  
-**Audit Plan:** docs/plans/2026-05-23-003-refactor-comprehensive-parity-audit-plan.md  
+**Audit Performed:** 2026-05-28
+**Audit Plan:** docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audit-refresh-plan.md
+**Detailed Audit Document:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 **Evidence Sources:**
+
 - Codebase inspection (16 projects, 572 C# files)
 - Test execution (767+ test cases verified executable)
 - Architecture analysis (dependency mapping, module boundaries)
-- Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs)
+- Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs, build-verification notes)
+- TSLPatcher source comparison (current Delphi snapshot, older Delphi snapshot, reviewed behavior-owning units)
 - Fixture policy validation (100% compliance verified)
 - Flight recorder verification (lifecycle, state capture, non-breaking)
 
-**Confidence Methodology:** Combines direct observation (code, tests, docs) with expert assessment (architecture, parity, risk). Confidence levels reflect both verification completeness and expected stability.
+**Confidence Methodology:** Combines direct observation (code, tests, docs, reviewed Delphi sources) with bounded synthesis about parity and risk. Confidence levels reflect both verification completeness and the explicit observation boundary of this refresh pass.
 
 ---
 
@@ -519,14 +563,14 @@ This ledger certifies that KPatcher is parity-faithful, architecturally sound, c
 
 1. **Harness Migration** (P2, High Priority) — Extract integration tests from legacy fixture patterns to ExtractedModInstallHarness or GenericMods pattern. Unblocks full regression capacity.
 
-2. **Continuous Parity Monitoring** (P3, Future) — Integrate parity confidence checks into CI pipeline. Establish automated regression detection.
+2. **Resolve Confirmed Core-Logic Gaps** (P1/P2) — Choose the authoritative pipeline target, align InstallList overwrite safeguards, decide namespace fallback/path-confinement behavior, and determine whether KPatcher should keep its narrowed HACK/Compile behavior.
 
-3. **Release Announcement** (Immediate) — Use this ledger as release notes foundation. Communicate parity confidence to users.
+3. **Continuous Parity Monitoring** (P3, Future) — Integrate parity confidence checks into CI pipeline. Establish automated regression detection.
 
-**Future Audits:** Recommend quarterly parity confidence refresh, especially after major features or dependency updates.
+**Future Audits:** Recommend quarterly parity confidence refresh, especially after major features, parity fixes, or dependency updates.
 
 ---
 
-**Ledger Status:** Active  
-**Approved By:** Engineering team (via comprehensive audit)  
-**Certified:** 2026-05-23
+**Ledger Status:** Active
+**Approved By:** Engineering team (via refreshed parity audit)
+**Certified:** 2026-05-28
