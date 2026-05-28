@@ -210,6 +210,33 @@ ScriptEndRound\1\ScriptEndRound=k_ai_master
         }
 
         [Fact]
+        public void GFF_TopLevel2DAMemoryFieldPath_ShouldRemainRegularModifyField()
+        {
+            // Vendored TSLPatcher only stores !FieldPath via AddGffField recursion.
+            // A top-level GFFList key named 2DAMEMORY# is still treated as a literal field path.
+            string iniText = @"
+[GFFList]
+File0=test.utc
+
+[test.utc]
+2DAMEMORY5=!FieldPath
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            var modify = result.PatchesGFF.First(p => p.SaveAs == "test.utc").Modifiers[0] as ModifyFieldGFF;
+            modify.Should().NotBeNull();
+            modify.Path.Should().Be("2DAMEMORY5");
+
+            var value = modify.Value as FieldValueConstant;
+            value.Should().NotBeNull();
+            value.Value(null, GFFFieldType.String).Should().Be("!FieldPath");
+        }
+
+        [Fact]
         public void GFF_AddField_ShouldLoadIntField()
         {
             // Arrange

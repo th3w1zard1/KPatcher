@@ -33,6 +33,10 @@ namespace KPatcher.Core.Patcher
     /// </summary>
     public class ModInstaller
     {
+        private const string SkippingFileNoOverwriteExeFormat = "Skipping file {0}, this Installer will not overwrite EXE files!";
+        private const string SkippingFileNoOverwriteChitinKeyFormat = "Skipping file {0}, this Installer will not overwrite the chitin.key file.";
+        private const string SkippingFileNoOverwriteBifFormat = "Skipping file {0}, this Installer will not overwrite BIF data files.";
+
         private readonly string modPath;
         private readonly string gamePath;
         private readonly string changesIniPath;
@@ -1032,6 +1036,12 @@ namespace KPatcher.Core.Patcher
 
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             // should_patch() should not check for empty sourcefile/saveas; parity: skip this validation.
+            if (ShouldSkipProtectedInstallListOverwrite(patch, exists, capsule, saveAs))
+            {
+                log.AddDiagnostic("ShouldPatch: protected InstallList overwrite blocked -> false");
+                return false;
+            }
+
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
@@ -1072,6 +1082,45 @@ namespace KPatcher.Core.Patcher
             string savingAsStr = saveAs != patch.SourceFile ? $"as '{saveAs}' in" : "to";
             log.AddNote($"{actionBase}ing '{patch.SourceFile}' and {saveType} {savingAsStr} the '{localFolder}' {containerType}");
             log.AddDiagnostic("ShouldPatch: default new/copy branch -> true");
+            return true;
+        }
+
+        private bool ShouldSkipProtectedInstallListOverwrite(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string saveAs)
+        {
+            if (!(patch is InstallFile) || !patch.ReplaceFile || !exists || capsule != null)
+            {
+                return false;
+            }
+
+            string extension = Path.GetExtension(saveAs);
+            string message = null;
+            if (string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteExeFormat, saveAs);
+            }
+            else if (string.Equals(extension, ".tlk", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, KPatcher.Core.Common.TSLPatcherMessages.SkippingFileNoOverwriteDialogTlk, saveAs);
+            }
+            else if (string.Equals(extension, ".key", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteChitinKeyFormat, saveAs);
+            }
+            else if (string.Equals(extension, ".bif", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteBifFormat, saveAs);
+            }
+
+            if (message == null)
+            {
+                return false;
+            }
+
+            log.AddNote(message);
             return true;
         }
 

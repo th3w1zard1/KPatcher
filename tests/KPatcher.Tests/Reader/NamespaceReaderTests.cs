@@ -385,7 +385,7 @@ description=Test Description
         }
 
         [Fact]
-        public void Load_WithMissingRequiredField_ShouldThrowKeyNotFoundException()
+        public void Load_WithMissingIniName_ShouldUseDefaultChangesIni()
         {
             // Arrange - Missing IniName
             string iniContent = @"[Namespaces]
@@ -399,11 +399,31 @@ InfoName=info.rtf
             // Act
             IniData ini = ConfigReader.ParseIniText(iniContent, caseInsensitive: true);
             var reader = new NamespaceReader(ini);
+            List<PatcherNamespace> namespaces = reader.Load();
 
-            // Assert
-            Action act = () => reader.Load();
-            act.Should().Throw<KeyNotFoundException>()
-                .WithMessage("*IniName not found*");
+            namespaces.Should().HaveCount(1);
+            namespaces[0].IniFilename.Should().Be(PatcherNamespace.DefaultIniFilename);
+            namespaces[0].InfoFilename.Should().Be("info.rtf");
+        }
+
+        [Fact]
+        public void Load_WithMissingInfoName_ShouldUseDefaultInfoRtf()
+        {
+            string iniContent = @"[Namespaces]
+    Namespace1=TestNamespace
+
+    [TestNamespace]
+    IniName=changes.ini
+    ";
+            File.WriteAllText(_iniFilePath, iniContent);
+
+            IniData ini = ConfigReader.ParseIniText(iniContent, caseInsensitive: true);
+            var reader = new NamespaceReader(ini);
+            List<PatcherNamespace> namespaces = reader.Load();
+
+            namespaces.Should().HaveCount(1);
+            namespaces[0].IniFilename.Should().Be("changes.ini");
+            namespaces[0].InfoFilename.Should().Be(PatcherNamespace.DefaultInfoFilename);
         }
 
         [Fact]
@@ -423,6 +443,27 @@ Namespace1=NonExistentNamespace
             Action act = () => reader.Load();
             act.Should().Throw<KeyNotFoundException>()
                 .WithMessage("*'[NonExistentNamespace]' section was not found*");
+        }
+
+        [Fact]
+        public void Load_WithBackingOutDataPath_ShouldResetToDefaultDataFolder()
+        {
+            string iniContent = @"[Namespaces]
+      Namespace1=TestNamespace
+
+      [TestNamespace]
+      IniName=changes.ini
+      InfoName=info.rtf
+      DataPath=../outside
+      ";
+            File.WriteAllText(_iniFilePath, iniContent);
+
+            IniData ini = ConfigReader.ParseIniText(iniContent, caseInsensitive: true);
+            var reader = new NamespaceReader(ini);
+            List<PatcherNamespace> namespaces = reader.Load();
+
+            namespaces.Should().HaveCount(1);
+            namespaces[0].DataFolderPath.Should().BeEmpty();
         }
     }
 }
