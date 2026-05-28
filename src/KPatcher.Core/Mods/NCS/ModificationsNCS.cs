@@ -346,7 +346,10 @@ namespace KPatcher.Core.Mods.NCS
             [CanBeNull] string defaultDestination = null,
             [NotNull] string defaultSourceFolder = ".")
         {
-            base.PopTslPatcherVars(fileSectionDict, defaultDestination, defaultSourceFolder);
+            // Vendored HACKList patches always target Override even when a per-file
+            // !Destination key is present.
+            fileSectionDict.Remove("!Destination");
+            base.PopTslPatcherVars(fileSectionDict, DEFAULT_DESTINATION, defaultSourceFolder);
             // Can be null if not found
             if (fileSectionDict.TryGetValue("ReplaceFile", out string replaceFile))
             {
