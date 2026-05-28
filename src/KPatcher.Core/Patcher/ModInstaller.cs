@@ -1038,6 +1038,12 @@ namespace KPatcher.Core.Patcher
                 return false;
             }
 
+            if (ShouldSkipVendoredCompileListOverrideConflict(patch, capsule, destination, localFolder, containerType))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored CompileList override source-name guard -> false");
+                return false;
+            }
+
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
@@ -1078,6 +1084,34 @@ namespace KPatcher.Core.Patcher
             string savingAsStr = saveAs != patch.SourceFile ? $"as '{saveAs}' in" : "to";
             log.AddNote($"{actionBase}ing '{patch.SourceFile}' and {saveType} {savingAsStr} the '{localFolder}' {containerType}");
             log.AddDiagnostic("ShouldPatch: default new/copy branch -> true");
+            return true;
+        }
+
+        private bool ShouldSkipVendoredCompileListOverrideConflict(
+            PatcherModifications patch,
+            [CanBeNull] Capsule capsule,
+            string destination,
+            string localFolder,
+            string containerType)
+        {
+            if (!(patch is ModificationsNSS)
+                || patch.ReplaceFile
+                || capsule != null
+                || !string.Equals(destination, ModificationsNSS.DefaultDestination, StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(patch.SourceFile))
+            {
+                return false;
+            }
+
+            string sourceConflictPath = Path.Combine(gamePath, destination, patch.SourceFile);
+            if (!File.Exists(sourceConflictPath))
+            {
+                return false;
+            }
+
+            log.AddNote($"'{patch.SourceFile}' already exists in the '{localFolder}' {containerType}. Skipping file...");
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ShouldSkipVendoredCompileListOverrideConflict: sourceConflictPath={0}", sourceConflictPath));
             return true;
         }
 

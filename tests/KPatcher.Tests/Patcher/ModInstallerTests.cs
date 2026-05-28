@@ -7,6 +7,7 @@ using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
 using KPatcher.Core.Mods.NCS;
+using KPatcher.Core.Mods.NSS;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Resources;
 using Xunit;
@@ -262,6 +263,29 @@ namespace KPatcher.Core.Tests.Patcher
 
             // Act
             bool result = _installer.ShouldPatch(patch, exists: true);
+
+            // Assert
+            Assert.True(patch.SkipIfNotReplace);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ShouldPatch_CompileList_NotReplaceFile_ExistingSourceNssInOverride_SkipsLikeVendor()
+        {
+            // Arrange
+            string overridePath = Path.Combine(_tempDirectory, "Override");
+            Directory.CreateDirectory(overridePath);
+            File.WriteAllText(Path.Combine(overridePath, "test.nss"), "void main() {}\n");
+
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                Destination = "Override"
+            };
+
+            // Act
+            bool result = _installer.ShouldPatch(patch, exists: false);
 
             // Assert
             Assert.True(patch.SkipIfNotReplace);
