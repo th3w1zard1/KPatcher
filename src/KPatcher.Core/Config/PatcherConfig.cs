@@ -23,6 +23,7 @@ namespace KPatcher.Core.Config
         public List<string[]> RequiredFiles { get; set; } = new List<string[]>();
         public List<string> RequiredMessages { get; set; } = new List<string>();
         public int SaveProcessedScripts { get; set; }
+        public string ScriptCompilerFlags { get; set; } = string.Empty;
         public LogLevel LogLevel { get; set; } = LogLevel.Warnings;
 
         // Optional KPatcher features

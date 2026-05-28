@@ -310,6 +310,7 @@ namespace KPatcher.Core.Reader
                     Config.RequiredMessages.Count));
             }
             Config.SaveProcessedScripts = int.TryParse(settingsIni.GetValueOrDefault("SaveProcessedScripts"), out int sps) ? sps : 0;
+            Config.ScriptCompilerFlags = settingsIni.GetValueOrDefault("ScriptCompilerFlags", string.Empty);
             Config.LogLevel = int.TryParse(settingsIni.GetValueOrDefault("LogLevel"), out int logLevelInt)
                 ? (LogLevel)logLevelInt
                 : LogLevel.Warnings;
@@ -334,9 +335,10 @@ namespace KPatcher.Core.Reader
             }
 
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ConfigReader.LoadSettings: done logLevel={0} saveProcessedScripts={1} requiredGroups={2}",
+                "ConfigReader.LoadSettings: done logLevel={0} saveProcessedScripts={1} scriptCompilerFlagsPresent={2} requiredGroups={3}",
                 Config.LogLevel,
                 Config.SaveProcessedScripts,
+                !string.IsNullOrWhiteSpace(Config.ScriptCompilerFlags),
                 Config.RequiredFiles.Count));
         }
 
@@ -881,8 +883,9 @@ namespace KPatcher.Core.Reader
             // Vendored CompileList only supports top-level !DefaultDestination. Source overrides stay per-file.
             compilelistSectionDict.Remove("!DefaultSourceFolder");
             string defaultSourceFolder = ".";
+            string compilerWorkingDirectory = Path.GetFullPath(_tslPatchDataPath ?? _modPath);
 
-            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler (no nwnnsscomp.exe resolution)");
+            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler with managed nwnnsscomp flag parsing (no external nwnnsscomp.exe resolution)");
 
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
@@ -890,7 +893,9 @@ namespace KPatcher.Core.Reader
                 var modifications = new ModificationsNSS(file, replace)
                 {
                     Destination = defaultDestination,
-                    SourceFolder = defaultSourceFolder
+                    SourceFolder = defaultSourceFolder,
+                    ScriptCompilerFlags = Config.ScriptCompilerFlags,
+                    CompilerWorkingDirectory = compilerWorkingDirectory
                 };
 
                 // Can be null if section not found

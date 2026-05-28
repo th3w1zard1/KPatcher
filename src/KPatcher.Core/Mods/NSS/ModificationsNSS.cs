@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using KCompiler;
+using KCompiler.Cli;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.NCS;
 using KPatcher.Core.Formats.NCS.Compiler;
@@ -38,10 +40,24 @@ namespace KPatcher.Core.Mods.NSS
         public new const string DEFAULT_DESTINATION = "Override";
         public static string DefaultDestination => DEFAULT_DESTINATION;
 
+        private sealed class ManagedCompileOptions
+        {
+            public Game Game { get; set; }
+
+            public bool Debug { get; set; }
+
+            [CanBeNull]
+            public string NwscriptPath { get; set; }
+        }
+
         public new string Action { get; set; } = "Compile";
         public new bool SkipIfNotReplace { get; set; } = true;
         [CanBeNull]
         public string TempScriptFolder { get; set; }
+        public string ScriptCompilerFlags { get; set; } = string.Empty;
+
+        [CanBeNull]
+        public string CompilerWorkingDirectory { get; set; }
 
         public ModificationsNSS(string filename, bool replaceFile = false)
             : base(filename, replaceFile)
@@ -91,6 +107,7 @@ namespace KPatcher.Core.Mods.NSS
                 string relativeSourceFolder = string.IsNullOrWhiteSpace(SourceFolder) ? "." : SourceFolder;
                 string tempScriptFile = Path.Combine(tempFolder, relativeSourceFolder, SourceFile);
                 string tempScriptDirectory = Path.GetDirectoryName(tempScriptFile);
+                string tempNcsFile = Path.Combine(tempFolder, relativeSourceFolder, SaveAs ?? Path.ChangeExtension(SourceFile, ".ncs"));
                 if (!string.IsNullOrEmpty(tempScriptDirectory))
                 {
                     Directory.CreateDirectory(tempScriptDirectory);
@@ -104,13 +121,13 @@ namespace KPatcher.Core.Mods.NSS
 
                 try
                 {
-                    global::KPatcher.Core.Formats.NCS.NCS ncs = NCSAuto.CompileNss(
+                    ManagedCompileOptions compileOptions = ResolveManagedCompileOptions(tempScriptFile, tempNcsFile, game, logger);
+                    compiledBytes = ManagedNwnnsscomp.CompileSourceToBytes(
                         mutableSource.Value,
-                        game,
-                        null,
-                        null,
-                        BuildLibraryLookupPaths(tempFolder, tempScriptDirectory));
-                    compiledBytes = NCSAuto.BytesNcs(ncs);
+                        compileOptions.Game,
+                        BuildLibraryLookupPaths(tempFolder, tempScriptDirectory),
+                        compileOptions.Debug,
+                        compileOptions.NwscriptPath);
                     logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                         "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                     return compiledBytes;
@@ -217,6 +234,60 @@ namespace KPatcher.Core.Mods.NSS
 
                 match = Regex.Match(nssSource.Value, searchPattern);
             }
+        }
+
+        private ManagedCompileOptions ResolveManagedCompileOptions(
+            string tempScriptFile,
+            string tempNcsFile,
+            Game defaultGame,
+            PatchLogger logger)
+        {
+            var options = new ManagedCompileOptions
+            {
+                Game = defaultGame,
+                Debug = false,
+                NwscriptPath = null
+            };
+
+            if (string.IsNullOrWhiteSpace(ScriptCompilerFlags))
+            {
+                return options;
+            }
+
+            var args = new List<string>(NwnnsscompCliParser.SplitCommandLine(ScriptCompilerFlags));
+            args.Add("-c");
+            args.Add(tempScriptFile);
+            args.Add("-o");
+            args.Add(tempNcsFile);
+
+            string workingDirectory = string.IsNullOrWhiteSpace(CompilerWorkingDirectory)
+                ? Path.GetDirectoryName(tempScriptFile) ?? Directory.GetCurrentDirectory()
+                : CompilerWorkingDirectory;
+            NwnnsscompParseResult parseResult = NwnnsscompCliParser.Parse(args.ToArray(), workingDirectory, null);
+            if (!parseResult.Success || parseResult.IsHelp)
+            {
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Could not parse ScriptCompilerFlags '{0}' for '{1}': {2}",
+                    ScriptCompilerFlags,
+                    SourceFile,
+                    parseResult.ErrorMessage ?? "unknown parser failure"));
+            }
+
+            options.Game = parseResult.GameExplicitlySet ? parseResult.Game : defaultGame;
+            options.Debug = parseResult.Debug;
+            options.NwscriptPath = parseResult.NwscriptPath;
+
+            logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModificationsNSS.ResolveManagedCompileOptions: sourceFile={0} flags={1} game={2} debug={3} nwscript={4} workingDirectory={5}",
+                SourceFile,
+                ScriptCompilerFlags,
+                options.Game,
+                options.Debug,
+                options.NwscriptPath ?? "(default)",
+                workingDirectory));
+
+            return options;
         }
 
         private static bool IsVendoredIncludeFile(string sourceText)

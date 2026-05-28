@@ -51,5 +51,26 @@ File0=test.nss
             result.PatchesNSS.Should().ContainSingle();
             result.PatchesNSS[0].SourceFolder.Should().Be(".");
         }
+
+        [Fact]
+        public void CompileList_PropagatesScriptCompilerFlags_FromSettings()
+        {
+            const string iniText = @"
+[Settings]
+ScriptCompilerFlags=--debug --nwscript ""defs/custom nwscript.nss""
+
+[CompileList]
+File0=test.nss
+";
+            IniData ini = _parser.Parse(iniText);
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(new PatcherConfig());
+
+            result.ScriptCompilerFlags.Should().Be("--debug --nwscript \"defs/custom nwscript.nss\"");
+            result.PatchesNSS.Should().ContainSingle();
+            result.PatchesNSS[0].ScriptCompilerFlags.Should().Be(result.ScriptCompilerFlags);
+            result.PatchesNSS[0].CompilerWorkingDirectory.Should().Be(Path.GetFullPath(_modPath));
+        }
     }
 }
