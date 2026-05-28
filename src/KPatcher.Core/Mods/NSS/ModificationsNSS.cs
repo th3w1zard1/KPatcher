@@ -120,10 +120,23 @@ namespace KPatcher.Core.Mods.NSS
 
                 byte[] compiledBytes = null;
                 ManagedCompileOptions compileOptions;
+                string compileOptionFailureFeedback;
 
                 try
                 {
-                    compileOptions = ResolveManagedCompileOptions(tempScriptFile, tempNcsFile, game, logger);
+                    if (!TryResolveManagedCompileOptions(tempScriptFile, tempNcsFile, game, logger, out compileOptions, out compileOptionFailureFeedback))
+                    {
+                        LogCompilerFeedback(logger, compileOptionFailureFeedback);
+                        logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "ModificationsNSS.PatchResource: compile option resolution rejected sourceFile={0} feedback={1}",
+                            SourceFile,
+                            compileOptionFailureFeedback ?? "(none)"));
+                        logger.AddError(string.Format(
+                            CultureInfo.CurrentCulture,
+                            PatcherResources.CompileListCompiledNotFoundFormat,
+                            SourceFile));
+                        return true;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -254,22 +267,25 @@ namespace KPatcher.Core.Mods.NSS
             }
         }
 
-        private ManagedCompileOptions ResolveManagedCompileOptions(
+        private bool TryResolveManagedCompileOptions(
             string tempScriptFile,
             string tempNcsFile,
             Game defaultGame,
-            PatchLogger logger)
+            PatchLogger logger,
+            out ManagedCompileOptions options,
+            out string failureFeedback)
         {
-            var options = new ManagedCompileOptions
+            options = new ManagedCompileOptions
             {
                 Game = defaultGame,
                 Debug = false,
                 NwscriptPath = null
             };
+            failureFeedback = null;
 
             if (string.IsNullOrWhiteSpace(ScriptCompilerFlags))
             {
-                return options;
+                return true;
             }
 
             var args = new List<string>(NwnnsscompCliParser.SplitCommandLine(ScriptCompilerFlags));
@@ -284,12 +300,14 @@ namespace KPatcher.Core.Mods.NSS
             NwnnsscompParseResult parseResult = NwnnsscompCliParser.Parse(args.ToArray(), workingDirectory, null);
             if (!parseResult.Success || parseResult.IsHelp)
             {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    "Could not parse ScriptCompilerFlags '{0}' for '{1}': {2}",
-                    ScriptCompilerFlags,
+                failureFeedback = parseResult.ErrorMessage ?? "unknown parser failure";
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "ModificationsNSS.TryResolveManagedCompileOptions: parse failed sourceFile={0} flags={1} feedback={2} workingDirectory={3}",
                     SourceFile,
-                    parseResult.ErrorMessage ?? "unknown parser failure"));
+                    ScriptCompilerFlags,
+                    failureFeedback,
+                    workingDirectory));
+                return false;
             }
 
             options.Game = parseResult.GameExplicitlySet ? parseResult.Game : defaultGame;
@@ -305,7 +323,7 @@ namespace KPatcher.Core.Mods.NSS
                 options.NwscriptPath ?? "(default)",
                 workingDirectory));
 
-            return options;
+            return true;
         }
 
         private static bool IsVendoredIncludeFile(string sourceText)
