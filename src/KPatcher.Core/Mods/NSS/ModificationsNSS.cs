@@ -304,13 +304,11 @@ namespace KPatcher.Core.Mods.NSS
             var lookupPaths = new List<string>();
             var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            // Match vendored nwnnsscomp invocation more closely: search the script's
+            // own folder first, then the staged tslpatchdata root, without recursively
+            // scanning sibling directories for implicit includes.
             AddLookupPath(tempScriptDirectory, lookupPaths, seenPaths);
             AddLookupPath(tempFolder, lookupPaths, seenPaths);
-
-            foreach (string directory in Directory.GetDirectories(tempFolder, "*", SearchOption.AllDirectories))
-            {
-                AddLookupPath(directory, lookupPaths, seenPaths);
-            }
 
             return lookupPaths;
         }
