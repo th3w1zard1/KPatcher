@@ -20,7 +20,7 @@ date: 2026-05-28
 - [REPO] The older Delphi snapshot (`UTSLPatcher12.pas`) runs `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList`.
 - [REPO] The newer Delphi snapshot (`UTSLPatcher.pas`) runs `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF`.
 - [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) states the verified shipped binary runs `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) currently queues `TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF` and comments that this is the TSLPatcher order.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) currently queues `TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF`, while its adjacent comment now explicitly notes that repo-local TSLPatcher artifacts disagree on one authoritative order.
 - [SYNTH] KPatcher does not currently match the binary-verified order, and the repo cannot honestly describe one single authoritative TSLPatcher pipeline without first deciding whether parity targets the verified binary or the reconstructed WIP Delphi source.
 - [OPEN] A code-fix pass should not change patch ordering until the parity target is chosen explicitly.
 
