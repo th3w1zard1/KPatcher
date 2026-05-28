@@ -2,30 +2,31 @@
 title: "KPatcher Parity Confidence Ledger"
 created: 2026-05-23
 status: active
-audit_ref: "docs/plans/2026-05-23-003-refactor-comprehensive-parity-audit-plan.md"
+audit_ref: "docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audit-refresh-plan.md"
 ---
 
 # KPatcher Parity Confidence Ledger
 
 **Document Purpose:** Durable record of parity assessment, test infrastructure confidence, and verified implementations. This ledger establishes the baseline for release gating, post-release monitoring, and future audit cycles.
 
-**Last Audited:** 2026-05-23  
-**Audit Plan:** docs/plans/2026-05-23-003-refactor-comprehensive-parity-audit-plan.md
+**Last Audited:** 2026-05-28
+**Audit Plan:** docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audit-refresh-plan.md
+**Detailed Audit:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 
 ---
 
 ## Executive Summary
 
-**Parity Status: ✅ STRONG**  
-KPatcher maintains faithful parity with TSLPatcher baseline across all core functionality. Test infrastructure is robust with 767+ test cases and multi-tier coverage. Architecture is sound with clear module boundaries. The flight recorder feature (PR #9) is complete and non-breaking. All active strategy tracks have substantive implementations.
+**Parity Status: ⚠ PARTIAL / REOPENED**
+KPatcher implements the major TSLPatcher feature families, but the repository no longer has evidence for a "strong" end-to-end core-logic parity claim. The refreshed audit found source-vs-runtime drift around TSLPatcher pipeline ordering, confirmed namespace behavior differences, a confirmed InstallList overwrite-safeguard gap, and intentional backup/uninstall extensions that should not be summarized as strict parity.
 
-**Confidence Level:** High (85-90% parity verified, 100% fixture policy compliance, 3 of 4 tracks substantially complete)
+**Confidence Level:** Moderate (feature-surface coverage remains broad, but core-logic parity is only partially verified and several top-level behavior differences are now confirmed)
 
-**Risk Profile:** Low  
-- No P1 blockers identified
-- All documented gaps are non-blocking or future optimization
-- Fixture policy compliance verified at 100%
-- Architecture consistency confirmed
+**Risk Profile:** Medium
+- Pipeline parity target is unresolved because repo-local TSLPatcher artifacts disagree
+- InstallList overwrite safeguards differ from historical TSLPatcher behavior
+- Namespace fallback/path-confinement behavior differs from historical TSLPatcher behavior
+- Existing parity documentation had overstated confidence
 
 ---
 
@@ -273,6 +274,7 @@ _logger.LogAdded += _logAddedHandler;
 ### 4.1 Reference Material
 
 **Documentation Sources:**
+- ✅ `docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md` — refreshed evidence-based gap report
 - ✅ `docs/TSLPATCHER_BUILD_VERIFICATION.md` — Ghidra binary analysis, behavior spec
 - ✅ `docs/NWNNSSCOMP_RE.md` — nwnnsscomp.exe reverse-engineering, managed replacement parity
 - ✅ `docs/EXHAUSTIVE_INLINE_PROVENANCE.md` — Test payload source documentation
@@ -280,25 +282,22 @@ _logger.LogAdded += _logAddedHandler;
 
 ### 4.2 Execution Pipeline Parity
 
-**TSLPatcher Sequence (Binary-verified):**
-1. CountModifications (pre-pass)
-2. PatchTLK ([TLKList])
-3. PatchGFF ([GFFList])
-4. Patch2DA ([2DAList])
-5. ProcessInstallList ([InstallList])
-6. ProcessHACKList ([HACKList]) — bytecode patching
-7. CompileNSS ([CompileList])
-8. PatchSSF ([SSFList])
+**TSLPatcher Evidence in Repo Is Split:**
+1. **Older Delphi snapshot:** `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList`
+2. **Current Delphi snapshot:** `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF`
+3. **Build-verification doc:** `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`
 
 **KPatcher Sequence (Implementation-verified):**
 1. CountModifications ✅
 2. TLK modifications ✅
-3. InstallList (copies/deletes) ✅
-4. **2DA modifications** (order variant — see 4.4)
-5. **GFF modifications** (order variant — see 4.4)
-6. NSS compilation ✅
-7. NCS patching (HACKList equivalent) ✅
-8. SSF modifications ✅
+3. InstallList
+4. 2DA modifications
+5. GFF modifications
+6. NSS compilation
+7. NCS patching (HACKList equivalent)
+8. SSF modifications
+
+**Assessment:** KPatcher implements the expected pipeline stages, but the repo's TSLPatcher references do not currently agree on one authoritative order. Strong pipeline-parity claims are therefore suspended pending an explicit target decision.
 
 ### 4.3 Format Handler Parity
 
@@ -315,13 +314,16 @@ _logger.LogAdded += _logAddedHandler;
 
 | Deviation | Status | Reason | Impact |
 |-----------|--------|--------|--------|
-| **GFF/2DA Order** | Documented | KPatcher reverses order (2DA then GFF vs GFF then 2DA) | Functionally equivalent; no observed behavioral difference |
+| **Pipeline Target Drift** | Confirmed | Older Delphi source, newer Delphi source, and binary-verification docs disagree on TSLPatcher order; KPatcher currently matches none exactly | High |
+| **Namespace Fallback / DataPath Confinement** | Confirmed | KPatcher is stricter on missing namespace files but looser on `DataPath` escape rules than TSLPatcher | Medium |
+| **InstallList Overwrite Safeguards** | Confirmed | KPatcher lacks the historical `.exe` / `.tlk` / `.key` / `.bif` replace guard found in TSLPatcher | High |
+| **Backup / Uninstall Semantics** | Intentional Extension | KPatcher uses timestamped backups and uninstall support instead of app-root single-copy backups | Medium |
 | **RTF Rendering** | Intentional | Python uses Tkinter (strips RTF); C# uses Avalonia RichTextBox | Improved user experience; approved per README.md |
 | **HACKList Serialization** | TODO | Write path not implemented (read implemented) | Cannot round-trip NCS configs to INI; acceptable for now |
 | **LZMA Compression** | TODO | Not implemented | Cannot compress MOD/RIM if required; edge case |
 | **Script Validation** | TODO | Confidence checks disabled pending validation | Deferred; non-blocking |
 
-**Assessment:** All deviations are either intentional improvements, documented, or acceptable gaps. No architectural violations.
+**Assessment:** The major patch surfaces exist, but parity is not "done." Some deviations are intentional extensions, while others are confirmed core-behavior gaps that need follow-up.
 
 ### 4.5 nwnnsscomp.exe Replacement Parity
 
@@ -345,7 +347,7 @@ _logger.LogAdded += _logAddedHandler;
 
 *Goal:* Install behavior, format handling, namespace/config parsing aligned with Python/TSLPatcher
 
-**Status: ✅ 85-90% COMPLETE**
+**Status: ⚠ PARTIALLY VERIFIED**
 
 **Implemented:**
 - ✅ All format handlers (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS)
@@ -353,13 +355,16 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Config parsing (INI/YAML + localization)
 - ✅ Namespace support (PatcherNamespace, localized variants)
 - ✅ Flight recorder + logging
-- ✅ TSLPatcher pipeline order (with documented variance)
+- ⚠ TSLPatcher pipeline stages implemented, but authoritative ordering is unresolved
 
 **Known Gaps:**
+- ⚠ Pipeline target drift across repo-local TSLPatcher artifacts
+- ⚠ InstallList overwrite safeguards differ from historical TSLPatcher behavior
+- ⚠ Namespace fallback and path-confinement behavior differ from historical TSLPatcher behavior
 - ⚠ HACKList serialization (TODO — write path incomplete)
 - ⚠ LZMA compression (TODO — compression not implemented)
 
-**Assessment:** Sufficient for release. Gaps are non-blocking and documented as future work.
+**Assessment:** Broad implementation coverage remains, but the refreshed audit withdrew the earlier strong parity claim. Future release discussions should treat this track as partially verified rather than complete.
 
 ---
 
