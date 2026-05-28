@@ -80,6 +80,11 @@ namespace KPatcher.Core.Mods
         public virtual string SourceFile { get; set; }
 
         /// <summary>
+        /// The original INI key for this patch before any !SourceFile / !SaveAs overrides.
+        /// </summary>
+        public virtual string OriginalSourceFile { get; protected set; }
+
+        /// <summary>
         /// The source folder.
         /// </summary>
         public virtual string SourceFolder { get; set; } = ".";
@@ -130,6 +135,7 @@ namespace KPatcher.Core.Mods
             [CanBeNull] string destination = null)
         {
             SourceFile = sourcefile;
+            OriginalSourceFile = sourcefile;
             SourceFolder = ".";
             SaveAs = sourcefile;
             ReplaceFile = replace ?? false;

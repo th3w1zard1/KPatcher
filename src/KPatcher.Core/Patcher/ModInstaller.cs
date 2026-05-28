@@ -36,6 +36,10 @@ namespace KPatcher.Core.Patcher
         private const string SkippingFileNoOverwriteExeFormat = "Skipping file {0}, this Installer will not overwrite EXE files!";
         private const string SkippingFileNoOverwriteChitinKeyFormat = "Skipping file {0}, this Installer will not overwrite the chitin.key file.";
         private const string SkippingFileNoOverwriteBifFormat = "Skipping file {0}, this Installer will not overwrite BIF data files.";
+        private const string HackListCopyToOverrideFormat = "Copying file {0} to Override folder...";
+        private const string HackListFileExistsSkipFormat = "A file named \"{0}\" already exists in the Override folder. Skipping...";
+        private const string HackListRenameSourceMissingFormat = "Unable to locate source file \"{0}\" to rename to \"{1}\" and install, skipping...";
+        private const string HackListSourceMissingFormat = "Unable to locate file \"{0}\" to install as \"{1}\", skipping...";
 
         private readonly string modPath;
         private readonly string gamePath;
@@ -488,9 +492,16 @@ namespace KPatcher.Core.Patcher
                                 log.AddError(string.Format(TSLPatcherMessages.UnableToLocateTLKFileToPatch, tlkPatch.SaveAs ?? tlkPatch.SourceFile ?? "dialog.tlk"));
                             else if (patch is Modifications2DA twodaPatch)
                                 log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.UnableToFind2DAFileToModify, twodaPatch.SaveAs ?? patch.SourceFile ?? ""));
+                            else if (patch is ModificationsNCS)
+                                log.AddDiagnostic("Install: HACKList null lookup already logged vendored source-missing error; suppressing generic follow-up");
                             else
                                 log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.CriticalErrorUnableToLocateFileToPatch, patch.SourceFile ?? patch.SaveAs ?? ""));
                             continue;
+                        }
+
+                        if (ShouldUseVendoredHackListCopyNote(patch, result.Exists, result.Capsule, destination))
+                        {
+                            log.AddNote(string.Format(CultureInfo.CurrentCulture, HackListCopyToOverrideFormat, saveAs));
                         }
 
                         if (dataToPatch.Length == 0)
@@ -929,6 +940,73 @@ namespace KPatcher.Core.Patcher
             return underModRoot;
         }
 
+        private string GetHackListOriginalFileName(PatcherModifications patch)
+        {
+            return string.IsNullOrWhiteSpace(patch.OriginalSourceFile)
+                ? patch.SaveAs ?? patch.SourceFile ?? ""
+                : patch.OriginalSourceFile;
+        }
+
+        private bool TryLogVendoredHackListMissingSource(PatcherModifications patch, string sourceFile)
+        {
+            if (!(patch is ModificationsNCS))
+            {
+                return false;
+            }
+
+            string originalFile = GetHackListOriginalFileName(patch);
+            if (!string.Equals(sourceFile, originalFile, StringComparison.OrdinalIgnoreCase))
+            {
+                log.AddError(string.Format(CultureInfo.CurrentCulture, HackListRenameSourceMissingFormat, sourceFile, originalFile));
+                return true;
+            }
+
+            log.AddError(string.Format(CultureInfo.CurrentCulture, HackListSourceMissingFormat, originalFile, originalFile));
+            return true;
+        }
+
+        private static bool IsVendoredHackListOverridePatch(
+            PatcherModifications patch,
+            [CanBeNull] Capsule capsule,
+            string destination)
+        {
+            return patch is ModificationsNCS
+                && capsule == null
+                && string.Equals(destination, ModificationsNCS.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool ShouldSkipVendoredHackListOverrideConflict(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string destination,
+            string saveAs)
+        {
+            if (!exists
+                || patch.ReplaceFile
+                || !patch.SkipIfNotReplace
+                || !IsVendoredHackListOverridePatch(patch, capsule, destination))
+            {
+                return false;
+            }
+
+            log.AddNote(string.Format(CultureInfo.CurrentCulture, HackListFileExistsSkipFormat, saveAs));
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ShouldSkipVendoredHackListOverrideConflict: saveAs={0}", saveAs));
+            return true;
+        }
+
+        private static bool ShouldUseVendoredHackListCopyNote(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string destination)
+        {
+            return !exists
+                && !patch.ReplaceFile
+                && IsVendoredHackListOverridePatch(patch, capsule, destination);
+        }
+
         /// <summary>
         /// Loads a resource file using BinaryReader.
         /// </summary>
@@ -975,6 +1053,11 @@ namespace KPatcher.Core.Patcher
                     // then mod root — matches INI comments and HoloPatcher-style layouts where modPath is the
                     // extracted mod folder and tslpatchdata is a subdirectory.
                     string sourcePath = ResolveModContentPath(sourceFolder, sourceFile);
+                    if (patch is ModificationsNCS && !File.Exists(sourcePath))
+                    {
+                        TryLogVendoredHackListMissingSource(patch, sourceFile);
+                        return null;
+                    }
                     return LoadResourceFile(sourcePath);
                 }
 
@@ -1044,6 +1127,12 @@ namespace KPatcher.Core.Patcher
                 return false;
             }
 
+            if (ShouldSkipVendoredHackListOverrideConflict(patch, exists, capsule, destination, saveAs))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored HACKList override skip -> false");
+                return false;
+            }
+
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
@@ -1078,6 +1167,12 @@ namespace KPatcher.Core.Patcher
                 log.AddDiagnostic("ShouldPatch: capsule did not exist on disk and not replace -> false");
                 log.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.CapsuleNotFoundWhenAttempting, destination, patch.Action.ToLower().TrimEnd(), patch.SourceFile));
                 return false;
+            }
+
+            if (ShouldUseVendoredHackListCopyNote(patch, exists, capsule, destination))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored HACKList copy branch -> true");
+                return true;
             }
 
             string saveType = (capsule != null && saveAs == patch.SourceFile) ? "adding" : "saving";

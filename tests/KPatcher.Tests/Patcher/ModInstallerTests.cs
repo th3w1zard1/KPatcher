@@ -267,6 +267,8 @@ namespace KPatcher.Core.Tests.Patcher
             // Assert
             Assert.True(patch.SkipIfNotReplace);
             Assert.False(result);
+            Assert.Contains(_logger.Notes, note => note.Message.Contains("A file named \"test.ncs\" already exists in the Override folder. Skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Notes, note => note.Message.Contains("already exists in the 'Override' folder. Skipping file...", StringComparison.Ordinal));
         }
 
         [Fact]
@@ -393,6 +395,49 @@ namespace KPatcher.Core.Tests.Patcher
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void LookupResource_HackListMissingAlternateSource_LogsVendorRenameFailure()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("script.ncs", false)
+            {
+                Destination = "Override",
+                SourceFile = "source-alt.ncs",
+                SaveAs = "patched.ncs"
+            };
+
+            // Act
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
+
+            // Assert
+            Assert.Null(result);
+            Assert.Contains(_logger.Errors, error => error.Message.Contains("Unable to locate source file \"source-alt.ncs\" to rename to \"script.ncs\" and install, skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Errors, error => error.Message.Contains("Could not load source file to hack", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void LookupResource_HackListMissingDefaultSource_LogsVendorInstallAsFailure()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("script.ncs", false)
+            {
+                Destination = "Override",
+                SaveAs = "patched.ncs"
+            };
+
+            // Act
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
+
+            // Assert
+            Assert.Null(result);
+            Assert.Contains(_logger.Errors, error => error.Message.Contains("Unable to locate file \"script.ncs\" to install as \"script.ncs\", skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Errors, error => error.Message.Contains("Could not load source file to hack", StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
