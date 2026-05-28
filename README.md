@@ -72,18 +72,13 @@ See [AGENTS.md](AGENTS.md) for build/publish commands and **“Which binary do I
 
 ## Vendor submodules
 
-This repository uses git submodules for reference and test assets:
+This repository uses git submodules for reference and test assets, including:
 
 | Path | Purpose |
 |------|---------|
 | `vendor/PyKotor` | Parity reference (HoloPatcher, PyKotor library). |
 | `vendor/Vanilla_KOTOR_Script_Source` | Decompiled vanilla NSS (K1/TSL) for compile/roundtrip tests. |
 | `vendor/DeNCS` | NCS decompiler reference (Java); C# decoder port lives under `src/KPatcher.Core/Formats/NCS/Decompiler/`. |
-
-Additional checked-in vendor reference:
-
-| Path | Purpose |
-|------|---------|
 | `vendor/TSLPatcher` | Reverse-engineered Delphi reference source for `TSLPatcher.exe` and `ChangeEdit.exe`; verification workflow is documented in [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md). |
 
 Clone with submodules to run vanilla NSS compile tests and to have full parity references:
