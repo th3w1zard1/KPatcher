@@ -145,6 +145,9 @@ namespace KPatcher.Core.Tests.Mods
                 log => log.Message.IndexOf("Also checked", StringComparison.OrdinalIgnoreCase) >= 0);
             Assert.All(
                 verboseLogs,
+                log => Assert.StartsWith("NWNNSSComp says: ", log.Message));
+            Assert.All(
+                verboseLogs,
                 log => Assert.DoesNotContain("\n", log.Message));
 
             int firstVerboseIndex = logger.AllLogs.ToList().FindIndex(log => log.LogType == LogType.Verbose);
@@ -177,6 +180,9 @@ namespace KPatcher.Core.Tests.Mods
                 verboseLogs,
                 log => log.Message.IndexOf("entry instruction", StringComparison.OrdinalIgnoreCase) >= 0
                     || log.Message.IndexOf("no entry point", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.All(
+                verboseLogs,
+                log => Assert.StartsWith("NWNNSSComp says: ", log.Message));
             Assert.Single(errorLogs);
             Assert.Contains(
                 errorLogs,

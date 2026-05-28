@@ -333,15 +333,18 @@ namespace KPatcher.Core.Mods.NSS
 
         private static void LogCompilerFeedback(PatchLogger logger, string feedback)
         {
-            if (logger == null || feedback == null || feedback.Length == 0)
+            if (logger == null || string.IsNullOrWhiteSpace(feedback))
             {
                 return;
             }
 
             string normalized = feedback.Replace("\r\n", "\n").Replace('\r', '\n');
-            foreach (string line in normalized.Split(new[] { '\n' }, StringSplitOptions.None))
+            foreach (string line in normalized.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                logger.AddVerbose(line);
+                logger.AddVerbose(string.Format(
+                    CultureInfo.CurrentCulture,
+                    PatcherResources.CompileListCompilerOutputFormat,
+                    line));
             }
         }
 

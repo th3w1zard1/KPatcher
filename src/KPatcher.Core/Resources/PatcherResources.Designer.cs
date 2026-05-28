@@ -101,6 +101,7 @@ namespace KPatcher.Core.Resources
         public static string FileOperationErrorFormat => ResourceManager.GetString(nameof(FileOperationErrorFormat), _resourceCulture);
         public static string InvalidNssSourceProvided => ResourceManager.GetString(nameof(InvalidNssSourceProvided), _resourceCulture);
         public static string BuiltInCompilationFailedFormat => ResourceManager.GetString(nameof(BuiltInCompilationFailedFormat), _resourceCulture);
+        public static string CompileListCompilerOutputFormat => ResourceManager.GetString(nameof(CompileListCompilerOutputFormat), _resourceCulture);
         public static string CompileListCompiledNotFoundFormat => ResourceManager.GetString(nameof(CompileListCompiledNotFoundFormat), _resourceCulture);
         public static string CouldNotCompileReturningUncompiledFormat => ResourceManager.GetString(nameof(CouldNotCompileReturningUncompiledFormat), _resourceCulture);
         public static string ExpectedMutableStringButGotFormat => ResourceManager.GetString(nameof(ExpectedMutableStringButGotFormat), _resourceCulture);
