@@ -6,6 +6,7 @@ using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
+using KPatcher.Core.Mods.NCS;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Resources;
 using Xunit;
@@ -243,6 +244,27 @@ namespace KPatcher.Core.Tests.Patcher
             bool result = _installer.ShouldPatch(patch, exists: true);
 
             // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ShouldPatch_HackList_NotReplaceFile_ExistingOverride_SkipsLikeVendor()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("test.ncs", false)
+            {
+                Destination = "Override",
+                SaveAs = "test.ncs",
+                SourceFile = "test.ncs"
+            };
+
+            // Act
+            bool result = _installer.ShouldPatch(patch, exists: true);
+
+            // Assert
+            Assert.True(patch.SkipIfNotReplace);
             Assert.False(result);
         }
 

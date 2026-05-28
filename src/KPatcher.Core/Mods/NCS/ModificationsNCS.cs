@@ -285,6 +285,8 @@ namespace KPatcher.Core.Mods.NCS
             : base(filename, replace)
         {
             Action = "Hack ";
+            // Vendored HACKList entries skip existing Override targets unless replacement is enabled.
+            SkipIfNotReplace = true;
             Modifiers = modifiers ?? new List<ModifyNCS>();
         }
 

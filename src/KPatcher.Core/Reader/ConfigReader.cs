@@ -878,14 +878,9 @@ namespace KPatcher.Core.Reader
             Dictionary<string, string> compilelistSectionDict = SectionToDictionary(_ini[compilelistSection]);
             string defaultDestination = compilelistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsNSS.DefaultDestination;
             compilelistSectionDict.Remove("!DefaultDestination");
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="scripts" resolves to "C:/Mod/tslpatchdata/scripts"
-            // Can be null if key not found
-            string defaultSourceFolder = compilelistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
+            // Vendored CompileList only supports top-level !DefaultDestination. Source overrides stay per-file.
             compilelistSectionDict.Remove("!DefaultSourceFolder");
+            string defaultSourceFolder = ".";
 
             _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler (no nwnnsscomp.exe resolution)");
 
