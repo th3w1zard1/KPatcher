@@ -435,15 +435,8 @@ namespace KPatcher.Core.Reader
 
             string defaultDestination = ModificationsTLK.DefaultDestination;
             tlkListEdits.Remove("!DefaultDestination");
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="textures" resolves to "C:/Mod/tslpatchdata/textures"
-            // Can be null if key not found
-            string defaultSourcefolder = tlkListEdits.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
             tlkListEdits.Remove("!DefaultSourceFolder");
-            Config.PatchesTLK.PopTslPatcherVars(tlkListEdits, defaultDestination, defaultSourcefolder);
+            Config.PatchesTLK.PopTslPatcherVars(tlkListEdits, defaultDestination, ".");
 
             // PatcherModifications' ctor assigns null when ModificationsTLK() is created without a filename; PopTslPatcherVars
             // leaves SourceFile/SaveAs unset when the INI omits !SourceFile/!SaveAs. Empty saveAs breaks ModInstaller's
@@ -509,7 +502,7 @@ namespace KPatcher.Core.Reader
                         }
 
                         Dictionary<string, string> nextSectionDict = SectionToDictionary(_ini[nextSectionName]);
-                        Config.PatchesTLK.PopTslPatcherVars(nextSectionDict, defaultDestination, defaultSourcefolder);
+                        Config.PatchesTLK.PopTslPatcherVars(nextSectionDict, defaultDestination, ".");
 
                         foreach ((string rawDialogTlkIndex, string rawModTlkIndex) in _ini[nextSectionName].Select(k => (k.KeyName, k.Value)))
                         {
@@ -605,7 +598,7 @@ namespace KPatcher.Core.Reader
 
             KeyDataCollection twodaSectionData = _ini[twodaSectionName];
             string defaultDestination = Modifications2DA.DefaultDestination;
-            string defaultSourceFolder = twodaSectionData["!DefaultSourceFolder"] ?? ".";
+            string defaultSourceFolder = ".";
 
             foreach (KeyData tableEntry in twodaSectionData)
             {

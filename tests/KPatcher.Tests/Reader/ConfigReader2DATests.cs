@@ -727,6 +727,31 @@ DefaultValue=123
             addColumn.Default.Should().Be("123");
         }
 
+        [Fact]
+        public void TwoDAList_DefaultSourceFolder_IsIgnored()
+        {
+            string iniText = @"
+[2DAList]
+!DefaultSourceFolder=alt
+Table0=appearance.2da
+
+[appearance.2da]
+AddColumn0=newcolumn
+
+[newcolumn]
+ColumnLabel=newcolumn
+DefaultValue=
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            result.Patches2DA.Should().ContainSingle();
+            result.Patches2DA[0].SourceFolder.Should().Be(".");
+        }
+
         #endregion
     }
 }
