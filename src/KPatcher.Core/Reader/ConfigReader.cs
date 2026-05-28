@@ -802,7 +802,6 @@ namespace KPatcher.Core.Reader
             Dictionary<string, string> gffSectionDict = SectionToDictionary(_ini[gffListSection]);
             string defaultDestination = ModificationsGFF.DefaultDestination;
             // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-                ssfSectionDict.Remove("!DefaultDestination"); // Remove the default destination key
             // For example: if mod_path = "C:/Mod/tslpatchdata", then:
             //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
             //   - !DefaultSourceFolder="gff" resolves to "C:/Mod/tslpatchdata/gff"
@@ -883,9 +882,9 @@ namespace KPatcher.Core.Reader
             }
 
             _log.AddNote(PatcherResources.LoadingCompileListPatches);
-            Dictionary<string, string> ssfSectionDict = SectionToDictionary(_ini[ssfListSection]);
-            string defaultDestination = ModificationsSSF.DefaultDestination;
-            ssfSectionDict.Remove("!DefaultDestination");
+            Dictionary<string, string> compilelistSectionDict = SectionToDictionary(_ini[compilelistSection]);
+            string defaultDestination = compilelistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsNSS.DefaultDestination;
+            compilelistSectionDict.Remove("!DefaultDestination");
             // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
             // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
             // For example: if mod_path = "C:/Mod/tslpatchdata", then:
