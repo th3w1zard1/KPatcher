@@ -86,6 +86,44 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         [Fact]
+        public void PatchResource_MissingCustomNwscriptPath_ReturnsSkipAndLogsVerboseCompilerFeedback()
+        {
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                TempScriptFolder = _tempDir,
+                CompilerWorkingDirectory = _tempDir,
+                ScriptCompilerFlags = "--nwscript missing_custom.nss"
+            };
+            byte[] source = Encoding.GetEncoding("windows-1252").GetBytes("void main() { PrintInteger(1); }\n");
+            var logger = new PatchLogger();
+
+            object result = patch.PatchResource(source, new PatcherMemory(), logger, Game.K1);
+
+            Assert.True(result is bool skipped && skipped);
+            PatchLog[] verboseLogs = logger.VerboseLogs.ToArray();
+            PatchLog[] errorLogs = logger.Errors.ToArray();
+
+            Assert.Single(errorLogs);
+            Assert.Contains(
+                errorLogs,
+                log => log.Message.IndexOf("Unable to find compiled version of file", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.DoesNotContain(
+                errorLogs,
+                log => log.Message.IndexOf("Built-in compilation failed", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Contains(
+                verboseLogs,
+                log => log.Message.IndexOf("Failed to parse nwscript.nss file", StringComparison.OrdinalIgnoreCase) >= 0
+                    && log.Message.IndexOf("nwscript.nss file not found", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.All(
+                verboseLogs,
+                log => Assert.StartsWith("NWNNSSComp says: ", log.Message));
+
+            int firstVerboseIndex = logger.AllLogs.ToList().FindIndex(log => log.LogType == LogType.Verbose);
+            int firstErrorIndex = logger.AllLogs.ToList().FindIndex(log => log.LogType == LogType.Error);
+            Assert.True(firstVerboseIndex >= 0 && firstErrorIndex > firstVerboseIndex);
+        }
+
+        [Fact]
         public void PatchResource_ImplicitSiblingFolderInclude_DoesNotResolveOutsideScriptDirOrRoot()
         {
             string scriptFolder = Path.Combine(_tempDir, "scripts", "main");

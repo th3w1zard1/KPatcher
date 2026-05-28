@@ -168,11 +168,21 @@ namespace KPatcher.Core.Mods.NSS
                 }
                 catch (Exception e)
                 {
-                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                        "ModificationsNSS.PatchResource: built-in compile exception sourceFile={0} type={1} message={2}",
-                        SourceFile, e.GetType().FullName, e.Message));
-                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
-                    return true;
+                    if (ShouldTreatAsCompilerFeedback(e))
+                    {
+                        LogCompilerFeedback(logger, e.Message);
+                        logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "ModificationsNSS.PatchResource: built-in compile feedback exception sourceFile={0} type={1} message={2}",
+                            SourceFile, e.GetType().FullName, e.Message));
+                    }
+                    else
+                    {
+                        logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "ModificationsNSS.PatchResource: built-in compile exception sourceFile={0} type={1} message={2}",
+                            SourceFile, e.GetType().FullName, e.Message));
+                        logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
+                        return true;
+                    }
                 }
 
                 if (compiledBytes != null)
@@ -347,6 +357,23 @@ namespace KPatcher.Core.Mods.NSS
             AddLookupPath(tempFolder, lookupPaths, seenPaths);
 
             return lookupPaths;
+        }
+
+        private static bool ShouldTreatAsCompilerFeedback(Exception exception)
+        {
+            if (exception is InvalidOperationException
+                && exception.Message.IndexOf("Failed to parse nwscript.nss file:", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            if (exception is FileNotFoundException
+                && exception.Message.IndexOf("nwscript.nss file not found:", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static void LogCompilerFeedback(PatchLogger logger, string feedback)
