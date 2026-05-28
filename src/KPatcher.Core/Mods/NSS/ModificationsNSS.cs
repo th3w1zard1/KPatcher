@@ -118,10 +118,23 @@ namespace KPatcher.Core.Mods.NSS
                     tempScriptFile, tempFolder));
 
                 byte[] compiledBytes = null;
+                ManagedCompileOptions compileOptions;
 
                 try
                 {
-                    ManagedCompileOptions compileOptions = ResolveManagedCompileOptions(tempScriptFile, tempNcsFile, game, logger);
+                    compileOptions = ResolveManagedCompileOptions(tempScriptFile, tempNcsFile, game, logger);
+                }
+                catch (Exception e)
+                {
+                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                        "ModificationsNSS.PatchResource: compile option resolution failed sourceFile={0} type={1} message={2}",
+                        SourceFile, e.GetType().FullName, e.Message));
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
+                    return true;
+                }
+
+                try
+                {
                     compiledBytes = ManagedNwnnsscomp.CompileSourceToBytes(
                         mutableSource.Value,
                         compileOptions.Game,
@@ -132,12 +145,12 @@ namespace KPatcher.Core.Mods.NSS
                         "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                     return compiledBytes;
                 }
-                catch (EntryPointError e)
+                catch (CompileError e)
                 {
+                    LogCompilerFeedback(logger, e.Message);
                     logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                        "ModificationsNSS.PatchResource: EntryPointError from built-in compile sourceFile={0} message={1}", SourceFile, e.Message));
-                    logger.AddNote(e.Message);
-                    return true;
+                        "ModificationsNSS.PatchResource: built-in compile error sourceFile={0} type={1} message={2}",
+                        SourceFile, e.GetType().FullName, e.Message));
                 }
                 catch (Exception e)
                 {
@@ -145,6 +158,7 @@ namespace KPatcher.Core.Mods.NSS
                         "ModificationsNSS.PatchResource: built-in compile exception sourceFile={0} type={1} message={2}",
                         SourceFile, e.GetType().FullName, e.Message));
                     logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.BuiltInCompilationFailedFormat, SourceFile, e.Message));
+                    return true;
                 }
 
                 if (compiledBytes != null)
@@ -311,6 +325,20 @@ namespace KPatcher.Core.Mods.NSS
             AddLookupPath(tempFolder, lookupPaths, seenPaths);
 
             return lookupPaths;
+        }
+
+        private static void LogCompilerFeedback(PatchLogger logger, string feedback)
+        {
+            if (logger == null || feedback == null || feedback.Length == 0)
+            {
+                return;
+            }
+
+            string normalized = feedback.Replace("\r\n", "\n").Replace('\r', '\n');
+            foreach (string line in normalized.Split(new[] { '\n' }, StringSplitOptions.None))
+            {
+                logger.AddVerbose(line);
+            }
         }
 
         private static void AddLookupPath(string candidate, List<string> lookupPaths, HashSet<string> seenPaths)
