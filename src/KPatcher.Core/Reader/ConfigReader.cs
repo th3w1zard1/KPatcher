@@ -938,14 +938,7 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingHackListPatches);
             Dictionary<string, string> hacklistSectionDict = SectionToDictionary(_ini[hacklistSection]);
             string defaultDestination = "Override";
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="scripts" resolves to "C:/Mod/tslpatchdata/scripts"
-            // Can be null if key not found
-            string defaultSourceFolder = hacklistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
-            hacklistSectionDict.Remove("!DefaultSourceFolder");
+            string defaultSourceFolder = ".";
 
             // Process each NCS file in HACKList
             foreach ((string identifier, string filename) in hacklistSectionDict)
