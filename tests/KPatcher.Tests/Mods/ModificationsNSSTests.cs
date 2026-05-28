@@ -71,7 +71,7 @@ namespace KPatcher.Core.Tests.Mods
             Assert.True(result is bool skipped && skipped);
             Assert.Contains(
                 logger.Errors,
-                log => log.Message.IndexOf("did not produce an NCS file", StringComparison.OrdinalIgnoreCase) >= 0);
+                log => log.Message.IndexOf("Unable to find compiled version of file", StringComparison.OrdinalIgnoreCase) >= 0);
             Assert.Contains(
                 logger.VerboseLogs,
                 log => log.Message.IndexOf("helper", StringComparison.OrdinalIgnoreCase) >= 0);
@@ -130,7 +130,7 @@ namespace KPatcher.Core.Tests.Mods
             Assert.Single(errorLogs);
             Assert.Contains(
                 errorLogs,
-                log => log.Message.IndexOf("did not produce an NCS file", StringComparison.OrdinalIgnoreCase) >= 0);
+                log => log.Message.IndexOf("Unable to find compiled version of file", StringComparison.OrdinalIgnoreCase) >= 0);
             Assert.DoesNotContain(
                 errorLogs,
                 log => log.Message.IndexOf("Could not find included script", StringComparison.OrdinalIgnoreCase) >= 0);
@@ -180,7 +180,7 @@ namespace KPatcher.Core.Tests.Mods
             Assert.Single(errorLogs);
             Assert.Contains(
                 errorLogs,
-                log => log.Message.IndexOf("did not produce an NCS file", StringComparison.OrdinalIgnoreCase) >= 0);
+                log => log.Message.IndexOf("Unable to find compiled version of file", StringComparison.OrdinalIgnoreCase) >= 0);
             Assert.DoesNotContain(
                 errorLogs,
                 log => log.Message.IndexOf("entry instruction", StringComparison.OrdinalIgnoreCase) >= 0

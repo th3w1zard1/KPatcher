@@ -619,6 +619,9 @@ Examples:
   <data name="BuiltInCompilationFailedFormat" xml:space="preserve">
     <value>Built-in compilation failed for '{0}': {1}</value>
   </data>
+  <data name="CompileListCompiledNotFoundFormat" xml:space="preserve">
+    <value>Unable to find compiled version of file "{0}"! The compilation probably failed! Skipping...</value>
+  </data>
   <data name="CouldNotCompileReturningUncompiledFormat" xml:space="preserve">
     <value>Could not compile '{0}'. Returning uncompiled NSS source.</value>
   </data>

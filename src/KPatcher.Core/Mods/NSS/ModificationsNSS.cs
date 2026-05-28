@@ -169,7 +169,10 @@ namespace KPatcher.Core.Mods.NSS
 
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                     "ModificationsNSS.PatchResource: no compiled bytecode produced for sourceFile={0}; returning sentinel true to skip write", SourceFile));
-                logger.AddError($"CompileList skipped output for '{SourceFile}' because compilation did not produce an NCS file.");
+                logger.AddError(string.Format(
+                    CultureInfo.CurrentCulture,
+                    PatcherResources.CompileListCompiledNotFoundFormat,
+                    SourceFile));
                 return true;
             }
 
