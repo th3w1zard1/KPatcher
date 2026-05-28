@@ -129,6 +129,80 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         [Fact]
+        public void TryHandleCompilerUnavailable_FileLoadException_LogsDedicatedError()
+        {
+            var logger = new PatchLogger();
+
+            bool handled = ModificationsNSS.TryHandleCompilerUnavailable(logger, new FileLoadException("Could not load KCompiler backend"));
+
+            Assert.True(handled);
+            PatchLog[] errorLogs = logger.Errors.ToArray();
+
+            Assert.Single(errorLogs);
+            Assert.Contains(
+                errorLogs,
+                log => log.Message.IndexOf("script compiler is unavailable", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Contains(
+                errorLogs,
+                log => log.Message.IndexOf("Unable to compile scripts", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.DoesNotContain(
+                errorLogs,
+                log => log.Message.IndexOf("Built-in compilation failed", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.DoesNotContain(
+                errorLogs,
+                log => log.Message.IndexOf("Unable to find compiled version of file", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Empty(logger.VerboseLogs);
+        }
+
+        [Fact]
+        public void TryHandleCompilerUnavailable_FileNotFoundException_ReturnsFalse()
+        {
+            var logger = new PatchLogger();
+
+            bool handled = ModificationsNSS.TryHandleCompilerUnavailable(logger, new FileNotFoundException("missing include helper"));
+
+            Assert.False(handled);
+            Assert.Empty(logger.Errors);
+        }
+
+        [Fact]
+        public void TryHandleCompilerUnavailable_DeduplicatesErrors()
+        {
+            var logger = new PatchLogger();
+            var exception = new FileLoadException("Could not load KCompiler backend");
+
+            Assert.True(ModificationsNSS.TryHandleCompilerUnavailable(logger, exception));
+            Assert.True(ModificationsNSS.TryHandleCompilerUnavailable(logger, exception));
+            Assert.Single(logger.Errors);
+        }
+
+        [Fact]
+        public void PatchResource_ManagedCompilerUnavailable_ReturnsSkipAndLogsDiagnostic()
+        {
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                TempScriptFolder = _tempDir,
+                CompilerWorkingDirectory = _tempDir,
+                CompileSourceToBytesOverride = (nssContents, game, libraryLookupPaths, debug, nwscriptPath) =>
+                    throw new FileLoadException("Could not load KCompiler backend")
+            };
+            byte[] source = Encoding.GetEncoding("windows-1252").GetBytes("void main() { PrintInteger(1); }\n");
+            var logger = new PatchLogger();
+
+            object result = patch.PatchResource(source, new PatcherMemory(), logger, Game.K1);
+
+            Assert.True(result is bool skipped && skipped);
+            Assert.Contains(
+                logger.Errors,
+                log => log.Message.IndexOf("script compiler is unavailable", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Contains(
+                logger.Diagnostics,
+                log => log.Message.IndexOf("built-in compiler unavailable", StringComparison.OrdinalIgnoreCase) >= 0
+                    && log.Message.IndexOf("FileLoadException", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Empty(logger.VerboseLogs);
+        }
+
+        [Fact]
         public void PatchResource_ImplicitSiblingFolderInclude_DoesNotResolveOutsideScriptDirOrRoot()
         {
             string scriptFolder = Path.Combine(_tempDir, "scripts", "main");

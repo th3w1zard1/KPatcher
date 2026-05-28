@@ -113,6 +113,10 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="KPatcher.Tests" />
+  </ItemGroup>
+
   <!-- NSS/NCS compiler + Game + ResourceType are built into KCompiler.Core (same on-disk sources via link). -->
   <!-- StringUtilFunctions (StripRtf delegates to Common.RtfStripper) -->
   <ItemGroup>

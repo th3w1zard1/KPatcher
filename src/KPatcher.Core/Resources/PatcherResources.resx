@@ -619,6 +619,9 @@ Examples:
   <data name="BuiltInCompilationFailedFormat" xml:space="preserve">
     <value>Built-in compilation failed for '{0}': {1}</value>
   </data>
+  <data name="CompileListCompilerUnavailableFormat" xml:space="preserve">
+    <value>Built-in script compiler is unavailable. Unable to compile scripts: {0}</value>
+  </data>
   <data name="CompileListCompilerOutputFormat" xml:space="preserve">
     <value>NWNNSSComp says: {0}</value>
   </data>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -68,6 +69,9 @@ namespace KPatcher.Core.Mods.NSS
 
         [CanBeNull]
         public string CompilerWorkingDirectory { get; set; }
+
+        [CanBeNull]
+        internal Func<string, Game, IReadOnlyList<string>, bool, string, byte[]> CompileSourceToBytesOverride { get; set; }
 
         public ModificationsNSS(string filename, bool replaceFile = false)
             : base(filename, replaceFile)
@@ -158,12 +162,20 @@ namespace KPatcher.Core.Mods.NSS
 
                 try
                 {
-                    compiledBytes = ManagedNwnnsscomp.CompileSourceToBytes(
-                        mutableSource.Value,
-                        compileOptions.Game,
-                        BuildLibraryLookupPaths(tempFolder, tempScriptDirectory),
-                        compileOptions.Debug,
-                        compileOptions.NwscriptPath);
+                    Func<string, Game, IReadOnlyList<string>, bool, string, byte[]> compileSourceToBytes = CompileSourceToBytesOverride;
+                    compiledBytes = compileSourceToBytes != null
+                        ? compileSourceToBytes(
+                            mutableSource.Value,
+                            compileOptions.Game,
+                            BuildLibraryLookupPaths(tempFolder, tempScriptDirectory),
+                            compileOptions.Debug,
+                            compileOptions.NwscriptPath)
+                        : ManagedNwnnsscomp.CompileSourceToBytes(
+                            mutableSource.Value,
+                            compileOptions.Game,
+                            BuildLibraryLookupPaths(tempFolder, tempScriptDirectory),
+                            compileOptions.Debug,
+                            compileOptions.NwscriptPath);
                     logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                         "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
                     return compiledBytes;
@@ -177,6 +189,14 @@ namespace KPatcher.Core.Mods.NSS
                 }
                 catch (Exception e)
                 {
+                    if (TryHandleCompilerUnavailable(logger, e))
+                    {
+                        logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                            "ModificationsNSS.PatchResource: built-in compiler unavailable sourceFile={0} type={1} message={2}",
+                            SourceFile, e.GetType().FullName, e.Message));
+                        return true;
+                    }
+
                     if (ShouldTreatAsCompilerFeedback(e))
                     {
                         LogCompilerFeedback(logger, e.Message);
@@ -368,6 +388,21 @@ namespace KPatcher.Core.Mods.NSS
             return lookupPaths;
         }
 
+        internal static bool TryHandleCompilerUnavailable(PatchLogger logger, Exception exception)
+        {
+            if (!(exception is BadImageFormatException
+                || exception is DllNotFoundException
+                || exception is FileLoadException
+                || exception is MissingMethodException
+                || exception is TypeLoadException))
+            {
+                return false;
+            }
+
+            LogCompilerUnavailable(logger, exception);
+            return true;
+        }
+
         private static bool ShouldTreatAsCompilerFeedback(Exception exception)
         {
             if (exception is InvalidOperationException
@@ -383,6 +418,25 @@ namespace KPatcher.Core.Mods.NSS
             }
 
             return false;
+        }
+
+        private static void LogCompilerUnavailable(PatchLogger logger, Exception exception)
+        {
+            if (logger == null || exception == null)
+            {
+                return;
+            }
+
+            string message = string.Format(
+                CultureInfo.CurrentCulture,
+                PatcherResources.CompileListCompilerUnavailableFormat,
+                exception.Message);
+            if (logger.Errors.Any(log => string.Equals(log.Message, message, StringComparison.Ordinal)))
+            {
+                return;
+            }
+
+            logger.AddError(message);
         }
 
         private static void LogCompilerFeedback(PatchLogger logger, string feedback)
