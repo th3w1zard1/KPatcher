@@ -27,7 +27,7 @@ namespace KPatcher.Core.Formats.SSF
                 writer.Write(Encoding.ASCII.GetBytes("V1.1"));
                 writer.Write((uint)12); // Sounds offset
 
-                // Write all 28 sound references in order
+                // Write all 40 sound references in order
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.BATTLE_CRY_1));
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.BATTLE_CRY_2));
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.BATTLE_CRY_3));
@@ -56,12 +56,18 @@ namespace KPatcher.Core.Formats.SSF
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.SEPARATED_FROM_PARTY));
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.REJOINED_PARTY));
                 WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.POISONED));
-
-                // Write 12 padding bytes (0xFFFFFFFF)
-                for (int i = 0; i < 12; i++)
-                {
-                    writer.Write(0xFFFFFFFF);
-                }
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_29));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_30));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_31));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_32));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_33));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_34));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_35));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_36));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_37));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_38));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_39));
+                WriteInt32MaxNeg1(writer, _ssf.Get(SSFSound.UNKNOWN_40));
 
                 return ms.ToArray();
             }

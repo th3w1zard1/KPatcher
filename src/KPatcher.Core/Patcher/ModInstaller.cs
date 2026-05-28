@@ -356,17 +356,17 @@ namespace KPatcher.Core.Patcher
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FoundPatchesToApply, cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count));
 
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                    "Install: ordered queue TLK+install+2DA+GFF+NSS+NCS+SSF; TslPatchDataPath={0}",
+                    "Install: ordered queue TLK+GFF+2DA+install+HACK+Compile+SSF; TslPatchDataPath={0}",
                     TslPatchDataPath ?? "null"));
 
                 List<PatcherModifications> patchesList = new List<PatcherModifications>();
-                // TSLPatcher patch order: TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF
+                // Binary-verified TSLPatcher patch order: TLK -> GFF -> 2DA -> InstallList -> HACK -> Compile -> SSF
                 patchesList.AddRange(GetTlkPatches(cfg));
-                patchesList.AddRange(cfg.InstallList);
-                patchesList.AddRange(cfg.Patches2DA);
                 patchesList.AddRange(cfg.PatchesGFF);
-                patchesList.AddRange(cfg.PatchesNSS);
+                patchesList.AddRange(cfg.Patches2DA);
+                patchesList.AddRange(cfg.InstallList);
                 patchesList.AddRange(cfg.PatchesNCS);
+                patchesList.AddRange(cfg.PatchesNSS);
                 patchesList.AddRange(cfg.PatchesSSF);
 
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -439,7 +439,7 @@ namespace KPatcher.Core.Patcher
                         processingSSF = true;
                     }
 
-                    // Must run preprocessed scripts directly before GFFList so we don't interfere with !FieldPath assignments to 2DAMEMORY.
+                    // TSLPatcher compiles after GFF/HACK, so preprocess scripts immediately before CompileList patches.
                     if (!finishedPreprocessedScripts && patch is ModificationsNSS)
                     {
                         tempScriptFolder = PrepareCompileList(cfg, memory);
@@ -638,29 +638,19 @@ namespace KPatcher.Core.Patcher
         [CanBeNull]
         private string PrepareCompileList(PatcherConfig config, PatcherMemory memory)
         {
-            // tslpatchdata should be read-only, this allows us to replace memory tokens while ensuring include scripts work correctly.
+            // TSLPatcher prepares CompileList work out of the active tslpatchdata root.
             if (config.PatchesNSS.Count == 0)
             {
                 log.AddDiagnostic("PrepareCompileList: no NSS patches, skipping temp script folder");
                 return null;
             }
 
+            string dataRoot = string.IsNullOrWhiteSpace(TslPatchDataPath) ? modPath : TslPatchDataPath;
             log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "PrepareCompileList: NSS patch count={0}, modPath={1}", config.PatchesNSS.Count, modPath));
+                "PrepareCompileList: NSS patch count={0}, dataRoot={1}", config.PatchesNSS.Count, dataRoot));
 
-            // Move nwscript.nss to Override if there are any nss patches to do
-            string nwscriptPath = Path.Combine(modPath, "nwscript.nss");
-            if (File.Exists(nwscriptPath))
-            {
-                var fileInstall = new InstallFile("nwscript.nss", replaceExisting: true);
-                if (!config.InstallList.Contains(fileInstall))
-                {
-                    config.InstallList.Add(fileInstall);
-                }
-            }
-
-            // Copy all .nss files in the mod path, to a temp working directory
-            string tempScriptFolder = Path.Combine(modPath, "temp_nss_working_dir");
+            // Copy all .nss files in the active data path to a temp working directory for token substitution and includes.
+            string tempScriptFolder = Path.Combine(dataRoot, "nsspatch_temp");
             if (Directory.Exists(tempScriptFolder))
             {
                 try
@@ -674,18 +664,24 @@ namespace KPatcher.Core.Patcher
             }
             Directory.CreateDirectory(tempScriptFolder);
 
-            // Copy .nss files
-            foreach (string file in Directory.GetFiles(modPath))
+            // Copy .nss files while preserving their tslpatchdata-relative layout.
+            foreach (string file in Directory.GetFiles(dataRoot, "*.nss", SearchOption.AllDirectories))
             {
-                if (Path.GetExtension(file).Equals(".nss", StringComparison.OrdinalIgnoreCase) && File.Exists(file))
+                if (File.Exists(file))
                 {
-                    string destFile = Path.Combine(tempScriptFolder, Path.GetFileName(file));
+                    string relativePath = Path.GetRelativePath(dataRoot, file);
+                    string destFile = Path.Combine(tempScriptFolder, relativePath);
+                    string destDirectory = Path.GetDirectoryName(destFile);
+                    if (!string.IsNullOrEmpty(destDirectory))
+                    {
+                        Directory.CreateDirectory(destDirectory);
+                    }
                     File.Copy(file, destFile, true);
                 }
             }
 
             // Process the strref/2damemory in each script
-            string[] scripts = Directory.GetFiles(tempScriptFolder, "*.nss", SearchOption.TopDirectoryOnly);
+            string[] scripts = Directory.GetFiles(tempScriptFolder, "*.nss", SearchOption.AllDirectories);
             log.AddVerbose($"Preprocessing #StrRef# and #2DAMEMORY# tokens for all {scripts.Length} scripts, before running [CompileList]");
 
             foreach (string script in scripts)
@@ -1153,17 +1149,6 @@ namespace KPatcher.Core.Patcher
             {
                 // renamed_file_path: CaseAwarePath = override_dir / f"old_{patch.saveas}"
                 string renamedFilePath = Path.Combine(overrideDir, $"old_{saveAs}");
-                int i = 2;
-                string filestem = Path.GetFileNameWithoutExtension(renamedFilePath);
-
-                // while renamed_file_path.is_file():
-                while (File.Exists(renamedFilePath))
-                {
-                    // renamed_file_path = renamed_file_path.parent / f"{filestem} ({i}){renamed_file_path.suffix}"
-                    string suffix = Path.GetExtension(renamedFilePath);
-                    renamedFilePath = Path.Combine(overrideDir, $"{filestem} ({i}){suffix}");
-                    i++;
-                }
 
                 try
                 {

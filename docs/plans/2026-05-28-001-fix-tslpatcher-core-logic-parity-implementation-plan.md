@@ -11,7 +11,7 @@ audit_ref: docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 
 ## Summary
 
-Translate the confirmed parity gaps from the audit into executable KPatcher changes, starting with the user-flagged `!FieldPath` behavior and the other highest-confidence logic mismatches that have a clear local owner: namespace fallback/path confinement and InstallList overwrite safeguards. The branch keeps KPatcher's code organization, but removes behavior drift where vendored TSLPatcher logic is the clearer authority.
+Translate the confirmed parity gaps from the audit into executable KPatcher changes until the managed implementation matches vendored `vendor/TSLPatcher` core logic as closely as the reviewed owner paths allow. The branch keeps KPatcher's code organization, but removes behavior drift where vendored TSLPatcher logic is the clearer authority, starting with the already-landed `!FieldPath`, namespace, and InstallList slices and continuing with the next smallest confirmed mismatches.
 
 ## Problem frame
 
@@ -26,7 +26,7 @@ There are two important constraints on the implementation work:
 
 - R1. Re-open `!FieldPath` parity by comparing vendored TSLPatcher behavior to KPatcher parsing and runtime behavior, then fix KPatcher if the semantics differ.
 - R2. Add characterization-style tests for every behavior change so the parity target is executable, not only described.
-- R3. Align high-confidence core-logic gaps with clear C# owners in this branch: `!FieldPath`, namespace fallback/path confinement, and InstallList overwrite guards.
+- R3. Align high-confidence core-logic gaps with clear C# owners in this branch: `!FieldPath`, namespace fallback/path confinement, InstallList overwrite guards, and KPatcher-specific K1 2DA hardcaps that are not present in the reviewed vendor source.
 - R4. Keep KPatcher's internal organization and managed implementation style where behavior can still match TSLPatcher.
 - R5. Preserve repo constraints: C# 7.3 only, no new committed external fixture files, and real temp directories instead of mocking for installer-style tests.
 - R6. Update parity documentation only where the implementation changes invalidate or sharpen current audit wording.
@@ -50,8 +50,8 @@ There are two important constraints on the implementation work:
 3. Use characterization-first edits for each parity slice.
    Rationale: several areas already had incorrect or overconfident parity summaries. Each slice should start by expressing the claimed TSLPatcher behavior in a focused test before changing production code.
 
-4. Land only clear-owner parity slices in this branch.
-   Rationale: `!FieldPath`, namespace resolution, and InstallList overwrite rules each map to localized C# owners. The broader HACKList/CompileList/pipeline issues still need either a bigger design pass or a stronger authority decision.
+4. Land exact-parity work in ascending owner clarity.
+  Rationale: the user requirement is exact vendor logic, but some discrepancies still have radically different implementation cost. This branch should keep consuming the smallest directly evidenced drifts first (`!FieldPath`, namespace resolution, InstallList overwrite rules, K1 hardcaps) before reopening the broader HACKList/CompileList/pipeline questions.
 
 ## Implementation units
 
@@ -139,6 +139,26 @@ There are two important constraints on the implementation work:
 - Verification:
   - Focused diff review plus `git diff --check` on touched docs.
 
+### U5. Remove KPatcher-specific K1 2DA hardcaps
+
+- Goal: align 2DA patch application with vendored TSLPatcher by removing KPatcher-only row-limit rejection for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da` on K1.
+- Files:
+  - `src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs`
+  - `tests/KPatcher.Tests/Mods/TwoDAModsUnitTests.cs`
+  - `tests/KPatcher.Tests/Mods/TwoDaModsTests.cs`
+- Reference anchors:
+  - `vendor/TSLPatcher/UTSLPatcher.pas`
+  - `vendor/TSLPatcher/U2DAEdit.pas`
+- Approach:
+  - Re-characterize the current KPatcher hardcap path in focused tests.
+  - Verify that the reviewed vendor 2DA patch path contains no equivalent K1-specific row-limit rejection.
+  - Remove the row-limit guard from the KPatcher 2DA patch write path if the tests confirm it is a vendor-divergent add-on.
+- Test scenarios:
+  - K1 2DA patch application does not reject `placeables.2da`, `upcrystals.2da`, or `upgrade.2da` solely for exceeding KPatcher's current hardcoded row limits.
+  - Existing 2DA modifier ordering and token-storage behavior remain intact after removing the hardcap branch.
+- Verification:
+  - Focused `TwoDAMods*` execution covering the touched K1 write path.
+
 ## Risks and mitigations
 
 - Risk: vendored TSLPatcher source still contains behavior drift from the historically shipped binary.
@@ -153,6 +173,9 @@ There are two important constraints on the implementation work:
 - Risk: InstallList safety guards could accidentally block unrelated patch paths.
   Mitigation: place the guard at the InstallList behavior boundary and cover allowed versus blocked targets explicitly.
 
+- Risk: removing the K1 hardcap guard could expose a product-compatibility concern that KPatcher previously treated as policy.
+  Mitigation: anchor the change on vendor-source absence plus focused K1 test coverage, and document any remaining compatibility concern as a post-parity product decision rather than keeping it hidden in core patch logic.
+
 ## Validation plan
 
 1. Run the narrowest affected KPatcher test files for each implementation unit after its first substantive edit.
@@ -162,6 +185,7 @@ There are two important constraints on the implementation work:
 
 ## Status deltas
 
-- Landed: implementation branch/worktree created and vendored TSLPatcher source initialized.
-- Partial/uncertain: the exact `!FieldPath` mismatch still needs direct Delphi-to-C# characterization before any behavior edit is justified.
-- Next-step change: anchor the first code slice on `!FieldPath`, then sequence namespace and InstallList parity changes behind passing focused tests.
+- Landed: implementation branch/worktree created; vendored TSLPatcher source initialized; `!FieldPath`, namespace fallback/path confinement, InstallList overwrite safeguards, and removal of KPatcher-only K1 hardcaps are all landed on this branch.
+- Landed: additional owner-path parity fixes now cover the binary-verified install queue order, vendor-default HACK write semantics within the existing NCS-backed surface, CompileList prep/include/failure behavior, SSF recovery plus 40-slot handling, vendored `!OverrideType` default/rename behavior, and removal of unsupported top-level `!DefaultDestination` handling outside CompileList.
+- Partial/uncertain: generic HACKList behavior, external-compiler/settings parity for CompileList, and backup/uninstall semantics still need branch-local code decisions or follow-up fixes.
+- Next-step change: continue the remaining HACK/Compile/backup parity slices and keep the audit/ledger aligned with the landed owner-path fixes.

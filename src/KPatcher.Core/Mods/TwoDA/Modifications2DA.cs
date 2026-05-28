@@ -25,13 +25,6 @@ namespace KPatcher.Core.Mods.TwoDA
         public new const string DEFAULT_DESTINATION = PatcherModifications.DEFAULT_DESTINATION;
         public static string DefaultDestination => DEFAULT_DESTINATION;
 
-        public static readonly Dictionary<string, int> HardcappedRowLimits = new Dictionary<string, int>()
-        {
-            { "placeables.2da", 256 },
-            { "upcrystals.2da", 256 },
-            { "upgrade.2da", 32 }
-        };
-
         public List<Modify2DA> Modifiers { get; set; } = new List<Modify2DA>();
         public Dictionary<int, RowValue> FileStore2DA { get; } = new Dictionary<int, RowValue>();
         public Dictionary<int, RowValue> FileStoreTLK { get; } = new Dictionary<int, RowValue>();
@@ -68,23 +61,6 @@ namespace KPatcher.Core.Mods.TwoDA
             }
 
             Apply(twoda, memory, logger, game);
-
-            // If game is K2, return before hardcap check.
-            // K1 enforces 256-row caps on placeables/upcrystals etc.; TSL/K2 does not (vanilla K2 placeables can exceed 256).
-            if (!game.IsK2() && HardcappedRowLimits.TryGetValue(SaveAs.ToLowerInvariant(), out int twodaRowLimit))
-            {
-                int curRowCount = twoda.GetHeight();
-                if (curRowCount > twodaRowLimit)
-                {
-                    int rowsOverLimit = curRowCount - twodaRowLimit;
-                    logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                        "Modifications2DA.PatchResource: K1 hardcap rejected saveAs={0} limit={1} rows={2} overBy={3}; returning original bytes",
-                        SaveAs, twodaRowLimit, curRowCount, rowsOverLimit));
-                    logger.AddError(
-                        $"{SaveAs} has a max row count of {twodaRowLimit} on KOTOR 1. Result has {curRowCount} rows ({rowsOverLimit} over the limit); changes were not applied.");
-                    return source;
-                }
-            }
 
             byte[] written = new TwoDABinaryWriter(twoda).Write();
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,

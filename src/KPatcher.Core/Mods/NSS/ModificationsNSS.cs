@@ -75,12 +75,26 @@ namespace KPatcher.Core.Mods.NSS
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "ModificationsNSS.PatchResource: after token Apply nssCharLength={0}", mutableSource.Value.Length));
 
+            if (Action.Equals("Compile", StringComparison.OrdinalIgnoreCase)
+                && IsVendoredIncludeFile(sourceText))
+            {
+                logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                    "ModificationsNSS.PatchResource: vendor include heuristic matched sourceFile={0}; skipping compile output", SourceFile));
+                return true;
+            }
+
             // Compile the modified NSS source to NCS bytecode
             if (Action.Equals("Compile", StringComparison.OrdinalIgnoreCase))
             {
                 string tempFolder = TempScriptFolder is null ? Path.GetTempPath() : TempScriptFolder;
                 Directory.CreateDirectory(tempFolder);
-                string tempScriptFile = Path.Combine(tempFolder, SourceFile);
+                string relativeSourceFolder = string.IsNullOrWhiteSpace(SourceFolder) ? "." : SourceFolder;
+                string tempScriptFile = Path.Combine(tempFolder, relativeSourceFolder, SourceFile);
+                string tempScriptDirectory = Path.GetDirectoryName(tempScriptFile);
+                if (!string.IsNullOrEmpty(tempScriptDirectory))
+                {
+                    Directory.CreateDirectory(tempScriptDirectory);
+                }
                 File.WriteAllText(tempScriptFile, mutableSource.Value, Encoding.GetEncoding("windows-1252"));
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                     "ModificationsNSS.PatchResource: wrote temp NSS path={0} tempFolder={1}",
@@ -95,7 +109,7 @@ namespace KPatcher.Core.Mods.NSS
                         game,
                         null,
                         null,
-                        new List<string> { tempFolder });
+                        BuildLibraryLookupPaths(tempFolder, tempScriptDirectory));
                     compiledBytes = NCSAuto.BytesNcs(ncs);
                     logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                         "ModificationsNSS.PatchResource: built-in compile ok sourceFile={0} ncsBytes={1}", SourceFile, compiledBytes.Length));
@@ -122,9 +136,9 @@ namespace KPatcher.Core.Mods.NSS
                 }
 
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                    "ModificationsNSS.PatchResource: falling back to NSS bytes sourceFile={0} nssCharLength={1}", SourceFile, mutableSource.Value.Length));
-                logger.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCompileReturningUncompiledFormat, SourceFile));
-                return Encoding.GetEncoding("windows-1252").GetBytes(mutableSource.Value);
+                    "ModificationsNSS.PatchResource: no compiled bytecode produced for sourceFile={0}; returning sentinel true to skip write", SourceFile));
+                logger.AddError($"CompileList skipped output for '{SourceFile}' because compilation did not produce an NCS file.");
+                return true;
             }
 
             // If not compiling, just return the modified source
@@ -202,6 +216,45 @@ namespace KPatcher.Core.Mods.NSS
                 nssSource.Value = nssSource.Value.Substring(0, start) + replacementValue.ToString() + nssSource.Value.Substring(end);
 
                 match = Regex.Match(nssSource.Value, searchPattern);
+            }
+        }
+
+        private static bool IsVendoredIncludeFile(string sourceText)
+        {
+            string lowerSource = (sourceText ?? string.Empty).ToLowerInvariant();
+            return lowerSource.IndexOf("void main()", StringComparison.Ordinal) == -1
+                && lowerSource.IndexOf("void main ()", StringComparison.Ordinal) == -1
+                && lowerSource.IndexOf("int startingconditional()", StringComparison.Ordinal) == -1
+                && lowerSource.IndexOf("int startingconditional ()", StringComparison.Ordinal) == -1;
+        }
+
+        private static List<string> BuildLibraryLookupPaths(string tempFolder, string tempScriptDirectory)
+        {
+            var lookupPaths = new List<string>();
+            var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            AddLookupPath(tempScriptDirectory, lookupPaths, seenPaths);
+            AddLookupPath(tempFolder, lookupPaths, seenPaths);
+
+            foreach (string directory in Directory.GetDirectories(tempFolder, "*", SearchOption.AllDirectories))
+            {
+                AddLookupPath(directory, lookupPaths, seenPaths);
+            }
+
+            return lookupPaths;
+        }
+
+        private static void AddLookupPath(string candidate, List<string> lookupPaths, HashSet<string> seenPaths)
+        {
+            if (string.IsNullOrEmpty(candidate) || !Directory.Exists(candidate))
+            {
+                return;
+            }
+
+            string fullPath = Path.GetFullPath(candidate);
+            if (seenPaths.Add(fullPath))
+            {
+                lookupPaths.Add(fullPath);
             }
         }
     }

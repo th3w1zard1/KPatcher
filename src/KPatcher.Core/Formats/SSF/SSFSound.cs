@@ -33,6 +33,18 @@ namespace KPatcher.Core.Formats.SSF
         UNLOCK_SUCCESS = 24,
         SEPARATED_FROM_PARTY = 25,
         REJOINED_PARTY = 26,
-        POISONED = 27
+        POISONED = 27,
+        UNKNOWN_29 = 28,
+        UNKNOWN_30 = 29,
+        UNKNOWN_31 = 30,
+        UNKNOWN_32 = 31,
+        UNKNOWN_33 = 32,
+        UNKNOWN_34 = 33,
+        UNKNOWN_35 = 34,
+        UNKNOWN_36 = 35,
+        UNKNOWN_37 = 36,
+        UNKNOWN_38 = 37,
+        UNKNOWN_39 = 38,
+        UNKNOWN_40 = 39
     }
 }

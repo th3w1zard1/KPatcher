@@ -27,6 +27,12 @@ namespace KPatcher.Core.Mods.NCS
     /// </summary>
     public enum NCSTokenType
     {
+        /// <summary>Vendored HACKList TLK string reference using Delphi's 32-bit write semantics</summary>
+        VENDOR_STRREF,
+        /// <summary>Vendored HACKList 2DA memory reference using Delphi's 32-bit write semantics</summary>
+        VENDOR_MEMORY_2DA,
+        /// <summary>Vendored HACKList direct integer using Delphi's 32-bit write semantics</summary>
+        VENDOR_INT32,
         /// <summary>16-bit unsigned TLK string reference</summary>
         STRREF,
         /// <summary>32-bit signed TLK string reference (CONSTI instruction)</summary>
@@ -85,6 +91,15 @@ namespace KPatcher.Core.Mods.NCS
 
             switch (TokenType)
             {
+                case NCSTokenType.VENDOR_STRREF:
+                    WriteVendorStrRef(writer, memory, logger, sourcefile);
+                    break;
+                case NCSTokenType.VENDOR_MEMORY_2DA:
+                    WriteVendor2DAMemory(writer, memory, logger, sourcefile);
+                    break;
+                case NCSTokenType.VENDOR_INT32:
+                    WriteVendorInt32(writer, TokenIdOrValue, logger, sourcefile);
+                    break;
                 case NCSTokenType.STRREF:
                     WriteStrRef(writer, memory, logger, sourcefile);
                     break;
@@ -109,6 +124,43 @@ namespace KPatcher.Core.Mods.NCS
                 default:
                     throw new InvalidOperationException($"Unknown token type '{TokenType}' in HACKList patch");
             }
+        }
+
+        private void WriteVendorStrRef(System.IO.BinaryWriter writer, PatcherMemory memory, PatchLogger logger, string sourcefile)
+        {
+            if (!memory.MemoryStr.TryGetValue(TokenIdOrValue, out int value))
+            {
+                throw new KeyNotFoundException($"StrRef{TokenIdOrValue} was not defined before use");
+            }
+
+            WriteVendorInt32(writer, value, logger, sourcefile);
+        }
+
+        private void WriteVendor2DAMemory(System.IO.BinaryWriter writer, PatcherMemory memory, PatchLogger logger, string sourcefile)
+        {
+            if (!memory.Memory2DA.TryGetValue(TokenIdOrValue, out string memoryVal))
+            {
+                throw new KeyNotFoundException($"2DAMEMORY{TokenIdOrValue} was not defined before use");
+            }
+            if (memoryVal != null && (memoryVal.Contains('/') || memoryVal.Contains('\\')))
+            {
+                throw new InvalidOperationException($"Memory value cannot be !FieldPath in [HACKList] patches, got '{memoryVal}'");
+            }
+
+            WriteVendorInt32(writer, int.Parse(memoryVal ?? "0"), logger, sourcefile);
+        }
+
+        private void WriteVendorInt32(System.IO.BinaryWriter writer, int value, PatchLogger logger, string sourcefile)
+        {
+            logger.AddVerbose($"HACKList {sourcefile}: writing vendored DWORD (32-bit) {value} at offset {Offset:#X}");
+
+            if (ShouldUseVendoredNcsByteOrder(sourcefile))
+            {
+                WriteInt32BigEndian(writer, value);
+                return;
+            }
+
+            writer.Write(value);
         }
 
         /// <summary>Write a 16-bit unsigned TLK string reference.</summary>
@@ -214,6 +266,12 @@ namespace KPatcher.Core.Mods.NCS
             writer.Write((byte)((value >> 8) & 0xFF));
             writer.Write((byte)(value & 0xFF));
         }
+
+        private static bool ShouldUseVendoredNcsByteOrder(string sourcefile)
+        {
+            return sourcefile != null
+                && sourcefile.EndsWith(".ncs", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     /// <summary>
@@ -271,7 +329,7 @@ namespace KPatcher.Core.Mods.NCS
                 {
                     foreach (ModifyNCS modifier in Modifiers)
                     {
-                        modifier.Apply(writer, memory, logger, SourceFile);
+                        modifier.Apply(writer, memory, logger, SaveAs ?? SourceFile);
                     }
                 }
             }

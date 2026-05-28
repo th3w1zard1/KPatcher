@@ -2,30 +2,50 @@
 title: "KPatcher Parity Confidence Ledger"
 created: 2026-05-23
 status: active
-audit_ref: "docs/plans/2026-05-23-003-refactor-comprehensive-parity-audit-plan.md"
+audit_ref: "docs/plans/2026-05-28-001-fix-tslpatcher-core-logic-parity-implementation-plan.md"
 ---
 
 # KPatcher Parity Confidence Ledger
 
 **Document Purpose:** Durable record of parity assessment, test infrastructure confidence, and verified implementations. This ledger establishes the baseline for release gating, post-release monitoring, and future audit cycles.
 
-**Last Audited:** 2026-05-23  
-**Audit Plan:** docs/plans/2026-05-23-003-refactor-comprehensive-parity-audit-plan.md
+**Last Audited:** 2026-05-28  
+**Audit Plan:** docs/plans/2026-05-28-001-fix-tslpatcher-core-logic-parity-implementation-plan.md
+**Detailed Audit:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 
 ---
 
 ## Executive Summary
 
-**Parity Status: ✅ STRONG**  
-KPatcher maintains faithful parity with TSLPatcher baseline across all core functionality. Test infrastructure is robust with 767+ test cases and multi-tier coverage. Architecture is sound with clear module boundaries. The flight recorder feature (PR #9) is complete and non-breaking. All active strategy tracks have substantive implementations.
+**Parity Status: ⚠ PARTIAL / IMPROVING**  
+KPatcher now has branch-local parity coverage for a broader set of confirmed owner-path slices: top-level GFF `!FieldPath` semantics, namespace fallback/path confinement, InstallList overwrite safeguards, removal of KPatcher-only K1 2DA hardcaps, binary-verified install queue ordering, vendor-default HACK writes within the existing NCS-backed surface, CompileList prep/include/failure semantics, SSF recovery plus full 40-entry layout handling, and vendored `!OverrideType` default/rename behavior. Exact end-to-end parity is still not established because generic HACKList scope, external-compiler/settings parity for CompileList, and backup/uninstall semantics remain unresolved or intentionally broader than the reviewed vendor path.
 
-**Confidence Level:** High (85-90% parity verified, 100% fixture policy compliance, 3 of 4 tracks substantially complete)
+**Confidence Level:** Moderate (the landed owner-path slices are increasingly backed by focused tests and file-level validation, but exact full-core parity is still incomplete)
 
-**Risk Profile:** Low  
-- No P1 blockers identified
-- All documented gaps are non-blocking or future optimization
-- Fixture policy compliance verified at 100%
-- Architecture consistency confirmed
+**Risk Profile:** Medium  
+- Four previously confirmed behavior drifts are now landed on this branch
+- Additional owner-path parity fixes are landed for queue order, SSF handling, override behavior, and CompileList prep/failure recovery
+- HACKList behavior remains narrowed to NCS-only patching in KPatcher
+- CompileList still differs where vendored TSLPatcher relies on external compiler/settings behavior beyond the managed KPatcher compiler path
+- Backup/uninstall behavior remains a documented extension rather than strict parity
+
+## 0. Current Branch-Local Parity Status
+
+**Landed on this branch:**
+
+- `!FieldPath`: top-level `GFFList` `2DAMEMORY#=!FieldPath` special-casing removed; nested add-field handling retained.
+- Namespace handling: missing `IniName` / `InfoName` now fall back to `changes.ini` / `info.rtf`, namespace-specific missing files fall back to base files, and `DataPath` escape attempts are rejected.
+- InstallList safety: existing folder-target `.exe`, `.tlk`, `.key`, and `.bif` replacements are now blocked to match the reviewed vendor behavior.
+- 2DA parity: KPatcher-only K1 row-limit rejection for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da` has been removed.
+- Queue order: installer patch sequencing now follows the binary-verified runtime order `TLK -> GFF -> 2DA -> InstallList -> HACK -> Compile -> SSF`.
+- HACK/Compile/SSF owner paths: plain HACK entries now default to vendor-style 32-bit writes, CompileList prep/failure behavior is closer to the reviewed vendor path, and SSF parsing/application now recovers from missing sections and invalid values while supporting all 40 sound slots.
+- Override behavior: absent `!OverrideType` now defaults to `ignore`, and rename mode uses the vendored `old_<name>` target behavior.
+
+**Still open:**
+
+- Generic HACKList parity
+- CompileList/external-compiler parity
+- Backup/uninstall strict-parity decision
 
 ---
 

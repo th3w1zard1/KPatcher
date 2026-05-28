@@ -46,7 +46,7 @@ namespace KPatcher.Core.Formats.SSF
                 uint soundsOffset = Reader.ReadUInt32();
                 Reader.Seek((int)soundsOffset);
 
-                // Read all 28 sound references in order
+                // Read all 40 sound references in order
                 ssf.SetData(SSFSound.BATTLE_CRY_1, ReadInt32MaxNeg1());
                 ssf.SetData(SSFSound.BATTLE_CRY_2, ReadInt32MaxNeg1());
                 ssf.SetData(SSFSound.BATTLE_CRY_3, ReadInt32MaxNeg1());
@@ -75,6 +75,18 @@ namespace KPatcher.Core.Formats.SSF
                 ssf.SetData(SSFSound.SEPARATED_FROM_PARTY, ReadInt32MaxNeg1());
                 ssf.SetData(SSFSound.REJOINED_PARTY, ReadInt32MaxNeg1());
                 ssf.SetData(SSFSound.POISONED, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_29, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_30, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_31, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_32, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_33, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_34, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_35, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_36, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_37, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_38, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_39, ReadInt32MaxNeg1());
+                ssf.SetData(SSFSound.UNKNOWN_40, ReadInt32MaxNeg1());
 
                 return ssf;
             }
