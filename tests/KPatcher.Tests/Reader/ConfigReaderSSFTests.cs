@@ -71,6 +71,22 @@ Replace0=test2.ssf
         }
 
         [Fact]
+        public void SSF_MissingModifierSection_ShouldSkipEntry()
+        {
+            string iniText = @"
+[SSFList]
+File0=test.ssf
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            result.PatchesSSF.Should().BeEmpty();
+        }
+
+        [Fact]
         public void SSF_Set_ShouldLoadDirectAssignment()
         {
             // Python test: test_ssf_stored_constant
@@ -298,6 +314,48 @@ Poisoned=28
 
             ModifySSF mod_poisoned = modifiers[27];
             mod_poisoned.Sound.Should().Be(SSFSound.POISONED);
+        }
+
+        [Fact]
+        public void SSF_Set_ShouldMapUnknownSounds()
+        {
+            string iniText = @"
+[SSFList]
+File0=test.ssf
+
+[test.ssf]
+Unknown(29)=29
+Unknown(30)=30
+Unknown(31)=31
+Unknown(32)=32
+Unknown(33)=33
+Unknown(34)=34
+Unknown(35)=35
+Unknown(36)=36
+Unknown(37)=37
+Unknown(38)=38
+Unknown(39)=39
+Unknown(40)=40
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            result.PatchesSSF[0].Modifiers.Select(modifier => modifier.Sound).Should().ContainInOrder(
+                SSFSound.UNKNOWN_29,
+                SSFSound.UNKNOWN_30,
+                SSFSound.UNKNOWN_31,
+                SSFSound.UNKNOWN_32,
+                SSFSound.UNKNOWN_33,
+                SSFSound.UNKNOWN_34,
+                SSFSound.UNKNOWN_35,
+                SSFSound.UNKNOWN_36,
+                SSFSound.UNKNOWN_37,
+                SSFSound.UNKNOWN_38,
+                SSFSound.UNKNOWN_39,
+                SSFSound.UNKNOWN_40);
         }
 
     }

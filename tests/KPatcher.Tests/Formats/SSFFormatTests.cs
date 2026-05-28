@@ -45,6 +45,41 @@ namespace KPatcher.Core.Tests.Formats
         }
 
         [Fact]
+        public void UnknownEntries_RoundTrip()
+        {
+            var ssf = new SSF();
+            ssf.SetData(SSFSound.UNKNOWN_29, 2900);
+            ssf.SetData(SSFSound.UNKNOWN_30, 3000);
+            ssf.SetData(SSFSound.UNKNOWN_31, 3100);
+            ssf.SetData(SSFSound.UNKNOWN_32, 3200);
+            ssf.SetData(SSFSound.UNKNOWN_33, 3300);
+            ssf.SetData(SSFSound.UNKNOWN_34, 3400);
+            ssf.SetData(SSFSound.UNKNOWN_35, 3500);
+            ssf.SetData(SSFSound.UNKNOWN_36, 3600);
+            ssf.SetData(SSFSound.UNKNOWN_37, 3700);
+            ssf.SetData(SSFSound.UNKNOWN_38, 3800);
+            ssf.SetData(SSFSound.UNKNOWN_39, 3900);
+            ssf.SetData(SSFSound.UNKNOWN_40, 4000);
+
+            byte[] bytes = ssf.ToBytes();
+            bytes.Length.Should().Be(172);
+
+            SSF loaded = new SSFBinaryReader(bytes).Load();
+            loaded.Get(SSFSound.UNKNOWN_29).Should().Be(2900);
+            loaded.Get(SSFSound.UNKNOWN_30).Should().Be(3000);
+            loaded.Get(SSFSound.UNKNOWN_31).Should().Be(3100);
+            loaded.Get(SSFSound.UNKNOWN_32).Should().Be(3200);
+            loaded.Get(SSFSound.UNKNOWN_33).Should().Be(3300);
+            loaded.Get(SSFSound.UNKNOWN_34).Should().Be(3400);
+            loaded.Get(SSFSound.UNKNOWN_35).Should().Be(3500);
+            loaded.Get(SSFSound.UNKNOWN_36).Should().Be(3600);
+            loaded.Get(SSFSound.UNKNOWN_37).Should().Be(3700);
+            loaded.Get(SSFSound.UNKNOWN_38).Should().Be(3800);
+            loaded.Get(SSFSound.UNKNOWN_39).Should().Be(3900);
+            loaded.Get(SSFSound.UNKNOWN_40).Should().Be(4000);
+        }
+
+        [Fact]
         public void TestReadRaises()
         {
             Action act1 = () => new SSFBinaryReader(".").Load();
