@@ -356,7 +356,7 @@ namespace KPatcher.Core.Patcher
                     TslPatchDataPath ?? "null"));
 
                 List<PatcherModifications> patchesList = new List<PatcherModifications>();
-                // TSLPatcher patch order: TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF
+                // Current KPatcher run order. Repo-local TSLPatcher artifacts disagree on one authoritative order.
                 patchesList.AddRange(GetTlkPatches(cfg));
                 patchesList.AddRange(cfg.InstallList);
                 patchesList.AddRange(cfg.Patches2DA);
