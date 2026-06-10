@@ -95,12 +95,19 @@ namespace KPatcher.Core.Patcher
                 }
             }
 
-            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ModInstaller ctor: resolved changesIniPath={0}, modDirectory={1}",
-                this.changesIniPath, Path.GetDirectoryName(this.changesIniPath) ?? this.modPath));
-
             // Initialize install log writer in the mod directory (where changes.ini is located)
             string modDirectory = Path.GetDirectoryName(this.changesIniPath) ?? this.modPath;
+
+            // TSLPatcher parity: mod assets (HACK/Install/Compile sources) live beside changes.ini in
+            // tslpatchdata. Default the asset root when callers omit TslPatchDataPath (CLI/tests).
+            if (string.IsNullOrWhiteSpace(TslPatchDataPath))
+            {
+                TslPatchDataPath = modDirectory;
+            }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller ctor: resolved changesIniPath={0}, modDirectory={1}, tslPatchDataPath={2}",
+                this.changesIniPath, modDirectory, TslPatchDataPath));
             try
             {
                 installLog = new InstallLogWriter(modDirectory);
@@ -972,7 +979,7 @@ namespace KPatcher.Core.Patcher
         {
             return patch is ModificationsNCS
                 && capsule == null
-                && string.Equals(destination, ModificationsNCS.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase);
+                && string.Equals(destination, PatcherModifications.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool ShouldSkipVendoredHackListOverrideConflict(
