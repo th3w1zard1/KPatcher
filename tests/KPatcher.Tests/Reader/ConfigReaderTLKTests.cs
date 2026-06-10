@@ -175,6 +175,38 @@ StrRef0=0
         }
 
         [Fact]
+        public void TlkList_DefaultSourceFolder_IsIgnored()
+        {
+            Directory.CreateDirectory(Path.Combine(_modPath, "alt"));
+            CreateTestTLKFile("append.tlk", new[]
+            {
+                ("Root Entry", "root_vo"),
+            });
+            CreateTestTLKFile(Path.Combine("alt", "append.tlk"), new[]
+            {
+                ("Alt Entry", "alt_vo"),
+            });
+
+            string iniText = @"
+[TLKList]
+!DefaultSourceFolder=alt
+StrRef0=0
+";
+            IniData ini = _parser.Parse(iniText);
+            var reader = new ConfigReader(ini, _tempDir, new PatchLogger(), _modPath);
+
+            PatcherConfig result = reader.Load(new PatcherConfig());
+
+            result.PatchesTLK.SourceFolder.Should().Be(".");
+            result.PatchesTLK.Modifiers.Should().ContainSingle();
+
+            ModifyTLK modifier = result.PatchesTLK.Modifiers.Single();
+            modifier.Load();
+            modifier.Text.Should().Be("Root Entry");
+            modifier.Sound.Should().Be("root_vo");
+        }
+
+        [Fact]
         public void TLK_ReplaceFile_ShouldMarkAsReplacement()
         {
             // Python test: test_tlk_replacefile_functionality

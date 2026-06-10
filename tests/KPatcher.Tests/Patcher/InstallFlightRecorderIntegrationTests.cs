@@ -110,6 +110,58 @@ File0=sample.wav
             logger.Notes.Should().Contain(note => note.Message.Contains("Install record written to"));
         }
 
+        [Fact]
+        public void Install_HackListMissingAlternateSource_UsesVendorErrorWithoutGenericFollowup()
+        {
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[HACKList]
+script.ncs=script.ncs
+
+[script.ncs]
+!SourceFile=source-alt.ncs
+!SaveAs=patched.ncs
+0x0=u8:1
+");
+
+            var logger = new PatchLogger();
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+
+            installer.Install();
+
+            logger.Errors.Should().Contain(log => log.Message.Contains("Unable to locate source file \"source-alt.ncs\" to rename to \"script.ncs\" and install, skipping...", StringComparison.Ordinal));
+            logger.Errors.Should().NotContain(log => log.Message.Contains("Could not load source file to hack", StringComparison.OrdinalIgnoreCase));
+            logger.Errors.Should().NotContain(log => log.Message.Contains("Critical error: Unable to locate file to patch", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void Install_HackListRenamedSource_UsesVendorCopyToOverrideMessage()
+        {
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[HACKList]
+script.ncs=script.ncs
+
+[script.ncs]
+!SourceFile=source-alt.ncs
+!SaveAs=patched.ncs
+0x0=u8:1
+");
+            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "source-alt.ncs"), new byte[] { 0, 2, 3, 4 });
+
+            var logger = new PatchLogger();
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+
+            installer.Install();
+
+            logger.Notes.Should().Contain(log => log.Message.Contains("Copying file patched.ncs to Override folder...", StringComparison.Ordinal));
+            logger.Notes.Should().NotContain(log => log.Message.Contains("Hacking 'source-alt.ncs' and saving as 'patched.ncs'", StringComparison.Ordinal));
+        }
+
         private void WriteChangesIni(string body)
         {
             File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), body);

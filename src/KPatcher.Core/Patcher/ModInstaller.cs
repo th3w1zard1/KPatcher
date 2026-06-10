@@ -33,6 +33,14 @@ namespace KPatcher.Core.Patcher
     /// </summary>
     public class ModInstaller
     {
+        private const string SkippingFileNoOverwriteExeFormat = "Skipping file {0}, this Installer will not overwrite EXE files!";
+        private const string SkippingFileNoOverwriteChitinKeyFormat = "Skipping file {0}, this Installer will not overwrite the chitin.key file.";
+        private const string SkippingFileNoOverwriteBifFormat = "Skipping file {0}, this Installer will not overwrite BIF data files.";
+        private const string HackListCopyToOverrideFormat = "Copying file {0} to Override folder...";
+        private const string HackListFileExistsSkipFormat = "A file named \"{0}\" already exists in the Override folder. Skipping...";
+        private const string HackListRenameSourceMissingFormat = "Unable to locate source file \"{0}\" to rename to \"{1}\" and install, skipping...";
+        private const string HackListSourceMissingFormat = "Unable to locate file \"{0}\" to install as \"{1}\", skipping...";
+
         private readonly string modPath;
         private readonly string gamePath;
         private readonly string changesIniPath;
@@ -87,12 +95,19 @@ namespace KPatcher.Core.Patcher
                 }
             }
 
-            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ModInstaller ctor: resolved changesIniPath={0}, modDirectory={1}",
-                this.changesIniPath, Path.GetDirectoryName(this.changesIniPath) ?? this.modPath));
-
             // Initialize install log writer in the mod directory (where changes.ini is located)
             string modDirectory = Path.GetDirectoryName(this.changesIniPath) ?? this.modPath;
+
+            // TSLPatcher parity: mod assets (HACK/Install/Compile sources) live beside changes.ini in
+            // tslpatchdata. Default the asset root when callers omit TslPatchDataPath (CLI/tests).
+            if (string.IsNullOrWhiteSpace(TslPatchDataPath))
+            {
+                TslPatchDataPath = modDirectory;
+            }
+
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ModInstaller ctor: resolved changesIniPath={0}, modDirectory={1}, tslPatchDataPath={2}",
+                this.changesIniPath, modDirectory, TslPatchDataPath));
             try
             {
                 installLog = new InstallLogWriter(modDirectory);
@@ -352,17 +367,17 @@ namespace KPatcher.Core.Patcher
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FoundPatchesToApply, cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count));
 
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                    "Install: ordered queue TLK+install+2DA+GFF+NSS+NCS+SSF; TslPatchDataPath={0}",
+                    "Install: ordered queue TLK+GFF+2DA+install+HACK+Compile+SSF; TslPatchDataPath={0}",
                     TslPatchDataPath ?? "null"));
 
                 List<PatcherModifications> patchesList = new List<PatcherModifications>();
-                // Current KPatcher run order. Repo-local TSLPatcher artifacts disagree on one authoritative order.
+                // Binary-verified TSLPatcher patch order: TLK -> GFF -> 2DA -> InstallList -> HACK -> Compile -> SSF
                 patchesList.AddRange(GetTlkPatches(cfg));
-                patchesList.AddRange(cfg.InstallList);
-                patchesList.AddRange(cfg.Patches2DA);
                 patchesList.AddRange(cfg.PatchesGFF);
-                patchesList.AddRange(cfg.PatchesNSS);
+                patchesList.AddRange(cfg.Patches2DA);
+                patchesList.AddRange(cfg.InstallList);
                 patchesList.AddRange(cfg.PatchesNCS);
+                patchesList.AddRange(cfg.PatchesNSS);
                 patchesList.AddRange(cfg.PatchesSSF);
 
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -435,7 +450,7 @@ namespace KPatcher.Core.Patcher
                         processingSSF = true;
                     }
 
-                    // Must run preprocessed scripts directly before GFFList so we don't interfere with !FieldPath assignments to 2DAMEMORY.
+                    // TSLPatcher compiles after GFF/HACK, so preprocess scripts immediately before CompileList patches.
                     if (!finishedPreprocessedScripts && patch is ModificationsNSS)
                     {
                         tempScriptFolder = PrepareCompileList(cfg, memory);
@@ -484,9 +499,16 @@ namespace KPatcher.Core.Patcher
                                 log.AddError(string.Format(TSLPatcherMessages.UnableToLocateTLKFileToPatch, tlkPatch.SaveAs ?? tlkPatch.SourceFile ?? "dialog.tlk"));
                             else if (patch is Modifications2DA twodaPatch)
                                 log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.UnableToFind2DAFileToModify, twodaPatch.SaveAs ?? patch.SourceFile ?? ""));
+                            else if (patch is ModificationsNCS)
+                                log.AddDiagnostic("Install: HACKList null lookup already logged vendored source-missing error; suppressing generic follow-up");
                             else
                                 log.AddError(string.Format(System.Globalization.CultureInfo.CurrentCulture, TSLPatcherMessages.CriticalErrorUnableToLocateFileToPatch, patch.SourceFile ?? patch.SaveAs ?? ""));
                             continue;
+                        }
+
+                        if (ShouldUseVendoredHackListCopyNote(patch, result.Exists, result.Capsule, destination))
+                        {
+                            log.AddNote(string.Format(CultureInfo.CurrentCulture, HackListCopyToOverrideFormat, saveAs));
                         }
 
                         if (dataToPatch.Length == 0)
@@ -634,29 +656,19 @@ namespace KPatcher.Core.Patcher
         [CanBeNull]
         private string PrepareCompileList(PatcherConfig config, PatcherMemory memory)
         {
-            // tslpatchdata should be read-only, this allows us to replace memory tokens while ensuring include scripts work correctly.
+            // TSLPatcher prepares CompileList work out of the active tslpatchdata root.
             if (config.PatchesNSS.Count == 0)
             {
                 log.AddDiagnostic("PrepareCompileList: no NSS patches, skipping temp script folder");
                 return null;
             }
 
+            string dataRoot = string.IsNullOrWhiteSpace(TslPatchDataPath) ? modPath : TslPatchDataPath;
             log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "PrepareCompileList: NSS patch count={0}, modPath={1}", config.PatchesNSS.Count, modPath));
+                "PrepareCompileList: NSS patch count={0}, dataRoot={1}", config.PatchesNSS.Count, dataRoot));
 
-            // Move nwscript.nss to Override if there are any nss patches to do
-            string nwscriptPath = Path.Combine(modPath, "nwscript.nss");
-            if (File.Exists(nwscriptPath))
-            {
-                var fileInstall = new InstallFile("nwscript.nss", replaceExisting: true);
-                if (!config.InstallList.Contains(fileInstall))
-                {
-                    config.InstallList.Add(fileInstall);
-                }
-            }
-
-            // Copy all .nss files in the mod path, to a temp working directory
-            string tempScriptFolder = Path.Combine(modPath, "temp_nss_working_dir");
+            // Copy all .nss files in the active data path to a temp working directory for token substitution and includes.
+            string tempScriptFolder = Path.Combine(dataRoot, "nsspatch_temp");
             if (Directory.Exists(tempScriptFolder))
             {
                 try
@@ -670,18 +682,24 @@ namespace KPatcher.Core.Patcher
             }
             Directory.CreateDirectory(tempScriptFolder);
 
-            // Copy .nss files
-            foreach (string file in Directory.GetFiles(modPath))
+            // Copy .nss files while preserving their tslpatchdata-relative layout.
+            foreach (string file in Directory.GetFiles(dataRoot, "*.nss", SearchOption.AllDirectories))
             {
-                if (Path.GetExtension(file).Equals(".nss", StringComparison.OrdinalIgnoreCase) && File.Exists(file))
+                if (File.Exists(file))
                 {
-                    string destFile = Path.Combine(tempScriptFolder, Path.GetFileName(file));
+                    string relativePath = Path.GetRelativePath(dataRoot, file);
+                    string destFile = Path.Combine(tempScriptFolder, relativePath);
+                    string destDirectory = Path.GetDirectoryName(destFile);
+                    if (!string.IsNullOrEmpty(destDirectory))
+                    {
+                        Directory.CreateDirectory(destDirectory);
+                    }
                     File.Copy(file, destFile, true);
                 }
             }
 
             // Process the strref/2damemory in each script
-            string[] scripts = Directory.GetFiles(tempScriptFolder, "*.nss", SearchOption.TopDirectoryOnly);
+            string[] scripts = Directory.GetFiles(tempScriptFolder, "*.nss", SearchOption.AllDirectories);
             log.AddVerbose($"Preprocessing #StrRef# and #2DAMEMORY# tokens for all {scripts.Length} scripts, before running [CompileList]");
 
             foreach (string script in scripts)
@@ -929,6 +947,73 @@ namespace KPatcher.Core.Patcher
             return underModRoot;
         }
 
+        private string GetHackListOriginalFileName(PatcherModifications patch)
+        {
+            return string.IsNullOrWhiteSpace(patch.OriginalSourceFile)
+                ? patch.SaveAs ?? patch.SourceFile ?? ""
+                : patch.OriginalSourceFile;
+        }
+
+        private bool TryLogVendoredHackListMissingSource(PatcherModifications patch, string sourceFile)
+        {
+            if (!(patch is ModificationsNCS))
+            {
+                return false;
+            }
+
+            string originalFile = GetHackListOriginalFileName(patch);
+            if (!string.Equals(sourceFile, originalFile, StringComparison.OrdinalIgnoreCase))
+            {
+                log.AddError(string.Format(CultureInfo.CurrentCulture, HackListRenameSourceMissingFormat, sourceFile, originalFile));
+                return true;
+            }
+
+            log.AddError(string.Format(CultureInfo.CurrentCulture, HackListSourceMissingFormat, originalFile, originalFile));
+            return true;
+        }
+
+        private static bool IsVendoredHackListOverridePatch(
+            PatcherModifications patch,
+            [CanBeNull] Capsule capsule,
+            string destination)
+        {
+            return patch is ModificationsNCS
+                && capsule == null
+                && string.Equals(destination, PatcherModifications.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool ShouldSkipVendoredHackListOverrideConflict(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string destination,
+            string saveAs)
+        {
+            if (!exists
+                || patch.ReplaceFile
+                || !patch.SkipIfNotReplace
+                || !IsVendoredHackListOverridePatch(patch, capsule, destination))
+            {
+                return false;
+            }
+
+            log.AddNote(string.Format(CultureInfo.CurrentCulture, HackListFileExistsSkipFormat, saveAs));
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ShouldSkipVendoredHackListOverrideConflict: saveAs={0}", saveAs));
+            return true;
+        }
+
+        private static bool ShouldUseVendoredHackListCopyNote(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string destination)
+        {
+            return !exists
+                && !patch.ReplaceFile
+                && IsVendoredHackListOverridePatch(patch, capsule, destination);
+        }
+
         /// <summary>
         /// Loads a resource file using BinaryReader.
         /// </summary>
@@ -975,6 +1060,11 @@ namespace KPatcher.Core.Patcher
                     // then mod root — matches INI comments and HoloPatcher-style layouts where modPath is the
                     // extracted mod folder and tslpatchdata is a subdirectory.
                     string sourcePath = ResolveModContentPath(sourceFolder, sourceFile);
+                    if (patch is ModificationsNCS && !File.Exists(sourcePath))
+                    {
+                        TryLogVendoredHackListMissingSource(patch, sourceFile);
+                        return null;
+                    }
                     return LoadResourceFile(sourcePath);
                 }
 
@@ -1032,6 +1122,24 @@ namespace KPatcher.Core.Patcher
 
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             // should_patch() should not check for empty sourcefile/saveas; parity: skip this validation.
+            if (ShouldSkipProtectedInstallListOverwrite(patch, exists, capsule, saveAs))
+            {
+                log.AddDiagnostic("ShouldPatch: protected InstallList overwrite blocked -> false");
+                return false;
+            }
+
+            if (ShouldSkipVendoredCompileListOverrideConflict(patch, capsule, destination, localFolder, containerType))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored CompileList override source-name guard -> false");
+                return false;
+            }
+
+            if (ShouldSkipVendoredHackListOverrideConflict(patch, exists, capsule, destination, saveAs))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored HACKList override skip -> false");
+                return false;
+            }
+
             if (patch.ReplaceFile && exists)
             {
                 string saveAsStr = saveAs != patch.SourceFile ? $"'{saveAs}' in" : "in";
@@ -1068,10 +1176,83 @@ namespace KPatcher.Core.Patcher
                 return false;
             }
 
+            if (ShouldUseVendoredHackListCopyNote(patch, exists, capsule, destination))
+            {
+                log.AddDiagnostic("ShouldPatch: vendored HACKList copy branch -> true");
+                return true;
+            }
+
             string saveType = (capsule != null && saveAs == patch.SourceFile) ? "adding" : "saving";
             string savingAsStr = saveAs != patch.SourceFile ? $"as '{saveAs}' in" : "to";
             log.AddNote($"{actionBase}ing '{patch.SourceFile}' and {saveType} {savingAsStr} the '{localFolder}' {containerType}");
             log.AddDiagnostic("ShouldPatch: default new/copy branch -> true");
+            return true;
+        }
+
+        private bool ShouldSkipVendoredCompileListOverrideConflict(
+            PatcherModifications patch,
+            [CanBeNull] Capsule capsule,
+            string destination,
+            string localFolder,
+            string containerType)
+        {
+            if (!(patch is ModificationsNSS)
+                || patch.ReplaceFile
+                || capsule != null
+                || !string.Equals(destination, ModificationsNSS.DefaultDestination, StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(patch.SourceFile))
+            {
+                return false;
+            }
+
+            string sourceConflictPath = Path.Combine(gamePath, destination, patch.SourceFile);
+            if (!File.Exists(sourceConflictPath))
+            {
+                return false;
+            }
+
+            log.AddNote($"'{patch.SourceFile}' already exists in the '{localFolder}' {containerType}. Skipping file...");
+            log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
+                "ShouldSkipVendoredCompileListOverrideConflict: sourceConflictPath={0}", sourceConflictPath));
+            return true;
+        }
+
+        private bool ShouldSkipProtectedInstallListOverwrite(
+            PatcherModifications patch,
+            bool exists,
+            [CanBeNull] Capsule capsule,
+            string saveAs)
+        {
+            if (!(patch is InstallFile) || !patch.ReplaceFile || !exists || capsule != null)
+            {
+                return false;
+            }
+
+            string extension = Path.GetExtension(saveAs);
+            string message = null;
+            if (string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteExeFormat, saveAs);
+            }
+            else if (string.Equals(extension, ".tlk", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, KPatcher.Core.Common.TSLPatcherMessages.SkippingFileNoOverwriteDialogTlk, saveAs);
+            }
+            else if (string.Equals(extension, ".key", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteChitinKeyFormat, saveAs);
+            }
+            else if (string.Equals(extension, ".bif", StringComparison.OrdinalIgnoreCase))
+            {
+                message = string.Format(CultureInfo.CurrentCulture, SkippingFileNoOverwriteBifFormat, saveAs);
+            }
+
+            if (message == null)
+            {
+                return false;
+            }
+
+            log.AddNote(message);
             return true;
         }
 
@@ -1104,17 +1285,6 @@ namespace KPatcher.Core.Patcher
             {
                 // renamed_file_path: CaseAwarePath = override_dir / f"old_{patch.saveas}"
                 string renamedFilePath = Path.Combine(overrideDir, $"old_{saveAs}");
-                int i = 2;
-                string filestem = Path.GetFileNameWithoutExtension(renamedFilePath);
-
-                // while renamed_file_path.is_file():
-                while (File.Exists(renamedFilePath))
-                {
-                    // renamed_file_path = renamed_file_path.parent / f"{filestem} ({i}){renamed_file_path.suffix}"
-                    string suffix = Path.GetExtension(renamedFilePath);
-                    renamedFilePath = Path.Combine(overrideDir, $"{filestem} ({i}){suffix}");
-                    i++;
-                }
 
                 try
                 {

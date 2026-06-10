@@ -19,6 +19,7 @@ namespace KCompiler.Cli
         public string SourcePath { get; set; }
         public string OutputPath { get; set; }
         public Game Game { get; set; } = Game.K1;
+        public bool GameExplicitlySet { get; set; }
         public bool Debug { get; set; }
         public string NwscriptPath { get; set; }
         /// <summary>True when -d (decompile) was requested. Not implemented in managed code; parser sets error.</summary>
@@ -29,11 +30,16 @@ namespace KCompiler.Cli
     {
         public static NwnnsscompParseResult Parse(string[] args)
         {
-            return Parse(args, null);
+            return Parse(args, null, null);
         }
 
         /// <param name="log">Optional MEL logger; Debug lines use redacted paths and short failure reasons.</param>
         public static NwnnsscompParseResult Parse(string[] args, ILogger log)
+        {
+            return Parse(args, null, log);
+        }
+
+        public static NwnnsscompParseResult Parse(string[] args, string baseDirectory, ILogger log)
         {
             var r = new NwnnsscompParseResult();
             string cid = ToolCorrelation.ReadOptional() ?? "";
@@ -106,6 +112,7 @@ namespace KCompiler.Cli
             string outputDir = null;
             string outputFile = null;
             Game game = Game.K1;
+            bool gameExplicitlySet = false;
             bool debug = false;
             string nwscript = null;
 
@@ -139,6 +146,8 @@ namespace KCompiler.Cli
                         LogParseDebugFail(log, cid, "g_invalid", gv, r);
                         return r;
                     }
+
+                    gameExplicitlySet = true;
 
                     continue;
                 }
@@ -276,13 +285,55 @@ namespace KCompiler.Cli
             }
 
             r.Success = true;
-            r.SourcePath = Path.GetFullPath(source);
-            r.OutputPath = Path.GetFullPath(output);
+            r.SourcePath = ResolvePath(source, baseDirectory);
+            r.OutputPath = ResolvePath(output, baseDirectory);
             r.Game = game;
+            r.GameExplicitlySet = gameExplicitlySet;
             r.Debug = debug;
-            r.NwscriptPath = nwscript;
+            r.NwscriptPath = string.IsNullOrWhiteSpace(nwscript) ? null : ResolvePath(nwscript, baseDirectory);
             LogParseDebugOk(log, cid, r);
             return r;
+        }
+
+        public static string[] SplitCommandLine(string arguments)
+        {
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                return Array.Empty<string>();
+            }
+
+            var tokens = new List<string>();
+            var current = new StringBuilder();
+            bool inQuotes = false;
+
+            foreach (char c in arguments)
+            {
+                if (c == '"')
+                {
+                    inQuotes = !inQuotes;
+                    continue;
+                }
+
+                if (char.IsWhiteSpace(c) && !inQuotes)
+                {
+                    if (current.Length > 0)
+                    {
+                        tokens.Add(current.ToString());
+                        current.Clear();
+                    }
+
+                    continue;
+                }
+
+                current.Append(c);
+            }
+
+            if (current.Length > 0)
+            {
+                tokens.Add(current.ToString());
+            }
+
+            return tokens.ToArray();
         }
 
         private static void LogParseDebugHelp(ILogger log, string correlationId)
@@ -341,6 +392,19 @@ namespace KCompiler.Cli
 
             s = s.Replace('\r', ' ').Replace('\n', ' ').Trim();
             return s.Length <= max ? s : s.Substring(0, max) + "...";
+        }
+
+        private static string ResolvePath(string value, string baseDirectory)
+        {
+            if (Path.IsPathRooted(value))
+            {
+                return Path.GetFullPath(value);
+            }
+
+            string resolvedBaseDirectory = string.IsNullOrWhiteSpace(baseDirectory)
+                ? Directory.GetCurrentDirectory()
+                : Path.GetFullPath(baseDirectory);
+            return Path.GetFullPath(Path.Combine(resolvedBaseDirectory, value));
         }
 
         private static string HelpText()

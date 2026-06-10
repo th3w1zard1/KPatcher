@@ -25,9 +25,33 @@ namespace KPatcher.Core.Mods.SSF
             Stringref = stringref;
         }
 
-        public void Apply(Formats.SSF.SSF ssf, PatcherMemory memory)
+        public void Apply(Formats.SSF.SSF ssf, PatcherMemory memory, PatchLogger logger)
         {
-            ssf.SetData(Sound, int.Parse(Stringref.Value(memory)));
+            string rawValue;
+            try
+            {
+                rawValue = Stringref.Value(memory);
+            }
+            catch (Exception ex)
+            {
+                logger.AddWarning(string.Format(CultureInfo.InvariantCulture,
+                    "Invalid SSF strref for {0}: {1}. Skipping this entry.",
+                    Sound,
+                    ex.Message));
+                return;
+            }
+
+            int stringRef;
+            if (!int.TryParse(rawValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out stringRef))
+            {
+                logger.AddWarning(string.Format(CultureInfo.InvariantCulture,
+                    "Invalid SSF strref for {0}: '{1}'. Skipping this entry.",
+                    Sound,
+                    rawValue));
+                return;
+            }
+
+            ssf.SetData(Sound, stringRef);
         }
     }
 
@@ -83,7 +107,7 @@ namespace KPatcher.Core.Mods.SSF
             {
                 foreach (ModifySSF modifier in Modifiers)
                 {
-                    modifier.Apply(ssf, memory);
+                    modifier.Apply(ssf, memory, logger);
                 }
             }
             else

@@ -141,6 +141,40 @@ namespace KPatcher.Core.Tests.Mods
             patchedTwoda.GetColumn("Col3").Should().Equal("c", "f");
         }
 
+        [Theory]
+        [InlineData("placeables.2da", 257)]
+        [InlineData("upcrystals.2da", 257)]
+        [InlineData("upgrade.2da", 33)]
+        public void PatchResource_K1VendorParityFiles_ShouldStillApplyChangesBeyondFormerHardcaps(string saveAs, int rowCount)
+        {
+            var twoda = new TwoDAFile(new[] { "Col1" }.ToList());
+            for (int index = 0; index < rowCount; index++)
+            {
+                twoda.AddRow(index.ToString(), new Dictionary<string, object>
+                {
+                    ["Col1"] = index.ToString()
+                });
+            }
+
+            var memory = new PatcherMemory();
+            var logger = new PatchLogger();
+            var config = new Modifications2DA(saveAs);
+            config.Modifiers.Add(new ChangeRow2DA(
+                "",
+                new Target(TargetType.ROW_INDEX, rowCount - 1),
+                new Dictionary<string, RowValue>
+                {
+                    ["Col1"] = new RowValueConstant("patched")
+                }
+            ));
+
+            byte[] bytes = (byte[])config.PatchResource(twoda.ToBytes(), memory, logger, Game.K1);
+            var patchedTwoda = TwoDAFile.FromBytes(bytes);
+
+            patchedTwoda.GetHeight().Should().Be(rowCount);
+            patchedTwoda.GetColumn("Col1").Last().Should().Be("patched");
+        }
+
         [Fact]
         public void ChangeRow_With2DAMemory_ShouldUseMemoryValue()
         {

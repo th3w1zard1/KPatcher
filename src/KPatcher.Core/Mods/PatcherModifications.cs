@@ -14,10 +14,10 @@ namespace KPatcher.Core.Mods
     /// </summary>
     public static class OverrideType
     {
-        /// <summary>Do nothing: don't even check (KPatcher default)</summary>
+        /// <summary>Do nothing: don't even check.</summary>
         public const string IGNORE = "ignore";
 
-        /// <summary>Log a warning (KPatcher default)</summary>
+        /// <summary>Log a warning.</summary>
         public const string WARN = "warn";
 
         /// <summary>Rename the file in the Override folder with the 'old_' prefix. Also logs a warning.</summary>
@@ -80,6 +80,11 @@ namespace KPatcher.Core.Mods
         public virtual string SourceFile { get; set; }
 
         /// <summary>
+        /// The original INI key for this patch before any !SourceFile / !SaveAs overrides.
+        /// </summary>
+        public virtual string OriginalSourceFile { get; protected set; }
+
+        /// <summary>
         /// The source folder.
         /// </summary>
         public virtual string SourceFolder { get; set; } = ".";
@@ -109,7 +114,7 @@ namespace KPatcher.Core.Mods
         /// <summary>
         /// The override type, see `class OverrideType` above.
         /// </summary>
-        public virtual string OverrideTypeValue { get; set; } = OverrideType.WARN;
+        public virtual string OverrideTypeValue { get; set; } = OverrideType.IGNORE;
 
         /// <summary>
         /// Determines how !ReplaceFile will be handled.
@@ -130,13 +135,14 @@ namespace KPatcher.Core.Mods
             [CanBeNull] string destination = null)
         {
             SourceFile = sourcefile;
+            OriginalSourceFile = sourcefile;
             SourceFolder = ".";
             SaveAs = sourcefile;
             ReplaceFile = replace ?? false;
             Destination = destination ?? DEFAULT_DESTINATION;
 
             Action = "Patch" + " ";
-            OverrideTypeValue = OverrideType.WARN;
+            OverrideTypeValue = OverrideType.IGNORE;
             SkipIfNotReplace = false; // [InstallList] and [CompileList] only
         }
 
@@ -183,9 +189,7 @@ namespace KPatcher.Core.Mods
             ReplaceFile = ConvertToBool(replaceFile);
             fileSectionDict.Remove("!ReplaceFile");
 
-            // KPatcher defaults to "ignore". However realistically, Override file shadowing is
-            // a major problem, so KPatcher defaults to "warn"
-            OverrideTypeValue = fileSectionDict.TryGetValue("!OverrideType", out string overrideType) ? overrideType.ToLowerInvariant() : OverrideType.WARN;
+            OverrideTypeValue = fileSectionDict.TryGetValue("!OverrideType", out string overrideType) ? overrideType.ToLowerInvariant() : OverrideType.IGNORE;
             fileSectionDict.Remove("!OverrideType");
             // !SourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
             // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.

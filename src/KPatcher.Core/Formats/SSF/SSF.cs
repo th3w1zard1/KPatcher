@@ -9,7 +9,7 @@ namespace KPatcher.Core.Formats.SSF
     /// </summary>
     public class SSF
     {
-        private readonly int[] _sounds = new int[28];
+        private readonly int[] _sounds = new int[40];
 
         public SSF()
         {
@@ -18,7 +18,7 @@ namespace KPatcher.Core.Formats.SSF
 
         public void Reset()
         {
-            for (int i = 0; i < 28; i++)
+            for (int i = 0; i < 40; i++)
             {
                 _sounds[i] = -1;
             }

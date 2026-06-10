@@ -280,6 +280,30 @@ test.ncs=test.ncs
             };
             act.Should().Throw<OverflowException>("because multiple Int32 overflows currently cause unhandled exception");
         }
+
+        [Fact]
+        public void LoadHackList_TopLevelDefaultSourceFolder_DoesNotAffectPatchSourceFolder()
+        {
+            string iniContent = @"[Settings]
+ModName=Test Mod
+
+[HACKList]
+!DefaultSourceFolder=alt
+test.ncs=test.ncs
+
+[test.ncs]
+0x1000=u32:123
+";
+            File.WriteAllText(_iniFilePath, iniContent);
+
+            var logger = new PatchLogger();
+            var reader = ConfigReader.FromFilePath(_iniFilePath, logger);
+
+            var result = reader.Load(reader.Config);
+
+            result.PatchesNCS.Should().ContainSingle();
+            result.PatchesNCS[0].SourceFolder.Should().Be(".");
+        }
     }
 }
 

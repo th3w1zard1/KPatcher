@@ -1,10 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using KPatcher.Core.Common;
 using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Memory;
 using KPatcher.Core.Mods;
+using KPatcher.Core.Mods.NCS;
+using KPatcher.Core.Mods.NSS;
 using KPatcher.Core.Patcher;
 using KPatcher.Core.Resources;
 using Xunit;
@@ -54,6 +57,7 @@ namespace KPatcher.Core.Tests.Patcher
         private readonly string _tempDirectory;
         private readonly string _tempChangesIni;
         private ModInstaller _installer;
+        private PatchLogger _logger;
 
         public ModInstallerTests()
         {
@@ -61,6 +65,7 @@ namespace KPatcher.Core.Tests.Patcher
             Directory.CreateDirectory(_tempDirectory);
             _tempChangesIni = Path.Combine(_tempDirectory, "changes.ini");
             File.WriteAllText(_tempChangesIni, "[Settings]\n");
+            _logger = new PatchLogger();
         }
 
         public void Dispose()
@@ -82,7 +87,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_DestinationDot()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             var patch = new TestPatcherModifications("file1", true)
             {
@@ -103,7 +108,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_SaveAs_DestinationDot()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, ".", "file2", "Patch ");
@@ -119,7 +124,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_DestinationOverride()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "Override", "file1", "Patch ");
@@ -135,7 +140,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_SaveAs_DestinationOverride()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "Override", "file2", "Compile");
@@ -151,7 +156,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_NotExists_SaveAs_DestinationOverride()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "Override", "file2", "Copy ");
@@ -167,7 +172,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_NotExists_DestinationOverride()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "Override", "file1", "Copy ");
@@ -183,7 +188,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_DestinationCapsule()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "capsule.mod", "file1", "Patch ");
@@ -199,7 +204,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_ReplaceFile_Exists_SaveAs_DestinationCapsule()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "capsule.mod", "file2", "Patch ");
@@ -215,7 +220,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_NotReplaceFile_Exists_SkipFalse()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", false, "other", "file3", "Patching", false);
@@ -231,7 +236,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_SkipIfNotReplace_NotReplaceFile_Exists()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", false, "other", "file3", "Patching", true);
@@ -244,10 +249,56 @@ namespace KPatcher.Core.Tests.Patcher
         }
 
         [Fact]
+        public void ShouldPatch_HackList_NotReplaceFile_ExistingOverride_SkipsLikeVendor()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("test.ncs", false)
+            {
+                Destination = "Override",
+                SaveAs = "test.ncs",
+                SourceFile = "test.ncs"
+            };
+
+            // Act
+            bool result = _installer.ShouldPatch(patch, exists: true);
+
+            // Assert
+            Assert.True(patch.SkipIfNotReplace);
+            Assert.False(result);
+            Assert.Contains(_logger.Notes, note => note.Message.Contains("A file named \"test.ncs\" already exists in the Override folder. Skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Notes, note => note.Message.Contains("already exists in the 'Override' folder. Skipping file...", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void ShouldPatch_CompileList_NotReplaceFile_ExistingSourceNssInOverride_SkipsLikeVendor()
+        {
+            // Arrange
+            string overridePath = Path.Combine(_tempDirectory, "Override");
+            Directory.CreateDirectory(overridePath);
+            File.WriteAllText(Path.Combine(overridePath, "test.nss"), "void main() {}\n");
+
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNSS("test.nss", false)
+            {
+                Destination = "Override"
+            };
+
+            // Act
+            bool result = _installer.ShouldPatch(patch, exists: false);
+
+            // Assert
+            Assert.True(patch.SkipIfNotReplace);
+            Assert.False(result);
+        }
+
+        [Fact]
         public void ShouldPatch_ReplaceFile_NotExists_SaveAs_DestinationCapsule()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", true, "capsule.mod", "file2", "Copy ");
@@ -283,7 +334,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_CapsuleNotExist_ShouldReturnFalse()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", null, "capsule", null, "Patching");
@@ -301,7 +352,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void ShouldPatch_DefaultBehavior()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
 
             TestPatcherModifications patch = CreatePatch("file1", false, "other", "file3", "Patching", false);
@@ -317,7 +368,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void LookupResource_CapsuleExistsTrue_ShouldReturnNull()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             TestPatcherModifications patch = CreatePatch("file1", false);
 
@@ -334,7 +385,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void LookupResource_ReplaceFileTrueNoFile_ShouldReturnNull()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             TestPatcherModifications patch = CreatePatch("nonexistent.txt", true);
             patch.SourceFolder = ".";
@@ -347,10 +398,53 @@ namespace KPatcher.Core.Tests.Patcher
         }
 
         [Fact]
+        public void LookupResource_HackListMissingAlternateSource_LogsVendorRenameFailure()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("script.ncs", false)
+            {
+                Destination = "Override",
+                SourceFile = "source-alt.ncs",
+                SaveAs = "patched.ncs"
+            };
+
+            // Act
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
+
+            // Assert
+            Assert.Null(result);
+            Assert.Contains(_logger.Errors, error => error.Message.Contains("Unable to locate source file \"source-alt.ncs\" to rename to \"script.ncs\" and install, skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Errors, error => error.Message.Contains("Could not load source file to hack", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void LookupResource_HackListMissingDefaultSource_LogsVendorInstallAsFailure()
+        {
+            // Arrange
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new ModificationsNCS("script.ncs", false)
+            {
+                Destination = "Override",
+                SaveAs = "patched.ncs"
+            };
+
+            // Act
+            byte[] result = _installer.LookupResource(patch, _tempDirectory, patch.SaveAs ?? patch.SourceFile ?? "", existsAtOutput: false, capsule: null);
+
+            // Assert
+            Assert.Null(result);
+            Assert.Contains(_logger.Errors, error => error.Message.Contains("Unable to locate file \"script.ncs\" to install as \"script.ncs\", skipping...", StringComparison.Ordinal));
+            Assert.DoesNotContain(_logger.Errors, error => error.Message.Contains("Could not load source file to hack", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
         public void LookupResource_CapsuleExistsTrueNoFile_ShouldReturnNull()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             TestPatcherModifications patch = CreatePatch("file1", false);
 
@@ -367,7 +461,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void LookupResource_NoCapsuleExistsTrueNoFile_ShouldReturnNull()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             TestPatcherModifications patch = CreatePatch("nonexistent.txt", false);
 
@@ -382,7 +476,7 @@ namespace KPatcher.Core.Tests.Patcher
         public void LookupResource_NoCapsuleExistsFalseNoFile_ShouldReturnNull()
         {
             // Arrange
-            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni);
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
 
             TestPatcherModifications patch = CreatePatch("nonexistent.txt", false);
 
@@ -391,6 +485,47 @@ namespace KPatcher.Core.Tests.Patcher
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData("dialog.tlk", "dialog.tlk directly")]
+        [InlineData("swkotor.exe", "overwrite EXE files")]
+        [InlineData("chitin.key", "overwrite the chitin.key file")]
+        [InlineData("templates.bif", "overwrite BIF data files")]
+        public void ShouldPatch_InstallFileReplaceExisting_ProtectedFolderTargets_ShouldSkip(string saveAs, string expectedMessageFragment)
+        {
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new InstallFile(saveAs, replaceExisting: true)
+            {
+                Destination = ".",
+                SaveAs = saveAs,
+                SourceFile = saveAs,
+            };
+
+            bool result = _installer.ShouldPatch(patch, exists: true);
+
+            Assert.False(result);
+            Assert.Contains(_logger.Notes, note => note.Message.Contains(expectedMessageFragment, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void ShouldPatch_InstallFileReplaceExisting_ProtectedCapsuleTarget_ShouldStillAllow()
+        {
+            _installer = new ModInstaller(_tempDirectory, _tempDirectory, _tempChangesIni, _logger);
+
+            var patch = new InstallFile("dialog.tlk", replaceExisting: true)
+            {
+                Destination = "capsule.mod",
+                SaveAs = "dialog.tlk",
+                SourceFile = "dialog.tlk",
+            };
+
+            var capsule = new Capsule(Path.Combine(_tempDirectory, "capsule.mod"), createIfNotExist: true);
+
+            bool result = _installer.ShouldPatch(patch, exists: true, capsule: capsule);
+
+            Assert.True(result);
         }
     }
 }

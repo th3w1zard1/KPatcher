@@ -93,6 +93,42 @@ namespace KPatcher.Core.Tests.Mods
             Assert.Equal(100, ssf.Get(SSFSound.BATTLE_CRY_2));
             Assert.Equal(200, ssf.Get(SSFSound.BATTLE_CRY_3));
         }
+
+        [Fact]
+        public void Apply_InvalidLiteral_WarnsAndSkips()
+        {
+            var ssf = new SSF();
+            var memory = new PatcherMemory();
+            var logger = new PatchLogger();
+
+            var config = new ModificationsSSF("", false, new List<ModifySSF>());
+            config.Modifiers.Add(new ModifySSF(SSFSound.BATTLE_CRY_1, new NoTokenUsage("not-a-number")));
+
+            object bytes = config.PatchResource(ssf.ToBytes(), memory, logger, Game.K1);
+            ssf = SSF.FromBytes((byte[])bytes);
+
+            Assert.Equal(-1, ssf.Get(SSFSound.BATTLE_CRY_1));
+            PatchLog warning = Assert.Single(logger.Warnings);
+            Assert.Contains("Invalid SSF strref", warning.Message);
+        }
+
+        [Fact]
+        public void Apply_MissingToken_WarnsAndSkips()
+        {
+            var ssf = new SSF();
+            var memory = new PatcherMemory();
+            var logger = new PatchLogger();
+
+            var config = new ModificationsSSF("", false, new List<ModifySSF>());
+            config.Modifiers.Add(new ModifySSF(SSFSound.BATTLE_CRY_2, new TokenUsage2DA(5)));
+
+            object bytes = config.PatchResource(ssf.ToBytes(), memory, logger, Game.K1);
+            ssf = SSF.FromBytes((byte[])bytes);
+
+            Assert.Equal(-1, ssf.Get(SSFSound.BATTLE_CRY_2));
+            PatchLog warning = Assert.Single(logger.Warnings);
+            Assert.Contains("2DAMEMORY5 was not defined before use", warning.Message);
+        }
     }
 }
 

@@ -587,7 +587,21 @@ namespace KPatcher.Core.Mods.GFF
 
             logger.AddVerbose($"AddField: Creating field of type '{FieldType}' value: '{value}' at GFF path '{Path}'. INI section: [{Identifier}]");
 
-            SetFieldValue(structContainer, Label, value, FieldType, memory);
+            if (structContainer.TryGetFieldType(Label, out GFFFieldType existingFieldType))
+            {
+                if (existingFieldType != FieldType)
+                {
+                    string existingPath = string.IsNullOrEmpty(containerPath) ? "root" : containerPath;
+                    logger.AddWarning($"AddField skipped in [{Identifier}]: field '{Label}' already exists at '{existingPath}' with type '{existingFieldType}', requested type '{FieldType}'.");
+                    return;
+                }
+
+                ApplyExistingFieldValue(structContainer, value, memory, logger);
+            }
+            else
+            {
+                SetFieldValue(structContainer, Label, value, FieldType, memory);
+            }
 
             foreach (ModifyGFF addField in Modifiers)
             {
@@ -628,6 +642,46 @@ namespace KPatcher.Core.Mods.GFF
 
                 addField.Apply(rootStruct, memory, logger, game);
             }
+        }
+
+        private void ApplyExistingFieldValue(GFFStruct structContainer, object value, PatcherMemory memory, PatchLogger logger)
+        {
+            if (FieldType == GFFFieldType.LocalizedString)
+            {
+                if (!(value is LocalizedString locString))
+                {
+                    logger.AddError(string.Format(CultureInfo.CurrentCulture, PatcherResources.ExpectedLocalizedStringButGotFormat, value?.GetType().Name ?? "null"));
+                    return;
+                }
+
+                if (value is LocalizedStringDelta delta)
+                {
+                    LocalizedString original = structContainer.GetLocString(Label);
+                    delta.Apply(original, memory);
+                    structContainer.SetLocString(Label, original);
+                    return;
+                }
+
+                structContainer.SetLocString(Label, locString);
+                return;
+            }
+
+            if (FieldType == GFFFieldType.Struct)
+            {
+                if (value is GFFStruct incomingStruct && incomingStruct.StructId != 0)
+                {
+                    GFFStruct existingStruct = structContainer.GetStruct(Label);
+                    existingStruct.StructId = incomingStruct.StructId;
+                }
+                return;
+            }
+
+            if (FieldType == GFFFieldType.List)
+            {
+                return;
+            }
+
+            SetFieldValue(structContainer, Label, value, FieldType, memory);
         }
     }
 

@@ -80,17 +80,22 @@ namespace KPatcher.Core.Reader
                         $"The '[{namespaceId}]' section was not found in the 'namespaces.ini' file, " +
                         $"referenced by '{keyData.KeyName}={namespaceId}' in [{namespacesSection.SectionName}].");
 
-                // Required fields
+                string iniFilename = GetValue(namespaceSection, "IniName");
+                if (string.IsNullOrWhiteSpace(iniFilename))
+                {
+                    iniFilename = PatcherNamespace.DefaultIniFilename;
+                }
 
-                string iniFilename = GetValue(namespaceSection, "IniName")
-                    ?? throw new KeyNotFoundException($"IniName not found in [{namespaceSection.SectionName}]");
-                string infoFilename = GetValue(namespaceSection, "InfoName")
-                    ?? throw new KeyNotFoundException($"InfoName not found in [{namespaceSection.SectionName}]");
+                string infoFilename = GetValue(namespaceSection, "InfoName");
+                if (string.IsNullOrWhiteSpace(infoFilename))
+                {
+                    infoFilename = PatcherNamespace.DefaultInfoFilename;
+                }
 
                 var ns = new PatcherNamespace(iniFilename, infoFilename)
                 {
                     // Optional fields
-                    DataFolderPath = GetValue(namespaceSection, "DataPath") ?? string.Empty,
+                    DataFolderPath = SanitizeDataPath(GetValue(namespaceSection, "DataPath")),
                     Name = GetValue(namespaceSection, "Name")?.Trim() ?? string.Empty,
                     Description = GetValue(namespaceSection, "Description") ?? string.Empty,
                     NamespaceId = namespaceSection.SectionName
@@ -118,6 +123,23 @@ namespace KPatcher.Core.Reader
         {
             return section.Keys.FirstOrDefault(k =>
                 k.KeyName.Equals(key, StringComparison.OrdinalIgnoreCase))?.Value;
+        }
+
+        private static string SanitizeDataPath([CanBeNull] string dataPath)
+        {
+            if (string.IsNullOrWhiteSpace(dataPath))
+            {
+                return string.Empty;
+            }
+
+            string trimmed = dataPath.Trim();
+            string[] segments = trimmed.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Any(segment => segment == ".."))
+            {
+                return string.Empty;
+            }
+
+            return trimmed;
         }
     }
 }

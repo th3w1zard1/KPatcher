@@ -310,6 +310,7 @@ namespace KPatcher.Core.Reader
                     Config.RequiredMessages.Count));
             }
             Config.SaveProcessedScripts = int.TryParse(settingsIni.GetValueOrDefault("SaveProcessedScripts"), out int sps) ? sps : 0;
+            Config.ScriptCompilerFlags = settingsIni.GetValueOrDefault("ScriptCompilerFlags", string.Empty);
             Config.LogLevel = int.TryParse(settingsIni.GetValueOrDefault("LogLevel"), out int logLevelInt)
                 ? (LogLevel)logLevelInt
                 : LogLevel.Warnings;
@@ -334,9 +335,10 @@ namespace KPatcher.Core.Reader
             }
 
             _log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "ConfigReader.LoadSettings: done logLevel={0} saveProcessedScripts={1} requiredGroups={2}",
+                "ConfigReader.LoadSettings: done logLevel={0} saveProcessedScripts={1} scriptCompilerFlagsPresent={2} requiredGroups={3}",
                 Config.LogLevel,
                 Config.SaveProcessedScripts,
+                !string.IsNullOrWhiteSpace(Config.ScriptCompilerFlags),
                 Config.RequiredFiles.Count));
         }
 
@@ -433,18 +435,10 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingTlkListPatches);
             Dictionary<string, string> tlkListEdits = SectionToDictionary(_ini[tlkListSection]);
 
-            // Can be null if key not found
-            string defaultDestination = tlkListEdits.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsTLK.DefaultDestination;
+            string defaultDestination = ModificationsTLK.DefaultDestination;
             tlkListEdits.Remove("!DefaultDestination");
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="textures" resolves to "C:/Mod/tslpatchdata/textures"
-            // Can be null if key not found
-            string defaultSourcefolder = tlkListEdits.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
             tlkListEdits.Remove("!DefaultSourceFolder");
-            Config.PatchesTLK.PopTslPatcherVars(tlkListEdits, defaultDestination, defaultSourcefolder);
+            Config.PatchesTLK.PopTslPatcherVars(tlkListEdits, defaultDestination, ".");
 
             // PatcherModifications' ctor assigns null when ModificationsTLK() is created without a filename; PopTslPatcherVars
             // leaves SourceFile/SaveAs unset when the INI omits !SourceFile/!SaveAs. Empty saveAs breaks ModInstaller's
@@ -510,7 +504,7 @@ namespace KPatcher.Core.Reader
                         }
 
                         Dictionary<string, string> nextSectionDict = SectionToDictionary(_ini[nextSectionName]);
-                        Config.PatchesTLK.PopTslPatcherVars(nextSectionDict, defaultDestination, defaultSourcefolder);
+                        Config.PatchesTLK.PopTslPatcherVars(nextSectionDict, defaultDestination, ".");
 
                         foreach ((string rawDialogTlkIndex, string rawModTlkIndex) in _ini[nextSectionName].Select(k => (k.KeyName, k.Value)))
                         {
@@ -605,8 +599,8 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingTwoDAListPatches);
 
             KeyDataCollection twodaSectionData = _ini[twodaSectionName];
-            string defaultDestination = twodaSectionData["!DefaultDestination"] ?? Modifications2DA.DefaultDestination;
-            string defaultSourceFolder = twodaSectionData["!DefaultSourceFolder"] ?? ".";
+            string defaultDestination = Modifications2DA.DefaultDestination;
+            string defaultSourceFolder = ".";
 
             foreach (KeyData tableEntry in twodaSectionData)
             {
@@ -717,9 +711,7 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingSsfListPatches);
 
             Dictionary<string, string> ssfSectionDict = SectionToDictionary(_ini[ssfListSection]);
-            // Can be null if key not found
-            string defaultDestination = ssfSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsSSF.DefaultDestination;
-            ssfSectionDict.Remove("!DefaultDestination");
+            string defaultDestination = ModificationsSSF.DefaultDestination;
             // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
             // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
             // For example: if mod_path = "C:/Mod/tslpatchdata", then:
@@ -735,7 +727,8 @@ namespace KPatcher.Core.Reader
                 string ssfFileSection = GetSectionName(file);
                 if (ssfFileSection is null)
                 {
-                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, file) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, file, ssfListSection));
+                    _log.AddWarning($"SSFList entry '{file}' has no modifier section; skipping [{identifier}].");
+                    continue;
                 }
 
                 bool replace = identifier.ToLower().StartsWith("replace");
@@ -761,7 +754,7 @@ namespace KPatcher.Core.Reader
                     }
                     else
                     {
-                        newValue = new NoTokenUsage(ParseIntValue(value));
+                        newValue = new NoTokenUsage(value);
                     }
 
                     SSFSound sound = ResolveTslPatcherSSFSound(name);
@@ -802,11 +795,8 @@ namespace KPatcher.Core.Reader
 
             _log.AddNote(PatcherResources.LoadingGffListPatches);
             Dictionary<string, string> gffSectionDict = SectionToDictionary(_ini[gffListSection]);
-            // Can be null if key not found
-            string defaultDestination = gffSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsGFF.DefaultDestination;
-            gffSectionDict.Remove("!DefaultDestination");
+            string defaultDestination = ModificationsGFF.DefaultDestination;
             // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
             // For example: if mod_path = "C:/Mod/tslpatchdata", then:
             //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
             //   - !DefaultSourceFolder="gff" resolves to "C:/Mod/tslpatchdata/gff"
@@ -820,7 +810,8 @@ namespace KPatcher.Core.Reader
                 string fileSectionName = GetSectionName(file);
                 if (fileSectionName is null)
                 {
-                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, file) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, file, gffListSection));
+                    _log.AddError($"GFFList entry '{file}' has no modifier section; skipping [{identifier}].");
+                    continue;
                 }
 
                 bool replace = identifier.ToLower().StartsWith("replace");
@@ -847,43 +838,6 @@ namespace KPatcher.Core.Reader
 
                         Dictionary<string, string> nextSectionDict = SectionToDictionary(_ini[nextGffSection]);
                         modifier = AddFieldGFF(nextGffSection, nextSectionDict);
-                    }
-                    else if (lowercaseKey.StartsWith("2damemory"))
-                    {
-                        if (value.ToLower() == "!fieldpath")
-                        {
-                            // When value is "!FieldPath", check if there's a [!FieldPath] section with Path=
-                            // Can be null if section not found
-                            string fieldPathSectionName = GetSectionName(value);
-                            string path = string.Empty;
-                            if (fieldPathSectionName != null)
-                            {
-                                Dictionary<string, string> fieldPathSection = SectionToDictionary(_ini[fieldPathSectionName]);
-                                // Can be null if key not found
-                                if (fieldPathSection.TryGetValue("Path", out string pathValue))
-                                {
-                                    // raw_path: str = ini_data.pop("Path", "").strip()
-                                    // INI values are literal; unescape doubled backslashes that the parser may emit
-                                    path = pathValue.Replace("\\\\", "\\");
-                                }
-                            }
-                            modifier = new Memory2DAModifierGFF(
-                                file,
-                                path,
-                                Parse2DAMemoryTokenId(key.Substring(9)));
-                        }
-                        else if (value.ToLower().StartsWith("2damemory"))
-                        {
-                            modifier = new Memory2DAModifierGFF(
-                                file,
-                                string.Empty,
-                                Parse2DAMemoryTokenId(key.Substring(9)),
-                                Parse2DAMemoryTokenId(value.Substring(9)));
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException($"Cannot parse '{key}={value}' in [{identifier}]. GFFList only supports 2DAMEMORY#=!FieldPath and 2DAMEMORY#=2DAMEMORY# assignments");
-                        }
                     }
                     else
                     {
@@ -924,19 +878,14 @@ namespace KPatcher.Core.Reader
 
             _log.AddNote(PatcherResources.LoadingCompileListPatches);
             Dictionary<string, string> compilelistSectionDict = SectionToDictionary(_ini[compilelistSection]);
-            // Can be null if key not found
             string defaultDestination = compilelistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : ModificationsNSS.DefaultDestination;
             compilelistSectionDict.Remove("!DefaultDestination");
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="scripts" resolves to "C:/Mod/tslpatchdata/scripts"
-            // Can be null if key not found
-            string defaultSourceFolder = compilelistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
+            // Vendored CompileList only supports top-level !DefaultDestination. Source overrides stay per-file.
             compilelistSectionDict.Remove("!DefaultSourceFolder");
+            string defaultSourceFolder = ".";
+            string compilerWorkingDirectory = Path.GetFullPath(_tslPatchDataPath ?? _modPath);
 
-            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler (no nwnnsscomp.exe resolution)");
+            _log.AddDiagnostic("ConfigReader.LoadCompileList: compile uses managed KCompiler with managed nwnnsscomp flag parsing (no external nwnnsscomp.exe resolution)");
 
             foreach ((string identifier, string file) in compilelistSectionDict)
             {
@@ -944,7 +893,9 @@ namespace KPatcher.Core.Reader
                 var modifications = new ModificationsNSS(file, replace)
                 {
                     Destination = defaultDestination,
-                    SourceFolder = defaultSourceFolder
+                    SourceFolder = defaultSourceFolder,
+                    ScriptCompilerFlags = Config.ScriptCompilerFlags,
+                    CompilerWorkingDirectory = compilerWorkingDirectory
                 };
 
                 // Can be null if section not found
@@ -986,17 +937,8 @@ namespace KPatcher.Core.Reader
 
             _log.AddNote(PatcherResources.LoadingHackListPatches);
             Dictionary<string, string> hacklistSectionDict = SectionToDictionary(_ini[hacklistSection]);
-            // Can be null if key not found
-            string defaultDestination = hacklistSectionDict.TryGetValue("!DefaultDestination", out string dd) ? dd : "Override";
-            hacklistSectionDict.Remove("!DefaultDestination");
-            // !DefaultSourceFolder: Relative path from mod_path (which is typically the tslpatchdata folder) to source files.
-            // Default value "." refers to mod_path itself (the tslpatchdata folder), not its parent.
-            // For example: if mod_path = "C:/Mod/tslpatchdata", then:
-            //   - !DefaultSourceFolder="." resolves to "C:/Mod/tslpatchdata"
-            //   - !DefaultSourceFolder="scripts" resolves to "C:/Mod/tslpatchdata/scripts"
-            // Can be null if key not found
-            string defaultSourceFolder = hacklistSectionDict.TryGetValue("!DefaultSourceFolder", out string dsf) ? dsf : ".";
-            hacklistSectionDict.Remove("!DefaultSourceFolder");
+            string defaultDestination = "Override";
+            string defaultSourceFolder = ".";
 
             // Process each NCS file in HACKList
             foreach ((string identifier, string filename) in hacklistSectionDict)
@@ -1009,7 +951,8 @@ namespace KPatcher.Core.Reader
                 string fileSectionName = GetSectionName(filename);
                 if (fileSectionName is null)
                 {
-                    throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, PatcherResources.SectionNotFoundError, filename) + string.Format(CultureInfo.CurrentCulture, PatcherResources.ReferencesTracebackMsg, identifier, filename, hacklistSection));
+                    _log.AddWarning($"HACKList entry '{filename}' has no offsets section; skipping [{identifier}].");
+                    continue;
                 }
 
                 Dictionary<string, string> fileSectionDict = SectionToDictionary(_ini[fileSectionName]);
@@ -1064,8 +1007,8 @@ namespace KPatcher.Core.Reader
                     throw new OverflowException($"Offset value was either too large or too small for an Int32: '{offsetStr}'", ex);
                 }
 
-                // Parse type specifier and value
-                string typeSpecifier = "u16"; // Default to 16-bit unsigned
+                // Parse type specifier and value. Without an explicit type, vendored HACKList writes a 32-bit integer.
+                string typeSpecifier = null;
                 string parsedValue = valueStr;
                 if (valueStr.Contains(':'))
                 {
@@ -1075,6 +1018,7 @@ namespace KPatcher.Core.Reader
                 }
 
                 string lowerValue = parsedValue.ToLower();
+                string lowerTypeSpec = typeSpecifier == null ? null : typeSpecifier.ToLowerInvariant();
 
                 // Create appropriate hack entry based on value type
                 NCSTokenType tokenType;
@@ -1084,25 +1028,38 @@ namespace KPatcher.Core.Reader
                 {
                     // StrRef token reference
                     tokenIdOrValue = ParseIntValue(parsedValue.Substring(6).Trim());
-                    // Check if it's 32-bit (strref32) or 16-bit (strref)
-                    tokenType = typeSpecifier.ToLower() == "u32" || typeSpecifier.ToLower() == "i32"
-                        ? NCSTokenType.STRREF32
-                        : NCSTokenType.STRREF;
+                    if (lowerTypeSpec == null)
+                    {
+                        tokenType = NCSTokenType.VENDOR_STRREF;
+                    }
+                    else
+                    {
+                        // Check if it's 32-bit (strref32) or 16-bit (strref)
+                        tokenType = lowerTypeSpec == "u32" || lowerTypeSpec == "i32"
+                            ? NCSTokenType.STRREF32
+                            : NCSTokenType.STRREF;
+                    }
                 }
                 else if (lowerValue.StartsWith("2damemory"))
                 {
                     // 2DA memory token reference
                     tokenIdOrValue = Parse2DAMemoryTokenId(parsedValue.Substring(9).Trim());
-                    // Check if it's 32-bit (2damemory32) or 16-bit (2damemory)
-                    tokenType = typeSpecifier.ToLower() == "u32" || typeSpecifier.ToLower() == "i32"
-                        ? NCSTokenType.MEMORY_2DA32
-                        : NCSTokenType.MEMORY_2DA;
+                    if (lowerTypeSpec == null)
+                    {
+                        tokenType = NCSTokenType.VENDOR_MEMORY_2DA;
+                    }
+                    else
+                    {
+                        // Check if it's 32-bit (2damemory32) or 16-bit (2damemory)
+                        tokenType = lowerTypeSpec == "u32" || lowerTypeSpec == "i32"
+                            ? NCSTokenType.MEMORY_2DA32
+                            : NCSTokenType.MEMORY_2DA;
+                    }
                 }
                 else
                 {
                     // Direct integer values - map type specifier to enum
                     tokenIdOrValue = ParseIntValue(parsedValue);
-                    string lowerTypeSpec = typeSpecifier.ToLower();
                     if (lowerTypeSpec == "u8")
                     {
                         tokenType = NCSTokenType.UINT8;
@@ -1111,13 +1068,13 @@ namespace KPatcher.Core.Reader
                     {
                         tokenType = NCSTokenType.UINT16;
                     }
-                    else if (lowerTypeSpec == "u32")
+                    else if (lowerTypeSpec == "u32" || lowerTypeSpec == "i32")
                     {
                         tokenType = NCSTokenType.UINT32;
                     }
                     else
                     {
-                        tokenType = NCSTokenType.UINT16; // Default to 16-bit
+                        tokenType = NCSTokenType.VENDOR_INT32;
                     }
                 }
 
@@ -1222,15 +1179,6 @@ namespace KPatcher.Core.Reader
                 locstring.SetData(language, gender, strValue);
                 value = new FieldValueConstant(locstring);
                 key = key.Substring(0, lowerKey.IndexOf("(lang"));
-            }
-            else if (lowerKey.StartsWith("2damemory"))
-            {
-                string lowerStrValue = strValue.ToLower();
-                if (lowerStrValue != "!fieldpath" && !lowerStrValue.StartsWith("2damemory"))
-                {
-                    throw new InvalidOperationException($"Cannot parse '{key}={value}' in [{identifier}]. GFFList only supports 2DAMEMORY#=!FieldPath assignments");
-                }
-                value = new FieldValueConstant(string.Empty); // no path at the root
             }
 
             return new ModifyFieldGFF(key, value, identifier);
@@ -2334,7 +2282,19 @@ namespace KPatcher.Core.Reader
             { "Pick lock done", SSFSound.UNLOCK_SUCCESS },
             { "Leave party", SSFSound.SEPARATED_FROM_PARTY },
             { "Rejoin party", SSFSound.REJOINED_PARTY },
-            { "Poisoned", SSFSound.POISONED }
+            { "Poisoned", SSFSound.POISONED },
+            { "Unknown(29)", SSFSound.UNKNOWN_29 },
+            { "Unknown(30)", SSFSound.UNKNOWN_30 },
+            { "Unknown(31)", SSFSound.UNKNOWN_31 },
+            { "Unknown(32)", SSFSound.UNKNOWN_32 },
+            { "Unknown(33)", SSFSound.UNKNOWN_33 },
+            { "Unknown(34)", SSFSound.UNKNOWN_34 },
+            { "Unknown(35)", SSFSound.UNKNOWN_35 },
+            { "Unknown(36)", SSFSound.UNKNOWN_36 },
+            { "Unknown(37)", SSFSound.UNKNOWN_37 },
+            { "Unknown(38)", SSFSound.UNKNOWN_38 },
+            { "Unknown(39)", SSFSound.UNKNOWN_39 },
+            { "Unknown(40)", SSFSound.UNKNOWN_40 }
         };
             return configstrToSsfSound[name];
         }

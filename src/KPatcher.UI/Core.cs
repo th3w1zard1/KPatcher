@@ -350,8 +350,8 @@ namespace KPatcher.UI
             }
 
             // Load info.rtf only (exclusively RTF; no .rte / RTE JSON support)
-            var infoRtfPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.RtfFilePath());
-            string rtfPathStr = infoRtfPath.GetResolvedPath();
+            string rtfPathStr = ResolveNamespaceInfoPath(modPath, namespaceOption, diagnosticLogger);
+            var infoRtfPath = new CaseAwarePath(rtfPathStr);
 
             string infoContent = null;
             bool isRtf = false;
@@ -401,7 +401,8 @@ namespace KPatcher.UI
                 namespaces,
                 selectedNamespaceName,
                 diagnosticLogger,
-                out string tslPatchDataPathResolved);
+                out string tslPatchDataPathResolved,
+                allowDefaultFallback: false);
 
             diagnosticLogger?.AddDiagnostic(string.Format(
                 CultureInfo.InvariantCulture,
@@ -427,7 +428,8 @@ namespace KPatcher.UI
                 namespaces,
                 selectedNamespaceName,
                 diagnosticLogger,
-                out string tslPatchDataPathResolved);
+                out string tslPatchDataPathResolved,
+                allowDefaultFallback: false);
             return Path.GetRelativePath(tslPatchDataPathResolved, resolvedChangesPath);
         }
 
@@ -449,15 +451,41 @@ namespace KPatcher.UI
             [CanBeNull] PatchLogger diagnosticLogger,
             out string tslPatchDataPathResolved)
         {
+            return ResolveNamespaceChangesPath(
+                modPath,
+                namespaces,
+                selectedNamespaceName,
+                diagnosticLogger,
+                out tslPatchDataPathResolved,
+                allowDefaultFallback: true);
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger,
+            out string tslPatchDataPathResolved,
+            bool allowDefaultFallback)
+        {
             PatcherNamespace namespaceOption = GetNamespaceOption(namespaces, selectedNamespaceName);
             tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
-            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger);
+            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger, allowDefaultFallback);
         }
 
         private static string ResolveNamespaceChangesPath(
             string modPath,
             PatcherNamespace namespaceOption,
             [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            return ResolveNamespaceChangesPath(modPath, namespaceOption, diagnosticLogger, allowDefaultFallback: true);
+        }
+
+        private static string ResolveNamespaceChangesPath(
+            string modPath,
+            PatcherNamespace namespaceOption,
+            [CanBeNull] PatchLogger diagnosticLogger,
+            bool allowDefaultFallback)
         {
             string tslPatchDataPathResolved = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
             string fullChangesPath = Path.Combine(tslPatchDataPathResolved, namespaceOption.ChangesFilePath());
@@ -473,16 +501,72 @@ namespace KPatcher.UI
                 localizedPath ?? "(null)",
                 localizedChangesName ?? "(null)"));
 
-            string resolvedChangesPath = localizedPath ?? new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
+            if (localizedPath != null)
+            {
+                diagnosticLogger?.AddDiagnostic(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Core.ResolveNamespaceChangesPath: resolved namespace-specific changes path={0}",
+                    localizedPath));
+                return localizedPath;
+            }
+
+            if (!allowDefaultFallback)
+            {
+                string resolvedChangesPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
+                diagnosticLogger?.AddDiagnostic(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Core.ResolveNamespaceChangesPath: strict resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
+                    resolvedChangesPath,
+                    namespaceDir,
+                    baseName,
+                    tslPatchDataPathResolved));
+                return resolvedChangesPath;
+            }
+
+            string fallbackChangesPath = ResolveDefaultNamespaceChangesPath(tslPatchDataPathResolved, diagnosticLogger);
             diagnosticLogger?.AddDiagnostic(string.Format(
                 CultureInfo.InvariantCulture,
-                "Core.ResolveNamespaceChangesPath: resolvedChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
-                resolvedChangesPath,
+                "Core.ResolveNamespaceChangesPath: namespace-specific path missing, fallbackChangesPath={0} namespaceDir={1} baseName={2} tslPatchData={3}",
+                fallbackChangesPath,
                 namespaceDir,
                 baseName,
                 tslPatchDataPathResolved));
 
-            return resolvedChangesPath;
+            return fallbackChangesPath;
+        }
+
+        private static string ResolveDefaultNamespaceChangesPath(
+            string tslPatchDataPathResolved,
+            [CanBeNull] PatchLogger diagnosticLogger)
+        {
+            var tslPatchDataDirectory = new CaseAwarePath(tslPatchDataPathResolved);
+            string lang = ConfigLanguageCode;
+            var (localizedPath, _) = ResolveLocalizedConfigFile(tslPatchDataDirectory, "changes", lang, tryYaml: true, diagnosticLogger);
+            if (localizedPath != null)
+            {
+                return localizedPath;
+            }
+
+            return new CaseAwarePath(tslPatchDataPathResolved, PatcherNamespace.DefaultIniFilename).GetResolvedPath();
+        }
+
+        private static string ResolveNamespaceInfoPath(
+            string modPath,
+            PatcherNamespace namespaceOption,
+            [CanBeNull] PatchLogger diagnosticLogger)
+        {
+            var namespaceInfoPath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.RtfFilePath());
+            if (namespaceInfoPath.IsFile())
+            {
+                return namespaceInfoPath.GetResolvedPath();
+            }
+
+            string fallbackInfoPath = new CaseAwarePath(modPath, "tslpatchdata", PatcherNamespace.DefaultInfoFilename).GetResolvedPath();
+            diagnosticLogger?.AddDiagnostic(string.Format(
+                CultureInfo.InvariantCulture,
+                "Core.ResolveNamespaceInfoPath: namespace-specific info missing, fallbackInfoPath={0}",
+                fallbackInfoPath));
+            return fallbackInfoPath;
         }
 
         /// <summary>
