@@ -80,7 +80,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-06-10 — `master` @ `c7b42ff3` (seventeenth `/lfg` — merged PR #17, post-merge re-run on `master`). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
+**Last /lfg verification:** 2026-06-10 — `master` @ `0b2ac7c4` (forty-second `/lfg` — criteria still **Met** after PR #17 merge). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
 
 **NCS/NSS test gate (managed tooling):** **223** `KPatcher.Tests` + **2** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-06-10 post-merge on `master`). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
 
@@ -95,3 +95,5 @@ bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ## Maintenance
 
 If `vendor/DeNCS` adds Java under `src/main/java`, extend this table (new subpackage -> new Core folder) or add a row under **superseded** if policy excludes it (e.g. new Windows-only spoof helper).
+
+When the completion checklist above is **Met** on `master`, further `/lfg` invocations for this workstream should re-run `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (and the NCS/NSS filter) and update this verification section only — not add new numbered `master-complete-plan` files unless scope or criteria change.
