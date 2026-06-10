@@ -80,7 +80,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-06-10 — `master` @ `56a4eaba` (seventeenth `/lfg` — merged PR #17, post-merge re-run on `master`). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
+**Last /lfg verification:** 2026-06-10 — `master` @ `c7b42ff3` (seventeenth `/lfg` — merged PR #17, post-merge re-run on `master`). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
 
 **NCS/NSS test gate (managed tooling):** **223** `KPatcher.Tests` + **2** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~Nss|FullyQualifiedName~Decomp` (2026-06-10 post-merge on `master`). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
 
