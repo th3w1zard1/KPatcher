@@ -8,84 +8,87 @@ date: 2026-05-28
 
 ## Observation boundary
 
-- [REPO] This branch-local audit compares KPatcher's behavior-owning install, config, namespace, GFF, and 2DA surfaces against the vendored Delphi source tree under `vendor/TSLPatcher`.
-- [REPO] It records only branch-local parity claims that are backed by code in this worktree plus focused tests.
-- [OPEN] It does not claim end-to-end exact parity for every TSLPatcher behavior. Remaining unresolved slices stay listed as open gaps until code and tests land here.
+- [REPO] This pass compares KPatcher's behavior-owning install/config surfaces against repo-local parity documents and the locally checked-out TSLPatcher Delphi source tree under `vendor/TSLPatcher`.
+- [REPO] The reviewed KPatcher surfaces now include install orchestration, namespace/config parsing, TLK handling, 2DA row-value handling, GFF `!FieldPath` handling, HACK/NCS parsing and patching, NSS compilation flow, SSF writes, override handling, and uninstall/backup logic.
+- [REPO] The reviewed TSLPatcher surfaces now include the current `UTSLPatcher.pas`, the older `UTSLPatcher12.pas`, the repo-local build-verification doc, and the previously inspected namespace behavior from the Delphi UI units.
+- [OPEN] This audit still does not claim byte-for-byte equivalence for every helper routine in every Delphi unit. It promotes only discrepancies or alignments that were directly observed in the reviewed behavior-owning paths.
 
-## Landed parity slices on this branch
+## Confirmed findings
 
-### 1. Top-level GFF `!FieldPath` handling now matches the vendored owner path
+### 1. Pipeline truth is split across repo sources, and KPatcher does not fully match any of them
 
-- [REPO] The vendored Delphi path stores `!FieldPath` only through recursive `AddGffField(...)` handling when new GFF fields are added.
-- [REPO] [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) no longer special-cases top-level `GFFList` keys named `2DAMEMORY#` into `Memory2DAModifierGFF` behavior.
-- [REPO] [tests/KPatcher.Tests/Reader/ConfigReaderGFFTests.cs](tests/KPatcher.Tests/Reader/ConfigReaderGFFTests.cs) now proves that a top-level `2DAMEMORY#=!FieldPath` entry stays a regular `ModifyFieldGFF` with literal path/value semantics.
-- [SYNTH] KPatcher previously overreached beyond the vendored owner path here; that drift is now removed.
+- [REPO] The older Delphi snapshot (`UTSLPatcher12.pas`) runs `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList`.
+- [REPO] The newer Delphi snapshot (`UTSLPatcher.pas`) runs `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF`.
+- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) states the verified shipped binary runs `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) currently queues `TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF`, while its adjacent comment now explicitly notes that repo-local TSLPatcher artifacts disagree on one authoritative order.
+- [SYNTH] KPatcher does not currently match the binary-verified order, and the repo cannot honestly describe one single authoritative TSLPatcher pipeline without first deciding whether parity targets the verified binary or the reconstructed WIP Delphi source.
+- [OPEN] A code-fix pass should not change patch ordering until the parity target is chosen explicitly.
 
-### 2. Namespace fallback and `DataPath` confinement are aligned for the reviewed owner paths
+### 2. Namespace fallback and path confinement diverge
 
-- [REPO] The vendored namespace UI falls back to `changes.ini` and `info.rtf` when namespace metadata is missing or points at absent files, and it rejects `DataPath` values that back out of `tslpatchdata`.
-- [REPO] [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) now defaults missing `IniName` / `InfoName` values and strips `DataPath` values containing `..` segments.
-- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) now falls back from missing namespace-specific `changes` and `info.rtf` targets to the default `tslpatchdata` files.
-- [REPO] [tests/KPatcher.Tests/Reader/NamespaceReaderTests.cs](tests/KPatcher.Tests/Reader/NamespaceReaderTests.cs) and [tests/KPatcher.Tests/UI/CoreNamespaceFallbackTests.cs](tests/KPatcher.Tests/UI/CoreNamespaceFallbackTests.cs) exercise both the parser fallback and the runtime namespace-file fallback.
-- [SYNTH] The earlier mismatch is closed for the reviewed namespace owner path.
+- [REPO] The original namespace UI falls back to `changes.ini` / `info.rtf` when a namespace entry omits or mispoints those files, and it rejects `DataPath` values containing `..\` so a namespace cannot escape `tslpatchdata`.
+- [REPO] [src/KPatcher.Core/Namespaces/PatcherNamespace.cs](src/KPatcher.Core/Namespaces/PatcherNamespace.cs) still defines defaults for `changes.ini` and `info.rtf`, but [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) treats `IniName` and `InfoName` as required and throws if they are absent.
+- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) resolves `DataFolderPath` through `Path.Combine` and localized-file resolution without an equivalent `..\` confinement guard.
+- [SYNTH] KPatcher is stricter than TSLPatcher when namespace files are missing, but more permissive about namespace paths escaping `tslpatchdata`. Both are real behavior differences.
+- [OPEN] If parity with original namespace behavior matters, KPatcher needs both a fallback decision and a path-confinement rule.
 
-### 3. InstallList overwrite safeguards now match the reviewed vendored protections
+### 3. InstallList overwrite safety checks are missing on the KPatcher side
 
-- [REPO] The vendored `DoInstallFiles()` path blocks folder-target replacement of existing `.exe`, `.tlk`, `.key`, and `.bif` files.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) now blocks those same extensions for folder-based `InstallFile` replacements while still allowing archive-target behavior.
-- [REPO] [tests/KPatcher.Tests/Patcher/ModInstallerTests.cs](tests/KPatcher.Tests/Patcher/ModInstallerTests.cs) covers the protected-extension skip cases and the archive-target allow case.
-- [SYNTH] KPatcher no longer overwrites InstallList targets that the reviewed vendored path explicitly refuses to replace.
+- [REPO] The newer Delphi source blocks `Replace#` installs from overwriting existing `.exe`, `.tlk`, `.key`, and `.bif` targets.
+- [REPO] [src/KPatcher.Core/Mods/InstallFile.cs](src/KPatcher.Core/Mods/InstallFile.cs) is a passthrough copy operation, and the reviewed KPatcher install path only special-cases direct TLK patch writes to `dialog.tlk` in [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs).
+- [REPO] No equivalent InstallList extension filter was found in the reviewed KPatcher C# path.
+- [SYNTH] This is a confirmed parity and safety gap. KPatcher can presently replace targets that classic TSLPatcher explicitly refused to overwrite.
+- [OPEN] Add a focused fix slice after the pipeline target is settled.
 
-### 4. KPatcher-only K1 2DA hardcaps have been removed
+### 4. KPatcher narrows TSLPatcher's generic HACKList behavior to NCS-only patching
 
-- [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) previously rejected K1 patch results for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da` once row counts exceeded hardcoded limits.
-- [REPO] No equivalent vendor-side guard was found in the reviewed 2DA owner paths under `vendor/TSLPatcher`.
-- [REPO] [tests/KPatcher.Tests/Mods/TwoDAModsUnitTests.cs](tests/KPatcher.Tests/Mods/TwoDAModsUnitTests.cs) now proves those filenames still preserve patched output on K1 after crossing the former limits.
-- [SYNTH] This KPatcher-specific policy branch has been removed from core 2DA patch logic.
+- [REPO] The current Delphi `UpdateHackFiles()` / `DoFileHack()` flow opens arbitrary selected files and applies offset/value writes directly to those files.
+- [REPO] [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) loads `[HACKList]` entries exclusively into `ModificationsNCS` objects, not a generic binary patch handler.
+- [REPO] [src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs](src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs) only supports NCS-oriented token/value writes and explicitly rejects `!FieldPath`-shaped `2DAMEMORY` values in `[HACKList]` patches.
+- [SYNTH] KPatcher covers the script-bytecode patching use case, but it is not strict parity with TSLPatcher's generic binary HACKList semantics.
 
-### 5. Installer queue order now matches the binary-verified TSLPatcher runtime order
+### 5. CompileList orchestration differs even though both sides support tokenized NSS compilation
 
-- [REPO] Repo-local verification in `docs/TSLPATCHER_BUILD_VERIFICATION.md` identifies the shipped runtime queue as `TLK -> GFF -> 2DA -> InstallList -> HACK -> Compile -> SSF`.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) now applies patches in that same order.
-- [SYNTH] Queue-order parity for the shipped runtime path is now closed on this branch.
+- [REPO] The current Delphi `DoCompileFiles()` flow writes processed NSS files, shells `nwnnsscomp.exe`, honors `ScriptCompilerFlags`, optionally keeps processed sources via `SaveProcessedScripts`, and then routes compiled output into override or ERF/RIM destinations.
+- [REPO] [src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs](src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs) replaces tokens in managed code and compiles via `NCSAuto.CompileNss(...)`.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) still honors `SaveProcessedScripts` for temp-script cleanup behavior, but no equivalent `ScriptCompilerFlags` setting was found in the reviewed C# tree.
+- [SYNTH] This is not just an organizational cleanup. KPatcher intentionally replaces the external-compiler workflow with an in-process compile path, and some configuration surface differs.
 
-### 6. HACKList, CompileList, and SSF owner-path behavior has been tightened toward the reviewed vendor path
+### 6. K1 2DA hardcaps are a KPatcher-specific rule
 
-- [REPO] [src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs](src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs) now treats plain HACK entries as vendor-style 32-bit writes while preserving explicit KPatcher typed extensions.
-- [REPO] [src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs](src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs) and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) now align CompileList prep root, include-file detection, temp layout, and compile-failure skip behavior more closely with the reviewed vendor flow.
-- [REPO] [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs), [src/KPatcher.Core/Mods/SSF/ModificationsSSF.cs](src/KPatcher.Core/Mods/SSF/ModificationsSSF.cs), and the SSF format owners now recover from missing modifier sections and invalid stringrefs while carrying the full 40-entry soundset layout the vendored SSF handler supports.
-- [REPO] SSF characterization coverage now exists in [tests/KPatcher.Tests/Formats/SSFFormatTests.cs](tests/KPatcher.Tests/Formats/SSFFormatTests.cs), [tests/KPatcher.Tests/Mods/SsfModificationTests.cs](tests/KPatcher.Tests/Mods/SsfModificationTests.cs), and [tests/KPatcher.Tests/Reader/ConfigReaderSSFTests.cs](tests/KPatcher.Tests/Reader/ConfigReaderSSFTests.cs).
-- [SYNTH] These slices are no longer open at the owner-path level, though broader generic HACKList and external-compiler parity questions remain.
+- [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) enforces K1-only row limits for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da`.
+- [REPO] No matching hardcap check was found in the reviewed TSLPatcher Delphi sources during this pass.
+- [SYNTH] This looks like a KPatcher-specific safety or compatibility addition rather than inherited TSLPatcher logic.
 
-### 7. Override conflict defaults now match the reviewed vendored behavior
+### 7. Backup and uninstall semantics differ materially
 
-- [REPO] The reviewed `HandleERFOverrideType(...)` vendored path defaults absent `!OverrideType` to `ignore` and renames conflicting files to `old_<name>` without iterative suffix generation.
-- [REPO] [src/KPatcher.Core/Mods/PatcherModifications.cs](src/KPatcher.Core/Mods/PatcherModifications.cs) now defaults `OverrideTypeValue` to `ignore`.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) now uses the vendored single-target rename behavior.
-- [SYNTH] KPatcher no longer warns by default or invents numbered override rename targets where the reviewed vendor path would not.
+- [REPO] The Delphi patch handler stores single-copy backups under the patcher application's `backup\` folder.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) creates timestamped `backup/<timestamp>` folders under the mod tree and clears a sibling `uninstall` directory before creating the new backup.
+- [REPO] [src/KPatcher.Core/Uninstall/ModUninstaller.cs](src/KPatcher.Core/Uninstall/ModUninstaller.cs) and [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) expose a concrete uninstall workflow that restores the newest timestamped backup.
+- [SYNTH] KPatcher intentionally extends backup behavior to support uninstall, but that is not strict core-behavior parity and should not be summarized as "same as TSLPatcher."
+- [OPEN] Keep this documented as an intentional extension unless the product decides to trade uninstall safety for stricter historical behavior.
 
-## Remaining confirmed gaps
+### 8. The repo's parity documentation is overstated relative to the available evidence
 
-### 1. KPatcher still narrows generic HACKList behavior to NCS-only patching
+- [REPO] Earlier repo parity summaries overstated confidence before this refresh pass; the refreshed ledger now points back to this audit and carries the downgraded status.
+- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) links `docs/TSLPATCHER_RE.md`, which is not present in the current tree.
+- [REPO] The build-verification document's pipeline claim conflicts with the currently reviewed Delphi source snapshots.
+- [SYNTH] The repo's parity story had been stronger than the evidence supported. This audit and the refreshed ledger now align on the downgraded confidence level, but the underlying source-vs-runtime drift remains unresolved.
 
-- [REPO] The reviewed vendored HACKList path operates as a generic binary offset patcher.
-- [REPO] KPatcher still routes `[HACKList]` entries into `ModificationsNCS` behavior rather than a generic binary patch surface.
-- [OPEN] Exact parity is still missing here.
+## Resolved non-gaps from the broader pass
 
-### 2. CompileList orchestration and settings still differ where TSLPatcher shells an external compiler
+- [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, and memory-backed StrRef substitution.
+- [REPO] KPatcher does implement `!FieldPath` and `2DAMEMORY` path indirection. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `2DAMEMORY#=!FieldPath`, and [src/KPatcher.Core/Mods/GFF/ModifyGFF.cs](src/KPatcher.Core/Mods/GFF/ModifyGFF.cs) stores and dereferences those paths through `Memory2DAModifierGFF`.
+- [REPO] ERF/RIM override handling exists on both sides. The Delphi `HandleERFOverrideType(...)` logic and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) both support ignore/warn/rename handling for override-folder shadowing, and KPatcher additionally warns when a `.mod` shadows a RIM/ERF destination.
+- [REPO] KPatcher does implement `high()` row-value support. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `high()` into `RowValueHigh`, and [src/KPatcher.Core/Mods/TwoDA/RowValue.cs](src/KPatcher.Core/Mods/TwoDA/RowValue.cs) resolves the next numeric row label or column value using a max-plus-one rule that matches the reviewed older Delphi behavior.
+- [REPO] Both codebases expose the same major patch families: TLK, 2DA, GFF, InstallList, HACK/NCS, Compile/NSS, and SSF.
+- [SYNTH] The broader pass removed several earlier uncertainties. The confirmed gaps are narrower and more specific than "whole handler missing," but they are still real core-logic differences.
 
-- [REPO] The reviewed vendored path shells an external compiler and exposes settings such as `ScriptCompilerFlags`.
-- [REPO] KPatcher still uses the managed in-process compiler path.
-- [OPEN] This remains an intentional architecture difference unless later parity work reproduces the missing configuration semantics.
+## Recommended follow-up slices
 
-### 3. Backup and uninstall semantics still extend beyond TSLPatcher
-
-- [REPO] KPatcher retains timestamped backup and uninstall behavior that is broader than the reviewed TSLPatcher backup path.
-- [OPEN] This is still a product extension rather than strict parity.
-
-## Recommended next slices
-
-1. Choose and document the authoritative parity target for pipeline ordering, then align KPatcher's install queue to that exact target.
-2. Decide whether strict parity requires replacing the NCS-only HACKList path with a generic binary patch surface.
-3. Decide whether CompileList parity means reproducing missing external-compiler settings or keeping the managed compiler as a documented divergence.
-4. Revisit backup/uninstall behavior only if strict parity is allowed to displace the current recoverability guarantees.
+1. Choose the authoritative parity target for pipeline ordering: verified binary behavior or current reconstructed Delphi source.
+2. Align KPatcher's InstallList overwrite safeguards with the historical `.exe` / `.tlk` / `.key` / `.bif` protections.
+3. Decide whether KPatcher should preserve its NCS-only HACKList narrowing or grow a generic binary-offset patch surface for strict TSLPatcher parity.
+4. Decide whether KPatcher should adopt TSLPatcher-style namespace fallbacks and `DataPath` confinement.
+5. Decide whether CompileList needs closer parity for external-compiler settings such as `ScriptCompilerFlags`.
+6. Confirm whether the K1 hardcap rules are intentional product policy or accidental parity drift.
