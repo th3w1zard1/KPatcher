@@ -1,7 +1,7 @@
 ---
 title: "TSLPatcher Core Logic Parity Audit"
 status: active
-date: 2026-05-28
+date: 2026-06-10
 ---
 
 # TSLPatcher Core Logic Parity Audit
@@ -24,13 +24,12 @@ date: 2026-05-28
 - [SYNTH] KPatcher does not currently match the binary-verified order, and the repo cannot honestly describe one single authoritative TSLPatcher pipeline without first deciding whether parity targets the verified binary or the reconstructed WIP Delphi source.
 - [OPEN] A code-fix pass should not change patch ordering until the parity target is chosen explicitly.
 
-### 2. Namespace fallback and path confinement diverge
+### 2. Namespace fallback and path confinement — mostly aligned (2026-06-10)
 
-- [REPO] The original namespace UI falls back to `changes.ini` / `info.rtf` when a namespace entry omits or mispoints those files, and it rejects `DataPath` values containing `..\` so a namespace cannot escape `tslpatchdata`.
-- [REPO] [src/KPatcher.Core/Namespaces/PatcherNamespace.cs](src/KPatcher.Core/Namespaces/PatcherNamespace.cs) still defines defaults for `changes.ini` and `info.rtf`, but [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) treats `IniName` and `InfoName` as required and throws if they are absent.
-- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) resolves `DataFolderPath` through `Path.Combine` and localized-file resolution without an equivalent `..\` confinement guard.
-- [SYNTH] KPatcher is stricter than TSLPatcher when namespace files are missing, but more permissive about namespace paths escaping `tslpatchdata`. Both are real behavior differences.
-- [OPEN] If parity with original namespace behavior matters, KPatcher needs both a fallback decision and a path-confinement rule.
+- [REPO] TSLPatcher falls back to root `changes.ini` / `info.rtf` when namespace-specific files are missing, and rejects `DataPath` values containing `..\`.
+- [REPO] [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) now defaults blank `IniName`/`InfoName` to `changes.ini`/`info.rtf` and clears `DataPath` segments containing `..`.
+- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) applies the same fallback and localized resolution at **install** time via `ResolveInstallPaths` (preview and install paths now match).
+- [SYNTH] Namespace parity is largely landed; remaining gap is namespace selection keyed by display `Name` rather than section id (documented extension).
 
 ### 3. InstallList overwrite safety checks are missing on the KPatcher side
 
@@ -77,7 +76,7 @@ date: 2026-05-28
 
 ## Resolved non-gaps from the broader pass
 
-- [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, and memory-backed StrRef substitution.
+- [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, memory-backed StrRef substitution, and **append deduplication** (reuse existing dialog entries when text+sound match — landed 2026-06-10).
 - [REPO] KPatcher does implement `!FieldPath` and `2DAMEMORY` path indirection. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `2DAMEMORY#=!FieldPath`, and [src/KPatcher.Core/Mods/GFF/ModifyGFF.cs](src/KPatcher.Core/Mods/GFF/ModifyGFF.cs) stores and dereferences those paths through `Memory2DAModifierGFF`.
 - [REPO] ERF/RIM override handling exists on both sides. The Delphi `HandleERFOverrideType(...)` logic and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) both support ignore/warn/rename handling for override-folder shadowing, and KPatcher additionally warns when a `.mod` shadows a RIM/ERF destination.
 - [REPO] KPatcher does implement `high()` row-value support. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `high()` into `RowValueHigh`, and [src/KPatcher.Core/Mods/TwoDA/RowValue.cs](src/KPatcher.Core/Mods/TwoDA/RowValue.cs) resolves the next numeric row label or column value using a max-plus-one rule that matches the reviewed older Delphi behavior.

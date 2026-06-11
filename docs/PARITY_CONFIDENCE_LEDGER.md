@@ -9,8 +9,8 @@ audit_ref: "docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audi
 
 **Document Purpose:** Durable record of parity assessment, test infrastructure confidence, and verified implementations. This ledger establishes the baseline for release gating, post-release monitoring, and future audit cycles.
 
-**Last Audited:** 2026-05-28
-**Audit Plan:** docs/plans/2026-05-27-002-refactor-tslpatcher-core-logic-parity-audit-refresh-plan.md
+**Last Audited:** 2026-06-10
+**Audit Plan:** docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteration-plan.md
 **Detailed Audit:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 
 ---
@@ -27,7 +27,7 @@ KPatcher implements the major TSLPatcher feature families, but the repository no
 - Pipeline parity target is unresolved because repo-local TSLPatcher artifacts disagree
 - Generic HACKList behavior is narrowed to NCS-only patching in KPatcher
 - InstallList overwrite safeguards differ from historical TSLPatcher behavior
-- Namespace fallback/path-confinement behavior differs from historical TSLPatcher behavior
+- Namespace install-time path resolution now matches preview fallback (2026-06-10); display-name namespace selection remains an extension
 - CompileList orchestration/settings differ from historical TSLPatcher behavior
 - Existing parity documentation had overstated confidence
 

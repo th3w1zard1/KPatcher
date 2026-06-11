@@ -118,6 +118,23 @@ namespace KPatcher.UI
         }
 
         /// <summary>
+        /// Resolved filesystem paths for installing a namespace configuration.
+        /// </summary>
+        public sealed class InstallPathResolution
+        {
+            public InstallPathResolution(string iniFilePath, string tslPatchDataPath, string namespaceModPath)
+            {
+                IniFilePath = iniFilePath ?? throw new ArgumentNullException(nameof(iniFilePath));
+                TslPatchDataPath = tslPatchDataPath ?? throw new ArgumentNullException(nameof(tslPatchDataPath));
+                NamespaceModPath = namespaceModPath ?? throw new ArgumentNullException(nameof(namespaceModPath));
+            }
+
+            public string IniFilePath { get; }
+            public string TslPatchDataPath { get; }
+            public string NamespaceModPath { get; }
+        }
+
+        /// <summary>
         /// Result of a mod installation.
         /// </summary>
         public class InstallResult
@@ -431,6 +448,36 @@ namespace KPatcher.UI
                 out string tslPatchDataPathResolved,
                 allowDefaultFallback: false);
             return Path.GetRelativePath(tslPatchDataPathResolved, resolvedChangesPath);
+        }
+
+        /// <summary>
+        /// Resolves install-time paths for a namespace, including localized config and
+        /// fallback to root <c>changes.ini</c> when namespace-specific files are missing
+        /// (TSLPatcher <c>UNamespaceForm</c> parity).
+        /// </summary>
+        public static InstallPathResolution ResolveInstallPaths(
+            string modPath,
+            List<PatcherNamespace> namespaces,
+            string selectedNamespaceName,
+            [CanBeNull] PatchLogger diagnosticLogger = null)
+        {
+            PatcherNamespace namespaceOption = GetNamespaceOption(namespaces, selectedNamespaceName);
+            string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            string iniFilePath = ResolveNamespaceChangesPath(
+                modPath,
+                namespaceOption,
+                diagnosticLogger,
+                allowDefaultFallback: true);
+            string namespaceModPath = Path.GetDirectoryName(iniFilePath) ?? tslPatchDataPath;
+
+            diagnosticLogger?.AddDiagnostic(string.Format(
+                CultureInfo.InvariantCulture,
+                "Core.ResolveInstallPaths: iniFilePath={0} tslPatchDataPath={1} namespaceModPath={2}",
+                iniFilePath,
+                tslPatchDataPath,
+                namespaceModPath));
+
+            return new InstallPathResolution(iniFilePath, tslPatchDataPath, namespaceModPath);
         }
 
         private static PatcherNamespace GetNamespaceOption(List<PatcherNamespace> namespaces, string selectedNamespaceName)
@@ -833,20 +880,18 @@ namespace KPatcher.UI
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
 
-            string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
-            string iniFilePath = new CaseAwarePath(tslPatchDataPath, namespaceOption.ChangesFilePath()).GetResolvedPath();
-            string namespaceModPath = Path.GetDirectoryName(iniFilePath) ?? tslPatchDataPath;
+            InstallPathResolution paths = ResolveInstallPaths(modPath, namespaces, selectedNamespaceName, logger);
 
-            var installer = new ModInstaller(namespaceModPath, gamePath, iniFilePath, logger)
+            var installer = new ModInstaller(paths.NamespaceModPath, gamePath, paths.IniFilePath, logger)
             {
-                TslPatchDataPath = tslPatchDataPath
+                TslPatchDataPath = paths.TslPatchDataPath
             };
 
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "Core.InstallMod: namespace={0}, iniFilePath={1}, tslPatchDataPath={2}, gamePath={3}",
                 selectedNamespaceName,
-                iniFilePath,
-                tslPatchDataPath,
+                paths.IniFilePath,
+                paths.TslPatchDataPath,
                 gamePath));
 
             DateTime installStartTime = DateTime.UtcNow;
@@ -893,17 +938,16 @@ namespace KPatcher.UI
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, UIResources.NamespaceNotFoundInListFormat, selectedNamespaceName));
             }
 
-            string iniFilePath = new CaseAwarePath(modPath, "tslpatchdata", namespaceOption.ChangesFilePath()).GetResolvedPath();
-            string tslPatchDataPath = new CaseAwarePath(modPath, "tslpatchdata").GetResolvedPath();
+            InstallPathResolution paths = ResolveInstallPaths(modPath, namespaces, selectedNamespaceName, logger);
 
             logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
-                "Core.ValidateConfig: iniFilePath={0}, tslPatchDataPath={1}", iniFilePath, tslPatchDataPath));
+                "Core.ValidateConfig: iniFilePath={0}, tslPatchDataPath={1}", paths.IniFilePath, paths.TslPatchDataPath));
 
-            var reader = ConfigReader.FromFilePath(iniFilePath, logger, tslPatchDataPath: tslPatchDataPath);
+            var reader = ConfigReader.FromFilePath(paths.IniFilePath, logger, tslPatchDataPath: paths.TslPatchDataPath);
             reader.Load(reader.Config);
-            if (iniFilePath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
+            if (paths.IniFilePath.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
             {
-                string yamlOut = Path.ChangeExtension(iniFilePath, ".yaml");
+                string yamlOut = Path.ChangeExtension(paths.IniFilePath, ".yaml");
                 reader.WriteEquivalentYaml(yamlOut);
                 logger.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                     "Core.ValidateConfig: wrote equivalent yaml path={0}", yamlOut));

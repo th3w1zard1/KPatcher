@@ -61,6 +61,27 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         [Fact]
+        public void Apply_Append_ReusesExistingIdenticalEntry()
+        {
+            var memory = new PatcherMemory();
+            var config = new ModificationsTLK();
+            config.Modifiers.Add(new ModifyTLK(0)
+            {
+                Text = "AlreadyThere",
+                Sound = ResRef.FromBlank()
+            });
+
+            var dialogTlk = new TLK();
+            dialogTlk.Add("Old1", "");
+            dialogTlk.Add("AlreadyThere", "");
+
+            config.Apply(dialogTlk, memory, new PatchLogger(), Game.K1);
+
+            Assert.Equal(2, dialogTlk.Count);
+            Assert.Equal(1, memory.MemoryStr[0]);
+        }
+
+        [Fact]
         public void Apply_Replace()
         {
             // Arrange
