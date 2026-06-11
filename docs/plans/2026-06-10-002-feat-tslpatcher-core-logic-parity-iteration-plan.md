@@ -1,8 +1,8 @@
 ---
 title: "feat: TSLPatcher core logic parity iteration (living authority)"
 type: feat
-status: active
-date: 2026-06-10
+status: complete
+date: 2026-06-11
 supersedes:
   - docs/plans/2026-06-10-001-feat-tslpatcher-core-logic-implementation-plan.md
   - docs/plans/2026-05-28-001-fix-tslpatcher-core-logic-parity-implementation-plan.md
@@ -102,17 +102,19 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 - **Install-time writable:** `SystemHelpers.EnsureFileWritable` before patch writes and existing capsule overwrites.
 - **Settings CRLF tokens:** `NormalizeTslPatcherCRLF` on `WindowCaption`, `ConfirmMessage`, and `RequiredMsg` in `LoadSettings`.
 - Characterization tests: `CoreNamespaceInstallPathTests`, `TlkModificationTests.Apply_Append_ReusesExistingIdenticalEntry`, `TwoDaModifierOrderTests`, `GFF_ModifyField_UInt32MaxDecimal_ShouldParseAsNegativeOneForInt32`, `ResRefTests`, `SystemHelpersTests.EnsureFileWritable_*`, `ConfigReaderIniSnippetTableTests` CRLF cases.
+- **PR #18 merged** to `master` (2026-06-11); parity audit and confidence ledger refreshed to match master.
 
 ### Partial / uncertain
 
-- **Pipeline authority** remains binary-verified order, not newer `UTSLPatcher.pas` source order (documented in audit).
 - **HACKList** NCS-only narrowing and **managed CompileList** remain intentional product choices.
 - **UStrTok.pas** unused from `.dpr`; low install impact.
+- Reconstructed Delphi source pipeline order still differs from binary-verified target (KPatcher follows binary).
 
 ### Next
 
-- Golden tests for additional interleaved 2DA INI corpora if regressions appear.
-- Merge PR #18 and monitor post-merge CI.
+- Optional: generic HACKList binary patching (large scope; product decision).
+- Optional: restore `docs/TSLPATCHER_RE.md` for Ghidra function tables.
+- Harness: golden/interleaved 2DA INI corpora if regressions appear.
 
 ## Fixes applied this iteration
 

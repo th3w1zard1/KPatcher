@@ -1,7 +1,7 @@
 ---
 title: "TSLPatcher Core Logic Parity Audit"
 status: active
-date: 2026-06-10
+date: 2026-06-11
 ---
 
 # TSLPatcher Core Logic Parity Audit
@@ -15,14 +15,14 @@ date: 2026-06-10
 
 ## Confirmed findings
 
-### 1. Pipeline truth is split across repo sources, and KPatcher does not fully match any of them
+### 1. Pipeline order — resolved (binary-verified target)
 
-- [REPO] The older Delphi snapshot (`UTSLPatcher12.pas`) runs `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList`.
-- [REPO] The newer Delphi snapshot (`UTSLPatcher.pas`) runs `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF`.
-- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) states the verified shipped binary runs `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) currently queues `TLK -> InstallList -> 2DA -> GFF -> NSS -> NCS -> SSF`, while its adjacent comment now explicitly notes that repo-local TSLPatcher artifacts disagree on one authoritative order.
-- [SYNTH] KPatcher does not currently match the binary-verified order, and the repo cannot honestly describe one single authoritative TSLPatcher pipeline without first deciding whether parity targets the verified binary or the reconstructed WIP Delphi source.
-- [OPEN] A code-fix pass should not change patch ordering until the parity target is chosen explicitly.
+- [REPO] The older Delphi snapshot (`UTSLPatcher12.pas`) runs `TLK -> 2DA -> GFF -> HACK -> Compile -> InstallList` (historical only).
+- [REPO] The newer Delphi snapshot (`UTSLPatcher.pas`) runs `TLK -> InstallList -> 2DA -> GFF -> HACK -> Compile -> SSF` (reconstructed source; differs from shipped binary).
+- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](TSLPATCHER_BUILD_VERIFICATION.md) documents the Ghidra-confirmed shipped binary order: `TLK -> GFF -> 2DA -> InstallList -> HACK -> NSS -> SSF`.
+- [REPO] **Parity target chosen:** binary-verified order (not newer Delphi source order).
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) queues `TLK -> GFF -> 2DA -> InstallList -> NCS (HACK) -> NSS (Compile) -> SSF`, matching the binary-verified sequence.
+- [SYNTH] Pipeline ordering is aligned for core install parity. Remaining drift is limited to intentional HACK/Compile implementations (NCS-only HACK, managed compile) documented below.
 
 ### 2. Namespace fallback and path confinement — mostly aligned (2026-06-10)
 
@@ -31,13 +31,12 @@ date: 2026-06-10
 - [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) applies the same fallback and localized resolution at **install** time via `ResolveInstallPaths` (preview and install paths now match).
 - [SYNTH] Namespace parity is largely landed; remaining gap is namespace selection keyed by display `Name` rather than section id (documented extension).
 
-### 3. InstallList overwrite safety checks are missing on the KPatcher side
+### 3. InstallList overwrite safety — resolved
 
-- [REPO] The newer Delphi source blocks `Replace#` installs from overwriting existing `.exe`, `.tlk`, `.key`, and `.bif` targets.
-- [REPO] [src/KPatcher.Core/Mods/InstallFile.cs](src/KPatcher.Core/Mods/InstallFile.cs) is a passthrough copy operation, and the reviewed KPatcher install path only special-cases direct TLK patch writes to `dialog.tlk` in [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs).
-- [REPO] No equivalent InstallList extension filter was found in the reviewed KPatcher C# path.
-- [SYNTH] This is a confirmed parity and safety gap. KPatcher can presently replace targets that classic TSLPatcher explicitly refused to overwrite.
-- [OPEN] Add a focused fix slice after the pipeline target is settled.
+- [REPO] The newer Delphi source blocks `Replace#` installs from overwriting existing `.exe`, `.tlk`, `.key`, and `.bif` targets in the game folder.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) implements `ShouldSkipProtectedInstallListOverwrite` for folder-level `InstallFile` replace operations on those extensions.
+- [REPO] Capsule destinations still allow replace (matches TSLPatcher capsule behavior); characterization tests in `ModInstallerTests.ShouldPatch_InstallFileReplaceExisting_ProtectedFolderTargets_ShouldSkip`.
+- [SYNTH] InstallList overwrite safeguards now match historical TSLPatcher folder protections.
 
 ### 4. KPatcher narrows TSLPatcher's generic HACKList behavior to NCS-only patching
 
@@ -46,12 +45,13 @@ date: 2026-06-10
 - [REPO] [src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs](src/KPatcher.Core/Mods/NCS/ModificationsNCS.cs) only supports NCS-oriented token/value writes and explicitly rejects `!FieldPath`-shaped `2DAMEMORY` values in `[HACKList]` patches.
 - [SYNTH] KPatcher covers the script-bytecode patching use case, but it is not strict parity with TSLPatcher's generic binary HACKList semantics.
 
-### 5. CompileList orchestration differs even though both sides support tokenized NSS compilation
+### 5. CompileList orchestration — partial (intentional managed compile)
 
-- [REPO] The current Delphi `DoCompileFiles()` flow writes processed NSS files, shells `nwnnsscomp.exe`, honors `ScriptCompilerFlags`, optionally keeps processed sources via `SaveProcessedScripts`, and then routes compiled output into override or ERF/RIM destinations.
-- [REPO] [src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs](src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs) replaces tokens in managed code and compiles via `NCSAuto.CompileNss(...)`.
-- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) still honors `SaveProcessedScripts` for temp-script cleanup behavior, but no equivalent `ScriptCompilerFlags` setting was found in the reviewed C# tree.
-- [SYNTH] This is not just an organizational cleanup. KPatcher intentionally replaces the external-compiler workflow with an in-process compile path, and some configuration surface differs.
+- [REPO] The current Delphi `DoCompileFiles()` flow writes processed NSS files, shells `nwnnsscomp.exe`, honors `ScriptCompilerFlags`, optionally keeps processed sources via `SaveProcessedScripts`, and routes compiled output into override or ERF/RIM destinations.
+- [REPO] [src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs](src/KPatcher.Core/Mods/NSS/ModificationsNSS.cs) replaces tokens in managed code and compiles via `KCompiler` (`NCSAuto.CompileNss(...)`).
+- [REPO] [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) loads `ScriptCompilerFlags` from `[Settings]` and propagates it to `ModificationsNSS`; tests in `ConfigReaderCompileListTests` and `ModificationsNSSTests`.
+- [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) honors `SaveProcessedScripts` for temp-script cleanup.
+- [SYNTH] Settings and tokenized compile orchestration align; the **compiler backend** is an intentional product choice (managed `KCompiler`, no `nwnnsscomp.exe` in product paths per repo policy).
 
 ### 6. 2DA modifier apply order aligned (2026-06-10)
 
@@ -59,11 +59,11 @@ date: 2026-06-10
 - [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) now iterates `Modifiers` in load order instead of grouping by modifier type.
 - [SYNTH] Interleaved AddColumn/ChangeRow INIs now match TSLPatcher sequencing; characterization tests in `TwoDaModifierOrderTests`.
 
-### 7. K1 2DA hardcaps are a KPatcher-specific rule
+### 7. K1 2DA hardcaps — removed (former drift closed)
 
-- [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) enforces K1-only row limits for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da`.
-- [REPO] No matching hardcap check was found in the reviewed TSLPatcher Delphi sources during this pass.
-- [SYNTH] This looks like a KPatcher-specific safety or compatibility addition rather than inherited TSLPatcher logic.
+- [REPO] A prior KPatcher build enforced K1-only row limits for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da`; no matching hardcap exists in reviewed TSLPatcher Delphi sources.
+- [REPO] Hardcaps were **removed** from [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs); `PatchResource_K1VendorParityFiles_ShouldStillApplyChangesBeyondFormerHardcaps` guards against regression.
+- [SYNTH] KPatcher no longer applies vendor-incompatible row truncation on those 2DAs.
 
 ### 8. Backup and uninstall semantics differ materially
 
@@ -73,12 +73,12 @@ date: 2026-06-10
 - [SYNTH] KPatcher intentionally extends backup behavior to support uninstall, but that is not strict core-behavior parity and should not be summarized as "same as TSLPatcher."
 - [OPEN] Keep this documented as an intentional extension unless the product decides to trade uninstall safety for stricter historical behavior.
 
-### 9. The repo's parity documentation is overstated relative to the available evidence
+### 9. Documentation and source-vs-runtime drift
 
-- [REPO] Earlier repo parity summaries overstated confidence before this refresh pass; the refreshed ledger now points back to this audit and carries the downgraded status.
-- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) links `docs/TSLPATCHER_RE.md`, which is not present in the current tree.
-- [REPO] The build-verification document's pipeline claim conflicts with the currently reviewed Delphi source snapshots.
-- [SYNTH] The repo's parity story had been stronger than the evidence supported. This audit and the refreshed ledger now align on the downgraded confidence level, but the underlying source-vs-runtime drift remains unresolved.
+- [REPO] The 2026-06-10 parity iteration (PR #18, merged to `master`) closed confirmed core-logic gaps: install paths, TLK append dedup, 2DA INI order, `SafeStrToInt`, ResRef INI sanitization, writable clearing, settings CRLF, pipeline order, InstallList guards, ScriptCompilerFlags, K1 hardcap removal.
+- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](TSLPATCHER_BUILD_VERIFICATION.md) references `docs/TSLPATCHER_RE.md`, which is **not** present in the tree; the pipeline table in the build-verification doc remains the authoritative binary RE summary until that doc is restored.
+- [REPO] Reconstructed Delphi source (`UTSLPatcher.pas`) still disagrees with the binary-verified order; KPatcher explicitly targets the binary.
+- [SYNTH] Parity confidence is **moderate-to-strong for core install behavior**, with documented intentional non-parity (generic HACK, external compiler, backup/uninstall, namespace display-name selection).
 
 ## Resolved non-gaps from the broader pass
 
@@ -91,9 +91,8 @@ date: 2026-06-10
 
 ## Recommended follow-up slices
 
-1. Choose the authoritative parity target for pipeline ordering: verified binary behavior or current reconstructed Delphi source.
-2. Align KPatcher's InstallList overwrite safeguards with the historical `.exe` / `.tlk` / `.key` / `.bif` protections.
-3. Decide whether KPatcher should preserve its NCS-only HACKList narrowing or grow a generic binary-offset patch surface for strict TSLPatcher parity.
-4. Decide whether KPatcher should adopt TSLPatcher-style namespace fallbacks and `DataPath` confinement.
-5. Decide whether CompileList needs closer parity for external-compiler settings such as `ScriptCompilerFlags`.
-6. Confirm whether the K1 hardcap rules are intentional product policy or accidental parity drift.
+1. **Product decision (optional):** Grow generic binary-offset `[HACKList]` parity beyond NCS-only patching — large scope; current behavior is intentional.
+2. **Product decision (optional):** External `nwnnsscomp.exe` compile parity — rejected by repo policy; managed `KCompiler` is the product path.
+3. **Low priority:** Trace `UStrTok.pas` callers in format units; not referenced from `.dpr`; document-only unless a mod corpus needs tokenizer parity.
+4. **Harness:** Golden/interleaved 2DA INI corpora if regressions appear in the wild.
+5. **Docs hygiene:** Restore or replace missing `docs/TSLPATCHER_RE.md` for full Ghidra function tables linked from build verification.

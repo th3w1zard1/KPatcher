@@ -20,7 +20,7 @@ A Ghidra-based RE session on `/TSLPatcher.exe` (loaded into AgentDecompile MCP p
 
 **Patch order correction:** The prior documented order (TLK → InstallList → 2DA → GFF → NSS → NCS → SSF) was an assumption. The confirmed binary order is **TLK → GFF → 2DA → InstallList → HACK → NSS → SSF**.
 
-**26 pipeline functions** were created manually (Ghidra was not auto-analyzed; only 254 imported thunks were pre-recognized). Full function table: [docs/TSLPATCHER_RE.md § 5.2.5](TSLPATCHER_RE.md).
+**26 pipeline functions** were created manually (Ghidra was not auto-analyzed; only 254 imported thunks were pre-recognized). Full function table was planned for `docs/TSLPATCHER_RE.md` (not present in tree as of 2026-06-11); the pipeline order table in this document is the authoritative binary RE summary.
 
 **Ghidra project note:** TSLPatcher.exe was NOT auto-analyzed when loaded. `DisassembleCommand` + `CreateFunctionCmd` were used to create all pipeline functions from known addresses. Run Ghidra UI **Analysis → Auto Analyze** to discover the full ~3,200+ function set.
 
