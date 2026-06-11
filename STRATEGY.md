@@ -1,6 +1,6 @@
 ---
 name: KPatcher
-last_updated: 2026-05-23
+last_updated: 2026-06-10
 ---
 
 # KPatcher Strategy
@@ -31,7 +31,7 @@ Win by being the faithful C#/.NET port of KPatcher/TSLPatcher behavior, not a re
 
 ### Patcher parity
 
-Keep install behavior, format handling, namespace/config parsing, and logging aligned with the Python and TSLPatcher baseline.
+Keep install behavior, format handling, namespace/config parsing, and logging aligned with the OpenKotOR TSLPatcher Pascal baseline (`vendor/TSLPatcher`). Active iteration plan: `docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteration-plan.md`.
 
 _Why it serves the approach:_ The product only wins if mods behave the same way the legacy tools and existing mod packages expect.
 

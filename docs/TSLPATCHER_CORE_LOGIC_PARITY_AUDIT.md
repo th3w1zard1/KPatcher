@@ -1,7 +1,7 @@
 ---
 title: "TSLPatcher Core Logic Parity Audit"
 status: active
-date: 2026-05-28
+date: 2026-06-10
 ---
 
 # TSLPatcher Core Logic Parity Audit
@@ -24,13 +24,12 @@ date: 2026-05-28
 - [SYNTH] KPatcher does not currently match the binary-verified order, and the repo cannot honestly describe one single authoritative TSLPatcher pipeline without first deciding whether parity targets the verified binary or the reconstructed WIP Delphi source.
 - [OPEN] A code-fix pass should not change patch ordering until the parity target is chosen explicitly.
 
-### 2. Namespace fallback and path confinement diverge
+### 2. Namespace fallback and path confinement — mostly aligned (2026-06-10)
 
-- [REPO] The original namespace UI falls back to `changes.ini` / `info.rtf` when a namespace entry omits or mispoints those files, and it rejects `DataPath` values containing `..\` so a namespace cannot escape `tslpatchdata`.
-- [REPO] [src/KPatcher.Core/Namespaces/PatcherNamespace.cs](src/KPatcher.Core/Namespaces/PatcherNamespace.cs) still defines defaults for `changes.ini` and `info.rtf`, but [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) treats `IniName` and `InfoName` as required and throws if they are absent.
-- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) resolves `DataFolderPath` through `Path.Combine` and localized-file resolution without an equivalent `..\` confinement guard.
-- [SYNTH] KPatcher is stricter than TSLPatcher when namespace files are missing, but more permissive about namespace paths escaping `tslpatchdata`. Both are real behavior differences.
-- [OPEN] If parity with original namespace behavior matters, KPatcher needs both a fallback decision and a path-confinement rule.
+- [REPO] TSLPatcher falls back to root `changes.ini` / `info.rtf` when namespace-specific files are missing, and rejects `DataPath` values containing `..\`.
+- [REPO] [src/KPatcher.Core/Reader/NamespaceReader.cs](src/KPatcher.Core/Reader/NamespaceReader.cs) now defaults blank `IniName`/`InfoName` to `changes.ini`/`info.rtf` and clears `DataPath` segments containing `..`.
+- [REPO] [src/KPatcher.UI/Core.cs](src/KPatcher.UI/Core.cs) applies the same fallback and localized resolution at **install** time via `ResolveInstallPaths` (preview and install paths now match).
+- [SYNTH] Namespace parity is largely landed; remaining gap is namespace selection keyed by display `Name` rather than section id (documented extension).
 
 ### 3. InstallList overwrite safety checks are missing on the KPatcher side
 
@@ -54,13 +53,19 @@ date: 2026-05-28
 - [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) still honors `SaveProcessedScripts` for temp-script cleanup behavior, but no equivalent `ScriptCompilerFlags` setting was found in the reviewed C# tree.
 - [SYNTH] This is not just an organizational cleanup. KPatcher intentionally replaces the external-compiler workflow with an in-process compile path, and some configuration surface differs.
 
-### 6. K1 2DA hardcaps are a KPatcher-specific rule
+### 6. 2DA modifier apply order aligned (2026-06-10)
+
+- [REPO] TSLPatcher applies `[2DAList]` modifiers in `changes.ini` section order (`UTSLPatcher.pas` lines 3067–3091).
+- [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) now iterates `Modifiers` in load order instead of grouping by modifier type.
+- [SYNTH] Interleaved AddColumn/ChangeRow INIs now match TSLPatcher sequencing; characterization tests in `TwoDaModifierOrderTests`.
+
+### 7. K1 2DA hardcaps are a KPatcher-specific rule
 
 - [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) enforces K1-only row limits for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da`.
 - [REPO] No matching hardcap check was found in the reviewed TSLPatcher Delphi sources during this pass.
 - [SYNTH] This looks like a KPatcher-specific safety or compatibility addition rather than inherited TSLPatcher logic.
 
-### 7. Backup and uninstall semantics differ materially
+### 8. Backup and uninstall semantics differ materially
 
 - [REPO] The Delphi patch handler stores single-copy backups under the patcher application's `backup\` folder.
 - [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) creates timestamped `backup/<timestamp>` folders under the mod tree and clears a sibling `uninstall` directory before creating the new backup.
@@ -68,7 +73,7 @@ date: 2026-05-28
 - [SYNTH] KPatcher intentionally extends backup behavior to support uninstall, but that is not strict core-behavior parity and should not be summarized as "same as TSLPatcher."
 - [OPEN] Keep this documented as an intentional extension unless the product decides to trade uninstall safety for stricter historical behavior.
 
-### 8. The repo's parity documentation is overstated relative to the available evidence
+### 9. The repo's parity documentation is overstated relative to the available evidence
 
 - [REPO] Earlier repo parity summaries overstated confidence before this refresh pass; the refreshed ledger now points back to this audit and carries the downgraded status.
 - [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) links `docs/TSLPATCHER_RE.md`, which is not present in the current tree.
@@ -77,7 +82,7 @@ date: 2026-05-28
 
 ## Resolved non-gaps from the broader pass
 
-- [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, and memory-backed StrRef substitution.
+- [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, memory-backed StrRef substitution, and **append deduplication** (reuse existing dialog entries when text+sound match — landed 2026-06-10).
 - [REPO] KPatcher does implement `!FieldPath` and `2DAMEMORY` path indirection. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `2DAMEMORY#=!FieldPath`, and [src/KPatcher.Core/Mods/GFF/ModifyGFF.cs](src/KPatcher.Core/Mods/GFF/ModifyGFF.cs) stores and dereferences those paths through `Memory2DAModifierGFF`.
 - [REPO] ERF/RIM override handling exists on both sides. The Delphi `HandleERFOverrideType(...)` logic and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) both support ignore/warn/rename handling for override-folder shadowing, and KPatcher additionally warns when a `.mod` shadows a RIM/ERF destination.
 - [REPO] KPatcher does implement `high()` row-value support. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `high()` into `RowValueHigh`, and [src/KPatcher.Core/Mods/TwoDA/RowValue.cs](src/KPatcher.Core/Mods/TwoDA/RowValue.cs) resolves the next numeric row label or column value using a max-plus-one rule that matches the reviewed older Delphi behavior.

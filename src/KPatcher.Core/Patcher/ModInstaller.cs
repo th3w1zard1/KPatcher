@@ -557,6 +557,7 @@ namespace KPatcher.Core.Patcher
                                 // output_container_path.mkdir(exist_ok=True, parents=True)
                                 Directory.CreateDirectory(outputContainerPath);
                                 string destinationPath = Path.Combine(outputContainerPath, saveAs);
+                                SystemHelpers.EnsureFileWritable(destinationPath);
                                 File.WriteAllBytes(destinationPath, patchedDataBytes);
                                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                                     "Install: wrote file {0} bytes={1} ordinal={2}",

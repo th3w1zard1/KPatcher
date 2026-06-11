@@ -277,8 +277,8 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingSettingsSection);
             Dictionary<string, string> settingsIni = SectionToDictionary(_ini[settingsSection]);
 
-            Config.WindowTitle = settingsIni.GetValueOrDefault("WindowCaption", "");
-            Config.ConfirmMessage = settingsIni.GetValueOrDefault("ConfirmMessage", "");
+            Config.WindowTitle = NormalizeTslPatcherCRLF(settingsIni.GetValueOrDefault("WindowCaption", ""));
+            Config.ConfirmMessage = NormalizeTslPatcherCRLF(settingsIni.GetValueOrDefault("ConfirmMessage", ""));
             foreach ((string key, string value) in settingsIni)
             {
                 string lowerKey = key.ToLower();
@@ -298,7 +298,7 @@ namespace KPatcher.Core.Reader
                     {
                         throw new InvalidOperationException($"Key '{key}' improperly defined in settings ini. Expected (Required) or (RequiredMsg)");
                     }
-                    Config.RequiredMessages.Add(value.Trim());
+                    Config.RequiredMessages.Add(NormalizeTslPatcherCRLF(value.Trim()));
                 }
             }
             if (Config.RequiredFiles.Count != Config.RequiredMessages.Count)
@@ -532,7 +532,7 @@ namespace KPatcher.Core.Reader
                         }
                         else if (propertyName == "sound")
                         {
-                            var modifier = new ModifyTLK(tokenId, isReplacement: true) { Sound = new ResRef(value) };
+                            var modifier = new ModifyTLK(tokenId, isReplacement: true) { Sound = ResRef.FromTslPatcherIni(value) };
                             Config.PatchesTLK.Modifiers.Add(modifier);
                         }
                         else
@@ -1103,6 +1103,12 @@ namespace KPatcher.Core.Reader
         {
             try
             {
+                // TSLPatcher UST_Common.SafeStrToInt: decimal UInt32.Max maps to $FFFFFFFF (-1 as signed int).
+                if (string.Equals(valueStr, "4294967295", StringComparison.Ordinal))
+                {
+                    return -1;
+                }
+
                 if (valueStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
                     // Parse as UInt32 first to detect overflow, then convert to Int32
@@ -1122,6 +1128,54 @@ namespace KPatcher.Core.Reader
             catch (FormatException ex)
             {
                 throw new FormatException($"The value '{valueStr}' is not in a valid format for an integer.", ex);
+            }
+        }
+
+        private static bool TryParseIniIntLiteral(string rawValue, out int value)
+        {
+            value = 0;
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return false;
+            }
+
+            bool looksInteger = rawValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
+            if (!looksInteger)
+            {
+                for (int i = 0; i < rawValue.Length; i++)
+                {
+                    char c = rawValue[i];
+                    if (i == 0 && c == '-' && rawValue.Length > 1)
+                    {
+                        continue;
+                    }
+
+                    if (!char.IsDigit(c))
+                    {
+                        return false;
+                    }
+                }
+
+                looksInteger = rawValue.Length > 0;
+            }
+
+            if (!looksInteger)
+            {
+                return false;
+            }
+
+            try
+            {
+                value = ParseIntValue(rawValue);
+                return true;
+            }
+            catch (OverflowException)
+            {
+                return false;
+            }
+            catch (FormatException)
+            {
+                return false;
             }
         }
 
@@ -1551,8 +1605,8 @@ namespace KPatcher.Core.Reader
                 return fieldValueMemory;
             }
 
-            // Int
-            if (int.TryParse(rawValue, out int intVal))
+            // Int (includes TSLPatcher SafeStrToInt decimal UInt32.Max → -1 via ParseIntValue)
+            if (TryParseIniIntLiteral(rawValue, out int intVal))
             {
                 return new FieldValueConstant(intVal);
             }
@@ -1642,7 +1696,7 @@ namespace KPatcher.Core.Reader
 
             if (fieldType == GFFFieldType.ResRef)
             {
-                value = new ResRef(rawValue);
+                value = ResRef.FromTslPatcherIni(rawValue);
             }
             else if (fieldType == GFFFieldType.String)
             {

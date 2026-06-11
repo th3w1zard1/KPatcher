@@ -1,7 +1,7 @@
 ---
 title: "feat: TSLPatcher core logic implementation and PR merge"
 type: feat
-status: active
+status: superseded
 date: 2026-06-10
 origin: user /lfg request — iterative TSLPatcher↔KPatcher parity, merge open PRs
 ---

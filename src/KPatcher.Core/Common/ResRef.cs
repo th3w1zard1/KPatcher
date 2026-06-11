@@ -25,6 +25,34 @@ namespace KPatcher.Core.Common
 
         public static ResRef FromBlank() => new ResRef(string.Empty);
 
+        /// <summary>
+        /// Builds a ResRef from TSLPatcher INI text using <c>UST_Common.StringToResRef</c> rules:
+        /// keep at most 16 alphanumeric or underscore characters; drop everything else.
+        /// </summary>
+        public static ResRef FromTslPatcherIni(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return FromBlank();
+            }
+
+            var filtered = new StringBuilder(MaxLength);
+            int limit = text.Length < MaxLength ? text.Length : MaxLength;
+            for (int i = 0; i < limit; i++)
+            {
+                char c = text[i];
+                if ((c >= 'A' && c <= 'Z')
+                    || (c >= 'a' && c <= 'z')
+                    || (c >= '0' && c <= '9')
+                    || c == '_')
+                {
+                    filtered.Append(c);
+                }
+            }
+
+            return new ResRef(filtered.ToString());
+        }
+
         public static ResRef FromPath(string filePath)
         {
             string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);

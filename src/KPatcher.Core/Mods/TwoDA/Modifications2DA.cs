@@ -83,15 +83,8 @@ namespace KPatcher.Core.Mods.TwoDA
 
             TwoDARow lastRow = null;
 
-            var ordered = new List<Modify2DA>();
-            ordered.AddRange(Modifiers.FindAll(m => m is AddColumn2DA));
-            ordered.AddRange(Modifiers.FindAll(m => m is ChangeRow2DA));
-            ordered.AddRange(Modifiers.FindAll(m => m is AddRow2DA));
-            ordered.AddRange(Modifiers.FindAll(m => m is CopyRow2DA));
-            ordered.AddRange(Modifiers.FindAll(m =>
-                !(m is AddColumn2DA) && !(m is ChangeRow2DA) && !(m is CopyRow2DA) && !(m is AddRow2DA)));
-
-            foreach (Modify2DA row in ordered)
+            // TSLPatcher parity: apply modifiers in changes.ini section order (UTSLPatcher.pas 2DAList loop).
+            foreach (Modify2DA row in Modifiers)
             {
                 try
                 {

@@ -13,6 +13,38 @@ namespace KPatcher.Core.Common
         private const int UnixModeDirectory = 0x1ED; // 0o755
 
         /// <summary>
+        /// Clears read-only attributes on a single file before overwrite (TSLPatcher <c>MakeFileWritable</c> parity).
+        /// No-op when the file does not exist.
+        /// </summary>
+        public static void EnsureFileWritable(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            {
+                return;
+            }
+
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    FileAttributes attrs = File.GetAttributes(filePath);
+                    if ((attrs & FileAttributes.ReadOnly) != 0)
+                    {
+                        File.SetAttributes(filePath, attrs & ~FileAttributes.ReadOnly);
+                    }
+                }
+                else
+                {
+                    Chmod(filePath, UnixModeFile);
+                }
+            }
+            catch
+            {
+                // Best-effort parity with TSLPatcher: attempt write even if attribute clear fails.
+            }
+        }
+
+        /// <summary>
         /// Attempts to gain write access to a directory and its contents.
         /// On Windows: removes ReadOnly attributes from files and directories.
         /// On Unix/Linux/macOS: applies chmod 0o644 to files and 0o755 to directories.

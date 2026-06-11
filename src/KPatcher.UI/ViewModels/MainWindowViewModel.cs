@@ -562,24 +562,27 @@ namespace KPatcher.UI.ViewModels
                     throw new InvalidOperationException(UIResources.SelectedNamespaceNotFound);
                 }
 
-                // Core.InstallMod applies path resolution
-                // installer = ModInstaller(namespace_mod_path, game_path, ini_file_path, logger)
-                // where namespace_mod_path = ini_file_path.parent (parent of the ini file)
-                string tslPatchDataPath = Path.Combine(ModPath, "tslpatchdata");
-                string iniFilePath = Path.Combine(tslPatchDataPath, selectedNs.ChangesFilePath());
+                Core.InstallPathResolution installPaths = Core.ResolveInstallPaths(
+                    ModPath,
+                    _loadedNamespaces,
+                    SelectedNamespace,
+                    _logger);
 
-                if (!File.Exists(iniFilePath))
+                if (!File.Exists(installPaths.IniFilePath))
                 {
-                    throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, UIResources.ChangesIniFileNotFoundFormat, iniFilePath));
+                    throw new FileNotFoundException(string.Format(
+                        CultureInfo.CurrentCulture,
+                        UIResources.ChangesIniFileNotFoundFormat,
+                        installPaths.IniFilePath));
                 }
 
-                // namespace_mod_path: CaseAwarePath = ini_file_path.parent
-                // The modPath for ModInstaller should be the parent of the ini file, not the mod root
-                string namespaceModPath = Path.GetDirectoryName(iniFilePath) ?? tslPatchDataPath;
-
-                var installer = new ModInstaller(namespaceModPath, SelectedGamePath, iniFilePath, _logger)
+                var installer = new ModInstaller(
+                    installPaths.NamespaceModPath,
+                    SelectedGamePath,
+                    installPaths.IniFilePath,
+                    _logger)
                 {
-                    TslPatchDataPath = tslPatchDataPath
+                    TslPatchDataPath = installPaths.TslPatchDataPath
                 };
 
                 // TSLPatcher-style confirmation before starting (always shown unless one-shot)

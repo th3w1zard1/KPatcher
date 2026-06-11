@@ -215,6 +215,12 @@ namespace KPatcher.Core.Common.Capsule
 
         public void Save()
         {
+            string resolvedPath = _path.GetResolvedPath();
+            if (_existedOnDisk)
+            {
+                SystemHelpers.EnsureFileWritable(resolvedPath);
+            }
+
             if (_capsuleType == CapsuleType.RIM)
             {
                 var rim = new RIM();

@@ -189,9 +189,33 @@ namespace KPatcher.Core.Mods.TLK
             }
             else
             {
-                int stringref = dialog.Add(Text ?? "", Sound ?? "");
+                // TSLPatcher AppendTLKData reuses an existing dialog entry when text+sound match.
+                int stringref = FindExistingAppendEntry(dialog, Text, Sound);
+                if (stringref < 0)
+                {
+                    stringref = dialog.Add(Text ?? "", Sound ?? "");
+                }
+
                 memory.MemoryStr[TokenId] = stringref;
             }
+        }
+
+        private static int FindExistingAppendEntry(Formats.TLK.TLK dialog, [CanBeNull] string text, [CanBeNull] string sound)
+        {
+            string normalizedText = text ?? string.Empty;
+            var normalizedSound = new ResRef(sound ?? string.Empty);
+            for (int i = 0; i < dialog.Count; i++)
+            {
+                TLKEntry entry = dialog.Get(i);
+                if (entry != null
+                    && string.Equals(entry.Text, normalizedText, StringComparison.Ordinal)
+                    && entry.Voiceover.Equals(normalizedSound))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         public void Load()

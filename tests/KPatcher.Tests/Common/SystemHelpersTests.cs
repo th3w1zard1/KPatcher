@@ -76,6 +76,30 @@ namespace KPatcher.Core.Tests.Common
         }
 
         [Fact]
+        public void EnsureFileWritable_ReadOnlyFile_ClearsReadOnlyOnWindows()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            string filePath = Path.Combine(_tempDir, "single_readonly.txt");
+            File.WriteAllText(filePath, "content");
+            new FileInfo(filePath).IsReadOnly = true;
+
+            SystemHelpers.EnsureFileWritable(filePath);
+
+            new FileInfo(filePath).IsReadOnly.Should().BeFalse();
+        }
+
+        [Fact]
+        public void EnsureFileWritable_MissingFile_DoesNotThrow()
+        {
+            Action act = () => SystemHelpers.EnsureFileWritable(Path.Combine(_tempDir, "missing.txt"));
+            act.Should().NotThrow();
+        }
+
+        [Fact]
         [Trait("Category", "WindowsOnly")]
         public void FixCaseSensitivityRecursive_MixedCaseFiles_RenamesToLower()
         {
