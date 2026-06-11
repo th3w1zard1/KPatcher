@@ -1103,6 +1103,12 @@ namespace KPatcher.Core.Reader
         {
             try
             {
+                // TSLPatcher UST_Common.SafeStrToInt: decimal UInt32.Max maps to $FFFFFFFF (-1 as signed int).
+                if (string.Equals(valueStr, "4294967295", StringComparison.Ordinal))
+                {
+                    return -1;
+                }
+
                 if (valueStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 {
                     // Parse as UInt32 first to detect overflow, then convert to Int32
@@ -1122,6 +1128,54 @@ namespace KPatcher.Core.Reader
             catch (FormatException ex)
             {
                 throw new FormatException($"The value '{valueStr}' is not in a valid format for an integer.", ex);
+            }
+        }
+
+        private static bool TryParseIniIntLiteral(string rawValue, out int value)
+        {
+            value = 0;
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return false;
+            }
+
+            bool looksInteger = rawValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
+            if (!looksInteger)
+            {
+                for (int i = 0; i < rawValue.Length; i++)
+                {
+                    char c = rawValue[i];
+                    if (i == 0 && c == '-' && rawValue.Length > 1)
+                    {
+                        continue;
+                    }
+
+                    if (!char.IsDigit(c))
+                    {
+                        return false;
+                    }
+                }
+
+                looksInteger = rawValue.Length > 0;
+            }
+
+            if (!looksInteger)
+            {
+                return false;
+            }
+
+            try
+            {
+                value = ParseIntValue(rawValue);
+                return true;
+            }
+            catch (OverflowException)
+            {
+                return false;
+            }
+            catch (FormatException)
+            {
+                return false;
             }
         }
 
@@ -1551,8 +1605,8 @@ namespace KPatcher.Core.Reader
                 return fieldValueMemory;
             }
 
-            // Int
-            if (int.TryParse(rawValue, out int intVal))
+            // Int (includes TSLPatcher SafeStrToInt decimal UInt32.Max → -1 via ParseIntValue)
+            if (TryParseIniIntLiteral(rawValue, out int intVal))
             {
                 return new FieldValueConstant(intVal);
             }

@@ -53,13 +53,19 @@ date: 2026-06-10
 - [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) still honors `SaveProcessedScripts` for temp-script cleanup behavior, but no equivalent `ScriptCompilerFlags` setting was found in the reviewed C# tree.
 - [SYNTH] This is not just an organizational cleanup. KPatcher intentionally replaces the external-compiler workflow with an in-process compile path, and some configuration surface differs.
 
-### 6. K1 2DA hardcaps are a KPatcher-specific rule
+### 6. 2DA modifier apply order aligned (2026-06-10)
+
+- [REPO] TSLPatcher applies `[2DAList]` modifiers in `changes.ini` section order (`UTSLPatcher.pas` lines 3067–3091).
+- [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) now iterates `Modifiers` in load order instead of grouping by modifier type.
+- [SYNTH] Interleaved AddColumn/ChangeRow INIs now match TSLPatcher sequencing; characterization tests in `TwoDaModifierOrderTests`.
+
+### 7. K1 2DA hardcaps are a KPatcher-specific rule
 
 - [REPO] [src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs](src/KPatcher.Core/Mods/TwoDA/Modifications2DA.cs) enforces K1-only row limits for `placeables.2da`, `upcrystals.2da`, and `upgrade.2da`.
 - [REPO] No matching hardcap check was found in the reviewed TSLPatcher Delphi sources during this pass.
 - [SYNTH] This looks like a KPatcher-specific safety or compatibility addition rather than inherited TSLPatcher logic.
 
-### 7. Backup and uninstall semantics differ materially
+### 8. Backup and uninstall semantics differ materially
 
 - [REPO] The Delphi patch handler stores single-copy backups under the patcher application's `backup\` folder.
 - [REPO] [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) creates timestamped `backup/<timestamp>` folders under the mod tree and clears a sibling `uninstall` directory before creating the new backup.
@@ -67,7 +73,7 @@ date: 2026-06-10
 - [SYNTH] KPatcher intentionally extends backup behavior to support uninstall, but that is not strict core-behavior parity and should not be summarized as "same as TSLPatcher."
 - [OPEN] Keep this documented as an intentional extension unless the product decides to trade uninstall safety for stricter historical behavior.
 
-### 8. The repo's parity documentation is overstated relative to the available evidence
+### 9. The repo's parity documentation is overstated relative to the available evidence
 
 - [REPO] Earlier repo parity summaries overstated confidence before this refresh pass; the refreshed ledger now points back to this audit and carries the downgraded status.
 - [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](docs/TSLPATCHER_BUILD_VERIFICATION.md) links `docs/TSLPATCHER_RE.md`, which is not present in the current tree.

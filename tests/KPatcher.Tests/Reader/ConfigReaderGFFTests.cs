@@ -78,6 +78,31 @@ Appearance_Type=123
         }
 
         [Fact]
+        public void GFF_ModifyField_UInt32MaxDecimal_ShouldParseAsNegativeOneForInt32()
+        {
+            string iniText = @"
+[GFFList]
+File0=test.utc
+
+[test.utc]
+Delay=4294967295
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            var modify = result.PatchesGFF.First(p => p.SaveAs == "test.utc").Modifiers[0] as ModifyFieldGFF;
+            modify.Should().NotBeNull();
+            modify.Path.Should().Be("Delay");
+
+            var value = modify.Value as FieldValueConstant;
+            value.Should().NotBeNull();
+            value.Value(null, GFFFieldType.Int32).Should().Be(-1);
+        }
+
+        [Fact]
         public void GFF_ModifyField_ShouldLoadStringValue()
         {
             // Arrange

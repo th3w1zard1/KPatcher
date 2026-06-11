@@ -68,10 +68,10 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 | # | Pascal file | Parity status | Notes |
 |---|-------------|---------------|-------|
 | 1 | `TSLPatcher.dpr` | Intentional | Avalonia + CLI extensions; same default ini/rtf names |
-| 2 | `UST_Common.pas` | Mixed | Float/CRLF/backup aligned; `SafeStrToInt('4294967295')` sentinel open for generic int parse; ResRef filter-vs-throw; install-time writable clearing open |
+| 2 | `UST_Common.pas` | Mostly same | `ParseIntValue('4294967295')` → `-1` landed; ResRef filter-vs-throw and install-time writable clearing remain open |
 | 3 | `UST_IniFile.pas` | Mostly same (read) | CRLF tokens on patch values; Settings strings not globally expanded |
 | 4 | `UStrTok.pas` | Open | Not referenced from `.dpr`; low install impact |
-| 5 | `U2DAEdit.pas` | Mostly same | **Mismatch:** modifier reorder vs INI order in `Modifications2DA.Apply` |
+| 5 | `U2DAEdit.pas` | Fixed pass 2 | INI-order apply in `Modifications2DA.Apply` (was grouped reorder) |
 | 6 | `UGFFFile.pas` | Mostly same | Intentional UInt64/VOID support beyond Pascal |
 | 7 | `UGFFHandler.pas` | N/A | Superseded by `UGFFFile` |
 | 8 | `UTLKFile.pas` | Fixed this iteration | Append dedup now reuses matching dialog entries (was mismatch) |
@@ -96,20 +96,20 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 - Comparison ledger with progress bar at 14/14.
 - **Install path parity:** `Core.ResolveInstallPaths` + `InstallMod` / `ValidateConfig` / `MainWindowViewModel` use namespace fallback + localized resolution at install time (not only preview).
 - **TLK append dedup:** `ModifyTLK.Apply` reuses existing dialog entries with matching text+sound (TSLPatcher `AppendTLKData` behavior).
-- Characterization tests: `CoreNamespaceInstallPathTests`, `TlkModificationTests.Apply_Append_ReusesExistingIdenticalEntry`.
+- **2DA modifier INI order:** `Modifications2DA.Apply` iterates `Modifiers` in load order (UTSLPatcher `2DAList` loop parity).
+- **`SafeStrToInt` sentinel:** `ParseIntValue("4294967295")` returns `-1` for GFF Delay-style Int32 fields.
+- Characterization tests: `CoreNamespaceInstallPathTests`, `TlkModificationTests.Apply_Append_ReusesExistingIdenticalEntry`, `TwoDaModifierOrderTests`, `GFF_ModifyField_UInt32MaxDecimal_ShouldParseAsNegativeOneForInt32`.
 
 ### Partial / uncertain
 
-- **2DA modifier ordering** still reorders modifiers; interleaved INIs may diverge — needs golden test before changing.
 - **Pipeline authority** remains binary-verified order, not newer `UTSLPatcher.pas` source order (documented in audit).
 - **HACKList** NCS-only narrowing and **managed CompileList** remain intentional product choices.
-- **`SafeStrToInt` decimal max sentinel** for generic `ParseIntValue` — open unless mod corpus shows breakage.
+- **ResRef** filter-vs-throw and **install-time writable** clearing remain open (`UST_Common`).
 
 ### Next
 
-- Add golden test for 2DA interleaved modifier order before reorder fix.
-- Optional: expand `ParseIntValue` `4294967295` → `-1` if GFF Int32 Delay mods fail in corpus.
-- Refresh `docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md` and `docs/PARITY_CONFIDENCE_LEDGER.md` after test run.
+- Golden tests for additional interleaved 2DA INI corpora if regressions appear.
+- ResRef sanitization parity vs `StringToResRef` if mod corpus hits invalid chars.
 
 ## Fixes applied this iteration
 
@@ -117,6 +117,8 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 |-------|-----|-------|
 | Preview vs install namespace path | `Core.ResolveInstallPaths` | `CoreNamespaceInstallPathTests` |
 | TLK append duplicate StrRefs | Reuse matching entry in `ModifyTLK.Apply` | `Apply_Append_ReusesExistingIdenticalEntry` |
+| 2DA modifier grouped reorder | Apply `Modifiers` in INI load order | `TwoDaModifierOrderTests` |
+| `SafeStrToInt` decimal max | `ParseIntValue("4294967295")` → `-1` | `GFF_ModifyField_UInt32MaxDecimal_*` |
 
 ## Validation
 
