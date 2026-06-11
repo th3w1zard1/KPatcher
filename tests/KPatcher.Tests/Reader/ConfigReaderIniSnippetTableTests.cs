@@ -31,10 +31,29 @@ namespace KPatcher.Core.Tests.Reader
         [Theory]
         [InlineData("[Settings]\nWindowCaption=My Mod\n", "My Mod")]
         [InlineData("[Settings]\nWindowCaption=\n", "")]
+        [InlineData("[Settings]\nWindowCaption=Line1<#LF#>Line2\n", "Line1\nLine2")]
         public void Load_maps_window_caption(string iniBody, string expectedTitle)
         {
             PatcherConfig cfg = LoadConfig(iniBody);
             cfg.WindowTitle.Should().Be(expectedTitle);
+        }
+
+        [Fact]
+        public void Load_expands_crlf_tokens_in_confirm_message()
+        {
+            PatcherConfig cfg = LoadConfig("[Settings]\nConfirmMessage=Yes<#CR#>No\n");
+            cfg.ConfirmMessage.Should().Be("Yes\rNo");
+        }
+
+        [Fact]
+        public void Load_expands_crlf_tokens_in_required_messages()
+        {
+            const string ini = @"
+[Settings]
+RequiredMsg=Need<#LF#>this
+";
+            PatcherConfig cfg = LoadConfig(ini);
+            cfg.RequiredMessages.Should().ContainSingle().Which.Should().Be("Need\nthis");
         }
 
         [Fact]

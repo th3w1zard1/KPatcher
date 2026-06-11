@@ -277,8 +277,8 @@ namespace KPatcher.Core.Reader
             _log.AddNote(PatcherResources.LoadingSettingsSection);
             Dictionary<string, string> settingsIni = SectionToDictionary(_ini[settingsSection]);
 
-            Config.WindowTitle = settingsIni.GetValueOrDefault("WindowCaption", "");
-            Config.ConfirmMessage = settingsIni.GetValueOrDefault("ConfirmMessage", "");
+            Config.WindowTitle = NormalizeTslPatcherCRLF(settingsIni.GetValueOrDefault("WindowCaption", ""));
+            Config.ConfirmMessage = NormalizeTslPatcherCRLF(settingsIni.GetValueOrDefault("ConfirmMessage", ""));
             foreach ((string key, string value) in settingsIni)
             {
                 string lowerKey = key.ToLower();
@@ -298,7 +298,7 @@ namespace KPatcher.Core.Reader
                     {
                         throw new InvalidOperationException($"Key '{key}' improperly defined in settings ini. Expected (Required) or (RequiredMsg)");
                     }
-                    Config.RequiredMessages.Add(value.Trim());
+                    Config.RequiredMessages.Add(NormalizeTslPatcherCRLF(value.Trim()));
                 }
             }
             if (Config.RequiredFiles.Count != Config.RequiredMessages.Count)
@@ -532,7 +532,7 @@ namespace KPatcher.Core.Reader
                         }
                         else if (propertyName == "sound")
                         {
-                            var modifier = new ModifyTLK(tokenId, isReplacement: true) { Sound = new ResRef(value) };
+                            var modifier = new ModifyTLK(tokenId, isReplacement: true) { Sound = ResRef.FromTslPatcherIni(value) };
                             Config.PatchesTLK.Modifiers.Add(modifier);
                         }
                         else
@@ -1696,7 +1696,7 @@ namespace KPatcher.Core.Reader
 
             if (fieldType == GFFFieldType.ResRef)
             {
-                value = new ResRef(rawValue);
+                value = ResRef.FromTslPatcherIni(rawValue);
             }
             else if (fieldType == GFFFieldType.String)
             {

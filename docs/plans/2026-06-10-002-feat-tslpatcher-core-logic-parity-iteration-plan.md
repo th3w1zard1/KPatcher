@@ -68,8 +68,8 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 | # | Pascal file | Parity status | Notes |
 |---|-------------|---------------|-------|
 | 1 | `TSLPatcher.dpr` | Intentional | Avalonia + CLI extensions; same default ini/rtf names |
-| 2 | `UST_Common.pas` | Mostly same | `ParseIntValue('4294967295')` → `-1` landed; ResRef filter-vs-throw and install-time writable clearing remain open |
-| 3 | `UST_IniFile.pas` | Mostly same (read) | CRLF tokens on patch values; Settings strings not globally expanded |
+| 2 | `UST_Common.pas` | Same | ResRef `FromTslPatcherIni` + install-time `EnsureFileWritable` landed |
+| 3 | `UST_IniFile.pas` | Same | Settings `WindowCaption`/`ConfirmMessage`/`RequiredMsg` CRLF expansion landed |
 | 4 | `UStrTok.pas` | Open | Not referenced from `.dpr`; low install impact |
 | 5 | `U2DAEdit.pas` | Fixed pass 2 | INI-order apply in `Modifications2DA.Apply` (was grouped reorder) |
 | 6 | `UGFFFile.pas` | Mostly same | Intentional UInt64/VOID support beyond Pascal |
@@ -98,18 +98,21 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 - **TLK append dedup:** `ModifyTLK.Apply` reuses existing dialog entries with matching text+sound (TSLPatcher `AppendTLKData` behavior).
 - **2DA modifier INI order:** `Modifications2DA.Apply` iterates `Modifiers` in load order (UTSLPatcher `2DAList` loop parity).
 - **`SafeStrToInt` sentinel:** `ParseIntValue("4294967295")` returns `-1` for GFF Delay-style Int32 fields.
-- Characterization tests: `CoreNamespaceInstallPathTests`, `TlkModificationTests.Apply_Append_ReusesExistingIdenticalEntry`, `TwoDaModifierOrderTests`, `GFF_ModifyField_UInt32MaxDecimal_ShouldParseAsNegativeOneForInt32`.
+- **ResRef INI sanitization:** `ResRef.FromTslPatcherIni` filters invalid chars (TSLPatcher `StringToResRef` parity) in `ConfigReader` and `FieldValue`.
+- **Install-time writable:** `SystemHelpers.EnsureFileWritable` before patch writes and existing capsule overwrites.
+- **Settings CRLF tokens:** `NormalizeTslPatcherCRLF` on `WindowCaption`, `ConfirmMessage`, and `RequiredMsg` in `LoadSettings`.
+- Characterization tests: `CoreNamespaceInstallPathTests`, `TlkModificationTests.Apply_Append_ReusesExistingIdenticalEntry`, `TwoDaModifierOrderTests`, `GFF_ModifyField_UInt32MaxDecimal_ShouldParseAsNegativeOneForInt32`, `ResRefTests`, `SystemHelpersTests.EnsureFileWritable_*`, `ConfigReaderIniSnippetTableTests` CRLF cases.
 
 ### Partial / uncertain
 
 - **Pipeline authority** remains binary-verified order, not newer `UTSLPatcher.pas` source order (documented in audit).
 - **HACKList** NCS-only narrowing and **managed CompileList** remain intentional product choices.
-- **ResRef** filter-vs-throw and **install-time writable** clearing remain open (`UST_Common`).
+- **UStrTok.pas** unused from `.dpr`; low install impact.
 
 ### Next
 
 - Golden tests for additional interleaved 2DA INI corpora if regressions appear.
-- ResRef sanitization parity vs `StringToResRef` if mod corpus hits invalid chars.
+- Merge PR #18 and monitor post-merge CI.
 
 ## Fixes applied this iteration
 
@@ -119,6 +122,9 @@ vendor/TSLPatcher/UTSLPatcher12.pas
 | TLK append duplicate StrRefs | Reuse matching entry in `ModifyTLK.Apply` | `Apply_Append_ReusesExistingIdenticalEntry` |
 | 2DA modifier grouped reorder | Apply `Modifiers` in INI load order | `TwoDaModifierOrderTests` |
 | `SafeStrToInt` decimal max | `ParseIntValue("4294967295")` → `-1` | `GFF_ModifyField_UInt32MaxDecimal_*` |
+| ResRef INI invalid chars | `ResRef.FromTslPatcherIni` | `ResRefTests` |
+| Install-time readonly clear | `SystemHelpers.EnsureFileWritable` | `EnsureFileWritable_*` |
+| Settings CRLF tokens | `NormalizeTslPatcherCRLF` in `LoadSettings` | `ConfigReaderIniSnippetTableTests` |
 
 ## Validation
 

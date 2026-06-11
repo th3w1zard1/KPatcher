@@ -97,9 +97,9 @@ namespace KPatcher.Core.Mods.GFF
                 // Support empty statements like 'resref=' in ini (empty value allowed)
                 if (value is string resRefStr)
                 {
-                    return string.IsNullOrWhiteSpace(resRefStr) ? ResRef.FromBlank() : new ResRef(resRefStr);
+                    return string.IsNullOrWhiteSpace(resRefStr) ? ResRef.FromBlank() : ResRef.FromTslPatcherIni(resRefStr);
                 }
-                return new ResRef(value.ToString() ?? "");
+                return ResRef.FromTslPatcherIni(value.ToString() ?? "");
             }
             else if (fieldType == GFFFieldType.String && !(value is string))
             {
