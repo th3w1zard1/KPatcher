@@ -72,7 +72,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 | No product registry spoofer | **Met** | `CompilerExecutionWrapper.CreateRegistrySpoofer()` → `NoOpRegistrySpoofer` only. |
 | ≥8 NCS/NSS test classes | **Met** | **14** classes listed under **NCS/NSS test fixtures** (includes opt-in harness). |
 | Roundtrip tests exist and pass (default tier) | **Met** | `NCSRoundtripTests`, `VanillaNssManagedDecompileRoundTripTests`, `NcsDecompNetStyleRoundTripTests`, `RoundTripUtilManagedCompareTests`, etc. |
-| Full solution tests pass | **Met** | Wrapper command below; **789/789** `KPatcher.Tests` (Default.runsettings) on Linux at `50ca6ec9` (2026-06-10). |
+| Full solution tests pass | **Met** | Wrapper command below; **789/789** `KPatcher.Tests` (Default.runsettings) on Linux at `15c03d8a` (2026-06-10). |
 | Default CI fails on test regressions | **Met** | Primary `ci.yml` test step no longer uses `continue-on-error`. |
 | Vendor tier not vacuous in default CI | **Met** | `Category=Vendor` excluded from `Default.runsettings`; vendor tests use `RequireVanillaSubmodule()` and run via `Vendor.runsettings` when the tree is present. |
 
@@ -80,9 +80,9 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-06-10 — `master` @ `50ca6ec9` (fifty-third `/lfg` — criteria still **Met**; maintenance policy: no new numbered plan). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
+**Last /lfg verification:** 2026-06-10 — `master` @ `15c03d8a` (fifty-fourth `/lfg` — criteria still **Met**; maintenance policy: no new numbered plan). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
 
-**NCS/NSS test gate (managed tooling):** **223** `KPatcher.Tests` + **6** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~NSS|FullyQualifiedName~KCompiler|FullyQualifiedName~NCSDecomp|FullyQualifiedName~Decomp` (2026-06-10, fifty-third `/lfg` on `master`). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
+**NCS/NSS test gate (managed tooling):** **223** `KPatcher.Tests` + **6** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~NSS|FullyQualifiedName~KCompiler|FullyQualifiedName~NCSDecomp|FullyQualifiedName~Decomp` (2026-06-10, fifty-fourth `/lfg` on `master`). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
 
 **Full default-tier suite** (repo wrapper, Linux):
 
@@ -90,10 +90,10 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug
 ```
 
-**789/789 passed** in `KPatcher.Tests` (2026-06-10, fifty-third `/lfg`) via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (four `Category=Vendor` facts opt in via `Vendor.runsettings`). Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**789/789 passed** in `KPatcher.Tests` (2026-06-10, fifty-fourth `/lfg`) via `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (four `Category=Vendor` facts opt in via `Vendor.runsettings`). Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 
 If `vendor/DeNCS` adds Java under `src/main/java`, extend this table (new subpackage -> new Core folder) or add a row under **superseded** if policy excludes it (e.g. new Windows-only spoof helper).
 
-When the completion checklist above is **Met** on `master`, further `/lfg` invocations for this workstream should re-run `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (and the NCS/NSS filter) and update this verification section only — not add new numbered `master-complete-plan` files unless scope or criteria change.
+When the completion checklist above is **Met** on `master`, further `/lfg` invocations for this workstream should re-run `bash ./scripts/dotnet-test.sh KPatcher.sln -c Debug` (and the NCS/NSS filter). Update this verification section when product code or criteria change; do not add new numbered `master-complete-plan` files or stamp-only commits when `master` is unchanged and tests still pass.
