@@ -27,8 +27,8 @@ Managed implementation:
 
 Binary-analysis reference:
 
-- [docs/TSLPATCHER_RE.md](docs/TSLPATCHER_RE.md) section `§20`
-- [docs/TSLPATCHER_RE.md](docs/TSLPATCHER_RE.md) appendix `C`
+- [docs/TSLPATCHER_RE.md](docs/TSLPATCHER_RE.md) — pipeline step 6 (`CompileNSS`) and managed replacement notes
+- [src/KCompiler.Core/NwnnsscompReMapping.cs](src/KCompiler.Core/NwnnsscompReMapping.cs) — address and behavior mapping table
 
 ## Mapped Binary Facts
 

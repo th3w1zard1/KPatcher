@@ -59,6 +59,10 @@ Documented in the parity audit; do not treat as harness gaps:
 - **Namespace UI** — KPatcher may select namespace by display `Name` in addition to section id.
 - **LZMA / `.bzf`** — `LzmaHelper` is a placeholder; iOS `.bzf` chitin paths are not decompressed yet ([src/KPatcher.Core/Common/LZMA/LzmaHelper.cs](src/KPatcher.Core/Common/LZMA/LzmaHelper.cs)).
 
+## CompileNSS and nwnnsscomp.exe
+
+TSLPatcher step 6 (`CompileNSS` @ `0x0047d4ec`) shells BioWare's `nwnnsscomp.exe`. KPatcher replaces that path with managed `KCompiler` (see [NWNNSSCOMP_RE.md](NWNNSSCOMP_RE.md) and `NwnnsscompReMapping.cs`). `ScriptCompilerFlags` from `[Settings]` is honored; external compiler execution is intentionally not used in product builds.
+
 ## Related documents
 
 - [TSLPATCHER_BUILD_VERIFICATION.md](TSLPATCHER_BUILD_VERIFICATION.md) — vendor tree compile verification
