@@ -40,7 +40,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 839 test cases (838 Default tier + 1 opt-in `TslPatcherExeReference`)
+- **KPatcher.Tests:** 84+ files, 846 test cases (845 Default tier + 1 opt-in `TslPatcherExeReference`)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 844+ test cases** (832 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 851+ test cases** (845 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 

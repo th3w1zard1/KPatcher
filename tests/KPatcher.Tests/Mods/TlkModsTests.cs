@@ -17,6 +17,27 @@ namespace KPatcher.Core.Tests.Mods
     public class TlkModsTests
     {
         [Fact]
+        public void Apply_AppendMatchingExistingEntry_ReusesIndexWithoutDuplicateRow()
+        {
+            var memory = new PatcherMemory();
+            var logger = new PatchLogger();
+            var config = new ModificationsTLK();
+            config.Modifiers.Add(new ModifyTLK(0)
+            {
+                Text = "SharedLine",
+                Sound = ResRef.FromBlank()
+            });
+
+            var dialogTlk = new TLK();
+            dialogTlk.Add("SharedLine", ResRef.FromBlank());
+
+            config.Apply(dialogTlk, memory, logger, Game.K1);
+
+            dialogTlk.Count.Should().Be(1);
+            memory.MemoryStr[0].Should().Be(0);
+        }
+
+        [Fact]
         public void TestApplyAppend()
         {
             // Python test: test_apply_append

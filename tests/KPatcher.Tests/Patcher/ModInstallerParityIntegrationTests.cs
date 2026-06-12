@@ -5,6 +5,7 @@ using System.Text;
 using FluentAssertions;
 using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Common;
+using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
@@ -55,6 +56,41 @@ namespace KPatcher.Core.Tests.Patcher
                 {
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("swkotor2.exe", "overwrite EXE files")]
+        [InlineData("chitin.key", "overwrite the chitin.key file")]
+        [InlineData("templates.bif", "overwrite BIF data files")]
+        public void Install_ProtectedFolderReplace_SkipsProtectedGameRootTargets(string targetFile, string expectedMessageFragment)
+        {
+            string targetPath = Path.Combine(_gameRoot, targetFile);
+            string modSourcePath = Path.Combine(_tslPatchDataPath, targetFile);
+            byte[] originalBytes = new byte[] { 1, 2, 3 };
+            byte[] replacementBytes = new byte[] { 9, 9, 9 };
+            File.WriteAllBytes(targetPath, originalBytes);
+            File.WriteAllBytes(modSourcePath, replacementBytes);
+
+            WriteChangesIni($@"
+[Settings]
+LogLevel=3
+InstallerMode=1
+
+[InstallList]
+folder0=.
+
+[folder0]
+Replace0={targetFile}
+");
+
+            var logger = new PatchLogger();
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+
+            installer.Install();
+
+            File.ReadAllBytes(targetPath).Should().Equal(originalBytes);
+            logger.Notes.Should().Contain(n =>
+                n.Message.Contains(expectedMessageFragment, StringComparison.Ordinal));
         }
 
         [Fact]
@@ -145,6 +181,46 @@ File0=main.nss
             string compiledPath = Path.Combine(_overridePath, "main.ncs");
             File.Exists(compiledPath).Should().BeTrue();
             File.ReadAllBytes(compiledPath).Length.Should().BeGreaterThan(0);
+        }
+
+        [Fact]
+        public void Install_TlkAppendDedup_ReusesExistingDialogEntryForStrRefMemory()
+        {
+            var dialogTlk = new TLK(Language.English);
+            dialogTlk.Add("SharedLine", string.Empty);
+            dialogTlk.Save(Path.Combine(_gameRoot, "dialog.tlk"));
+
+            var appendTlk = new TLK(Language.English);
+            appendTlk.Add("SharedLine", string.Empty);
+            appendTlk.Save(Path.Combine(_tslPatchDataPath, "append.tlk"));
+
+            var gff = new GFF();
+            gff.Root.SetUInt32("StrRefField", 0u);
+            File.WriteAllBytes(Path.Combine(_overridePath, "token.gff"), gff.ToBytes());
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[TLKList]
+StrRef0=0
+
+[append.tlk]
+0=SharedLine
+
+[GFFList]
+File0=token.gff
+
+[token.gff]
+StrRefField=StrRef0
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            var patchedGff = GFF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "token.gff")));
+            patchedGff.Root.GetUInt32("StrRefField").Should().Be(0u);
         }
 
         [Fact]

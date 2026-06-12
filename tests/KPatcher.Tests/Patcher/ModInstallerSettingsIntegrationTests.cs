@@ -2,8 +2,10 @@ using System;
 using System.IO;
 using System.Text;
 using FluentAssertions;
+using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
+using KPatcher.Core.Resources;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Patcher
@@ -247,6 +249,33 @@ PlaintextLog=1
 
             File.Exists(Path.Combine(_tslPatchDataPath, "installlog.txt")).Should().BeTrue();
             File.Exists(Path.Combine(_tslPatchDataPath, "installlog.rtf")).Should().BeFalse();
+        }
+
+        [Fact]
+        public void Install_CompileListDefaultDestination_ModuleCapsule_WritesCompiledNcsIntoArchive()
+        {
+            Directory.CreateDirectory(Path.Combine(_gameRoot, "Modules"));
+            string modulePath = Path.Combine(_gameRoot, "Modules", "capsule.mod");
+            new Capsule(modulePath, createIfNotExist: true).Save();
+            File.WriteAllText(Path.Combine(_tslPatchDataPath, "main.nss"), "void main() {}\n");
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[CompileList]
+!DefaultDestination=Modules\capsule.mod
+File0=main.nss
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            var capsule = new Capsule(modulePath, createIfNotExist: false);
+            byte[] ncs = capsule.GetResource("main", ResourceType.NCS);
+            ncs.Length.Should().BeGreaterThan(0);
+            File.Exists(Path.Combine(_gameRoot, "Override", "main.ncs")).Should().BeFalse();
         }
 
         private void WriteChangesIni(string body)
