@@ -12,7 +12,7 @@ audit_ref: "docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteratio
 **Last Audited:** 2026-06-12
 **Audit Plan:** docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteration-plan.md
 **Detailed Audit:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
-**Iteration PR:** #18 (merged 2026-06-11)
+**Iteration PRs:** #18 (merged 2026-06-11), #19 (merged 2026-06-12)
 
 ---
 
@@ -451,7 +451,7 @@ _logger.LogAdded += _logAddedHandler;
 
 **Implemented:**
 
-- ✅ 7 runsettings tiers (Default, Exhaustive, VendorK2Game, TslPatcherExeGolden, etc.)
+- ✅ 7 runsettings tiers (Default, Exhaustive, VendorK2Game, TslPatcherExeReference, etc.)
 - ✅ GitHub Actions CI (ci.yml, test-optional-tiers.yml)
 - ✅ Zero external test fixture files policy (100% verified compliant)
 - ✅ Format builder APIs for in-memory test data
@@ -461,11 +461,10 @@ _logger.LogAdded += _logAddedHandler;
 
 **In Progress:**
 
-- ⚠ Expand install-path integration + `EmbeddedIntegrationMods` rows (legacy Integration corpus removed)
-- ⚠ Generated fixture files (~1 GB byte[] literals) causing build hangs
-- ⚠ 27 files with pre-existing syntax errors (17,970 recorded)
+- ⚠ Expand `EmbeddedIntegrationMods/scenario_patterns` and optional golden install diff (`TslPatcherExeReference` tier)
+- ⚠ Populate `GeneratedGenericModSmoke` category when corpus rows are ready (inline/API construction only)
 
-**Assessment:** Harness foundation is solid; migration work is blocking full capacity. High-priority refactor needed.
+**Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.
 
 ---
 
