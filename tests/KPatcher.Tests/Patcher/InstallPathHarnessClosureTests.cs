@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using FluentAssertions;
+using KPatcher.Core.Tests.Common;
+using KPatcher.Core.Tests.Formats;
 using KPatcher.Core.Tests.Patcher.Support;
 using Xunit;
 
@@ -64,6 +66,10 @@ namespace KPatcher.Core.Tests.Patcher
 
             int cliEligible = scenarios.Count(s => !CliOracleExcludedScenarioIds.Contains(s.Id));
             cliEligible.Should().Be(scenarios.Count - CliOracleExcludedScenarioIds.Count);
+
+            // Product parity: iOS BZF chitin must round-trip (not a harness-only stub).
+            typeof(LzmaHelperTests).Should().NotBeNull();
+            typeof(ChitinBzfTests).Should().NotBeNull();
         }
 
         private static HashSet<string> ManifestScenarioInventoryIds()

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text;
 using FluentAssertions;
 using KPatcher.Core.Common.LZMA;
 using Xunit;
@@ -8,19 +10,35 @@ namespace KPatcher.Core.Tests.Common
     public sealed class LzmaHelperTests
     {
         [Fact]
-        public void Decompress_ThrowsNotImplemented_WithDocumentedMessage()
+        public void CompressThenDecompress_RoundTripsPayload()
         {
-            Action act = () => LzmaHelper.Decompress(new byte[] { 0 }, 1);
-            act.Should().Throw<NotImplementedException>()
-                .WithMessage("*LZMA decompression is not yet implemented*");
+            byte[] original = Encoding.ASCII.GetBytes("kotor-bzf-lzma-roundtrip");
+
+            byte[] compressed = LzmaHelper.Compress(original);
+            compressed.Should().NotBeEmpty();
+
+            byte[] roundTrip = LzmaHelper.Decompress(compressed, original.Length);
+            roundTrip.Should().Equal(original);
         }
 
         [Fact]
-        public void Compress_ThrowsNotImplemented_WithDocumentedMessage()
+        public void BzfWholeFileWrapper_RoundTripsBifPayload()
         {
-            Action act = () => LzmaHelper.Compress(new byte[] { 0 });
-            act.Should().Throw<NotImplementedException>()
-                .WithMessage("*LZMA compression is not yet implemented*");
+            byte[] bifPayload = Encoding.ASCII.GetBytes("BIFFV1  minimal-bif-payload-for-bzf");
+
+            byte[] wrapped = BzfHelper.WrapWholeFile(bifPayload);
+            BzfHelper.IsWholeFileWrapper(wrapped).Should().BeTrue();
+
+            byte[] roundTrip = BzfHelper.DecompressWholeFile(wrapped);
+            roundTrip.Should().Equal(bifPayload);
+        }
+
+        [Fact]
+        public void Decompress_WithWrongUncompressedSize_Throws()
+        {
+            byte[] compressed = LzmaHelper.Compress(Encoding.ASCII.GetBytes("size-check"));
+            Action act = () => LzmaHelper.Decompress(compressed, 1);
+            act.Should().Throw<Exception>();
         }
     }
 }

@@ -58,7 +58,7 @@ Documented in the parity audit; do not treat as harness gaps:
 - **External compiler** — TSLPatcher shells `nwnnsscomp.exe`; KPatcher uses managed `KCompiler` (repo policy).
 - **Backup/uninstall** — KPatcher timestamped mod-tree backups and uninstall restore (extension beyond TSLPatcher app-local backups).
 - **Namespace UI** — KPatcher may select namespace by display `Name` in addition to section id.
-- **LZMA / `.bzf`** — `LzmaHelper` is a placeholder; iOS `.bzf` chitin paths are not decompressed yet ([src/KPatcher.Core/Common/LZMA/LzmaHelper.cs](src/KPatcher.Core/Common/LZMA/LzmaHelper.cs)).
+- **LZMA / `.bzf`** — implemented for iOS chitin: whole-file `BZF V1.0` wrappers and packed-segment BIFF headers ([src/KPatcher.Core/Common/LZMA/LzmaHelper.cs](src/KPatcher.Core/Common/LZMA/LzmaHelper.cs), [src/KPatcher.Core/Formats/Chitin/Chitin.cs](src/KPatcher.Core/Formats/Chitin/Chitin.cs)). Tests: `LzmaHelperTests`, `ChitinBzfTests`.
 
 ## CompileNSS and nwnnsscomp.exe
 

@@ -345,7 +345,7 @@ _logger.LogAdded += _logAddedHandler;
 | **HACKList serialization** | Resolved | `KPatcherINISerializer.SerializeHackList` + round-trip test | INI export for NCS mods supported |
 | **CompileList serialization** | Resolved | `SerializeCompileList` + `KPatcherINISerializerCompileListTests` | INI export for NSS compile mods |
 | **GFF `2DAMEMORY#` field keys** | Resolved (unit); pipeline caveat | `PatcherMemory.ResolveMemoryToken` at apply time; **2DA memory cannot drive GFF at install** because GFF runs before 2DA in binary-verified order | Cross-stage 2DA->GFF not supported |
-| **LZMA compression** | Deferred (characterized) | `LzmaHelper` throws `NotImplementedException`; `LzmaHelperTests` documents contract | iOS `.bzf` chitin edge case only |
+| **LZMA compression** | Implemented | `LzmaHelper` + `BzfHelper`; `Chitin` reads whole-file and packed-segment `.bzf`; `LzmaHelperTests` + `ChitinBzfTests` | iOS `.bzf` chitin edge case |
 | **Script validation** | TODO | Confidence checks disabled pending validation | Deferred |
 
 **Assessment:** Core install parity gaps from the 2026-06-10 iteration are closed. Remaining deviations are intentional product choices or low-priority TODOs.
@@ -392,7 +392,7 @@ _logger.LogAdded += _logAddedHandler;
 - ⚠ Timestamped backup/uninstall vs TSLPatcher app-local backups
 - ⚠ Namespace selection by display name
 - ✅ HACKList serialization (`KPatcherINISerializer` write path)
-- ⚠ LZMA compression (deferred; characterized in `LzmaHelperTests`)
+- ✓ LZMA compression (iOS `.bzf` chitin; `LzmaHelperTests`, `ChitinBzfTests`)
 
 **Assessment:** Core install behavior is aligned with binary-verified TSLPatcher after PR #18. Remaining gaps are documented product choices or low-priority TODOs.
 
@@ -494,9 +494,9 @@ _logger.LogAdded += _logAddedHandler;
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
 | **Per-mod manifest byte regression** | Optional / maintainer | Large | 116 inventory ids pattern-covered; full `tslpatchdata` replay requires policy exception or local bootstrap | Parity / test owner |
-| **LZMA Compression** | KPatcher.Core / Common | Medium | iOS `.bzf` chitin only; contract characterized in `LzmaHelperTests` | Compression module owner |
+| **LZMA Compression** | KPatcher.Core / Common | Low (implemented) | iOS `.bzf` chitin via SharpCompress LZMA1; round-trip + chitin tests | Compression module owner |
 
-**Recommendation:** Expand inline characterization from `manifest.json` rows as mods require coverage. LZMA remains deferred until a release blocks on `.bzf` assets.
+**Recommendation:** Expand inline characterization from `manifest.json` rows as mods require coverage. Monitor SharpCompress advisory GHSA-6c8g-7p36-r338 for LZMA dependency updates.
 
 ---
 

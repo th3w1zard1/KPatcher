@@ -2,7 +2,10 @@ using System;
 using System.IO;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
+using KPatcher.Core.Common.LZMA;
 using KPatcher.Core.Extract;
+using KPatcher.Core.Tools;
+using FileHelpers = KPatcher.Core.Tools.FileHelpers;
 
 namespace KPatcher.Core.Resources
 {
@@ -41,7 +44,7 @@ namespace KPatcher.Core.Resources
             _insideCapsule = filepathStr.EndsWith(".erf") || filepathStr.EndsWith(".mod") ||
                            filepathStr.EndsWith(".rim") || filepathStr.EndsWith(".sav") ||
                            filepathStr.EndsWith(".hak");
-            _insideBif = filepathStr.EndsWith(".bif");
+            _insideBif = FileHelpers.IsBifFile(filepath) || FileHelpers.IsBzfFile(filepath);
 
             if (_insideCapsule || _insideBif)
             {
@@ -191,6 +194,11 @@ namespace KPatcher.Core.Resources
             // This handles the common case of non-nested paths efficiently
             if (File.Exists(_filepath))
             {
+                if (FileHelpers.IsBzfFile(_filepath))
+                {
+                    return ReadBzfResourceBytes();
+                }
+
                 using (FileStream fs = File.OpenRead(_filepath))
                 {
                     fs.Seek(_offset, SeekOrigin.Begin);
@@ -236,6 +244,30 @@ namespace KPatcher.Core.Resources
         public byte[] GetData()
         {
             return Data();
+        }
+
+        private byte[] ReadBzfResourceBytes()
+        {
+            if (BzfResourceCache.TryGetWholeFileBytes(_filepath, out byte[] decompressedBif))
+            {
+                byte[] buffer = new byte[_size];
+                Array.Copy(decompressedBif, _offset, buffer, 0, _size);
+                return buffer;
+            }
+
+            if (BzfResourceCache.TryGetPackedSegment(_filepath, _offset, out BzfResourceCache.PackedSegment segment))
+            {
+                byte[] packed = BzfResourceCache.ReadPackedBytes(_filepath, segment);
+                return LzmaHelper.Decompress(packed, segment.UncompressedSize);
+            }
+
+            using (FileStream fs = File.OpenRead(_filepath))
+            {
+                fs.Seek(_offset, SeekOrigin.Begin);
+                byte[] buffer = new byte[_size];
+                fs.Read(buffer, 0, _size);
+                return buffer;
+            }
         }
 
         public static FileResource FromPath(string path)

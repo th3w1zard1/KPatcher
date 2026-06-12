@@ -60,6 +60,8 @@ Optional oracle env vars (opt-in tiers, not default CI):
 
 `ModInstaller` resolves INI paths with `SystemHelpers.CombineUnderRoot` so Windows-style `Modules\file.mod` entries work on Linux CI.
 
+**LZMA / iOS `.bzf` chitin** (product parity, not install-path characterization): `LzmaHelperTests` and `ChitinBzfTests` build ephemeral KEY/BIF/BZF bytes in memory — no committed binary fixtures.
+
 ## Assertion style (formats)
 
 - **Stable outputs you control:** prefer byte-for-byte comparison against in-memory constructed expected values when serialization is canonical.
