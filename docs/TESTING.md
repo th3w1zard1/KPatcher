@@ -35,6 +35,16 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 - **Helpers:** concrete test subclasses (e.g. `TestPatcherModifications`), builders (`StrictFixtureBuilder`), and small deterministic binary stubs are fine.
 - **Guard:** `KPatcher.Core.Tests.Policies.IntegrationFolderNoMoqTests` fails if any `tests/KPatcher.Tests/Integration/*.cs` references Moq or `Mock<>`.
 
+## Install-path test portfolio
+
+| Family | Purpose | Representative tests / helpers |
+|--------|---------|--------------------------------|
+| **Characterization** | KPatcher install behavior on synthetic mods built in memory | `Patcher/*IntegrationTests.cs`, `EmbeddedScenarioPatternInstallTests` (`Category=GeneratedGenericModInstallerSmoke`) |
+| **Contract** | INI serializer ↔ `ConfigReader` round-trip | `Mods/KPatcherINISerializer*Tests.cs` |
+| **Oracle** | Deterministic game-tree fingerprint + optional `KPATCHER_TSLPATCHER_EXE` tier | `ModInstallerOracleReferenceTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
+
+Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment` (temp mod + game tree), `InstallAssertionLadder` (L0–L3 assertions), `PipelineOrderFixtures` (full-pipeline INI + seeds). `EmbeddedIntegrationMods/scenario_patterns/manifest.json` inventories legacy mod layouts for future oracle rows; inline runnable scenarios live in `EmbeddedScenarioDefinitions`.
+
 ## Assertion style (formats)
 
 - **Stable outputs you control:** prefer byte-for-byte comparison against in-memory constructed expected values when serialization is canonical.

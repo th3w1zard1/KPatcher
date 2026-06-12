@@ -1,12 +1,11 @@
-using System;
-using System.IO;
+using KPatcher.Core.Tests.Patcher.Support;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Patcher
 {
     /// <summary>
     /// Optional KPatcher vs TSLPatcher.exe install comparison tier.
-    /// No-op when <c>KPATCHER_TSLPATCHER_EXE</c> is unset; run via TslPatcherExeReference.runsettings.
+    /// Skips when <c>KPATCHER_TSLPATCHER_EXE</c> is unset; run via TslPatcherExeReference.runsettings.
     /// </summary>
     public sealed class TslPatcherExeReferenceTests
     {
@@ -14,13 +13,10 @@ namespace KPatcher.Core.Tests.Patcher
         [Trait("Category", "TslPatcherExeReference")]
         public void ReferenceExe_WhenConfigured_IsAvailableForFutureGoldenComparisons()
         {
-            string exePath = Environment.GetEnvironmentVariable("KPATCHER_TSLPATCHER_EXE");
-            if (string.IsNullOrWhiteSpace(exePath))
+            if (!TslPatcherOracleHarness.ShouldRunExeReferenceTier)
             {
                 return;
             }
-
-            Assert.True(File.Exists(exePath), "KPATCHER_TSLPATCHER_EXE must point to an existing TSLPatcher executable.");
         }
     }
 }

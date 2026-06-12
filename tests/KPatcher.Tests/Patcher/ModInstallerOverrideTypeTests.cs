@@ -51,7 +51,7 @@ namespace KPatcher.Core.Tests.Patcher
             File.WriteAllBytes(Path.Combine(_gameRoot, "Override", "shadow.ncs"), new byte[] { 1, 2, 3 });
             File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "shadow.ncs"), new byte[] { 9, 9, 9 });
 
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), @"
+            WriteChangesIni(@"
 [Settings]
 LogLevel=3
 InstallerMode=1
@@ -84,7 +84,7 @@ File0=shadow.ncs
             File.WriteAllBytes(Path.Combine(_gameRoot, "Override", "shadow.ncs"), new byte[] { 1, 2, 3 });
             File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "shadow.ncs"), new byte[] { 9, 9, 9 });
 
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), @"
+            WriteChangesIni(@"
 [Settings]
 LogLevel=3
 InstallerMode=1
@@ -118,7 +118,7 @@ File0=shadow.ncs
             File.WriteAllBytes(Path.Combine(_gameRoot, "Override", "shadow.ncs"), new byte[] { 1, 2, 3 });
             File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "shadow.ncs"), new byte[] { 9, 9, 9 });
 
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), @"
+            WriteChangesIni(@"
 [Settings]
 LogLevel=3
 InstallerMode=1
@@ -140,6 +140,11 @@ Replace0=shadow.ncs
 
             logger.Warnings.Should().NotContain(w =>
                 w.Message.Contains("shadowing", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void WriteChangesIni(string body)
+        {
+            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), body);
         }
     }
 }

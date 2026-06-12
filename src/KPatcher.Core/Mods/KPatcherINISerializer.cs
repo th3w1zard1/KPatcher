@@ -72,7 +72,7 @@ namespace KPatcher.Core.Mods
             }
 
             // Order matters per KPatcher convention:
-            // [TLKList], [InstallList], [2DAList], [GFFList], [CompileList], [SSFList]
+            // [TLKList], [InstallList], [2DAList], [GFFList], [CompileList], [HACKList], [SSFList]
             lines.AddRange(SerializeTlkList(modificationsByType.Tlk, verbose));
             lines.AddRange(SerializeInstallList(modificationsByType.Install, verbose));
             lines.AddRange(Serialize2DAList(modificationsByType.Twoda, verbose));

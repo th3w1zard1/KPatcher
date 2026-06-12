@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using System.Text;
+using System.Collections.Generic;
 using FluentAssertions;
+using KPatcher.Core.Tests.Patcher.Support;
 using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
@@ -12,11 +13,6 @@ namespace KPatcher.Core.Tests.Patcher
 {
     public sealed class ModInstallerSettingsIntegrationTests : IDisposable
     {
-        static ModInstallerSettingsIntegrationTests()
-        {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        }
-
         private readonly string _tempRoot;
         private readonly string _modRoot;
         private readonly string _gameRoot;
@@ -187,6 +183,18 @@ Replace0=target.txt
         }
 
         [Fact]
+        public void Install_PlaintextLogFalse_UsesRtfExtensionForInstallLogWriter()
+        {
+            WriteChangesIni("[Settings]\nLogLevel=3\nPlaintextLog=0\n");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            installer.Install();
+
+            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.rtf")).Should().BeTrue();
+            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.txt")).Should().BeFalse();
+        }
+
+        [Fact]
         public void Install_SaveProcessedScriptsZero_DeletesTempScriptFolder()
         {
             File.WriteAllText(Path.Combine(_tslPatchDataPath, "compile.nss"), "void main() {}\n");
@@ -276,6 +284,78 @@ File0=main.nss
             byte[] ncs = capsule.GetResource("main", ResourceType.NCS);
             ncs.Length.Should().BeGreaterThan(0);
             File.Exists(Path.Combine(_gameRoot, "Override", "main.ncs")).Should().BeFalse();
+        }
+
+        [Fact]
+        public void Install_BackupFilesTrue_CreatesBackupWhenTwoDAIsPatched()
+        {
+            string targetPath = Path.Combine(_gameRoot, "Override", "backup.2da");
+            var twoda = new global::KPatcher.Core.Formats.TwoDA.TwoDA(new List<string> { "label" });
+            twoda.AddRow("0", new Dictionary<string, object> { { "label", "original" } });
+            File.WriteAllBytes(targetPath, twoda.ToBytes());
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+BackupFiles=1
+
+[2DAList]
+Table0=backup.2da
+
+[backup.2da]
+ChangeRow0=change_row_0
+
+[change_row_0]
+RowIndex=0
+label=patched
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            installer.Install();
+
+            string backupRoot = Path.Combine(_modRoot, "backup");
+            Directory.Exists(backupRoot).Should().BeTrue();
+            string[] backupDirs = Directory.GetDirectories(backupRoot);
+            backupDirs.Should().NotBeEmpty();
+            string backupFile = Path.Combine(backupDirs[0], "Override", "backup.2da");
+            File.Exists(backupFile).Should().BeTrue();
+            var backupTwoda = global::KPatcher.Core.Formats.TwoDA.TwoDA.FromBytes(File.ReadAllBytes(backupFile));
+            backupTwoda.GetRow(0).GetString("label").Should().Be("original");
+        }
+
+        [Fact]
+        public void Install_InstallerModeFalse_SkipsInstallListButRunsHackAndCompile()
+        {
+            File.WriteAllText(Path.Combine(_tslPatchDataPath, "install_only.txt"), "install");
+            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
+            File.WriteAllText(Path.Combine(_tslPatchDataPath, "combo.nss"), "void main() {}\n");
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[InstallList]
+folder0=Override
+
+[folder0]
+File0=install_only.txt
+
+[HACKList]
+hack.ncs=hack.ncs
+
+[hack.ncs]
+0x0=u8:7
+
+[CompileList]
+File0=combo.nss
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            installer.Install();
+
+            File.Exists(Path.Combine(_gameRoot, "Override", "install_only.txt")).Should().BeFalse();
+            File.ReadAllBytes(Path.Combine(_gameRoot, "Override", "hack.ncs"))[0].Should().Be(7);
+            InstallAssertionLadder.AssertParsesAsNcsL2(Path.Combine(_gameRoot, "Override", "combo.ncs"));
         }
 
         private void WriteChangesIni(string body)

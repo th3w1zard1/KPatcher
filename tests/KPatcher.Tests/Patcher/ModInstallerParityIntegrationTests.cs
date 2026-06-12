@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using FluentAssertions;
+using KPatcher.Core.Tests.Patcher.Support;
 using KPatcher.Core.Common.Capsule;
 using KPatcher.Core.Common;
 using KPatcher.Core.Formats.GFF;
@@ -21,11 +21,6 @@ namespace KPatcher.Core.Tests.Patcher
     /// </summary>
     public sealed class ModInstallerParityIntegrationTests : IDisposable
     {
-        static ModInstallerParityIntegrationTests()
-        {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        }
-
         private readonly string _tempRoot;
         private readonly string _modRoot;
         private readonly string _gameRoot;
@@ -180,9 +175,7 @@ File0=main.nss
 
             installer.Install();
 
-            string compiledPath = Path.Combine(_overridePath, "main.ncs");
-            File.Exists(compiledPath).Should().BeTrue();
-            File.ReadAllBytes(compiledPath).Length.Should().BeGreaterThan(0);
+            InstallAssertionLadder.AssertParsesAsNcsL2(Path.Combine(_overridePath, "main.ncs"));
         }
 
         [Fact]
@@ -220,6 +213,9 @@ StrRefField=StrRef0
             var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
 
             installer.Install();
+
+            var dialogAfter = TLK.FromBytes(File.ReadAllBytes(Path.Combine(_gameRoot, "dialog.tlk")));
+            dialogAfter.Count.Should().Be(1, "dedup should not append a duplicate dialog line");
 
             var patchedGff = GFF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "token.gff")));
             patchedGff.Root.GetUInt32("StrRefField").Should().Be(0u);
@@ -353,6 +349,7 @@ File0=main.nss
             installer.Install();
 
             logger.Errors.Should().NotBeEmpty();
+            InstallAssertionLadder.AssertLoggerContainsFragment(logger, "main.nss");
             File.Exists(Path.Combine(_overridePath, "main.ncs")).Should().BeFalse();
         }
 
@@ -411,7 +408,10 @@ Replace0=dialog.tlk
 
             File.Exists(Path.Combine(_gameRoot, "dialog.tlk")).Should().BeFalse();
             var capsule = new Capsule(modulePath, createIfNotExist: false);
-            capsule.GetResource("dialog", ResourceType.TLK).Should().NotBeNull();
+            byte[] tlkBytes = capsule.GetResource("dialog", ResourceType.TLK);
+            tlkBytes.Should().NotBeNull();
+            var moduleTlk = TLK.FromBytes(tlkBytes);
+            moduleTlk.Get(0).Text.Should().Be("CapsuleLine");
         }
 
         private static void MakeFileReadOnlyForOverwrite(string filePath)

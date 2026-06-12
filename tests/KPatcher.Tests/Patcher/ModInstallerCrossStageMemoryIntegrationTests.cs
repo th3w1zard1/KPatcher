@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
+using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Formats.SSF;
+using KPatcher.Core.Formats.TLK;
 using KPatcher.Core.Formats.TwoDA;
+using KPatcher.Core.Common;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
 using Xunit;
@@ -89,6 +92,45 @@ Battlecry 2=2DAMEMORY5
 
             var patchedSsf = SSF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "memory.ssf")));
             patchedSsf.Get(SSFSound.BATTLE_CRY_2).Should().Be(456);
+        }
+
+        [Fact]
+        public void Install_TlkMemoryBeforeGff_ResolvesStrRefAtApplyTime()
+        {
+            var dialogTlk = new TLK(Language.English);
+            dialogTlk.Add("Existing", string.Empty);
+            dialogTlk.Save(Path.Combine(_gameRoot, "dialog.tlk"));
+
+            var appendTlk = new TLK(Language.English);
+            appendTlk.Add("CrossStageLine", string.Empty);
+            appendTlk.Save(Path.Combine(_tslPatchDataPath, "append.tlk"));
+
+            var gff = new GFF();
+            gff.Root.SetUInt32("StrRefField", 999u);
+            File.WriteAllBytes(Path.Combine(_overridePath, "cross.gff"), gff.ToBytes());
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[TLKList]
+StrRef0=0
+
+[append.tlk]
+0=CrossStageLine
+
+[GFFList]
+File0=cross.gff
+
+[cross.gff]
+StrRefField=StrRef0
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            installer.Install();
+
+            var patchedGff = GFF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "cross.gff")));
+            patchedGff.Root.GetUInt32("StrRefField").Should().Be(1u);
         }
 
         private void WriteChangesIni(string body)
