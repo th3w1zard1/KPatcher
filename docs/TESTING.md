@@ -43,7 +43,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 | **Contract** | INI serializer ↔ `ConfigReader` round-trip | `Mods/KPatcherINISerializer*Tests.cs` |
 | **Oracle** | Game-tree manifest fingerprints, CLI vs direct install diff, optional exe/baseline tiers | `ModInstallerOracleReferenceTests`, `ModInstallerCliOracleTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
 
-Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`, `TslPatcherOracleHarness`. Twenty inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export a single-scenario baseline for manual TSLPatcher comparison via `scripts/export-kpatcher-oracle-baseline.sh`.
+Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `ModInstallerIntegrationTestBase`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`, `TslPatcherOracleHarness`. Twenty inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export a single-scenario baseline for manual TSLPatcher comparison via `scripts/export-kpatcher-oracle-baseline.sh`. `ModInstaller` resolves INI paths with `SystemHelpers.CombineUnderRoot` so Windows-style `Modules\file.mod` entries work on Linux CI.
 
 Optional oracle env vars (opt-in tiers, not default CI):
 

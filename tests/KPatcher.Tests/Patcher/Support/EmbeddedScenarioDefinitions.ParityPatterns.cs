@@ -121,7 +121,7 @@ LogLevel=3
 InstallerMode=1
 
 [InstallList]
-module0=Modules/capsule.mod
+module0=Modules\capsule.mod
 
 [module0]
 Replace0=dialog.tlk
@@ -218,7 +218,7 @@ Replace0=backup_target.txt
 LogLevel=3
 
 [CompileList]
-!DefaultDestination=Modules/capsule.mod
+!DefaultDestination=Modules\capsule.mod
 File0=main.nss
 ",
         env =>
@@ -267,7 +267,7 @@ LogLevel=3
 InstallerMode=1
 
 [InstallList]
-module0=Modules/test.mod
+module0=Modules\test.mod
 
 [module0]
 File0=shadow.ncs

@@ -457,7 +457,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 922 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
+- ✅ 924 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
 
 **In Progress:**
 

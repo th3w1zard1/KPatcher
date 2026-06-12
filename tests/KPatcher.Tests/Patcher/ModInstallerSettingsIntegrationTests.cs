@@ -11,43 +11,18 @@ using Xunit;
 
 namespace KPatcher.Core.Tests.Patcher
 {
-    public sealed class ModInstallerSettingsIntegrationTests : IDisposable
+    public sealed class ModInstallerSettingsIntegrationTests : ModInstallerIntegrationTestBase
     {
-        private readonly string _tempRoot;
-        private readonly string _modRoot;
-        private readonly string _gameRoot;
-        private readonly string _tslPatchDataPath;
-
         public ModInstallerSettingsIntegrationTests()
+            : base("KPatcher_Settings_")
         {
-            _tempRoot = Path.Combine(Path.GetTempPath(), "KPatcher_Settings_" + Guid.NewGuid().ToString("N"));
-            _modRoot = Path.Combine(_tempRoot, "mod");
-            _gameRoot = Path.Combine(_tempRoot, "game");
-            _tslPatchDataPath = Path.Combine(_modRoot, "tslpatchdata");
-            Directory.CreateDirectory(_tslPatchDataPath);
-            Directory.CreateDirectory(Path.Combine(_gameRoot, "Override"));
-            File.WriteAllText(Path.Combine(_gameRoot, "swkotor2.exe"), string.Empty);
-        }
-
-        public void Dispose()
-        {
-            if (Directory.Exists(_tempRoot))
-            {
-                try
-                {
-                    Directory.Delete(_tempRoot, true);
-                }
-                catch
-                {
-                }
-            }
         }
 
         [Fact]
         public void Install_InstallerModeFalse_SkipsInstallListButRunsHackList()
         {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "install_only.txt"), "install");
-            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "install_only.txt"), "install");
+            File.WriteAllBytes(Path.Combine(TslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
 
             WriteChangesIni(@"
 [Settings]
@@ -67,19 +42,19 @@ hack.ncs=hack.ncs
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            File.Exists(Path.Combine(_gameRoot, "Override", "install_only.txt")).Should().BeFalse();
-            File.Exists(Path.Combine(_gameRoot, "Override", "hack.ncs")).Should().BeTrue();
-            File.ReadAllBytes(Path.Combine(_gameRoot, "Override", "hack.ncs"))[0].Should().Be(7);
+            File.Exists(Path.Combine(GameRoot, "Override", "install_only.txt")).Should().BeFalse();
+            File.Exists(Path.Combine(GameRoot, "Override", "hack.ncs")).Should().BeTrue();
+            File.ReadAllBytes(Path.Combine(GameRoot, "Override", "hack.ncs"))[0].Should().Be(7);
         }
 
         [Fact]
         public void Install_InstallerModeTrue_AppliesInstallList()
         {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "install_only.txt"), "install");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "install_only.txt"), "install");
 
             WriteChangesIni(@"
 [Settings]
@@ -94,20 +69,20 @@ File0=install_only.txt
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            File.Exists(Path.Combine(_gameRoot, "Override", "install_only.txt")).Should().BeTrue();
-            File.ReadAllText(Path.Combine(_gameRoot, "Override", "install_only.txt")).Should().Be("install");
+            File.Exists(Path.Combine(GameRoot, "Override", "install_only.txt")).Should().BeTrue();
+            File.ReadAllText(Path.Combine(GameRoot, "Override", "install_only.txt")).Should().Be("install");
         }
 
         [Fact]
         public void Install_BackupFilesTrue_CreatesBackupOfReplacedOverrideFile()
         {
-            string targetPath = Path.Combine(_gameRoot, "Override", "target.txt");
+            string targetPath = Path.Combine(GameRoot, "Override", "target.txt");
             File.WriteAllText(targetPath, "original");
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "target.txt"), "patched");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "target.txt"), "patched");
 
             WriteChangesIni(@"
 [Settings]
@@ -123,11 +98,11 @@ Replace0=target.txt
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            string backupRoot = Path.Combine(_modRoot, "backup");
+            string backupRoot = Path.Combine(ModRoot, "backup");
             Directory.Exists(backupRoot).Should().BeTrue();
 
             string[] backupDirs = Directory.GetDirectories(backupRoot);
@@ -142,9 +117,9 @@ Replace0=target.txt
         [Fact]
         public void Install_BackupFilesFalse_DoesNotCreateBackupDirectory()
         {
-            string targetPath = Path.Combine(_gameRoot, "Override", "target.txt");
+            string targetPath = Path.Combine(GameRoot, "Override", "target.txt");
             File.WriteAllText(targetPath, "original");
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "target.txt"), "patched");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "target.txt"), "patched");
 
             WriteChangesIni(@"
 [Settings]
@@ -160,11 +135,11 @@ Replace0=target.txt
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            Directory.Exists(Path.Combine(_modRoot, "backup")).Should().BeFalse();
+            Directory.Exists(Path.Combine(ModRoot, "backup")).Should().BeFalse();
             File.ReadAllText(targetPath).Should().Be("patched");
         }
 
@@ -174,12 +149,12 @@ Replace0=target.txt
             WriteChangesIni("[Settings]\nLogLevel=3\n");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.rtf")).Should().BeTrue();
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.txt")).Should().BeFalse();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.rtf")).Should().BeTrue();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.txt")).Should().BeFalse();
         }
 
         [Fact]
@@ -187,17 +162,17 @@ Replace0=target.txt
         {
             WriteChangesIni("[Settings]\nLogLevel=3\nPlaintextLog=0\n");
 
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), new PatchLogger());
             installer.Install();
 
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.rtf")).Should().BeTrue();
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.txt")).Should().BeFalse();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.rtf")).Should().BeTrue();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.txt")).Should().BeFalse();
         }
 
         [Fact]
         public void Install_SaveProcessedScriptsZero_DeletesTempScriptFolder()
         {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "compile.nss"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "compile.nss"), "void main() {}\n");
 
             WriteChangesIni(@"
 [Settings]
@@ -209,18 +184,18 @@ File0=compile.nss
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            Directory.Exists(Path.Combine(_tslPatchDataPath, "nsspatch_temp")).Should().BeFalse();
-            File.Exists(Path.Combine(_gameRoot, "Override", "compile.ncs")).Should().BeTrue();
+            Directory.Exists(Path.Combine(TslPatchDataPath, "nsspatch_temp")).Should().BeFalse();
+            File.Exists(Path.Combine(GameRoot, "Override", "compile.ncs")).Should().BeTrue();
         }
 
         [Fact]
         public void Install_SaveProcessedScriptsOne_KeepsTempScriptFolder()
         {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "compile.nss"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "compile.nss"), "void main() {}\n");
 
             WriteChangesIni(@"
 [Settings]
@@ -232,11 +207,11 @@ File0=compile.nss
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            string tempFolder = Path.Combine(_tslPatchDataPath, "nsspatch_temp");
+            string tempFolder = Path.Combine(TslPatchDataPath, "nsspatch_temp");
             Directory.Exists(tempFolder).Should().BeTrue();
             Directory.GetFiles(tempFolder, "compile.nss", SearchOption.AllDirectories).Should().NotBeEmpty();
         }
@@ -251,21 +226,21 @@ PlaintextLog=1
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.txt")).Should().BeTrue();
-            File.Exists(Path.Combine(_tslPatchDataPath, "installlog.rtf")).Should().BeFalse();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.txt")).Should().BeTrue();
+            File.Exists(Path.Combine(TslPatchDataPath, "installlog.rtf")).Should().BeFalse();
         }
 
         [Fact]
         public void Install_CompileListDefaultDestination_ModuleCapsule_WritesCompiledNcsIntoArchive()
         {
-            Directory.CreateDirectory(Path.Combine(_gameRoot, "Modules"));
-            string modulePath = Path.Combine(_gameRoot, "Modules", "capsule.mod");
+            Directory.CreateDirectory(Path.Combine(GameRoot, "Modules"));
+            string modulePath = Path.Combine(GameRoot, "Modules", "capsule.mod");
             new Capsule(modulePath, createIfNotExist: true).Save();
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "main.nss"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "main.nss"), "void main() {}\n");
 
             WriteChangesIni(@"
 [Settings]
@@ -276,20 +251,20 @@ LogLevel=3
 File0=main.nss
 ");
 
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), new PatchLogger());
 
             installer.Install();
 
             var capsule = new Capsule(modulePath, createIfNotExist: false);
             byte[] ncs = capsule.GetResource("main", ResourceType.NCS);
             ncs.Length.Should().BeGreaterThan(0);
-            File.Exists(Path.Combine(_gameRoot, "Override", "main.ncs")).Should().BeFalse();
+            File.Exists(Path.Combine(GameRoot, "Override", "main.ncs")).Should().BeFalse();
         }
 
         [Fact]
         public void Install_BackupFilesTrue_CreatesBackupWhenTwoDAIsPatched()
         {
-            string targetPath = Path.Combine(_gameRoot, "Override", "backup.2da");
+            string targetPath = Path.Combine(GameRoot, "Override", "backup.2da");
             var twoda = new global::KPatcher.Core.Formats.TwoDA.TwoDA(new List<string> { "label" });
             twoda.AddRow("0", new Dictionary<string, object> { { "label", "original" } });
             File.WriteAllBytes(targetPath, twoda.ToBytes());
@@ -310,10 +285,10 @@ RowIndex=0
 label=patched
 ");
 
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), new PatchLogger());
             installer.Install();
 
-            string backupRoot = Path.Combine(_modRoot, "backup");
+            string backupRoot = Path.Combine(ModRoot, "backup");
             Directory.Exists(backupRoot).Should().BeTrue();
             string[] backupDirs = Directory.GetDirectories(backupRoot);
             backupDirs.Should().NotBeEmpty();
@@ -326,9 +301,9 @@ label=patched
         [Fact]
         public void Install_InstallerModeFalse_SkipsInstallListButRunsHackAndCompile()
         {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "install_only.txt"), "install");
-            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "combo.nss"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "install_only.txt"), "install");
+            File.WriteAllBytes(Path.Combine(TslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
+            File.WriteAllText(Path.Combine(TslPatchDataPath, "combo.nss"), "void main() {}\n");
 
             WriteChangesIni(@"
 [Settings]
@@ -350,17 +325,13 @@ hack.ncs=hack.ncs
 File0=combo.nss
 ");
 
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), new PatchLogger());
             installer.Install();
 
-            File.Exists(Path.Combine(_gameRoot, "Override", "install_only.txt")).Should().BeFalse();
-            File.ReadAllBytes(Path.Combine(_gameRoot, "Override", "hack.ncs"))[0].Should().Be(7);
-            InstallAssertionLadder.AssertParsesAsNcsL2(Path.Combine(_gameRoot, "Override", "combo.ncs"));
+            File.Exists(Path.Combine(GameRoot, "Override", "install_only.txt")).Should().BeFalse();
+            File.ReadAllBytes(Path.Combine(GameRoot, "Override", "hack.ncs"))[0].Should().Be(7);
+            InstallAssertionLadder.AssertParsesAsNcsL2(Path.Combine(GameRoot, "Override", "combo.ncs"));
         }
 
-        private void WriteChangesIni(string body)
-        {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), body);
-        }
     }
 }
