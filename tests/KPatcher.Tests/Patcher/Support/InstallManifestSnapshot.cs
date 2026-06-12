@@ -24,7 +24,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
                 return new InstallManifestSnapshot(Array.Empty<InstallManifestEntry>());
             }
 
-            var entries = new List<InstallManifestEntry>();
+            var entriesByPath = new Dictionary<string, InstallManifestEntry>(StringComparer.OrdinalIgnoreCase);
             foreach (string line in fingerprintText.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 string[] parts = line.Split('|');
@@ -33,9 +33,14 @@ namespace KPatcher.Core.Tests.Patcher.Support
                     continue;
                 }
 
-                entries.Add(new InstallManifestEntry(parts[0], long.Parse(parts[1]), parts[2]));
+                string relativePath = parts[0].Replace('\\', '/');
+                entriesByPath[relativePath] = new InstallManifestEntry(relativePath, long.Parse(parts[1]), parts[2]);
             }
 
+            var entries = entriesByPath.Keys
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .Select(p => entriesByPath[p])
+                .ToList();
             return new InstallManifestSnapshot(entries);
         }
 

@@ -64,9 +64,9 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 | **Default** | PR/commit baseline | ✅ Yes | Verified executable |
 | **Exhaustive** | DeNCSRoundTrip (23k+ NCS scripts) | ❌ Opt-in | Documented as long-running |
 | **VendorK2Game** | Retail K2 tree validation | ❌ Opt-in | Requires `KPATCHER_K2_VENDOR_ROOT` |
-| **TslPatcherExeReference** | KPatcher manifest oracle + optional TSLPatcher.exe/baseline | ❌ Opt-in | Golden fingerprints for 12 inline scenarios; CLI vs direct oracle; `KPATCHER_TSLPATCHER_EXE` layout smoke; `KPATCHER_ORACLE_MANIFEST_BASELINE` for manual TSLPatcher diff |
+| **TslPatcherExeReference** | KPatcher manifest oracle + optional TSLPatcher.exe/baseline | ❌ Opt-in | Determinism + CLI vs direct oracle; `KPATCHER_TSLPATCHER_EXE` layout smoke; `KPATCHER_ORACLE_MANIFEST_BASELINE` for manual TSLPatcher diff |
 | **KorExhaustiveBinaryFixtures** | Mod corpus validation | ❌ Opt-in | Requires synthetic payloads |
-| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Reserved | No `Category=GeneratedGenericModInstallerSmoke` tests yet |
+| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Opt-in (also Default) | 20 inline scenarios with golden manifest fingerprints (`EmbeddedScenarioPatternInstallTests`) |
 | **GeneratedGenericModExhaustive** | Future exhaustive rows | ❌ Reserved | Not yet populated |
 
 ### 1.3 Skip and XFact Status
@@ -457,13 +457,12 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 851 KPatcher.Tests Default-tier cases (852 including opt-in `TslPatcherExeReference`)
+- ✅ 922 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
 
 **In Progress:**
 
-- ✅ Twelve inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`)
-- ⚠ Migrate additional `scenario_patterns/manifest.json` rows to inline scenarios or binary bundles as needed
-- ⚠ Populate `GeneratedGenericModSmoke` category when corpus rows are ready (inline/API construction only)
+- ✅ Twenty inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`)
+- ⚠ Migrate additional `scenario_patterns/manifest.json` rows to inline scenarios or binary bundles as needed (116 legacy inventory rows tracked in `ManifestScenarioCoverageRegistry`)
 
 **Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.
 

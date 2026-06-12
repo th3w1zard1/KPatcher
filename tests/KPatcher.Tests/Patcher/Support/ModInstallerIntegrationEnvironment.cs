@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
@@ -16,6 +17,10 @@ namespace KPatcher.Core.Tests.Patcher.Support
         public string TslPatchDataPath { get; }
         public string OverridePath { get; }
         public string ModulesPath { get; }
+
+        private readonly Dictionary<string, byte[]> _stashedBytes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+
+        public byte[] ProtectedDialogOriginalBytes { get; private set; }
 
         public ModInstallerIntegrationEnvironment(string namePrefix = "KPatcher_Int_")
         {
@@ -35,6 +40,21 @@ namespace KPatcher.Core.Tests.Patcher.Support
         {
             string iniPath = Path.Combine(TslPatchDataPath, changesIniRelativeToTslPatchData.Replace('/', Path.DirectorySeparatorChar));
             return new ModInstaller(ModRoot, GameRoot, iniPath, logger ?? new PatchLogger());
+        }
+
+        public void SetProtectedDialogOriginalBytes(byte[] bytes)
+        {
+            ProtectedDialogOriginalBytes = bytes;
+        }
+
+        public void StashBytes(string key, byte[] bytes)
+        {
+            _stashedBytes[key] = bytes;
+        }
+
+        public byte[] RetrieveBytes(string key)
+        {
+            return _stashedBytes[key];
         }
 
         public void WriteChangesIni(string body, string relativePath = "changes.ini")

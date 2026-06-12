@@ -73,20 +73,24 @@ namespace KPatcher.Core.Tests.Patcher.Support
                 return string.Empty;
             }
 
-            var lines = new List<string>();
+            var linesByPath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (string file in Directory.EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories).OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
             {
-                string relative = file.Substring(rootDirectory.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string relative = file.Substring(rootDirectory.Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .Replace('\\', '/');
                 byte[] hash;
                 using (var sha = SHA256.Create())
                 {
                     hash = sha.ComputeHash(File.ReadAllBytes(file));
                 }
                 string hex = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
-                lines.Add(relative + "|" + new FileInfo(file).Length + "|" + hex);
+                linesByPath[relative] = relative + "|" + new FileInfo(file).Length + "|" + hex;
             }
 
-            return string.Join("\n", lines);
+            return string.Join(
+                "\n",
+                linesByPath.Keys.OrderBy(p => p, StringComparer.OrdinalIgnoreCase).Select(p => linesByPath[p]));
         }
     }
 }

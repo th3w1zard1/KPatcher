@@ -58,6 +58,42 @@ namespace KPatcher.Core.Tests.Patcher.Support
             {
                 "inline_namespace_subfolder",
                 "Override/ns_marker.txt|12|7c4060e2dabd8f482d2aeb37da65079ac6df3f55329a6be0c6b9e71e9c92e36b\n" + EmptyExe
+            },
+            {
+                "inline_2da_ssf_memory",
+                "Override/memory.2da|55|95bd0398de46d7dfb6f91878f1b5d02227b75f3a79b8c868e10f49328d4bb586\n"
+                + "Override/memory.ssf|172|daab368901c7a52796c2b8fcebad083bc17362218ca348ddd31b9b49e047d971\n"
+                + EmptyExe
+            },
+            {
+                "inline_2da_exclusive_fallback",
+                "Override/excl.2da|53|17a48d1865d6c30649a3a9db5355bb3baf2013e38ddec3cfcc711ab9ea102882\n" + EmptyExe
+            },
+            {
+                "inline_capsule_dialog_tlk",
+                "Modules/capsule.mod|263|5694cc0cd0625fdc5087a394894c3869c7bef7e81ce92c9e452f9275fe5423fa\n" + EmptyExe
+            },
+            {
+                "inline_protected_dialog_skip",
+                "dialog.tlk|20|df6226dff6699a45a04b77c2b915bb127d49a3238fcb7b2e40428d9cf7ebdc25\n" + EmptyExe
+            },
+            {
+                "inline_backup_files_replace",
+                "Override/backup_target.txt|7|d7017ebcd65455e76e953d5b42fa96c3df28c7c3b616c7f069ed930fb4fae5fd\n" + EmptyExe
+            },
+            {
+                "inline_compile_module_capsule",
+                "Modules/capsule.mod|215|e395945fdba1dbe9c95bae8a0f15fa873efce3b98ab0e3dde8452075837bb3b1\n" + EmptyExe
+            },
+            {
+                "inline_custom_nwscript_compile",
+                "Override/main.ncs|31|d8a5d91faab815bdd423d0494d0509a3d233ee69539bf647b4299fdc3db9db3f\n" + EmptyExe
+            },
+            {
+                "inline_override_type_ignore_module",
+                "Modules/test.mod|195|7b33cee343efdd59a69da0bd1e33e0aa243bcd6aeda86ad57149d26722bc7e54\n"
+                + "Override/shadow.ncs|3|039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81\n"
+                + EmptyExe
             }
         };
 

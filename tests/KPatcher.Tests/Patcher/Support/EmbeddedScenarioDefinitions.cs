@@ -14,13 +14,13 @@ namespace KPatcher.Core.Tests.Patcher.Support
   /// Inline characterization scenarios (no committed mod trees). Legacy manifest rows without inline bodies
   /// remain inventoried in <c>manifest.json</c> for maintainer migration.
   /// </summary>
-  public static class EmbeddedScenarioDefinitions
+  public static partial class EmbeddedScenarioDefinitions
   {
     public static IReadOnlyList<EmbeddedInstallScenario> RunnableScenarios { get; } = BuildRunnableScenarios();
 
     private static List<EmbeddedInstallScenario> BuildRunnableScenarios()
     {
-      return new List<EmbeddedInstallScenario>
+      var scenarios = new List<EmbeddedInstallScenario>
       {
         SettingsOnly(),
         InstallMarker(),
@@ -35,6 +35,8 @@ namespace KPatcher.Core.Tests.Patcher.Support
         InstallerModeFalseHackOnly(),
         NamespaceSubfolderIni()
       };
+      scenarios.AddRange(ParityPatternScenarios());
+      return scenarios;
     }
 
     private static EmbeddedInstallScenario SettingsOnly()

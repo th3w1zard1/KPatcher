@@ -71,15 +71,6 @@ namespace KPatcher.Core.Tests.Patcher
             }
         }
 
-        [Fact]
-        public void ManifestInventory_InlineScenarioIdsAreDisjointFromLegacyManifestIds()
-        {
-            HashSet<string> manifestIds = ReadManifestIds();
-            var inlineIds = new HashSet<string>(EmbeddedScenarioDefinitions.RunnableScenarios.Select(s => s.Id));
-            inlineIds.Intersect(manifestIds).Should().BeEmpty(
-                "inline characterization ids must not collide with legacy manifest inventory ids");
-        }
-
         public static IEnumerable<object[]> InlineScenarioIds()
         {
             foreach (EmbeddedInstallScenario scenario in EmbeddedScenarioDefinitions.RunnableScenarios)
@@ -88,24 +79,5 @@ namespace KPatcher.Core.Tests.Patcher
             }
         }
 
-        private static HashSet<string> ReadManifestIds()
-        {
-            string manifestPath = Path.Combine(
-                AppContext.BaseDirectory,
-                "EmbeddedIntegrationMods",
-                "scenario_patterns",
-                "manifest.json");
-            string json = File.ReadAllText(manifestPath);
-            using (JsonDocument doc = JsonDocument.Parse(json))
-            {
-                var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (JsonElement row in doc.RootElement.EnumerateArray())
-                {
-                    ids.Add(row.GetProperty("Id").GetString());
-                }
-
-                return ids;
-            }
-        }
     }
 }

@@ -43,6 +43,27 @@ jobs:
       - name: Test (no 600s wrapper — may exceed agent cap)
         run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/Exhaustive.runsettings --verbosity normal
 
+  generated-generic-mod-smoke:
+    name: Inline mod characterization (GeneratedGenericModSmoke.runsettings)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/KPatcher.Tests/KPatcher.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
+
+      - name: Test
+        run: pwsh -NoProfile -File ./scripts/DotnetTest.ps1 tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings --verbosity normal
+
   tsl-patcher-exe-golden:
     name: TSLPatcher exe smoke (optional env)
     runs-on: ubuntu-latest

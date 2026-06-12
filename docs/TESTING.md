@@ -19,7 +19,7 @@ Optional: leading `-TimeoutSeconds N` (capped at **600**). Exit code **124** mea
 | `tests/KPatcher.Tests/VendorK2Game.runsettings` | Only `Category=VendorK2Game` (requires retail-style tree via env; see test comments). |
 | `tests/KPatcher.Tests/TslPatcherExeReference.runsettings` | Only `Category=TslPatcherExeReference` (optional `KPATCHER_TSLPATCHER_EXE`; smoke only until golden install diff lands). |
 | `tests/KPatcher.Tests/KorExhaustiveBinaryFixtures.runsettings` | Kor, namespace Main/Alt, `gff_git_module_texture_bundle`, and `heads_appearance_utc_row` install rows (`KorExhaustiveBinaryFixtures` \| `NamespaceMainAltBinaryFixtures` \| `GffGitModuleTextureBinaryFixtures` \| `HeadsAppearanceBinaryFixtures`). |
-| `tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings` | Reserved for future `Category=GeneratedGenericModInstallerSmoke` rows. |
+| `tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings` | Only `Category=GeneratedGenericModInstallerSmoke` (20 inline characterization scenarios + golden manifest oracle). Also runs in Default tier unless excluded. |
 | `tests/KPatcher.Tests/GeneratedGenericModExhaustive.runsettings` | Reserved for future `Category=GeneratedGenericModExhaustive` rows. |
 
 Override for a single run: `dotnet test --settings path/to/file.runsettings`.
@@ -27,7 +27,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 ### GitHub Actions tiers
 
 - **PR / push (`ci.yml`):** `KPatcher.Tests` with default `VSTestSetting` (via `DotnetTest.ps1`), plus a **satellite smoke** job for `tests/KCompiler.Tests`, `tests/NCSDecomp.Tests`, and `tests/KEditChanges.Tests`.
-- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper) and **TslPatcher exe** smoke (`TslPatcherExeReference.runsettings`). **Vanilla NSS** (`Vendor.runsettings`) runs when dispatched with `run_vendor_nss`; the job **fails** if the vanilla script tree has no `.nss` files (no silent skip). **Vendor KotOR II** integration runs only when dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. Install-path integration tests construct payloads in memory via format APIs — no committed `test_files/` tree.
+- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper), **TslPatcher exe** smoke (`TslPatcherExeReference.runsettings`), and **inline mod smoke** (`GeneratedGenericModSmoke.runsettings`). **Vanilla NSS** (`Vendor.runsettings`) runs when dispatched with `run_vendor_nss`; the job **fails** if the vanilla script tree has no `.nss` files (no silent skip). **Vendor KotOR II** integration runs only when dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. Install-path integration tests construct payloads in memory via format APIs — no committed `test_files/` tree.
 
 ## No mocks in integration-style paths
 
@@ -43,7 +43,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 | **Contract** | INI serializer ↔ `ConfigReader` round-trip | `Mods/KPatcherINISerializer*Tests.cs` |
 | **Oracle** | Game-tree manifest fingerprints, CLI vs direct install diff, optional exe/baseline tiers | `ModInstallerOracleReferenceTests`, `ModInstallerCliOracleTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
 
-Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`. Twelve inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`.
+Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`, `TslPatcherOracleHarness`. Twenty inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export a single-scenario baseline for manual TSLPatcher comparison via `scripts/export-kpatcher-oracle-baseline.sh`.
 
 Optional oracle env vars (opt-in tiers, not default CI):
 

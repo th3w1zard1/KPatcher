@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using FluentAssertions;
 using KPatcher.Core.Tests.Patcher.Support;
 using Xunit;
 using Xunit.Abstractions;
@@ -48,6 +50,33 @@ namespace KPatcher.Core.Tests.Patcher
             string reportPath = Path.Combine(Path.GetTempPath(), "kpatcher-scenario-goldens.txt");
             File.WriteAllText(reportPath, sb.ToString());
             _output.WriteLine("Written: " + reportPath);
+        }
+
+        [Fact]
+        public void ExportSingleScenarioBaseline_WhenEnvSet()
+        {
+            if (!string.Equals(
+                Environment.GetEnvironmentVariable("KP_EXPORT_ORACLE_BASELINE"),
+                "1",
+                StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            string scenarioId = Environment.GetEnvironmentVariable("KP_EXPORT_ORACLE_SCENARIO_ID")
+                ?? "inline_install_marker";
+            string outputPath = Environment.GetEnvironmentVariable("KP_EXPORT_ORACLE_BASELINE_PATH");
+            outputPath.Should().NotBeNullOrWhiteSpace();
+
+            EmbeddedInstallScenario scenario = EmbeddedScenarioDefinitions.RunnableScenarios
+                .First(s => s.Id == scenarioId);
+
+            using (var env = new ModInstallerIntegrationEnvironment("KPatcher_Export_"))
+            {
+                InstallManifestSnapshot manifest = TslPatcherOracleHarness.InstallAndCaptureManifest(env, scenario);
+                File.WriteAllText(outputPath, manifest.ToFingerprintText());
+                _output.WriteLine("Exported: " + outputPath);
+            }
         }
     }
 }
