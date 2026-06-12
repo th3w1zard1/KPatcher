@@ -41,11 +41,12 @@ KPatcher queues the same sequence in [src/KPatcher.Core/Patcher/ModInstaller.cs]
 
 | Layer | Tests / helpers |
 |-------|----------------|
-| Inline scenarios (20) | `EmbeddedScenarioDefinitions`, `EmbeddedScenarioPatternInstallTests` |
+| Inline scenarios (25) | `EmbeddedScenarioDefinitions`, `EmbeddedScenarioPatternInstallTests`, `InstallPathHarnessClosureTests` |
 | Golden manifests | `ScenarioGoldenManifests`, `InstallManifestSnapshot` |
 | Oracle | `TslPatcherOracleHarness`, `ModInstallerCliOracleTests`, `ModInstallerOracleReferenceTests` |
 | Stage coverage map | `ManifestScenarioCoverageRegistry.PipelineStageInlineScenarios` |
-| Legacy manifest inventory | `EmbeddedIntegrationMods/scenario_patterns/manifest.json` (116 rows, migration pending) |
+| INI path pattern map | `ManifestIniPathPatternRegistry` (all four `ChangesIniRelative` classes → inline scenarios) |
+| Legacy manifest inventory | `EmbeddedIntegrationMods/scenario_patterns/manifest.json` (116 row ids; pattern-covered, per-mod bytes not in CI) |
 
 Refresh goldens: `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export baseline: `scripts/export-kpatcher-oracle-baseline.sh`.
 

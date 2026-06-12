@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 954 test cases** (942 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 955 test cases** (943 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -457,12 +457,12 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 942 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
+- ✅ 943 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers + `InstallPathHarnessClosureTests`)
 
 **In Progress:**
 
 - ✅ Twenty-five inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`); `ManifestIniPathPatternRegistry` covers all four manifest INI-path classes; CLI oracle covers CLI-eligible install scenarios
-- ⚠ Migrate additional `scenario_patterns/manifest.json` rows to inline scenarios or binary bundles as needed (116 legacy inventory rows tracked in `ManifestScenarioCoverageRegistry`)
+- ✅ All four manifest `ChangesIniRelative` path-shape classes characterized (`ManifestIniPathPatternRegistry`); 116 per-mod inventory ids remain metadata-only (zero-fixture policy — not default CI byte regression)
 
 **Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.
 
@@ -493,7 +493,7 @@ _logger.LogAdded += _logAddedHandler;
 
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
-| **Manifest inventory migration** | `EmbeddedScenarioDefinitions` | Large | 116 legacy `manifest.json` rows await inline/API construction | Parity / test owner |
+| **Per-mod manifest byte regression** | Optional / maintainer | Large | 116 inventory ids pattern-covered; full `tslpatchdata` replay requires policy exception or local bootstrap | Parity / test owner |
 | **LZMA Compression** | KPatcher.Core / Common | Medium | iOS `.bzf` chitin only; contract characterized in `LzmaHelperTests` | Compression module owner |
 
 **Recommendation:** Expand inline characterization from `manifest.json` rows as mods require coverage. LZMA remains deferred until a release blocks on `.bzf` assets.
