@@ -53,6 +53,23 @@ File0=test.nss
         }
 
         [Fact]
+        public void CompileList_DefaultDestination_PropagatesToPatches()
+        {
+            const string iniText = @"
+[CompileList]
+!DefaultDestination=Modules\capsule.mod
+File0=test.nss
+";
+            IniData ini = _parser.Parse(iniText);
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(new PatcherConfig());
+
+            result.PatchesNSS.Should().ContainSingle();
+            result.PatchesNSS[0].Destination.Should().Be("Modules\\capsule.mod");
+        }
+
+        [Fact]
         public void CompileList_PropagatesScriptCompilerFlags_FromSettings()
         {
             const string iniText = @"

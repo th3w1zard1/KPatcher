@@ -112,8 +112,9 @@ namespace KPatcher.Core.Patcher
                 this.changesIniPath, modDirectory, TslPatchDataPath));
             try
             {
-                installLog = new InstallLogWriter(modDirectory, useRtf: false);
-                installLogFilePath = Path.Combine(modDirectory, "installlog.txt");
+                // Default PlaintextLog=false selects RTF; EnsureInstallLogWriter reconciles after config load.
+                installLog = new InstallLogWriter(modDirectory, useRtf: true);
+                installLogFilePath = Path.Combine(modDirectory, "installlog.rtf");
                 installLog.WriteHeader(modDirectory, this.gamePath, Game);
                 log.LogAdded += OnPatchLoggerLogAdded;
             }

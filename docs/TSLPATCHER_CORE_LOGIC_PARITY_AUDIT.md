@@ -108,3 +108,32 @@ date: 2026-06-11
 3. **Low priority:** Trace `UStrTok.pas` callers in format units; not referenced from `.dpr`; document-only unless a mod corpus needs tokenizer parity.
 4. **Harness:** Golden/interleaved 2DA INI corpora if regressions appear in the wild.
 5. **Docs hygiene:** Restore or replace missing `docs/TSLPATCHER_RE.md` for full Ghidra function tables linked from build verification.
+
+### 11. Pipeline test and HACKList export (2026-06-12, `feat/parity-pipeline-test-and-hack-serialize`)
+
+- [REPO] `ModInstallerPipelineOrderIntegrationTests` asserts binary-verified install queue order via `PatchLogger` diagnostics (`TLK → GFF → 2DA → InstallList → NCS → NSS → SSF`).
+- [REPO] `KPatcherINISerializer.SerializeHackList` round-trips `[HACKList]` entries (`KPatcherINISerializerHackListTests`).
+- [REPO] `ModInstaller` ctor defaults install log to RTF (`installlog.rtf`) matching `PlaintextLog=false` before `EnsureInstallLogWriter` runs.
+
+### 12. Cross-stage memory and settings integration coverage (2026-06-12)
+
+- [REPO] `ModInstallerCrossStageMemoryIntegrationTests` verifies `[2DAList]` memory tokens flow to a later `[SSFList]` patch in one install (2DA runs before SSF in binary-verified order).
+- [REPO] Settings integration tests cover `BackupFiles=true` backup creation, `SaveProcessedScripts` temp-folder retention/cleanup, and `!OverrideType=rename` module install behavior.
+- [REPO] `KPatcherINISerializer.SerializeCompileList` round-trips `[CompileList]` through `ConfigReader`.
+- [SYNTH] GFF field-key `2DAMEMORY#` resolution remains unit-tested only — GFF runs before 2DA in the binary-verified pipeline, so 2DA-populated field keys cannot affect GFF at install time.
+
+### 13. Install-path parity integration expansion (2026-06-12)
+
+- [REPO] `ModInstallerParityIntegrationTests` covers protected folder replace skips (`dialog.tlk`, `swkotor.exe`, `swkotor2.exe`, `chitin.key`, `templates.bif`), read-only existing Override targets cleared via `EnsureFileWritable` before overwrite, TLK append dedup through `Install()` (StrRef memory reuses existing dialog row), `!OverrideType=ignore`, `ScriptCompilerFlags` through `ModInstaller.Install()`, and 2DA exclusive-column `inc()` fallback at install time.
+- [REPO] `ModInstallerSettingsIntegrationTests.Install_CompileListDefaultDestination_ModuleCapsule_WritesCompiledNcsIntoArchive` verifies `[CompileList] !DefaultDestination=Modules\…` routes compiled NCS into a module capsule (not Override).
+- [REPO] `TlkModsTests.Apply_AppendMatchingExistingEntry_ReusesIndexWithoutDuplicateRow` guards TLK append dedup at unit level.
+- [REPO] `ConfigReaderCompileListTests.CompileList_DefaultDestination_PropagatesToPatches` guards `!DefaultDestination` parsing for CompileList.
+- [REPO] `ModInstallerPipelineOrderIntegrationTests.Install_AppliesPostInstallBytesForEachPipelineStage` asserts post-install bytes for TLK/GFF/2DA/InstallList/NCS/NSS/SSF — not log order alone.
+- [REPO] `TwoDaAddRowTests.AddRow_ExclusiveColumnExists_SkipsIncOnFallback` guards `UnpackExclusiveFallback` apply semantics.
+- [REPO] `TslPatcherExeReferenceTests` seeds the optional `TslPatcherExeReference` tier (no-op when `KPATCHER_TSLPATCHER_EXE` unset).
+
+### 14. Parity doc hygiene and install-path test expansion (2026-06-12)
+
+- [REPO] Removed phantom `Integration/*.cs` `Compile Remove` entries and dead `test_files/` Content from `KPatcher.Tests.csproj`; ledger §1.3 now reflects removed corpus vs compile-excluded fiction.
+- [REPO] `ModInstallerParityIntegrationTests` adds 2DA AddColumn→ChangeRow INI order through `Install()`, ScriptCompilerFlags failure when `--nwscript` target missing, HACKList byte patch on non-`.ncs` extension (documents NCS-path narrowing), and protected capsule `dialog.tlk` replace allow path.
+- [REPO] CI optional tier uses `TslPatcherExeReference.runsettings` (aligned with test `Category` and env var).

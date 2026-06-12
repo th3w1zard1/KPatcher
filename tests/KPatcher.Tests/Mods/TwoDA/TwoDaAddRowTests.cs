@@ -234,6 +234,35 @@ namespace KPatcher.Core.Tests.Mods.TwoDA
         }
 
         [Fact]
+        public void AddRow_ExclusiveColumnExists_SkipsIncOnFallback()
+        {
+            var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
+            twoda.AddRow("0", new Dictionary<string, object>
+            {
+                ["Col1"] = "key",
+                ["Col2"] = "5",
+                ["Col3"] = "1"
+            });
+
+            var logger = new PatchLogger();
+            var memory = new PatcherMemory();
+            var config = new Modifications2DA("");
+            config.Modifiers.Add(new AddRow2DA("", "Col1", null, new Dictionary<string, RowValue>
+            {
+                ["Col1"] = new RowValueConstant("key"),
+                ["Col2"] = new RowValueInc("Col2", 10),
+                ["Col3"] = new RowValueConstant("updated")
+            }));
+
+            config.Apply(twoda, memory, logger, Game.K1);
+
+            Assert.Equal(1, twoda.GetHeight());
+            Assert.Equal("key", twoda.GetRow(0).GetString("Col1"));
+            Assert.Equal("5", twoda.GetRow(0).GetString("Col2"));
+            Assert.Equal("updated", twoda.GetRow(0).GetString("Col3"));
+        }
+
+        [Fact]
         public void AddRow_Assign_High()
         {
             // Python test: test_add_assign_high
