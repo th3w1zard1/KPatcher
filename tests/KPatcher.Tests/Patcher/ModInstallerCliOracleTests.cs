@@ -65,7 +65,9 @@ namespace KPatcher.Core.Tests.Patcher
         {
             foreach (EmbeddedInstallScenario scenario in EmbeddedScenarioDefinitions.RunnableScenarios)
             {
-                if (scenario.Id == "inline_settings_only")
+                if (scenario.Id == "inline_settings_only"
+                    || scenario.Id == "inline_custom_ini_name"
+                    || scenario.Id == "inline_variant_ini_filename")
                 {
                     continue;
                 }

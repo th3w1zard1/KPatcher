@@ -27,7 +27,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
                 { "CompileList", new[] { "inline_compile_void_main", "inline_compile_module_capsule", "inline_custom_nwscript_compile" } },
                 { "SSFList", new[] { "inline_ssf_battlecry", "inline_2da_ssf_memory" } },
                 { "OverrideType", new[] { "inline_override_type_ignore_module" } },
-                { "Namespace", new[] { "inline_namespace_subfolder" } }
+                { "Namespace", new[] { "inline_namespace_subfolder", "inline_custom_ini_name", "inline_variant_ini_filename" } }
             };
 
         public static string GetCoverageKind(string manifestId)

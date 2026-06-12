@@ -59,6 +59,8 @@ namespace KPatcher.Core.Tests.Patcher
             ids.Should().Contain("inline_gff_add_field");
             ids.Should().Contain("inline_install_source_subfolder");
             ids.Should().Contain("inline_hack_rename_source");
+            ids.Should().Contain("inline_custom_ini_name");
+            ids.Should().Contain("inline_variant_ini_filename");
         }
 
         [Fact]

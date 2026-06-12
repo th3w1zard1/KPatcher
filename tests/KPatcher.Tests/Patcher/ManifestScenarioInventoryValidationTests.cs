@@ -46,6 +46,31 @@ namespace KPatcher.Core.Tests.Patcher
         }
 
         [Fact]
+        public void ManifestInventory_EveryIniPathPatternClassHasInlineCharacterization()
+        {
+            foreach (KeyValuePair<string, IReadOnlyList<string>> pattern in ManifestIniPathPatternRegistry.PatternInlineScenarios)
+            {
+                pattern.Value.Should().NotBeEmpty("pattern " + pattern.Key);
+                foreach (string scenarioId in pattern.Value)
+                {
+                    ManifestScenarioCoverageRegistry.IsInlineCharacterizationScenario(scenarioId)
+                        .Should().BeTrue("pattern {0} references {1}", pattern.Key, scenarioId);
+                }
+            }
+
+            List<ManifestRow> rows = ReadManifestRows();
+            foreach (ManifestRow row in rows)
+            {
+                string pattern = ManifestIniPathPatternRegistry.Classify(row.ChangesIniRelative);
+                ManifestIniPathPatternRegistry.PatternInlineScenarios.ContainsKey(pattern).Should().BeTrue();
+                ManifestIniPathPatternRegistry.PatternInlineScenarios[pattern].Should().NotBeEmpty(
+                    "manifest row {0} pattern {1}",
+                    row.Id,
+                    pattern);
+            }
+        }
+
+        [Fact]
         public void ManifestInventory_AllRowsRemainLegacyPendingMigration()
         {
             foreach (ManifestRow row in ReadManifestRows())

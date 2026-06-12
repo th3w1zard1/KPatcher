@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 950 test cases** (938 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 954 test cases** (942 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -66,7 +66,7 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 | **VendorK2Game** | Retail K2 tree validation | ❌ Opt-in | Requires `KPATCHER_K2_VENDOR_ROOT` |
 | **TslPatcherExeReference** | KPatcher manifest oracle + optional TSLPatcher.exe/baseline | ❌ Opt-in | Determinism + CLI vs direct oracle; `KPATCHER_TSLPATCHER_EXE` layout smoke; `KPATCHER_ORACLE_MANIFEST_BASELINE` for manual TSLPatcher diff |
 | **KorExhaustiveBinaryFixtures** | Mod corpus validation | ❌ Opt-in | Requires synthetic payloads |
-| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Opt-in (also Default) | 23 inline scenarios with golden manifest fingerprints (`EmbeddedScenarioPatternInstallTests`) |
+| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Opt-in (also Default) | 25 inline scenarios with golden manifest fingerprints (`EmbeddedScenarioPatternInstallTests`) |
 | **GeneratedGenericModExhaustive** | `scenario_patterns/manifest.json` structural validation (116 legacy inventory rows) | ❌ Opt-in | `ManifestScenarioInventoryValidationTests`; `scripts/validate-manifest-inventory.sh` |
 
 ### 1.3 Skip and XFact Status
@@ -457,11 +457,11 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 938 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
+- ✅ 942 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
 
 **In Progress:**
 
-- ✅ Twenty-three inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`); CLI oracle covers all install scenarios including namespace subfolders
+- ✅ Twenty-five inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`); `ManifestIniPathPatternRegistry` covers all four manifest INI-path classes; CLI oracle covers CLI-eligible install scenarios
 - ⚠ Migrate additional `scenario_patterns/manifest.json` rows to inline scenarios or binary bundles as needed (116 legacy inventory rows tracked in `ManifestScenarioCoverageRegistry`)
 
 **Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.

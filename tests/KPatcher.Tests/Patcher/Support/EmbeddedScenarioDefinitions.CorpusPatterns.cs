@@ -13,6 +13,8 @@ namespace KPatcher.Core.Tests.Patcher.Support
       yield return GffAddFieldNested();
       yield return InstallSourceSubfolder();
       yield return HackRenameSource();
+      yield return CustomIniName();
+      yield return VariantIniFilename();
     }
 
     private static EmbeddedInstallScenario GffAddFieldNested()
@@ -93,6 +95,55 @@ script.ncs=script.ncs
           Path.Combine(env.TslPatchDataPath, "source-alt.ncs"),
           new byte[] { 0, 2, 3, 4 }),
         env => File.ReadAllBytes(Path.Combine(env.OverridePath, "patched.ncs"))[0].Should().Be(1));
+    }
+
+    private static EmbeddedInstallScenario CustomIniName()
+    {
+      return new EmbeddedInstallScenario(
+        "inline_custom_ini_name",
+        @"
+[Settings]
+LogLevel=3
+InstallerMode=1
+
+[InstallList]
+folder0=Override
+
+[folder0]
+File0=custom_ini_marker.txt
+",
+        env => File.WriteAllText(Path.Combine(env.TslPatchDataPath, "custom_ini_marker.txt"), "custom_ini"),
+        env => InstallAssertionLadder.AssertTextEqualL1(
+          Path.Combine(env.OverridePath, "custom_ini_marker.txt"),
+          "custom_ini"),
+        "install.ini");
+    }
+
+    private static EmbeddedInstallScenario VariantIniFilename()
+    {
+      return new EmbeddedInstallScenario(
+        "inline_variant_ini_filename",
+        @"
+[Settings]
+LogLevel=3
+InstallerMode=1
+
+[InstallList]
+folder0=Override
+
+[folder0]
+File0=variant_marker.txt
+",
+        env =>
+        {
+          string optionsDir = Path.Combine(env.TslPatchDataPath, "options");
+          Directory.CreateDirectory(optionsDir);
+          File.WriteAllText(Path.Combine(optionsDir, "variant_marker.txt"), "variant_ini");
+        },
+        env => InstallAssertionLadder.AssertTextEqualL1(
+          Path.Combine(env.OverridePath, "variant_marker.txt"),
+          "variant_ini"),
+        "options/changes_1.ini");
     }
   }
 }

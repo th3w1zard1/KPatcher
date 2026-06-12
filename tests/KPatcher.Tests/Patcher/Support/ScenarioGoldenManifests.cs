@@ -106,6 +106,14 @@ namespace KPatcher.Core.Tests.Patcher.Support
             {
                 "inline_hack_rename_source",
                 "Override/patched.ncs|4|9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a\n" + EmptyExe
+            },
+            {
+                "inline_custom_ini_name",
+                "Override/custom_ini_marker.txt|10|b073bb66e7b833c2a51a43bab065686e6bd81c91720823ccd13f94b95c0985c9\n" + EmptyExe
+            },
+            {
+                "inline_variant_ini_filename",
+                "Override/variant_marker.txt|11|c661bae00e9cdd1f56915c08c4ca107c8d1e4e2dc9deda440b53e1d4274eaf81\n" + EmptyExe
             }
         };
 
