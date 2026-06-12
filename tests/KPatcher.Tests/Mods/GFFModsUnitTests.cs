@@ -258,6 +258,25 @@ namespace KPatcher.Core.Tests.Mods
         }
 
         [Fact]
+        public void ModifyField_With2DAMemoryFieldKey_ShouldResolveTargetField()
+        {
+            var gff = new GFF();
+            gff.Root.SetString("ResolvedField", "old");
+
+            var memory = new PatcherMemory();
+            memory.Memory2DA[5] = "ResolvedField";
+
+            var config = new ModificationsGFF("", false, new List<ModifyGFF> {
+                new ModifyFieldGFF("2DAMEMORY5", new FieldValueConstant("new"))
+            });
+
+            object bytes = config.PatchResource(gff.ToBytes(), memory, new PatchLogger(), Game.K1);
+            var patchedGff = GFF.FromBytes((byte[])bytes);
+
+            patchedGff.Root.GetValue("ResolvedField").Should().Be("new");
+        }
+
+        [Fact]
         public void ModifyField_With2DAMemory_ShouldUseMemoryValue()
         {
             var gff = new GFF();

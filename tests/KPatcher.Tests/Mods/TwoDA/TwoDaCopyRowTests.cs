@@ -16,6 +16,30 @@ namespace KPatcher.Core.Tests.Mods.TwoDA
     public class TwoDaCopyRowTests
     {
         [Fact]
+        public void CopyRow_IncModifier_IncrementsNumericCell()
+        {
+            var twoda = new TwoDAFile(new List<string> { "Col1", "Col2" });
+            twoda.AddRow("0", new Dictionary<string, object>() { ["Col1"] = "5", ["Col2"] = "b" });
+
+            var logger = new PatchLogger();
+            var memory = new PatcherMemory();
+
+            var config = new Modifications2DA("");
+            config.Modifiers.Add(new CopyRow2DA(
+                "",
+                new Target(TargetType.ROW_INDEX, 0),
+                null,
+                null,
+                new Dictionary<string, RowValue>() { ["Col1"] = new RowValueInc("Col1", 2) }
+            ));
+
+            config.Apply(twoda, memory, logger, Game.K1);
+
+            Assert.Equal(2, twoda.GetHeight());
+            Assert.Equal(new[] { "5", "7" }, twoda.GetColumn("Col1"));
+        }
+
+        [Fact]
         public void CopyRow_Existing_RowIndex()
         {
             // Arrange
@@ -129,6 +153,35 @@ namespace KPatcher.Core.Tests.Mods.TwoDA
             Assert.Equal("0", twoda.GetLabel(0));
             Assert.Equal(new[] { "a" }, twoda.GetColumn("Col1"));
             Assert.Equal(new[] { "X" }, twoda.GetColumn("Col2"));
+        }
+
+        [Fact]
+        public void CopyRow_Exclusive_Exists_SkipsIncAndHighModifiers()
+        {
+            var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
+            twoda.AddRow("0", new Dictionary<string, object>() { ["Col1"] = "g", ["Col2"] = "10", ["Col3"] = "5" });
+
+            var logger = new PatchLogger();
+            var memory = new PatcherMemory();
+            var config = new Modifications2DA("");
+            config.Modifiers.Add(new CopyRow2DA(
+                "",
+                new Target(TargetType.ROW_INDEX, 0),
+                "Col1",
+                null,
+                new Dictionary<string, RowValue>()
+                {
+                    ["Col1"] = new RowValueConstant("g"),
+                    ["Col2"] = new RowValueInc("Col2", 5),
+                    ["Col3"] = new RowValueHigh("Col3")
+                }
+            ));
+
+            config.Apply(twoda, memory, logger, Game.K1);
+
+            Assert.Equal(1, twoda.GetHeight());
+            Assert.Equal("10", twoda.GetRow(0).GetString("Col2"));
+            Assert.Equal("5", twoda.GetRow(0).GetString("Col3"));
         }
 
         [Fact]

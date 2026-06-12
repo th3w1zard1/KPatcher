@@ -66,6 +66,17 @@ namespace KPatcher.Core.Tests.Memory
             memory.MemoryStr[0].Should().Be(200);
         }
 
+        [Fact]
+        public void ResolveMemoryToken_substitutes_defined_token()
+        {
+            var memory = new PatcherMemory();
+            memory.Memory2DA[5] = "FieldLabel";
+
+            memory.ResolveMemoryToken("2DAMEMORY5").Should().Be("FieldLabel");
+            memory.ResolveMemoryToken("plain").Should().Be("plain");
+            memory.ResolveMemoryToken("2DAMEMORY99").Should().Be("2DAMEMORY99");
+        }
+
         #region LocalizedStringDelta Tests - from test_memory.py
 
         [Fact]

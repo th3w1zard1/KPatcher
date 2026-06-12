@@ -26,6 +26,57 @@ RequiredMsg=TSLRCM is not installed properly.
         }
 
         [Fact]
+        public void Load_installer_mode_and_backup_files_defaults()
+        {
+            const string ini = @"
+[Settings]
+LogLevel=3
+";
+
+            PatcherConfig config = LoadConfig(ini);
+
+            config.InstallerMode.Should().BeFalse();
+            config.BackupFiles.Should().BeTrue();
+            config.PlaintextLog.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Load_installer_mode_and_backup_files_from_bool_strings()
+        {
+            const string ini = @"
+[Settings]
+LogLevel=3
+InstallerMode=true
+BackupFiles=false
+PlaintextLog=false
+";
+
+            PatcherConfig config = LoadConfig(ini);
+
+            config.InstallerMode.Should().BeTrue();
+            config.BackupFiles.Should().BeFalse();
+            config.PlaintextLog.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Load_installer_mode_and_backup_files_from_ini()
+        {
+            const string ini = @"
+[Settings]
+LogLevel=3
+InstallerMode=1
+BackupFiles=0
+PlaintextLog=1
+";
+
+            PatcherConfig config = LoadConfig(ini);
+
+            config.InstallerMode.Should().BeTrue();
+            config.BackupFiles.Should().BeFalse();
+            config.PlaintextLog.Should().BeTrue();
+        }
+
+        [Fact]
         public void Load_tolerates_required_without_requiredmsg()
         {
             const string ini = @"

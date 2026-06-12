@@ -85,6 +85,30 @@ RowLabel=1
         }
 
         [Fact]
+        public void TwoDA_ModifierKey_MatchesEmbeddedCommandName()
+        {
+            string iniText = @"
+[2DAList]
+Table0=test.2da
+
+[test.2da]
+PrefixChangeRow0=change_row_0
+
+[change_row_0]
+RowIndex=0
+Col1=abc
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            result.Patches2DA[0].Modifiers.Should().ContainSingle();
+            (result.Patches2DA[0].Modifiers[0] as ChangeRow2DA).Should().NotBeNull();
+        }
+
+        [Fact]
         public void TwoDA_ChangeRow_ShouldLoadTargets()
         {
             // Python test: test_2da_changerow_targets
@@ -665,6 +689,32 @@ appearance=2DAMEMORY5
             var cell_0_appearance = mod_0.Cells["appearance"] as RowValue2DAMemory;
             cell_0_appearance.Should().NotBeNull();
             cell_0_appearance.TokenId.Should().Be(5);
+        }
+
+        [Fact]
+        public void TwoDA_AddRow_ShouldParseIncCellValue()
+        {
+            string iniText = @"
+[2DAList]
+Table0=test.2da
+
+[test.2da]
+AddRow0=add_row_0
+
+[add_row_0]
+label=inc(3)
+";
+            IniData ini = _parser.Parse(iniText);
+            var config = new PatcherConfig();
+            var reader = new ConfigReader(ini, _tempDir, null, _modPath);
+
+            PatcherConfig result = reader.Load(config);
+
+            var addRow = result.Patches2DA[0].Modifiers[0] as AddRow2DA;
+            addRow.Should().NotBeNull();
+            var incCell = addRow.Cells["label"] as RowValueInc;
+            incCell.Should().NotBeNull();
+            incCell.Increment.Should().Be(3);
         }
 
         #endregion

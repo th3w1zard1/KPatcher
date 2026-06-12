@@ -95,6 +95,34 @@ namespace KPatcher.Core.Tests.Mods.TwoDA
         }
 
         [Fact]
+        public void AddRow_Exclusive_Exists_SkipsIncAndHighModifiers()
+        {
+            var twoda = new TwoDAFile(new List<string> { "Col1", "Col2", "Col3" });
+            twoda.AddRow("0", new Dictionary<string, object>() { ["Col1"] = "g", ["Col2"] = "10", ["Col3"] = "5" });
+
+            var logger = new PatchLogger();
+            var memory = new PatcherMemory();
+            var config = new Modifications2DA("");
+            config.Modifiers.Add(new AddRow2DA(
+                "",
+                "Col1",
+                "1",
+                new Dictionary<string, RowValue>()
+                {
+                    ["Col1"] = new RowValueConstant("g"),
+                    ["Col2"] = new RowValueInc("Col2", 5),
+                    ["Col3"] = new RowValueHigh("Col3")
+                }
+            ));
+
+            config.Apply(twoda, memory, logger, Game.K1);
+
+            Assert.Equal(1, twoda.GetHeight());
+            Assert.Equal("10", twoda.GetRow(0).GetString("Col2"));
+            Assert.Equal("5", twoda.GetRow(0).GetString("Col3"));
+        }
+
+        [Fact]
         public void AddRow_Exclusive_Exists()
         {
             // Exclusive column is specified but the value in the new row is already used. Edit the existing row.

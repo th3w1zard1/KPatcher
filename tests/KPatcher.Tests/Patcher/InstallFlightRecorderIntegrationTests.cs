@@ -85,6 +85,7 @@ namespace KPatcher.Core.Tests.Patcher
             WriteChangesIni(@"
 [Settings]
 LogLevel=3
+InstallerMode=1
 
 [InstallList]
 install_folder0=Override
