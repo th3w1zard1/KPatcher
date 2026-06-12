@@ -12,6 +12,24 @@ namespace KPatcher.Core.Tests.Patcher.Support
         public const string InlineCharacterization = "inline_characterization";
         public const string LegacyInventory = "legacy_inventory_pending_migration";
 
+        /// <summary>
+        /// Install pipeline stages covered by inline characterization scenarios (not manifest row ids).
+        /// </summary>
+        public static IReadOnlyDictionary<string, IReadOnlyList<string>> PipelineStageInlineScenarios { get; } =
+            new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Settings", new[] { "inline_settings_only", "inline_installer_mode_false_hack" } },
+                { "InstallList", new[] { "inline_install_marker", "inline_install_replace", "inline_namespace_subfolder", "inline_backup_files_replace" } },
+                { "2DAList", new[] { "inline_2da_change_row", "inline_2da_add_column", "inline_2da_exclusive_fallback", "inline_2da_ssf_memory" } },
+                { "GFFList", new[] { "inline_gff_uint8", "inline_tlk_gff_strref" } },
+                { "TLKList", new[] { "inline_tlk_gff_strref", "inline_capsule_dialog_tlk", "inline_protected_dialog_skip" } },
+                { "HACKList", new[] { "inline_hack_byte", "inline_installer_mode_false_hack" } },
+                { "CompileList", new[] { "inline_compile_void_main", "inline_compile_module_capsule", "inline_custom_nwscript_compile" } },
+                { "SSFList", new[] { "inline_ssf_battlecry", "inline_2da_ssf_memory" } },
+                { "OverrideType", new[] { "inline_override_type_ignore_module" } },
+                { "Namespace", new[] { "inline_namespace_subfolder" } }
+            };
+
         public static string GetCoverageKind(string manifestId)
         {
             if (string.IsNullOrWhiteSpace(manifestId))
@@ -20,6 +38,24 @@ namespace KPatcher.Core.Tests.Patcher.Support
             }
 
             return LegacyInventory;
+        }
+
+        public static bool IsInlineCharacterizationScenario(string scenarioId)
+        {
+            if (string.IsNullOrWhiteSpace(scenarioId))
+            {
+                return false;
+            }
+
+            foreach (EmbeddedInstallScenario scenario in EmbeddedScenarioDefinitions.RunnableScenarios)
+            {
+                if (string.Equals(scenario.Id, scenarioId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static IReadOnlyCollection<string> InlineCharacterizationScenarioIds

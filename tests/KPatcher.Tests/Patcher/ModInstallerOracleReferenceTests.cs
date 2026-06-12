@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using KPatcher.Core.Tests.Patcher.Support;
 using Xunit;
@@ -11,7 +12,8 @@ namespace KPatcher.Core.Tests.Patcher
         [Fact]
         public void Install_DeterministicInlineScenario_ProducesStableGameFingerprint()
         {
-            var scenario = EmbeddedScenarioDefinitions.RunnableScenarios[1];
+            EmbeddedInstallScenario scenario = EmbeddedScenarioDefinitions.RunnableScenarios
+                .First(s => s.Id == "inline_install_marker");
 
             using (var env1 = new ModInstallerIntegrationEnvironment("KPatcher_Oracle_A_"))
             using (var env2 = new ModInstallerIntegrationEnvironment("KPatcher_Oracle_B_"))
@@ -45,7 +47,8 @@ namespace KPatcher.Core.Tests.Patcher
 
             using (var env = new ModInstallerIntegrationEnvironment("KPatcher_Oracle_Layout_"))
             {
-                var scenario = EmbeddedScenarioDefinitions.RunnableScenarios[1];
+                EmbeddedInstallScenario scenario = EmbeddedScenarioDefinitions.RunnableScenarios
+                    .First(s => s.Id == "inline_install_marker");
                 scenario.Seed(env);
                 env.WriteChangesIni(scenario.ChangesIniBody, scenario.ChangesIniRelative);
 

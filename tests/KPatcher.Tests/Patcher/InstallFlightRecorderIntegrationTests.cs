@@ -5,42 +5,16 @@ using System.Threading;
 using FluentAssertions;
 using KPatcher.Core.Logger;
 using KPatcher.Core.Patcher;
+using KPatcher.Core.Tests.Patcher.Support;
 using Xunit;
 
 namespace KPatcher.Core.Tests.Patcher
 {
-    public sealed class InstallFlightRecorderIntegrationTests : IDisposable
+    public sealed class InstallFlightRecorderIntegrationTests : ModInstallerIntegrationTestBase
     {
-        private readonly string _tempRoot;
-        private readonly string _modRoot;
-        private readonly string _gameRoot;
-        private readonly string _tslPatchDataPath;
-
         public InstallFlightRecorderIntegrationTests()
+            : base("KPatcher_FlightRecorder_")
         {
-            _tempRoot = Path.Combine(Path.GetTempPath(), "KPatcher_InstallFlightRecorderIntegrationTests_" + Guid.NewGuid().ToString("N").Substring(0, 8));
-            _modRoot = Path.Combine(_tempRoot, "mod");
-            _gameRoot = Path.Combine(_tempRoot, "game");
-            _tslPatchDataPath = Path.Combine(_modRoot, "tslpatchdata");
-
-            Directory.CreateDirectory(_tslPatchDataPath);
-            Directory.CreateDirectory(_gameRoot);
-            File.WriteAllText(Path.Combine(_gameRoot, "swkotor2.exe"), string.Empty);
-        }
-
-        public void Dispose()
-        {
-            if (Directory.Exists(_tempRoot))
-            {
-                try
-                {
-                    Directory.Delete(_tempRoot, true);
-                }
-                catch
-                {
-                    // ignore cleanup errors
-                }
-            }
         }
 
         [Fact]
@@ -49,11 +23,11 @@ namespace KPatcher.Core.Tests.Patcher
             WriteChangesIni("[Settings]\nLogLevel=3\n");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
-            string recordPath = Path.Combine(_tslPatchDataPath, "installrecord.txt");
+            string recordPath = Path.Combine(TslPatchDataPath, "installrecord.txt");
             File.Exists(recordPath).Should().BeTrue();
             File.ReadAllText(recordPath).Should().Contain("Outcome: Success");
             logger.Notes.Should().Contain(note => note.Message.Contains("Install record written to"));
@@ -65,13 +39,13 @@ namespace KPatcher.Core.Tests.Patcher
             WriteChangesIni("[Settings]\nRequired=missing.file\nRequiredMsg=Need missing.file\n");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             Action act = () => installer.Install();
 
             act.Should().Throw<InvalidOperationException>();
 
-            string recordPath = Path.Combine(_tslPatchDataPath, "installrecord.txt");
+            string recordPath = Path.Combine(TslPatchDataPath, "installrecord.txt");
             File.Exists(recordPath).Should().BeTrue();
             string content = File.ReadAllText(recordPath);
             content.Should().Contain("Outcome: Failure");
@@ -96,7 +70,7 @@ File0=sample.wav
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.Cancel();
 
@@ -104,7 +78,7 @@ File0=sample.wav
 
             act.Should().Throw<OperationCanceledException>();
 
-            string recordPath = Path.Combine(_tslPatchDataPath, "installrecord.txt");
+            string recordPath = Path.Combine(TslPatchDataPath, "installrecord.txt");
             File.Exists(recordPath).Should().BeTrue();
             string content = File.ReadAllText(recordPath);
             content.Should().Contain("Outcome: Cancelled");
@@ -128,7 +102,7 @@ script.ncs=script.ncs
 ");
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
@@ -152,10 +126,10 @@ script.ncs=script.ncs
 !SaveAs=patched.ncs
 0x0=u8:1
 ");
-            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "source-alt.ncs"), new byte[] { 0, 2, 3, 4 });
+            File.WriteAllBytes(Path.Combine(TslPatchDataPath, "source-alt.ncs"), new byte[] { 0, 2, 3, 4 });
 
             var logger = new PatchLogger();
-            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+            var installer = new ModInstaller(ModRoot, GameRoot, Path.Combine(TslPatchDataPath, "changes.ini"), logger);
 
             installer.Install();
 
@@ -163,9 +137,5 @@ script.ncs=script.ncs
             logger.Notes.Should().NotContain(log => log.Message.Contains("Hacking 'source-alt.ncs' and saving as 'patched.ncs'", StringComparison.Ordinal));
         }
 
-        private void WriteChangesIni(string body)
-        {
-            File.WriteAllText(Path.Combine(_tslPatchDataPath, "changes.ini"), body);
-        }
     }
 }

@@ -52,7 +52,7 @@ Optional oracle env vars (opt-in tiers, not default CI):
 | `KPATCHER_TSLPATCHER_EXE` | Path to TSLPatcher.exe for layout/smoke tier (`TslPatcherExeReference.runsettings`). GUI-only — no headless install. |
 | `KPATCHER_ORACLE_MANIFEST_BASELINE` | Text file of `path\|length\|sha256` lines from a manual TSLPatcher install for diff against KPatcher (`ModInstallerOracleReferenceTests`). |
 
-`EmbeddedIntegrationMods/scenario_patterns/manifest.json` inventories 116 legacy mod layouts for maintainer migration; inline characterization ids are disjoint from manifest ids.
+`EmbeddedIntegrationMods/scenario_patterns/manifest.json` inventories 116 legacy mod layouts for maintainer migration; inline characterization ids are disjoint from manifest ids. `ManifestScenarioCoverageRegistry.PipelineStageInlineScenarios` maps each install pipeline stage to the inline scenarios that characterize it; new manifest-derived tests should extend `EmbeddedScenarioDefinitions` and update that registry rather than committing on-disk mod trees.
 
 ## Assertion style (formats)
 

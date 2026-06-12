@@ -49,6 +49,31 @@ namespace KPatcher.Core.Tests.Patcher
             ids.Should().Contain("inline_hack_byte");
             ids.Should().Contain("inline_2da_ssf_memory");
             ids.Should().Contain("inline_compile_module_capsule");
+            ids.Should().Contain("inline_2da_exclusive_fallback");
+            ids.Should().Contain("inline_capsule_dialog_tlk");
+            ids.Should().Contain("inline_protected_dialog_skip");
+            ids.Should().Contain("inline_backup_files_replace");
+            ids.Should().Contain("inline_custom_nwscript_compile");
+            ids.Should().Contain("inline_override_type_ignore_module");
+            ids.Should().Contain("inline_namespace_subfolder");
+        }
+
+        [Fact]
+        public void PipelineStageRegistry_EveryStageReferencesRegisteredInlineScenarios()
+        {
+            var inlineIds = new HashSet<string>(
+                ManifestScenarioCoverageRegistry.InlineCharacterizationScenarioIds,
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (KeyValuePair<string, IReadOnlyList<string>> stage in ManifestScenarioCoverageRegistry.PipelineStageInlineScenarios)
+            {
+                stage.Value.Should().NotBeEmpty("stage " + stage.Key);
+                foreach (string scenarioId in stage.Value)
+                {
+                    inlineIds.Should().Contain(scenarioId, "stage {0} references {1}", stage.Key, scenarioId);
+                    ManifestScenarioCoverageRegistry.IsInlineCharacterizationScenario(scenarioId).Should().BeTrue();
+                }
+            }
         }
 
         private static HashSet<string> ReadManifestIds()
