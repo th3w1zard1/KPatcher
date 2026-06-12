@@ -85,6 +85,7 @@ File0=test.gff
 
 [test.gff]
 Field1=2
+StrRefField=StrRef0
 
 [InstallList]
 folder0=Override
@@ -151,6 +152,84 @@ Battlecry 1=123
     }
 
     [Fact]
+    public void Install_AppliesPostInstallBytesForEachPipelineStage()
+    {
+      SeedGameAndModAssets();
+
+      WriteChangesIni(@"
+[Settings]
+LogLevel=3
+InstallerMode=1
+
+[TLKList]
+StrRef0=0
+
+[append.tlk]
+0=Appended
+
+[2DAList]
+Table0=test.2da
+
+[test.2da]
+ChangeRow0=change_row_0
+
+[change_row_0]
+RowIndex=0
+label=patched
+
+[GFFList]
+File0=test.gff
+
+[test.gff]
+Field1=2
+StrRefField=StrRef0
+
+[InstallList]
+folder0=Override
+
+[folder0]
+File0=install_marker.txt
+
+[HACKList]
+hack.ncs=hack.ncs
+
+[hack.ncs]
+0x0=u8:7
+
+[CompileList]
+File0=main.nss
+
+[SSFList]
+File0=test.ssf
+
+[test.ssf]
+Battlecry 1=123
+");
+
+      var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+      installer.Install();
+
+      var gff = GFF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "test.gff")));
+      gff.Root.GetUInt8("Field1").Should().Be(2);
+      gff.Root.GetUInt32("StrRefField").Should().Be(1u);
+
+      var twoda = TwoDAFile.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "test.2da")));
+      twoda.GetRow(0).GetString("label").Should().Be("patched");
+
+      File.ReadAllText(Path.Combine(_overridePath, "install_marker.txt")).Should().Be("marker");
+
+      File.ReadAllBytes(Path.Combine(_overridePath, "hack.ncs"))[0].Should().Be(7);
+
+      string mainNcsPath = Path.Combine(_overridePath, "main.ncs");
+      File.Exists(mainNcsPath).Should().BeTrue();
+      File.ReadAllBytes(mainNcsPath).Length.Should().BeGreaterThan(0);
+
+      var ssf = SSF.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "test.ssf")));
+      ssf.Get(SSFSound.BATTLE_CRY_1).Should().Be(123);
+    }
+
+    [Fact]
     public void Install_InstallerModeFalse_OmitsInstallFileFromQueue()
     {
       File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "hack.ncs"), new byte[] { 0, 0, 0, 0 });
@@ -207,6 +286,7 @@ hack.ncs=hack.ncs
 
       var gff = new GFF();
       gff.Root.SetUInt8("Field1", 1);
+      gff.Root.SetUInt32("StrRefField", 0);
       File.WriteAllBytes(Path.Combine(_overridePath, "test.gff"), gff.ToBytes());
 
       var ssf = new SSF();
