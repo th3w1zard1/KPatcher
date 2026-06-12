@@ -27,7 +27,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 **Risk Profile:** Low-to-medium for typical mod installs
 
 - Pipeline matches binary-verified TSLPatcher order
-- Generic HACKList behavior is narrowed to NCS-only patching (intentional)
+- `[HACKList]` byte-offset writes on arbitrary extensions are implemented via `ModificationsNCS` (`inline_hack_byte`, `ModInstallerParityIntegrationTests`); token surface is narrower than full Delphi HACK (e.g. `!FieldPath` in HACK rejected) — intentional
 - Compile backend uses managed `KCompiler`, not `nwnnsscomp.exe` (intentional, repo policy)
 - Backup/uninstall uses timestamped mod-tree backups (intentional KPatcher extension)
 - Namespace selection by display `Name` remains an extension vs section id
@@ -308,11 +308,11 @@ _logger.LogAdded += _logAddedHandler;
 3. GFF modifications ✅
 4. 2DA modifications ✅
 5. InstallList ✅
-6. NCS-only HACKList ✅
+6. HACKList byte-offset patching ✅ (NCS-oriented token surface; not full Delphi HACK token parity)
 7. NSS compilation (managed `KCompiler`) ✅
 8. SSF modifications ✅
 
-**Assessment:** Pipeline **stage order matches binary-verified TSLPatcher**. HACK and Compile stages are intentional semantic subsets (NCS-only HACK, managed compile).
+**Assessment:** Pipeline **stage order matches binary-verified TSLPatcher**. HACK uses a narrowed token surface via `ModificationsNCS`; arbitrary-file byte-offset HACK is tested. Compile uses managed `KCompiler` by design.
 
 ### 4.3 Format Handler Parity
 
@@ -337,7 +337,7 @@ _logger.LogAdded += _logAddedHandler;
 | **2DA `inc()` / exclusive fallback / GFF field-key memory** | Resolved (gap-close) | `RowValueInc`, `UnpackExclusiveFallback`, `PatcherMemory.ResolveMemoryToken` | Low |
 | **!OverrideType destination guard** | Resolved (gap-close) | `HandleOverrideType` skips when destination is `Override`; `ModInstallerOverrideTypeTests` | Low |
 | **Install pipeline order** | Resolved + tested | Binary-verified queue in `ModInstaller`; `ModInstallerPipelineOrderIntegrationTests` | Low |
-| **Generic HACKList scope** | Intentional | NCS-only `[HACKList]`; TSLPatcher generic binary offset writes not implemented | Medium (edge mods) |
+| **HACKList token surface** | Intentional | Byte-offset HACK on arbitrary files works (`inline_hack_byte`); routed through `ModificationsNCS` with narrower tokens than Delphi (e.g. `!FieldPath` in HACK rejected) | Low–medium (edge mods) |
 | **Compile backend** | Intentional | Managed `KCompiler`; `ScriptCompilerFlags` loaded; no `nwnnsscomp.exe` in product | Low |
 | **K1 2DA hardcaps** | Resolved (removed) | Former KPatcher-only limits removed; no Delphi equivalent | Low |
 | **Backup / uninstall semantics** | Intentional extension | Timestamped mod-tree backups + uninstall vs app-root single-copy backups | Low |
@@ -387,7 +387,7 @@ _logger.LogAdded += _logAddedHandler;
 
 **Known intentional non-parity:**
 
-- ⚠ Generic HACKList narrowed to NCS-only patching
+- ✓ HACKList byte-offset patching (`inline_hack_byte`); narrowed token surface vs full Delphi HACK is intentional
 - ⚠ Managed CompileList (`KCompiler`) instead of shelling `nwnnsscomp.exe`
 - ⚠ Timestamped backup/uninstall vs TSLPatcher app-local backups
 - ⚠ Namespace selection by display name
@@ -553,7 +553,7 @@ _logger.LogAdded += _logAddedHandler;
 
 1. **Harness Migration** (P2) — Extract integration tests from legacy fixture patterns.
 
-2. **Optional product decisions** — Generic HACKList binary patching; restore `docs/TSLPatcher_RE.md` for full Ghidra tables.
+2. **Optional product decisions** — Full Delphi HACKList token parity (`!FieldPath` etc.); restore `docs/TSLPatcher_RE.md` for full Ghidra tables.
 
 3. **Continuous Parity Monitoring** (P3) — Implement KPatcher vs TSLPatcher.exe install golden diff behind `TslPatcherExeReference` tier.
 

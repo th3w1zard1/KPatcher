@@ -17,7 +17,7 @@ From `Execute_Pipeline` @ `0x0047eec8` (see [TSLPATCHER_BUILD_VERIFICATION.md](T
 | 2 | `PatchGFF` @ `0x0048290c` | `[GFFList]` | `ModificationsGFF`, `ModifyGFF` |
 | 3 | 2DA dispatch loop | `[2DAList]` | `Modifications2DA`, `Modify2DA` |
 | 4 | `ProcessInstallList` @ `0x0047c280` | `[InstallList]` | `InstallFile`, `ModInstaller` |
-| 5 | `ProcessHACKList` @ `0x00482150` | `[HACKList]` | `ModificationsNCS` (NCS-only narrowing) |
+| 5 | `ProcessHACKList` @ `0x00482150` | `[HACKList]` | `ModificationsNCS` (byte-offset HACK; narrower token surface than Delphi) |
 | 6 | `CompileNSS` @ `0x0047d4ec` | `[CompileList]` | `ModificationsNSS`, managed `KCompiler` |
 | 7 | `PatchSSF` @ `0x0047e514` | `[SSFList]` | `ModificationsSSF` |
 
