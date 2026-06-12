@@ -40,7 +40,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 823 test cases (flagship test suite)
+- **KPatcher.Tests:** 84+ files, 826 test cases (flagship test suite)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 831+ test cases** (823 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 838+ test cases** (826 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -347,12 +347,16 @@ _logger.LogAdded += _logAddedHandler;
 | **Pipeline order** | Resolved | KPatcher matches binary-verified order; Delphi source snapshots still disagree with each other | Low |
 | **Namespace display-name selection** | Intentional extension | KPatcher selects namespace by display `Name`; fallback/`..` confinement aligned | Low |
 | **InstallList overwrite safeguards** | Resolved | `.exe` / `.tlk` / `.key` / `.bif` folder replace guards in `ModInstaller` | Low |
+| **InstallerMode / BackupFiles / PlaintextLog** | Resolved (gap-close) | Settings wired through `PatcherConfig`, `ConfigReader`, `ModInstaller`; integration tests in `ModInstallerSettingsIntegrationTests` | Low |
+| **2DA `inc()` / exclusive fallback / GFF field-key memory** | Resolved (gap-close) | `RowValueInc`, `UnpackExclusiveFallback`, `PatcherMemory.ResolveMemoryToken` | Low |
+| **!OverrideType destination guard** | Resolved (gap-close) | `HandleOverrideType` skips when destination is `Override`; `ModInstallerOverrideTypeTests` | Low |
+| **Install pipeline order** | Resolved + tested | Binary-verified queue in `ModInstaller`; `ModInstallerPipelineOrderIntegrationTests` | Low |
 | **Generic HACKList scope** | Intentional | NCS-only `[HACKList]`; TSLPatcher generic binary offset writes not implemented | Medium (edge mods) |
 | **Compile backend** | Intentional | Managed `KCompiler`; `ScriptCompilerFlags` loaded; no `nwnnsscomp.exe` in product | Low |
 | **K1 2DA hardcaps** | Resolved (removed) | Former KPatcher-only limits removed; no Delphi equivalent | Low |
 | **Backup / uninstall semantics** | Intentional extension | Timestamped mod-tree backups + uninstall vs app-root single-copy backups | Low |
 | **RTF rendering** | Intentional | Avalonia RichTextBox vs stripped plain text | UX improvement |
-| **HACKList serialization** | TODO | Write path not implemented (read implemented) | Cannot round-trip NCS configs to INI |
+| **HACKList serialization** | Resolved | `KPatcherINISerializer.SerializeHackList` + round-trip test | INI export for NCS mods supported |
 | **LZMA compression** | TODO | Not implemented | Edge case |
 | **Script validation** | TODO | Confidence checks disabled pending validation | Deferred |
 
@@ -399,7 +403,7 @@ _logger.LogAdded += _logAddedHandler;
 - ⚠ Managed CompileList (`KCompiler`) instead of shelling `nwnnsscomp.exe`
 - ⚠ Timestamped backup/uninstall vs TSLPatcher app-local backups
 - ⚠ Namespace selection by display name
-- ⚠ HACKList serialization (TODO — write path incomplete)
+- ✅ HACKList serialization (`KPatcherINISerializer` write path)
 - ⚠ LZMA compression (TODO)
 
 **Assessment:** Core install behavior is aligned with binary-verified TSLPatcher after PR #18. Remaining gaps are documented product choices or low-priority TODOs.
@@ -465,7 +469,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 767+ test cases providing broad coverage
+- ✅ 826+ KPatcher.Tests cases providing broad coverage
 
 **In Progress:**
 
@@ -546,7 +550,7 @@ _logger.LogAdded += _logAddedHandler;
 **Evidence Sources:**
 
 - Codebase inspection (16 projects, 572 C# files)
-- Test execution (813 test cases verified executable, Default tier 2026-06-11)
+- Test execution (826 KPatcher.Tests cases verified executable, Default tier 2026-06-12)
 - Architecture analysis (dependency mapping, module boundaries)
 - Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs, build-verification notes)
 - TSLPatcher source comparison (current Delphi snapshot, older Delphi snapshot, reviewed behavior-owning units)

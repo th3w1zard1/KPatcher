@@ -108,3 +108,9 @@ date: 2026-06-11
 3. **Low priority:** Trace `UStrTok.pas` callers in format units; not referenced from `.dpr`; document-only unless a mod corpus needs tokenizer parity.
 4. **Harness:** Golden/interleaved 2DA INI corpora if regressions appear in the wild.
 5. **Docs hygiene:** Restore or replace missing `docs/TSLPATCHER_RE.md` for full Ghidra function tables linked from build verification.
+
+### 11. Pipeline test and HACKList export (2026-06-12, `feat/parity-pipeline-test-and-hack-serialize`)
+
+- [REPO] `ModInstallerPipelineOrderIntegrationTests` asserts binary-verified install queue order via `PatchLogger` diagnostics (`TLK → GFF → 2DA → InstallList → NCS → NSS → SSF`).
+- [REPO] `KPatcherINISerializer.SerializeHackList` round-trips `[HACKList]` entries (`KPatcherINISerializerHackListTests`).
+- [REPO] `ModInstaller` ctor defaults install log to RTF (`installlog.rtf`) matching `PlaintextLog=false` before `EnsureInstallLogWriter` runs.
