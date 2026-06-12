@@ -64,7 +64,7 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 | **Default** | PR/commit baseline | ✅ Yes | Verified executable |
 | **Exhaustive** | DeNCSRoundTrip (23k+ NCS scripts) | ❌ Opt-in | Documented as long-running |
 | **VendorK2Game** | Retail K2 tree validation | ❌ Opt-in | Requires `KPATCHER_K2_VENDOR_ROOT` |
-| **TslPatcherExeReference** | TSLPatcher.exe availability smoke | ❌ Opt-in | Requires `KPATCHER_TSLPATCHER_EXE`; golden install diff not yet implemented |
+| **TslPatcherExeReference** | KPatcher manifest oracle + optional TSLPatcher.exe/baseline | ❌ Opt-in | Golden fingerprints for 12 inline scenarios; CLI vs direct oracle; `KPATCHER_TSLPATCHER_EXE` layout smoke; `KPATCHER_ORACLE_MANIFEST_BASELINE` for manual TSLPatcher diff |
 | **KorExhaustiveBinaryFixtures** | Mod corpus validation | ❌ Opt-in | Requires synthetic payloads |
 | **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Reserved | No `Category=GeneratedGenericModInstallerSmoke` tests yet |
 | **GeneratedGenericModExhaustive** | Future exhaustive rows | ❌ Reserved | Not yet populated |
@@ -461,7 +461,8 @@ _logger.LogAdded += _logAddedHandler;
 
 **In Progress:**
 
-- ⚠ Expand `EmbeddedIntegrationMods/scenario_patterns` and optional golden install diff (`TslPatcherExeReference` tier)
+- ✅ Twelve inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`)
+- ⚠ Migrate additional `scenario_patterns/manifest.json` rows to inline scenarios or binary bundles as needed
 - ⚠ Populate `GeneratedGenericModSmoke` category when corpus rows are ready (inline/API construction only)
 
 **Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.

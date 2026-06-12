@@ -41,9 +41,18 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 |--------|---------|--------------------------------|
 | **Characterization** | KPatcher install behavior on synthetic mods built in memory | `Patcher/*IntegrationTests.cs`, `EmbeddedScenarioPatternInstallTests` (`Category=GeneratedGenericModInstallerSmoke`) |
 | **Contract** | INI serializer ↔ `ConfigReader` round-trip | `Mods/KPatcherINISerializer*Tests.cs` |
-| **Oracle** | Deterministic game-tree fingerprint + optional `KPATCHER_TSLPATCHER_EXE` tier | `ModInstallerOracleReferenceTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
+| **Oracle** | Game-tree manifest fingerprints, CLI vs direct install diff, optional exe/baseline tiers | `ModInstallerOracleReferenceTests`, `ModInstallerCliOracleTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
 
-Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment` (temp mod + game tree), `InstallAssertionLadder` (L0–L3 assertions), `PipelineOrderFixtures` (full-pipeline INI + seeds). `EmbeddedIntegrationMods/scenario_patterns/manifest.json` inventories legacy mod layouts for future oracle rows; inline runnable scenarios live in `EmbeddedScenarioDefinitions`.
+Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`. Twelve inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`.
+
+Optional oracle env vars (opt-in tiers, not default CI):
+
+| Variable | Purpose |
+|----------|---------|
+| `KPATCHER_TSLPATCHER_EXE` | Path to TSLPatcher.exe for layout/smoke tier (`TslPatcherExeReference.runsettings`). GUI-only — no headless install. |
+| `KPATCHER_ORACLE_MANIFEST_BASELINE` | Text file of `path\|length\|sha256` lines from a manual TSLPatcher install for diff against KPatcher (`ModInstallerOracleReferenceTests`). |
+
+`EmbeddedIntegrationMods/scenario_patterns/manifest.json` inventories 116 legacy mod layouts for maintainer migration; inline characterization ids are disjoint from manifest ids.
 
 ## Assertion style (formats)
 
