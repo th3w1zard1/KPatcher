@@ -457,7 +457,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 847 KPatcher.Tests Default-tier cases (848 including opt-in `TslPatcherExeReference`)
+- ✅ 851 KPatcher.Tests Default-tier cases (852 including opt-in `TslPatcherExeReference`)
 
 **In Progress:**
 
@@ -537,7 +537,7 @@ _logger.LogAdded += _logAddedHandler;
 **Evidence Sources:**
 
 - Codebase inspection (16 projects, 572 C# files)
-- Test execution (847 KPatcher.Tests Default-tier cases verified executable, 2026-06-12)
+- Test execution (851 KPatcher.Tests Default-tier cases verified executable, 2026-06-12)
 - Architecture analysis (dependency mapping, module boundaries)
 - Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs, build-verification notes)
 - TSLPatcher source comparison (current Delphi snapshot, older Delphi snapshot, reviewed behavior-owning units)
