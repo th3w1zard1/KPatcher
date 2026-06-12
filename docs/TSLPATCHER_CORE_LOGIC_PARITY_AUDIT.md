@@ -124,7 +124,7 @@ date: 2026-06-11
 
 ### 13. Install-path parity integration expansion (2026-06-12)
 
-- [REPO] `ModInstallerParityIntegrationTests` covers protected folder replace skips (`dialog.tlk`, `swkotor.exe`, `chitin.key`, `templates.bif`), TLK append dedup through `Install()` (StrRef memory reuses existing dialog row), `!OverrideType=ignore`, `ScriptCompilerFlags` through `ModInstaller.Install()`, and 2DA exclusive-column `inc()` fallback at install time.
+- [REPO] `ModInstallerParityIntegrationTests` covers protected folder replace skips (`dialog.tlk`, `swkotor.exe`, `swkotor2.exe`, `chitin.key`, `templates.bif`), read-only existing Override targets cleared via `EnsureFileWritable` before overwrite, TLK append dedup through `Install()` (StrRef memory reuses existing dialog row), `!OverrideType=ignore`, `ScriptCompilerFlags` through `ModInstaller.Install()`, and 2DA exclusive-column `inc()` fallback at install time.
 - [REPO] `ModInstallerSettingsIntegrationTests.Install_CompileListDefaultDestination_ModuleCapsule_WritesCompiledNcsIntoArchive` verifies `[CompileList] !DefaultDestination=Modules\…` routes compiled NCS into a module capsule (not Override).
 - [REPO] `TlkModsTests.Apply_AppendMatchingExistingEntry_ReusesIndexWithoutDuplicateRow` guards TLK append dedup at unit level.
 - [REPO] `ConfigReaderCompileListTests.CompileList_DefaultDestination_PropagatesToPatches` guards `!DefaultDestination` parsing for CompileList.

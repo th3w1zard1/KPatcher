@@ -40,7 +40,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 846 test cases (845 Default tier + 1 opt-in `TslPatcherExeReference`)
+- **KPatcher.Tests:** 84+ files, 848 test cases (847 Default tier + 1 opt-in `TslPatcherExeReference`)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 851+ test cases** (845 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 855 test cases** (847 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -71,11 +71,11 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 
 ### 1.3 Skip and XFact Status
 
-**Skipped Tests:** 68 markers documented
+**Skipped / excluded tests:** 101 `Integration/*.cs` files compile-excluded from `KPatcher.Tests` (not in Default-tier binary); additional runtime `[Fact(Skip=…)]` markers for platform guards and optional env tiers.
 
 **Breakdown:**
 
-- **76 legacy integration tests disabled** (pending harness migration to ExtractedModInstallHarness)
+- **101 legacy integration tests compile-excluded** (pending harness migration to ExtractedModInstallHarness)
   - Files: 27 containing pre-existing syntax errors (17,970 total)
   - Cause: Generated fixture byte[] literals (~1 GB) cause build hangs
   - Impact: Harness capacity reduced until migration complete
@@ -471,11 +471,11 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 838 KPatcher.Tests Default-tier cases (839 including opt-in `TslPatcherExeReference`)
+- ✅ 847 KPatcher.Tests Default-tier cases (848 including opt-in `TslPatcherExeReference`)
 
 **In Progress:**
 
-- ⚠ Integration harness migration (76 tests disabled, pending ExtractedModInstallHarness)
+- ⚠ Integration harness migration (101 Integration files compile-excluded, pending ExtractedModInstallHarness)
 - ⚠ Generated fixture files (~1 GB byte[] literals) causing build hangs
 - ⚠ 27 files with pre-existing syntax errors (17,970 recorded)
 
@@ -551,7 +551,7 @@ _logger.LogAdded += _logAddedHandler;
 **Evidence Sources:**
 
 - Codebase inspection (16 projects, 572 C# files)
-- Test execution (838 KPatcher.Tests Default-tier cases verified executable, 2026-06-12)
+- Test execution (847 KPatcher.Tests Default-tier cases verified executable, 2026-06-12)
 - Architecture analysis (dependency mapping, module boundaries)
 - Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs, build-verification notes)
 - TSLPatcher source comparison (current Delphi snapshot, older Delphi snapshot, reviewed behavior-owning units)

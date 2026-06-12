@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using FluentAssertions;
@@ -59,6 +60,7 @@ namespace KPatcher.Core.Tests.Patcher
         }
 
         [Theory]
+        [InlineData("swkotor.exe", "overwrite EXE files")]
         [InlineData("swkotor2.exe", "overwrite EXE files")]
         [InlineData("chitin.key", "overwrite the chitin.key file")]
         [InlineData("templates.bif", "overwrite BIF data files")]
@@ -261,6 +263,70 @@ Col3=updated
             patched.GetRow(0).GetString("Col1").Should().Be("key");
             patched.GetRow(0).GetString("Col2").Should().Be("5");
             patched.GetRow(0).GetString("Col3").Should().Be("updated");
+        }
+
+        [Fact]
+        public void Install_ReadOnlyExistingOverrideFile_PatchesSuccessfully()
+        {
+            var twoda = new TwoDAFile(new List<string> { "label" });
+            twoda.AddRow("0", new Dictionary<string, object> { { "label", "old" } });
+            string targetPath = Path.Combine(_overridePath, "readonly.2da");
+            File.WriteAllBytes(targetPath, twoda.ToBytes());
+            MakeFileReadOnlyForOverwrite(targetPath);
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[2DAList]
+Table0=readonly.2da
+
+[readonly.2da]
+ChangeRow0=change_row_0
+
+[change_row_0]
+RowIndex=0
+label=new
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            var patched = TwoDAFile.FromBytes(File.ReadAllBytes(targetPath));
+            patched.GetRow(0).GetString("label").Should().Be("new");
+        }
+
+        private static void MakeFileReadOnlyForOverwrite(string filePath)
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                new FileInfo(filePath).IsReadOnly = true;
+                return;
+            }
+
+            using (var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = "chmod",
+                ArgumentList = { "444", filePath },
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }))
+            {
+                if (process == null)
+                {
+                    throw new InvalidOperationException("Failed to start chmod for read-only test setup.");
+                }
+
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                {
+                    string stderr = process.StandardError.ReadToEnd();
+                    throw new InvalidOperationException("chmod 444 failed: " + stderr);
+                }
+            }
         }
 
         private void WriteChangesIni(string body)
