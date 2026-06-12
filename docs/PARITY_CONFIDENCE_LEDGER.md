@@ -9,7 +9,7 @@ audit_ref: "docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteratio
 
 **Document Purpose:** Durable record of parity assessment, test infrastructure confidence, and verified implementations. This ledger establishes the baseline for release gating, post-release monitoring, and future audit cycles.
 
-**Last Audited:** 2026-06-11
+**Last Audited:** 2026-06-12
 **Audit Plan:** docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteration-plan.md
 **Detailed Audit:** docs/TSLPATCHER_CORE_LOGIC_PARITY_AUDIT.md
 **Iteration PR:** #18 (merged 2026-06-11)
@@ -20,7 +20,7 @@ audit_ref: "docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteratio
 
 **Parity Status: ⚠ PARTIAL — core install aligned; intentional extensions documented**
 
-KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity iteration (PR #18) closed confirmed core-logic gaps: binary-verified pipeline order, InstallList overwrite guards, namespace install-path resolution, TLK append dedup, 2DA INI modifier order, `SafeStrToInt`, ResRef INI sanitization, install-time writable clearing, settings CRLF tokens, and K1 2DA hardcap removal. Remaining non-parity is **documented and intentional**: NCS-only HACKList, managed CompileList (`KCompiler`), timestamped backup/uninstall, and namespace selection by display name.
+KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity iteration (PR #18) closed confirmed core-logic gaps: binary-verified pipeline order, InstallList overwrite guards, namespace install-path resolution, TLK append dedup, 2DA INI modifier order, `SafeStrToInt`, ResRef INI sanitization, install-time writable clearing, settings CRLF tokens, and K1 2DA hardcap removal. Branch `feat/tslpatcher-parity-gap-close` (2026-06-12) closes additional settings/modifier gaps: `InstallerMode`, `BackupFiles`, `PlaintextLog`, 2DA `inc(n)`, embedded 2DA modifier keys, exclusive-column fallback, GFF `2DAMEMORY` field keys, and `!OverrideType` destination guard. Remaining non-parity is **documented and intentional**: NCS-only HACKList, managed CompileList (`KCompiler`), timestamped backup/uninstall, and namespace selection by display name.
 
 **Confidence Level:** Moderate-to-strong for core install behavior; partial for strict byte-for-byte TSLPatcher equivalence
 
@@ -40,12 +40,12 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84 files, 805 test cases (flagship test suite)
+- **KPatcher.Tests:** 84+ files, 823 test cases (flagship test suite)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
   - Logger: 7 cases (PatchLogger, InstallFlightRecorder, InstallLogWriter)
-  - Patcher: 2 cases (ModInstaller orchestration)
+  - Patcher: 4+ cases (ModInstaller orchestration, OverrideType integration)
   - Common: ~50 cases (utilities, RTF, geometry)
   - Memory: ~10+ cases (token substitution)
 
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 813 test cases** (805 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 831+ test cases** (823 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 

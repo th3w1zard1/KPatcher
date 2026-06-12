@@ -84,10 +84,22 @@ date: 2026-06-11
 
 - [REPO] TLK append/token support exists on both sides. The Delphi `ProcessTLKData()` / `AppendTLKData()` path and [src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs](src/KPatcher.Core/Mods/TLK/ModificationsTLK.cs) both support TLK token mapping, append-file overrides, dialog append targets, memory-backed StrRef substitution, and **append deduplication** (reuse existing dialog entries when text+sound match — landed 2026-06-10).
 - [REPO] KPatcher does implement `!FieldPath` and `2DAMEMORY` path indirection. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `2DAMEMORY#=!FieldPath`, and [src/KPatcher.Core/Mods/GFF/ModifyGFF.cs](src/KPatcher.Core/Mods/GFF/ModifyGFF.cs) stores and dereferences those paths through `Memory2DAModifierGFF`.
-- [REPO] ERF/RIM override handling exists on both sides. The Delphi `HandleERFOverrideType(...)` logic and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) both support ignore/warn/rename handling for override-folder shadowing, and KPatcher additionally warns when a `.mod` shadows a RIM/ERF destination.
+- [REPO] ERF/RIM override handling exists on both sides. The Delphi `HandleERFOverrideType(...)` logic and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) both support ignore/warn/rename for override-folder shadowing when destination is **not** `Override` (see §10 destination guard); KPatcher additionally warns when a `.mod` shadows a RIM/ERF destination.
 - [REPO] KPatcher does implement `high()` row-value support. [src/KPatcher.Core/Reader/ConfigReader.cs](src/KPatcher.Core/Reader/ConfigReader.cs) parses `high()` into `RowValueHigh`, and [src/KPatcher.Core/Mods/TwoDA/RowValue.cs](src/KPatcher.Core/Mods/TwoDA/RowValue.cs) resolves the next numeric row label or column value using a max-plus-one rule that matches the reviewed older Delphi behavior.
 - [REPO] Both codebases expose the same major patch families: TLK, 2DA, GFF, InstallList, HACK/NCS, Compile/NSS, and SSF.
 - [SYNTH] The broader pass removed several earlier uncertainties. The confirmed gaps are narrower and more specific than "whole handler missing," but they are still real core-logic differences.
+
+### 10. Settings and modifier gaps closed (2026-06-11, `feat/tslpatcher-parity-gap-close`)
+
+- [REPO] **InstallerMode** — TSLPatcher `DoInstallFiles` skips `[InstallList]` when `[Settings] InstallerMode` is false (default). [src/KPatcher.Core/Config/PatcherConfig.cs](src/KPatcher.Core/Config/PatcherConfig.cs) and [src/KPatcher.Core/Patcher/ModInstaller.cs](src/KPatcher.Core/Patcher/ModInstaller.cs) now gate InstallList queuing; `ParseIniBool` accepts `1`/`0` and `true`/`false`.
+- [REPO] **BackupFiles** — TSLPatcher `l_dlgopen.DoBackups` disables backup creation when false. `PatcherConfig.BackupFiles` (default true) gates `GetBackup` / `CreateBackupHelper`.
+- [REPO] **PlaintextLog** — `[Settings] PlaintextLog` selects `installlog.txt` vs `installlog.rtf` via `ModInstaller.EnsureInstallLogWriter` (`useRtf: !cfg.PlaintextLog`).
+- [REPO] **2DA `inc(n)`** — Delphi `UTSLPatcher.pas` `inc()` row labels; `RowValueInc` in [src/KPatcher.Core/Mods/TwoDA/RowValue.cs](src/KPatcher.Core/Mods/TwoDA/RowValue.cs), parsed in `ConfigReader.Cells2DA`.
+- [REPO] **2DA modifier key matching** — `ConfigReader.Matches2DAModifierKey` uses `IndexOf` (Delphi `Pos`) instead of `StartsWith` for embedded modifier keys.
+- [REPO] **Exclusive-column fallback** — `Modify2DA.UnpackExclusiveFallback` skips `RowValueInc` / `RowValueHigh` when updating existing exclusive-column rows (AddRow/CopyRow parity).
+- [REPO] **GFF field key `2DAMEMORY#`** — `PatcherMemory.ResolveMemoryToken` resolves memory tokens in GFF field keys at apply time ([src/KPatcher.Core/Mods/GFF/ModifyGFF.cs](src/KPatcher.Core/Mods/GFF/ModifyGFF.cs)).
+- [REPO] **!OverrideType destination guard** — `HandleOverrideType` skips when destination is `Override` (matches Delphi `HandleERFOverrideType` early exit); integration tests in `ModInstallerOverrideTypeTests` use capsule destinations.
+- [SYNTH] These were confirmed omissions from the 2026-06-10 iteration; they do not change intentional non-parity items (generic HACK, managed compile, backup/uninstall extension).
 
 ## Recommended follow-up slices
 
