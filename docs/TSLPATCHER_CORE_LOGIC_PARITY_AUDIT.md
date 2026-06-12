@@ -76,7 +76,7 @@ date: 2026-06-11
 ### 9. Documentation and source-vs-runtime drift
 
 - [REPO] The 2026-06-10 parity iteration (PR #18, merged to `master`) closed confirmed core-logic gaps: install paths, TLK append dedup, 2DA INI order, `SafeStrToInt`, ResRef INI sanitization, writable clearing, settings CRLF, pipeline order, InstallList guards, ScriptCompilerFlags, K1 hardcap removal.
-- [REPO] [docs/TSLPATCHER_BUILD_VERIFICATION.md](TSLPATCHER_BUILD_VERIFICATION.md) references `docs/TSLPATCHER_RE.md`, which is **not** present in the tree; the pipeline table in the build-verification doc remains the authoritative binary RE summary until that doc is restored.
+- [REPO] [docs/TSLPATCHER_RE.md](TSLPATCHER_RE.md) indexes binary pipeline addresses, vendor-unit mapping, and KPatcher characterization tests; [docs/TSLPATCHER_BUILD_VERIFICATION.md](TSLPATCHER_BUILD_VERIFICATION.md) remains the authoritative binary RE verification summary.
 - [REPO] Reconstructed Delphi source (`UTSLPatcher.pas`) still disagrees with the binary-verified order; KPatcher explicitly targets the binary.
 - [SYNTH] Parity confidence is **moderate-to-strong for core install behavior**, with documented intentional non-parity (generic HACK, external compiler, backup/uninstall, namespace display-name selection).
 
@@ -107,7 +107,7 @@ date: 2026-06-11
 2. **Product decision (optional):** External `nwnnsscomp.exe` compile parity — rejected by repo policy; managed `KCompiler` is the product path.
 3. **Low priority:** Trace `UStrTok.pas` callers in format units; not referenced from `.dpr`; document-only unless a mod corpus needs tokenizer parity.
 4. **Harness:** Golden/interleaved 2DA INI corpora if regressions appear in the wild.
-5. **Docs hygiene:** Restore or replace missing `docs/TSLPATCHER_RE.md` for full Ghidra function tables linked from build verification.
+5. **Docs hygiene:** Extend [docs/TSLPATCHER_RE.md](TSLPATCHER_RE.md) with additional Ghidra function tables if deeper RE sessions land new addresses.
 
 ### 11. Pipeline test and HACKList export (2026-06-12, `feat/parity-pipeline-test-and-hack-serialize`)
 

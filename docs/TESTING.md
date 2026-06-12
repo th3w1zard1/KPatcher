@@ -33,7 +33,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 
 - **Installer, uninstall, config on disk, format read/write:** use real temp directories, copied fixtures, and production types (`ModInstaller`, readers/writers). Do not use Moq/NSubstitute for these surfaces.
 - **Helpers:** concrete test subclasses (e.g. `TestPatcherModifications`), builders (`StrictFixtureBuilder`), and small deterministic binary stubs are fine.
-- **Guard:** `KPatcher.Core.Tests.Policies.IntegrationFolderNoMoqTests` fails if any `tests/KPatcher.Tests/Integration/*.cs` references Moq or `Mock<>`.
+- **Guard:** `KPatcher.Core.Tests.Policies.IntegrationFolderNoMoqTests` fails if a legacy `tests/KPatcher.Tests/Integration/` tree reappears with Moq usage (folder removed; install coverage lives under `Patcher/*IntegrationTests.cs`).
 
 ## Install-path test portfolio
 

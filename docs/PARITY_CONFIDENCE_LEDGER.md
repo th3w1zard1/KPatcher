@@ -345,7 +345,7 @@ _logger.LogAdded += _logAddedHandler;
 | **HACKList serialization** | Resolved | `KPatcherINISerializer.SerializeHackList` + round-trip test | INI export for NCS mods supported |
 | **CompileList serialization** | Resolved | `SerializeCompileList` + `KPatcherINISerializerCompileListTests` | INI export for NSS compile mods |
 | **GFF `2DAMEMORY#` field keys** | Resolved (unit); pipeline caveat | `PatcherMemory.ResolveMemoryToken` at apply time; **2DA memory cannot drive GFF at install** because GFF runs before 2DA in binary-verified order | Cross-stage 2DA->GFF not supported |
-| **LZMA compression** | TODO | Not implemented | Edge case |
+| **LZMA compression** | Deferred (characterized) | `LzmaHelper` throws `NotImplementedException`; `LzmaHelperTests` documents contract | iOS `.bzf` chitin edge case only |
 | **Script validation** | TODO | Confidence checks disabled pending validation | Deferred |
 
 **Assessment:** Core install parity gaps from the 2026-06-10 iteration are closed. Remaining deviations are intentional product choices or low-priority TODOs.
@@ -392,7 +392,7 @@ _logger.LogAdded += _logAddedHandler;
 - ⚠ Timestamped backup/uninstall vs TSLPatcher app-local backups
 - ⚠ Namespace selection by display name
 - ✅ HACKList serialization (`KPatcherINISerializer` write path)
-- ⚠ LZMA compression (TODO)
+- ⚠ LZMA compression (deferred; characterized in `LzmaHelperTests`)
 
 **Assessment:** Core install behavior is aligned with binary-verified TSLPatcher after PR #18. Remaining gaps are documented product choices or low-priority TODOs.
 
@@ -457,7 +457,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 925 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
+- ✅ 927 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers)
 
 **In Progress:**
 
@@ -493,10 +493,10 @@ _logger.LogAdded += _logAddedHandler;
 
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
-| **Harness Migration** | Regression/Test Infrastructure | Large | Capacity reduction; enables full integration coverage | Engineering lead |
-| **LZMA Compression** | KPatcher.Core / Common | Medium | Cannot compress MOD/RIM archives if required | Compression module owner |
+| **Manifest inventory migration** | `EmbeddedScenarioDefinitions` | Large | 116 legacy `manifest.json` rows await inline/API construction | Parity / test owner |
+| **LZMA Compression** | KPatcher.Core / Common | Medium | iOS `.bzf` chitin only; contract characterized in `LzmaHelperTests` | Compression module owner |
 
-**Recommendation:** Harness migration is highest priority. LZMA is deferred pending user demand or release blocking events.
+**Recommendation:** Expand inline characterization from `manifest.json` rows as mods require coverage. LZMA remains deferred until a release blocks on `.bzf` assets.
 
 ---
 
@@ -508,7 +508,7 @@ _logger.LogAdded += _logAddedHandler;
 | **Desktop Packaging** | KPatcher.UI | Large | Installer distribution, auto-update via NetSparkle | Release/delivery owner |
 | **Continuous Parity Monitoring** | CI/Testing | Medium | Automated parity regression detection | DevOps / Test owner |
 
-**Recommendation:** Defer until after harness migration. Script validation is lowest-cost value-add.
+**Recommendation:** Script validation is the lowest-cost optional value-add; inline manifest migration is the largest remaining parity-test expansion.
 
 ---
 
