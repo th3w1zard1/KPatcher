@@ -20,7 +20,7 @@ audit_ref: "docs/plans/2026-06-10-002-feat-tslpatcher-core-logic-parity-iteratio
 
 **Parity Status: ⚠ PARTIAL — core install aligned; intentional extensions documented**
 
-KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity iteration (PR #18) closed confirmed core-logic gaps: binary-verified pipeline order, InstallList overwrite guards, namespace install-path resolution, TLK append dedup, 2DA INI modifier order, `SafeStrToInt`, ResRef INI sanitization, install-time writable clearing, settings CRLF tokens, and K1 2DA hardcap removal. Branch `feat/tslpatcher-parity-gap-close` (2026-06-12) closes additional settings/modifier gaps: `InstallerMode`, `BackupFiles`, `PlaintextLog`, 2DA `inc(n)`, embedded 2DA modifier keys, exclusive-column fallback, GFF `2DAMEMORY` field keys, and `!OverrideType` destination guard. Remaining non-parity is **documented and intentional**: NCS-only HACKList, managed CompileList (`KCompiler`), timestamped backup/uninstall, and namespace selection by display name.
+KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity iteration (PR #18) closed confirmed core-logic gaps: binary-verified pipeline order, InstallList overwrite guards, namespace install-path resolution, TLK append dedup, 2DA INI modifier order, `SafeStrToInt`, ResRef INI sanitization, install-time writable clearing, settings CRLF tokens, and K1 2DA hardcap removal. Branch `feat/tslpatcher-parity-gap-close` (2026-06-12) closes additional settings/modifier gaps: `InstallerMode`, `BackupFiles`, `PlaintextLog`, 2DA `inc(n)`, embedded 2DA modifier keys, exclusive-column fallback, GFF `2DAMEMORY` field keys, and `!OverrideType` destination guard. Branch `feat/parity-integration-tests-and-compile-serialize` (2026-06-12) adds install-path integration coverage documented in audit §11–§13 (`ModInstallerParityIntegrationTests`, pipeline byte assertions, CompileList module routing, read-only override patching). Remaining non-parity is **documented and intentional**: NCS-only HACKList, managed CompileList (`KCompiler`), timestamped backup/uninstall, and namespace selection by display name.
 
 **Confidence Level:** Moderate-to-strong for core install behavior; partial for strict byte-for-byte TSLPatcher equivalence
 
@@ -40,12 +40,12 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 848 test cases (847 Default tier + 1 opt-in `TslPatcherExeReference`)
+- **KPatcher.Tests:** 84+ files, 852 test cases (851 Default tier + 1 opt-in `TslPatcherExeReference`)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
   - Logger: 7 cases (PatchLogger, InstallFlightRecorder, InstallLogWriter)
-  - Patcher: 4+ cases (ModInstaller orchestration, OverrideType integration)
+  - Patcher: ~55+ cases (ModInstaller unit/characterization + install-path integration: parity, pipeline order, settings, cross-stage memory)
   - Common: ~50 cases (utilities, RTF, geometry)
   - Memory: ~10+ cases (token substitution)
 
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 855 test cases** (847 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 859 test cases** (851 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -64,22 +64,18 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 | **Default** | PR/commit baseline | ✅ Yes | Verified executable |
 | **Exhaustive** | DeNCSRoundTrip (23k+ NCS scripts) | ❌ Opt-in | Documented as long-running |
 | **VendorK2Game** | Retail K2 tree validation | ❌ Opt-in | Requires `KPATCHER_K2_VENDOR_ROOT` |
-| **TslPatcherExeGolden** | TSLPatcher binary comparison | ❌ Opt-in | Requires `KPATCHER_TSLPATCHER_EXE` |
+| **TslPatcherExeReference** | TSLPatcher.exe availability smoke | ❌ Opt-in | Requires `KPATCHER_TSLPATCHER_EXE`; golden install diff not yet implemented |
 | **KorExhaustiveBinaryFixtures** | Mod corpus validation | ❌ Opt-in | Requires synthetic payloads |
-| **GeneratedGenericModSmoke** | In-memory mod harness | ✅ Default | Verified executable |
+| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Reserved | No `Category=GeneratedGenericModInstallerSmoke` tests yet |
 | **GeneratedGenericModExhaustive** | Future exhaustive rows | ❌ Reserved | Not yet populated |
 
 ### 1.3 Skip and XFact Status
 
-**Skipped / excluded tests:** 101 `Integration/*.cs` files compile-excluded from `KPatcher.Tests` (not in Default-tier binary); additional runtime `[Fact(Skip=…)]` markers for platform guards and optional env tiers.
+**Skipped / excluded tests:** Legacy `Integration/*.cs` corpus **removed from the repo** (former ~101 files; ~27 sources had ~17,970 compile diagnostics in `build_errors.txt`). Default-tier install coverage now lives under `tests/KPatcher.Tests/Patcher/*IntegrationTests.cs` and `EmbeddedIntegrationMods/`. Additional runtime `[Fact(Skip=…)]` markers for platform guards and optional env tiers.
 
 **Breakdown:**
 
-- **101 legacy integration tests compile-excluded** (pending harness migration to ExtractedModInstallHarness)
-  - Files: 27 containing pre-existing syntax errors (17,970 total)
-  - Cause: Generated fixture byte[] literals (~1 GB) cause build hangs
-  - Impact: Harness capacity reduced until migration complete
-  - Timeline: High-priority refactor, blocking enhanced parity confidence
+- **Former Integration corpus** — removed; not compile-excluded in current tree. Expand parity via focused `ModInstaller*IntegrationTests` and `EmbeddedIntegrationMods/scenario_patterns` rather than restoring byte[] fixture trees.
 
 - **Platform-specific guards:** Windows ReadOnly tests, macOS case sensitivity
   - Impact: Minimal (non-blocking per-platform tests)
@@ -89,28 +85,18 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 
 ### 1.4 Fixture Policy Compliance
 
-**Status: ✅ 100% COMPLIANT**
+**Status: ✅ Compliant (current tree)**
 
 **Verified:**
 
-- ✅ Zero top-level external fixture files committed (test_files/ root is clean per TestFilesRootPolicyTests)
-- ✅ All test data constructed via C# format APIs: `new GFF(GFFContent.UTC)`, `new TwoDA(columns)`, `new TLK(Language.English)`, etc.
-- ✅ Ephemeral temp directories used for I/O tests: `Path.GetTempPath() + Guid`, cleanup in Dispose()
-- ✅ Binary data exceptions follow policy: only `_corrupted`-suffixed samples and `.ncs` bytecode allowed
-- ✅ No `.exe` references in test code
+- ✅ No `test_files/` root committed (`TestFilesRootPolicyTests`)
+- ✅ Test data constructed via C# format APIs or ephemeral temp I/O
+- ✅ Binary data exceptions: `_corrupted` samples and `.ncs` bytecode literals only
+- ✅ No committed `.exe` fixture bytes; tests may create **ephemeral empty exe stubs** in temp game roots for InstallList guard characterization
 
-**Evidence:**
+**Evidence:** `InstallFlightRecorderTests`, `ModInstallerParityIntegrationTests`, `TestFilesRootPolicyTests`
 
-- InstallFlightRecorderTests.cs (lines 14-33): Exemplary temp directory pattern
-- TestFilesRootPolicyTests.cs: Explicit guard rail enforcing policy
-
-**Three Allowed Fixture Directories:**
-
-1. exhaustive_pattern_inlines (inline test patterns, under migration)
-2. integration_tslpatcher_archive_corpus (archive samples, under migration)
-3. integration_tslpatcher_mods (mod fixtures, under migration)
-
-**Confidence:** High — policy is enforced at test time, not just documented.
+**Confidence:** High for Default-tier paths; `EmbeddedIntegrationMods/` is the only copied mod tree (minimal `scenario_patterns` manifest).
 
 ---
 
@@ -475,7 +461,7 @@ _logger.LogAdded += _logAddedHandler;
 
 **In Progress:**
 
-- ⚠ Integration harness migration (101 Integration files compile-excluded, pending ExtractedModInstallHarness)
+- ⚠ Expand install-path integration + `EmbeddedIntegrationMods` rows (legacy Integration corpus removed)
 - ⚠ Generated fixture files (~1 GB byte[] literals) causing build hangs
 - ⚠ 27 files with pre-existing syntax errors (17,970 recorded)
 
@@ -570,7 +556,7 @@ _logger.LogAdded += _logAddedHandler;
 
 2. **Optional product decisions** — Generic HACKList binary patching; restore `docs/TSLPatcher_RE.md` for full Ghidra tables.
 
-3. **Continuous Parity Monitoring** (P3) — Golden mod corpora / opt-in `TslPatcherExeGolden` tier in CI.
+3. **Continuous Parity Monitoring** (P3) — Implement KPatcher vs TSLPatcher.exe install golden diff behind `TslPatcherExeReference` tier.
 
 **Future Audits:** Recommend quarterly refresh after major features or parity fixes.
 

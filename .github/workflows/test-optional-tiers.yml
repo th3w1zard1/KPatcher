@@ -62,7 +62,7 @@ jobs:
         run: dotnet build tests/KPatcher.Tests/KPatcher.Tests.csproj --no-restore -c Debug
 
       - name: Test
-        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/TslPatcherExeGolden.runsettings --verbosity normal
+        run: dotnet test tests/KPatcher.Tests/KPatcher.Tests.csproj --no-build -c Debug --settings tests/KPatcher.Tests/TslPatcherExeReference.runsettings --verbosity normal
 
   kor-exhaustive-binary-fixtures:
     name: Exhaustive inline committed mod bytes (Kor, namespace, GFF/git, heads)

@@ -297,6 +297,123 @@ label=new
             patched.GetRow(0).GetString("label").Should().Be("new");
         }
 
+        [Fact]
+        public void Install_2DA_AddColumnBeforeChangeRow_InIniOrder_AppliesBoth()
+        {
+            var twoda = new TwoDAFile(new List<string> { "Col1" });
+            twoda.AddRow("0", new Dictionary<string, object> { { "Col1", "A" } });
+            File.WriteAllBytes(Path.Combine(_overridePath, "order.2da"), twoda.ToBytes());
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[2DAList]
+Table0=order.2da
+
+[order.2da]
+AddColumn0=add_first
+ChangeRow0=change_second
+
+[add_first]
+ColumnLabel=NewCol
+DefaultValue=****
+
+[change_second]
+RowIndex=0
+NewCol=X
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            var patched = TwoDAFile.FromBytes(File.ReadAllBytes(Path.Combine(_overridePath, "order.2da")));
+            patched.GetHeaders().Should().Contain("NewCol");
+            patched.GetRow(0).GetString("NewCol").Should().Be("X");
+        }
+
+        [Fact]
+        public void Install_ScriptCompilerFlags_MissingNwscript_LeavesCompileErrors()
+        {
+            File.WriteAllText(Path.Combine(_tslPatchDataPath, "main.nss"), "void Helper();\nvoid main() { Helper(); }\n");
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+ScriptCompilerFlags=--nwscript missing_custom.nss
+
+[CompileList]
+File0=main.nss
+");
+
+            var logger = new PatchLogger();
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), logger);
+
+            installer.Install();
+
+            logger.Errors.Should().NotBeEmpty();
+            File.Exists(Path.Combine(_overridePath, "main.ncs")).Should().BeFalse();
+        }
+
+        [Fact]
+        public void Install_HackList_OnNonNcsExtension_StillPatchesBytesAtOffset()
+        {
+            byte[] original = new byte[] { 0, 0, 0, 0 };
+            File.WriteAllBytes(Path.Combine(_overridePath, "marker.bin"), original);
+            File.WriteAllBytes(Path.Combine(_tslPatchDataPath, "marker.bin"), original);
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+
+[HACKList]
+Replace0=marker.bin
+
+[marker.bin]
+0x0=u8:42
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            File.ReadAllBytes(Path.Combine(_overridePath, "marker.bin"))[0].Should().Be(42);
+        }
+
+        [Fact]
+        public void Install_ProtectedCapsuleReplace_AllowsDialogTlkInModule()
+        {
+            string modulesPath = Path.Combine(_gameRoot, "Modules");
+            Directory.CreateDirectory(modulesPath);
+            string modulePath = Path.Combine(modulesPath, "capsule.mod");
+            new Capsule(modulePath, createIfNotExist: true).Save();
+
+            var modDialog = new TLK(Language.English);
+            modDialog.Add("CapsuleLine", string.Empty);
+            modDialog.Save(Path.Combine(_tslPatchDataPath, "dialog.tlk"));
+
+            WriteChangesIni(@"
+[Settings]
+LogLevel=3
+InstallerMode=1
+
+[InstallList]
+module0=Modules\capsule.mod
+
+[module0]
+Replace0=dialog.tlk
+");
+
+            var installer = new ModInstaller(_modRoot, _gameRoot, Path.Combine(_tslPatchDataPath, "changes.ini"), new PatchLogger());
+
+            installer.Install();
+
+            File.Exists(Path.Combine(_gameRoot, "dialog.tlk")).Should().BeFalse();
+            var capsule = new Capsule(modulePath, createIfNotExist: false);
+            capsule.GetResource("dialog", ResourceType.TLK).Should().NotBeNull();
+        }
+
         private static void MakeFileReadOnlyForOverwrite(string filePath)
         {
             if (OperatingSystem.IsWindows())

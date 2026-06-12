@@ -131,3 +131,9 @@ date: 2026-06-11
 - [REPO] `ModInstallerPipelineOrderIntegrationTests.Install_AppliesPostInstallBytesForEachPipelineStage` asserts post-install bytes for TLK/GFF/2DA/InstallList/NCS/NSS/SSF — not log order alone.
 - [REPO] `TwoDaAddRowTests.AddRow_ExclusiveColumnExists_SkipsIncOnFallback` guards `UnpackExclusiveFallback` apply semantics.
 - [REPO] `TslPatcherExeReferenceTests` seeds the optional `TslPatcherExeReference` tier (no-op when `KPATCHER_TSLPATCHER_EXE` unset).
+
+### 14. Parity doc hygiene and install-path test expansion (2026-06-12)
+
+- [REPO] Removed phantom `Integration/*.cs` `Compile Remove` entries and dead `test_files/` Content from `KPatcher.Tests.csproj`; ledger §1.3 now reflects removed corpus vs compile-excluded fiction.
+- [REPO] `ModInstallerParityIntegrationTests` adds 2DA AddColumn→ChangeRow INI order through `Install()`, ScriptCompilerFlags failure when `--nwscript` target missing, HACKList byte patch on non-`.ncs` extension (documents NCS-path narrowing), and protected capsule `dialog.tlk` replace allow path.
+- [REPO] CI optional tier uses `TslPatcherExeReference.runsettings` (aligned with test `Category` and env var).

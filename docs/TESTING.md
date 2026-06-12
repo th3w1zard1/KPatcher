@@ -13,21 +13,21 @@ Optional: leading `-TimeoutSeconds N` (capped at **600**). Exit code **124** mea
 
 | File | Role |
 |------|------|
-| `tests/KPatcher.Tests/Default.runsettings` | Default PR/local runs: excludes `DeNCSRoundTrip`, `Vendor`, `VendorK2Game`, `TslPatcherExeGolden`, `KorExhaustiveBinaryFixtures`, `NamespaceMainAltBinaryFixtures`, `GffGitModuleTextureBinaryFixtures`, `HeadsAppearanceBinaryFixtures`. |
+| `tests/KPatcher.Tests/Default.runsettings` | Default PR/local runs: excludes `DeNCSRoundTrip`, `Vendor`, `VendorK2Game`, `TslPatcherExeReference`, `KorExhaustiveBinaryFixtures`, `NamespaceMainAltBinaryFixtures`, `GffGitModuleTextureBinaryFixtures`, `HeadsAppearanceBinaryFixtures`. |
 | `tests/KPatcher.Tests/Vendor.runsettings` | Only `Category=Vendor` (vanilla NSS compile/decompile; requires populated `vendor/Vanilla_KOTOR_Script_Source`). |
 | `tests/KPatcher.Tests/Exhaustive.runsettings` | Only `Category=DeNCSRoundTrip` (long DeNCS/NSS harness). Example: `dotnet test ... --settings tests/KPatcher.Tests/Exhaustive.runsettings` |
 | `tests/KPatcher.Tests/VendorK2Game.runsettings` | Only `Category=VendorK2Game` (requires retail-style tree via env; see test comments). |
-| `tests/KPatcher.Tests/TslPatcherExeGolden.runsettings` | Only `Category=TslPatcherExeGolden` (optional `KPATCHER_TSLPATCHER_EXE`; tests no-op when unset). |
+| `tests/KPatcher.Tests/TslPatcherExeReference.runsettings` | Only `Category=TslPatcherExeReference` (optional `KPATCHER_TSLPATCHER_EXE`; smoke only until golden install diff lands). |
 | `tests/KPatcher.Tests/KorExhaustiveBinaryFixtures.runsettings` | Kor, namespace Main/Alt, `gff_git_module_texture_bundle`, and `heads_appearance_utc_row` install rows (`KorExhaustiveBinaryFixtures` \| `NamespaceMainAltBinaryFixtures` \| `GffGitModuleTextureBinaryFixtures` \| `HeadsAppearanceBinaryFixtures`). |
-| `tests/KPatcher.Tests/GeneratedRealModSmoke.runsettings` | Only `Category=GeneratedRealModInstallerSmoke` (projected real-mod installer smoke rows). |
-| `tests/KPatcher.Tests/GeneratedRealModExhaustive.runsettings` | Reserved for future `Category=GeneratedRealModExhaustive` rows once exhaustive generated real-mod coverage is added. |
+| `tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings` | Reserved for future `Category=GeneratedGenericModInstallerSmoke` rows. |
+| `tests/KPatcher.Tests/GeneratedGenericModExhaustive.runsettings` | Reserved for future `Category=GeneratedGenericModExhaustive` rows. |
 
 Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 
 ### GitHub Actions tiers
 
 - **PR / push (`ci.yml`):** `KPatcher.Tests` with default `VSTestSetting` (via `DotnetTest.ps1`), plus a **satellite smoke** job for `tests/KCompiler.Tests`, `tests/NCSDecomp.Tests`, and `tests/KEditChanges.Tests`.
-- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper) and **TslPatcher exe** smoke. **Vanilla NSS** (`Vendor.runsettings`) runs when dispatched with `run_vendor_nss`; the job **fails** if the vanilla script tree has no `.nss` files (no silent skip). **Vendor KotOR II** integration runs only when dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. All exhaustive mod-install tests construct their payloads in memory using format builder APIs — no committed fixture files on disk. `GeneratedRealModSmoke.runsettings` is available for local or future CI runs of `GeneratedRealModInstallerSmoke`; `GeneratedRealModExhaustive.runsettings` is the reserved filter for future exhaustive generated tiers.
+- **Optional (`test-optional-tiers.yml`):** `workflow_dispatch` and a **weekly schedule** run the long **DeNCS** suite (`Exhaustive.runsettings`, **without** the 600s wrapper) and **TslPatcher exe** smoke (`TslPatcherExeReference.runsettings`). **Vanilla NSS** (`Vendor.runsettings`) runs when dispatched with `run_vendor_nss`; the job **fails** if the vanilla script tree has no `.nss` files (no silent skip). **Vendor KotOR II** integration runs only when dispatched with `run_vendor_k2` and repository secret `KPATCHER_K2_VENDOR_ROOT` is set. Install-path integration tests construct payloads in memory via format APIs — no committed `test_files/` tree.
 
 ## No mocks in integration-style paths
 
@@ -77,7 +77,7 @@ Smaller suites: `tests/KCompiler.Tests`, `tests/NCSDecomp.Tests`, `tests/KEditCh
 
 ## Integration fixtures
 
-Synthetic mod trees (`scenario_a`, `scenario_b`, `scenario_patterns`) live under `tests/KPatcher.Tests/EmbeddedIntegrationMods/` and are copied to the test output directory at build time (`KPatcher.Tests` `Content` with `CopyToOutputDirectory`). `EmbeddedIntegrationTslpatcherModTrees.GetIntegrationModsRoot()` points at that folder. Bulky archives remain under `tests/KPatcher.Tests/test_files/integration_tslpatcher_mods/`. See [INTEGRATION_TSLPATCHER_MODS.md](INTEGRATION_TSLPATCHER_MODS.md). Prefer neutral, generic naming in new fixtures (no storefront- or author-specific branding).
+Synthetic mod trees live under `tests/KPatcher.Tests/EmbeddedIntegrationMods/` (currently `scenario_patterns/manifest.json`) and are copied to the test output directory at build time. The legacy `tests/KPatcher.Tests/Integration/` corpus and committed `test_files/` trees were **removed**; install-path parity is covered by `Patcher/*IntegrationTests.cs` and inline format-API construction. See [INTEGRATION_TSLPATCHER_MODS.md](INTEGRATION_TSLPATCHER_MODS.md) for historical context. Prefer neutral naming in new fixtures.
 
 **Preferred style for new tests:** follow `ComprehensiveIntegrationTests`, `TLKIntegrationTests`, `TwoDAAdvancedTests`, and `SSFIntegrationTests`: define `changes.ini` fragments as string literals, call `SetupIniAndConfig` / `ConfigReader`, build or load `TLK` / `TwoDA` / `GFF` / `SSF` in memory (or write minimal stubs to a temp `tslpatchdata` via helpers), call `Apply` or `ModInstaller.Install`, and assert invariants and outputs explicitly. The copied `EmbeddedIntegrationMods/` trees are **bulk regression** over many anonymized layouts; add focused inline tests when a failure needs a tight repro.
 
