@@ -121,3 +121,10 @@ date: 2026-06-11
 - [REPO] Settings integration tests cover `BackupFiles=true` backup creation, `SaveProcessedScripts` temp-folder retention/cleanup, and `!OverrideType=rename` module install behavior.
 - [REPO] `KPatcherINISerializer.SerializeCompileList` round-trips `[CompileList]` through `ConfigReader`.
 - [SYNTH] GFF field-key `2DAMEMORY#` resolution remains unit-tested only — GFF runs before 2DA in the binary-verified pipeline, so 2DA-populated field keys cannot affect GFF at install time.
+
+### 13. Install-path parity integration expansion (2026-06-12)
+
+- [REPO] `ModInstallerParityIntegrationTests` covers protected `dialog.tlk` folder replace skip, `!OverrideType=ignore`, `ScriptCompilerFlags` through `ModInstaller.Install()`, and 2DA exclusive-column `inc()` fallback at install time.
+- [REPO] `ModInstallerPipelineOrderIntegrationTests.Install_AppliesPostInstallBytesForEachPipelineStage` asserts post-install bytes for TLK/GFF/2DA/InstallList/NCS/NSS/SSF — not log order alone.
+- [REPO] `TwoDaAddRowTests.AddRow_ExclusiveColumnExists_SkipsIncOnFallback` guards `UnpackExclusiveFallback` apply semantics.
+- [REPO] `TslPatcherExeReferenceTests` seeds the optional `TslPatcherExeReference` tier (no-op when `KPATCHER_TSLPATCHER_EXE` unset).

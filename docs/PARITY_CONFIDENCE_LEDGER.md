@@ -40,7 +40,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 832 test cases (flagship test suite)
+- **KPatcher.Tests:** 84+ files, 839 test cases (838 Default tier + 1 opt-in `TslPatcherExeReference`)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
@@ -357,6 +357,8 @@ _logger.LogAdded += _logAddedHandler;
 | **Backup / uninstall semantics** | Intentional extension | Timestamped mod-tree backups + uninstall vs app-root single-copy backups | Low |
 | **RTF rendering** | Intentional | Avalonia RichTextBox vs stripped plain text | UX improvement |
 | **HACKList serialization** | Resolved | `KPatcherINISerializer.SerializeHackList` + round-trip test | INI export for NCS mods supported |
+| **CompileList serialization** | Resolved | `SerializeCompileList` + `KPatcherINISerializerCompileListTests` | INI export for NSS compile mods |
+| **GFF `2DAMEMORY#` field keys** | Resolved (unit); pipeline caveat | `PatcherMemory.ResolveMemoryToken` at apply time; **2DA memory cannot drive GFF at install** because GFF runs before 2DA in binary-verified order | Cross-stage 2DA->GFF not supported |
 | **LZMA compression** | TODO | Not implemented | Edge case |
 | **Script validation** | TODO | Confidence checks disabled pending validation | Deferred |
 
@@ -469,7 +471,7 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 826+ KPatcher.Tests cases providing broad coverage
+- ✅ 838 KPatcher.Tests Default-tier cases (839 including opt-in `TslPatcherExeReference`)
 
 **In Progress:**
 
@@ -507,10 +509,9 @@ _logger.LogAdded += _logAddedHandler;
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
 | **Harness Migration** | Regression/Test Infrastructure | Large | Capacity reduction; enables full integration coverage | Engineering lead |
-| **CompileList Serialization** | KPatcher.Core / Mods | Small | INI export for NSS compile mods (round-trip via `SerializeCompileList`) | Feature owner |
 | **LZMA Compression** | KPatcher.Core / Common | Medium | Cannot compress MOD/RIM archives if required | Compression module owner |
 
-**Recommendation:** Harness migration is highest priority. HACKList and LZMA are deferred pending user demand or release blocking events.
+**Recommendation:** Harness migration is highest priority. LZMA is deferred pending user demand or release blocking events.
 
 ---
 
@@ -550,7 +551,7 @@ _logger.LogAdded += _logAddedHandler;
 **Evidence Sources:**
 
 - Codebase inspection (16 projects, 572 C# files)
-- Test execution (826 KPatcher.Tests cases verified executable, Default tier 2026-06-12)
+- Test execution (838 KPatcher.Tests Default-tier cases verified executable, 2026-06-12)
 - Architecture analysis (dependency mapping, module boundaries)
 - Documentation review (STRATEGY.md, TESTING.md, reverse-engineering docs, build-verification notes)
 - TSLPatcher source comparison (current Delphi snapshot, older Delphi snapshot, reviewed behavior-owning units)
