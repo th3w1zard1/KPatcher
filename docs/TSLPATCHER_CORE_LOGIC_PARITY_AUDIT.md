@@ -114,3 +114,10 @@ date: 2026-06-11
 - [REPO] `ModInstallerPipelineOrderIntegrationTests` asserts binary-verified install queue order via `PatchLogger` diagnostics (`TLK → GFF → 2DA → InstallList → NCS → NSS → SSF`).
 - [REPO] `KPatcherINISerializer.SerializeHackList` round-trips `[HACKList]` entries (`KPatcherINISerializerHackListTests`).
 - [REPO] `ModInstaller` ctor defaults install log to RTF (`installlog.rtf`) matching `PlaintextLog=false` before `EnsureInstallLogWriter` runs.
+
+### 12. Cross-stage memory and settings integration coverage (2026-06-12)
+
+- [REPO] `ModInstallerCrossStageMemoryIntegrationTests` verifies `[2DAList]` memory tokens flow to a later `[SSFList]` patch in one install (2DA runs before SSF in binary-verified order).
+- [REPO] Settings integration tests cover `BackupFiles=true` backup creation, `SaveProcessedScripts` temp-folder retention/cleanup, and `!OverrideType=rename` module install behavior.
+- [REPO] `KPatcherINISerializer.SerializeCompileList` round-trips `[CompileList]` through `ConfigReader`.
+- [SYNTH] GFF field-key `2DAMEMORY#` resolution remains unit-tested only — GFF runs before 2DA in the binary-verified pipeline, so 2DA-populated field keys cannot affect GFF at install time.

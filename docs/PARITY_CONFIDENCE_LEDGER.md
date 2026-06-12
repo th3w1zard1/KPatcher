@@ -40,7 +40,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 
 **Projects and Coverage:**
 
-- **KPatcher.Tests:** 84+ files, 826 test cases (flagship test suite)
+- **KPatcher.Tests:** 84+ files, 832 test cases (flagship test suite)
   - Formats: ~150 cases (GFF, 2DA, TLK, SSF, ERF, RIM, NCS, NSS format handling)
   - Mods: ~200 cases (modification types and application logic)
   - Reader: ~150 cases (config parsing, namespace resolution)
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 838+ test cases** (826 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 844+ test cases** (832 KPatcher.Tests + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -507,7 +507,7 @@ _logger.LogAdded += _logAddedHandler;
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
 | **Harness Migration** | Regression/Test Infrastructure | Large | Capacity reduction; enables full integration coverage | Engineering lead |
-| **HACKList Serialization** | KPatcher.Core / Mods | Small | Cannot round-trip NCS configs to INI | Feature owner |
+| **CompileList Serialization** | KPatcher.Core / Mods | Small | INI export for NSS compile mods (round-trip via `SerializeCompileList`) | Feature owner |
 | **LZMA Compression** | KPatcher.Core / Common | Medium | Cannot compress MOD/RIM archives if required | Compression module owner |
 
 **Recommendation:** Harness migration is highest priority. HACKList and LZMA are deferred pending user demand or release blocking events.
