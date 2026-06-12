@@ -7,6 +7,7 @@ using KPatcher.Core.Formats.GFF;
 using KPatcher.Core.Mods.GFF;
 using KPatcher.Core.Mods.SSF;
 using KPatcher.Core.Mods.NCS;
+using KPatcher.Core.Mods.NSS;
 using KPatcher.Core.Mods.TLK;
 using KPatcher.Core.Mods.TwoDA;
 using System.Globalization;
@@ -76,6 +77,7 @@ namespace KPatcher.Core.Mods
             lines.AddRange(SerializeInstallList(modificationsByType.Install, verbose));
             lines.AddRange(Serialize2DAList(modificationsByType.Twoda, verbose));
             lines.AddRange(SerializeGffList(modificationsByType.Gff, verbose));
+            lines.AddRange(SerializeCompileList(modificationsByType.Nss, verbose));
             lines.AddRange(SerializeHackList(modificationsByType.Ncs, verbose));
             lines.AddRange(SerializeSsfList(modificationsByType.Ssf, verbose));
 
@@ -718,6 +720,74 @@ namespace KPatcher.Core.Mods
                 case GFFFieldType.Struct: return "Struct";
                 default: return "DWord";
             }
+        }
+
+        private List<string> SerializeCompileList(List<ModificationsNSS> modifications, bool verbose)
+        {
+            if (modifications == null || modifications.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            var lines = new List<string>();
+            lines.Add("[CompileList]");
+
+            int fileIndex = 0;
+            int replaceIndex = 0;
+            foreach (ModificationsNSS modNss in modifications)
+            {
+                if (modNss.ReplaceFile)
+                {
+                    lines.Add($"Replace{replaceIndex}={modNss.SourceFile}");
+                    replaceIndex++;
+                }
+                else
+                {
+                    lines.Add($"File{fileIndex}={modNss.SourceFile}");
+                    fileIndex++;
+                }
+            }
+            lines.Add("");
+
+            foreach (ModificationsNSS modNss in modifications)
+            {
+                lines.AddRange(SerializeCompileFile(modNss));
+            }
+
+            return lines;
+        }
+
+        private List<string> SerializeCompileFile(ModificationsNSS modNss)
+        {
+            var lines = new List<string>();
+            lines.Add($"[{modNss.SourceFile}]");
+
+            lines.Add($"!ReplaceFile={(modNss.ReplaceFile ? "1" : "0")}");
+
+            if (!string.Equals(modNss.Destination, ModificationsNSS.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase))
+            {
+                lines.Add($"!Destination={FormatIniValue(modNss.Destination)}");
+            }
+
+            string defaultSaveAs = Path.ChangeExtension(modNss.SourceFile ?? "", ".ncs");
+            if (!string.Equals(modNss.SaveAs, defaultSaveAs, StringComparison.OrdinalIgnoreCase))
+            {
+                lines.Add($"!Filename={FormatIniValue(modNss.SaveAs)}");
+            }
+
+            if (!string.IsNullOrEmpty(modNss.OverrideTypeValue)
+                && !string.Equals(modNss.OverrideTypeValue, OverrideType.IGNORE, StringComparison.OrdinalIgnoreCase))
+            {
+                lines.Add($"!OverrideType={FormatIniValue(modNss.OverrideTypeValue)}");
+            }
+
+            if (!string.Equals(modNss.SourceFolder, ".", StringComparison.Ordinal))
+            {
+                lines.Add($"!SourceFolder={FormatIniValue(modNss.SourceFolder)}");
+            }
+
+            lines.Add("");
+            return lines;
         }
 
         private List<string> SerializeHackList(List<ModificationsNCS> modifications, bool verbose)
