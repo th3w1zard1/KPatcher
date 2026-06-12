@@ -19,3 +19,17 @@ KPatcher is a C#/.NET Avalonia desktop application for installing Star Wars KOTO
 
 - **.NET SDK is installed at `$HOME/.dotnet`**, which is added to `PATH` via `~/.bashrc`. The update script also ensures this.
 - **Avalonia GUI** requires `DISPLAY=:1` environment variable to launch the X11 window.
+
+## Learned User Preferences
+
+- Investigate and define scope before implementing; do not jump to code without understanding the end goal (especially for `/lfg` and parity work).
+- When porting TSLPatcher logic, prefer newer or better KPatcher code overall while preserving core behavior and avoiding regressions.
+- For TSLPatcher↔KPatcher parity, alternate reading Pascal units under `vendor/TSLPatcher` and equivalent C# under `src/KPatcher.Core` instead of bulk-reading one side first.
+- When integration or parity work is active, merge open PRs and feature branches into the default branch rather than leaving parallel drift.
+
+## Learned Workspace Facts
+
+- Authoritative repository checkout is `/run/media/brunner56/MyBook/Workspaces/KPatcher` (workspace and git root resolve here).
+- TSLPatcher parity baseline is the Pascal/Delphi source in `vendor/TSLPatcher` (OpenKotor); compare it to KPatcher C# iteratively, not binary RE alone.
+- Product NSS/NCS tooling is fully managed: `KCompiler.Core` for NSS→NCS, `NCSDecomp.Core` for NCS→NSS; no registry spoofer and no `nwnnsscomp.exe` in product or default CI paths.
+- `ModInstaller` defaults `TslPatchDataPath` to the `changes.ini` directory when callers omit it (HACKList and tslpatchdata asset resolution).
