@@ -29,6 +29,21 @@ namespace KPatcher.Core.Config
         // Optional KPatcher features
         public bool IgnoreFileExtensions { get; set; }
 
+        /// <summary>
+        /// TSLPatcher [Settings] InstallerMode — when false (default), [InstallList] is not applied.
+        /// </summary>
+        public bool InstallerMode { get; set; }
+
+        /// <summary>
+        /// TSLPatcher [Settings] BackupFiles — when false, game files are not copied to the mod backup folder.
+        /// </summary>
+        public bool BackupFiles { get; set; } = true;
+
+        /// <summary>
+        /// TSLPatcher [Settings] PlaintextLog — when false (default), install log uses RTF filename; when true, plaintext.
+        /// </summary>
+        public bool PlaintextLog { get; set; }
+
         // Patch lists
         public List<InstallFile> InstallList { get; set; } = new List<InstallFile>();
         public List<Modifications2DA> Patches2DA { get; set; } = new List<Modifications2DA>();

@@ -138,6 +138,39 @@ namespace KPatcher.Core.Mods.TwoDA
     }
 
     /// <summary>
+    /// Row value that increments an existing numeric cell (TSLPatcher inc(n) modifier).
+    /// </summary>
+    public class RowValueInc : RowValue
+    {
+        public string Column { get; }
+        public int Increment { get; }
+
+        public RowValueInc(string column, int increment)
+        {
+            Column = column;
+            Increment = increment;
+        }
+
+        public override string Value(PatcherMemory memory, Formats.TwoDA.TwoDA twoda, [CanBeNull] TwoDARow row)
+        {
+            if (row is null)
+            {
+                return "";
+            }
+
+            string current = row.GetString(Column);
+            if (int.TryParse(current, out int currentValue))
+            {
+                return (currentValue + Increment).ToString();
+            }
+
+            return current;
+        }
+
+        public override string ToString() => $"RowValueInc(column='{Column}', increment={Increment})";
+    }
+
+    /// <summary>
     /// Row value that returns the row index.
     /// </summary>
     public class RowValueRowIndex : RowValue

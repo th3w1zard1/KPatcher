@@ -48,6 +48,28 @@ namespace KPatcher.Core.Mods.TwoDA
             return result;
         }
 
+        /// <summary>
+        /// TSLPatcher ModifyRowFallback parity: skip inc() and high() when updating an existing exclusive-column row.
+        /// </summary>
+        protected static Dictionary<string, string> UnpackExclusiveFallback(
+            Dictionary<string, RowValue> cells,
+            PatcherMemory memory,
+            Formats.TwoDA.TwoDA twoda,
+            TwoDARow row)
+        {
+            var result = new Dictionary<string, string>();
+            foreach ((string column, RowValue value) in cells)
+            {
+                if (value is RowValueInc || value is RowValueHigh)
+                {
+                    continue;
+                }
+
+                result[column] = value.Value(memory, twoda, row);
+            }
+            return result;
+        }
+
         public abstract void Apply(Formats.TwoDA.TwoDA twoda, PatcherMemory memory);
     }
 
@@ -172,8 +194,7 @@ namespace KPatcher.Core.Mods.TwoDA
             }
             else
             {
-                // Exclusive column match found - update existing row instead of adding new one
-                Dictionary<string, string> cells = Unpack(Cells, memory, twoda, targetRow);
+                Dictionary<string, string> cells = UnpackExclusiveFallback(Cells, memory, twoda, targetRow);
                 targetRow.UpdateValues(cells);
             }
             LastRow = targetRow;
@@ -265,7 +286,7 @@ namespace KPatcher.Core.Mods.TwoDA
                     targetRow.SetString(header, sourceValue);
                 }
 
-                Dictionary<string, string> cells = Unpack(Cells, memory, twoda, targetRow);
+                Dictionary<string, string> cells = UnpackExclusiveFallback(Cells, memory, twoda, targetRow);
                 targetRow.UpdateValues(cells);
             }
             else

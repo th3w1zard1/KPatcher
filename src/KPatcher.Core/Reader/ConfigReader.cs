@@ -315,6 +315,10 @@ namespace KPatcher.Core.Reader
                 ? (LogLevel)logLevelInt
                 : LogLevel.Warnings;
 
+            Config.InstallerMode = ParseIniBool(settingsIni.GetValueOrDefault("InstallerMode"), false);
+            Config.BackupFiles = ParseIniBool(settingsIni.GetValueOrDefault("BackupFiles"), true);
+            Config.PlaintextLog = ParseIniBool(settingsIni.GetValueOrDefault("PlaintextLog"), false);
+
             // KPatcher optional
             Config.IgnoreFileExtensions = bool.TryParse(settingsIni.GetValueOrDefault("IgnoreExtensions"), out bool ign) && ign;
 
@@ -1180,6 +1184,38 @@ namespace KPatcher.Core.Reader
         }
 
         /// <summary>
+        /// TSLPatcher Pos('AddRow', key) parity: modifier command may appear anywhere in the INI key.
+        /// </summary>
+        private static bool Matches2DAModifierKey(string key, string command)
+        {
+            return key.IndexOf(command, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// TSLPatcher ReadBool parity: accepts true/false and 1/0.
+        /// </summary>
+        private static bool ParseIniBool(string rawValue, bool defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return defaultValue;
+            }
+
+            string trimmed = rawValue.Trim();
+            if (bool.TryParse(trimmed, out bool boolValue))
+            {
+                return boolValue;
+            }
+
+            if (int.TryParse(trimmed, out int intValue))
+            {
+                return intValue != 0;
+            }
+
+            return defaultValue;
+        }
+
+        /// <summary>
         /// Parses a 2DAMEMORY token id (e.g. from "2DAMEMORY0" -> 0, "2DAMEMORY1" -> 1). Token indexes are non-negative (0-based).
         /// </summary>
         private static int Parse2DAMemoryTokenId(string valueStr)
@@ -1824,9 +1860,7 @@ namespace KPatcher.Core.Reader
 
             // Can be null if modification cannot be created
             Modify2DA modification = null;
-            string lowercaseKey = key.ToLower();
-
-            if (lowercaseKey.StartsWith("changerow"))
+            if (Matches2DAModifierKey(key, "ChangeRow"))
             {
                 target = Target2DA(identifier, modifiers);
                 if (target is null)
@@ -1836,7 +1870,7 @@ namespace KPatcher.Core.Reader
                 (cells, store2da, storeTlk) = Cells2DA(identifier, modifiers);
                 modification = new ChangeRow2DA(identifier, target, cells, store2da, storeTlk);
             }
-            else if (lowercaseKey.StartsWith("addrow"))
+            else if (Matches2DAModifierKey(key, "AddRow"))
             {
                 // Can be null if key not found
                 exclusiveColumn = modifiers.TryGetValue("ExclusiveColumn", out string ec) ? ec : null;
@@ -1845,7 +1879,7 @@ namespace KPatcher.Core.Reader
                 (cells, store2da, storeTlk) = Cells2DA(identifier, modifiers);
                 modification = new AddRow2DA(identifier, exclusiveColumn, rowLabel, cells, store2da, storeTlk);
             }
-            else if (lowercaseKey.StartsWith("copyrow"))
+            else if (Matches2DAModifierKey(key, "CopyRow"))
             {
                 target = Target2DA(identifier, modifiers);
                 if (target is null)
@@ -1859,7 +1893,7 @@ namespace KPatcher.Core.Reader
                 (cells, store2da, storeTlk) = Cells2DA(identifier, modifiers);
                 modification = new CopyRow2DA(identifier, target, exclusiveColumn, rowLabel, cells, store2da, storeTlk);
             }
-            else if (lowercaseKey.StartsWith("addcolumn"))
+            else if (Matches2DAModifierKey(key, "AddColumn"))
             {
                 modification = ReadAddColumn(modifiers, identifier);
             }
@@ -2042,6 +2076,12 @@ namespace KPatcher.Core.Reader
                 else if (lowerValue == "high()")
                 {
                     rowValue = modifier == "rowlabel" ? new RowValueHigh(null) : new RowValueHigh(modifier);
+                }
+                else if (lowerValue.StartsWith("inc(") && value.EndsWith(")"))
+                {
+                    string inner = value.Substring(4, value.Length - 5).Trim();
+                    int increment = ParseIntValue(inner);
+                    rowValue = new RowValueInc(modifier, increment);
                 }
                 else if (lowerValue == "rowindex")
                 {

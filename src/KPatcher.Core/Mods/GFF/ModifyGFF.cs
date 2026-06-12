@@ -886,9 +886,14 @@ namespace KPatcher.Core.Mods.GFF
                 return;
             }
 
-            // label: str = self.path.name
-            // navigated_container: GFFList | GFFStruct | None = self._navigate_containers(root_container, self.path.parent)
-            (string parentPath, string label) = SplitPath(Path);
+            string resolvedPath = memory.ResolveMemoryToken(Path);
+            if (string.IsNullOrEmpty(resolvedPath))
+            {
+                logger.AddWarning("Blank GFF field label encountered in instructions, skipping...");
+                return;
+            }
+
+            (string parentPath, string label) = SplitPath(resolvedPath);
             // Can be null if not found
             object navigatedContainer = NavigateContainers(rootStruct, parentPath);
 

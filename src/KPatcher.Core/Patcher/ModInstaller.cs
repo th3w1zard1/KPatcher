@@ -48,6 +48,8 @@ namespace KPatcher.Core.Patcher
         [CanBeNull]
         private InstallLogWriter installLog;
         [CanBeNull]
+        private string installLogFilePath;
+        [CanBeNull]
         private InstallFlightRecorder installFlightRecorder;
 
         [CanBeNull]
@@ -110,15 +112,14 @@ namespace KPatcher.Core.Patcher
                 this.changesIniPath, modDirectory, TslPatchDataPath));
             try
             {
-                installLog = new InstallLogWriter(modDirectory);
+                installLog = new InstallLogWriter(modDirectory, useRtf: false);
+                installLogFilePath = Path.Combine(modDirectory, "installlog.txt");
                 installLog.WriteHeader(modDirectory, this.gamePath, Game);
-
-                // Subscribe to PatchLogger events to also write to install log
                 log.LogAdded += OnPatchLoggerLogAdded;
             }
             catch (Exception ex)
             {
-                // Log error but don't fail installation if log file can't be created
+                installLogFilePath = null;
                 log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCreateInstallLogFile, ex.Message));
             }
         }
@@ -154,6 +155,38 @@ namespace KPatcher.Core.Patcher
             catch
             {
                 // Ignore errors when writing to install log to avoid breaking installation
+            }
+        }
+
+        private void EnsureInstallLogWriter(PatcherConfig cfg)
+        {
+            string modDirectory = Path.GetDirectoryName(changesIniPath) ?? modPath;
+            bool useRtf = !cfg.PlaintextLog;
+            string expectedLogPath = Path.Combine(modDirectory, useRtf ? "installlog.rtf" : "installlog.txt");
+
+            if (installLog != null && string.Equals(installLogFilePath, expectedLogPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (installLog != null)
+            {
+                log.LogAdded -= OnPatchLoggerLogAdded;
+                installLog.Dispose();
+                installLog = null;
+            }
+
+            try
+            {
+                installLog = new InstallLogWriter(modDirectory, useRtf);
+                installLogFilePath = expectedLogPath;
+                installLog.WriteHeader(modDirectory, gamePath, Game);
+                log.LogAdded += OnPatchLoggerLogAdded;
+            }
+            catch (Exception ex)
+            {
+                installLogFilePath = null;
+                log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.CouldNotCreateInstallLogFile, ex.Message));
             }
         }
 
@@ -269,6 +302,11 @@ namespace KPatcher.Core.Patcher
         /// </summary>
         public (string backupPath, HashSet<string> processedFiles) GetBackup()
         {
+            if (config != null && !config.BackupFiles)
+            {
+                return (string.Empty, processedBackupFiles);
+            }
+
             if (backup != null)
             {
                 log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
@@ -362,6 +400,7 @@ namespace KPatcher.Core.Patcher
 
                 PatcherMemory memory = new PatcherMemory();
                 PatcherConfig cfg = Config();
+                EnsureInstallLogWriter(cfg);
 
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.LoadingConfigurationFrom, Path.GetFileName(changesIniPath)));
                 installLog?.WriteInfo(string.Format(CultureInfo.CurrentCulture, PatcherResources.FoundPatchesToApply, cfg.InstallList.Count + cfg.Patches2DA.Count + cfg.PatchesGFF.Count + cfg.PatchesTLK.Modifiers.Count + cfg.PatchesNSS.Count + cfg.PatchesNCS.Count + cfg.PatchesSSF.Count));
@@ -375,7 +414,14 @@ namespace KPatcher.Core.Patcher
                 patchesList.AddRange(GetTlkPatches(cfg));
                 patchesList.AddRange(cfg.PatchesGFF);
                 patchesList.AddRange(cfg.Patches2DA);
-                patchesList.AddRange(cfg.InstallList);
+                if (cfg.InstallerMode)
+                {
+                    patchesList.AddRange(cfg.InstallList);
+                }
+                else
+                {
+                    log.AddDiagnostic("Install: InstallerMode=false, skipping InstallList queue");
+                }
                 patchesList.AddRange(cfg.PatchesNCS);
                 patchesList.AddRange(cfg.PatchesNSS);
                 patchesList.AddRange(cfg.PatchesSSF);
@@ -838,6 +884,11 @@ namespace KPatcher.Core.Patcher
         /// </summary>
         private void CreateBackupHelper(string destinationFilePath, string backupFolderPath, HashSet<string> processedFiles, [CanBeNull] string subdirectoryPath = null)
         {
+            if (config != null && !config.BackupFiles)
+            {
+                return;
+            }
+
             log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "CreateBackupHelper: dest={0} backupRoot={1} subdir={2}",
                 destinationFilePath, backupFolderPath, subdirectoryPath ?? ""));
@@ -1272,6 +1323,12 @@ namespace KPatcher.Core.Patcher
                 return;
             }
 
+            string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
+            if (string.Equals(destination, PatcherModifications.DEFAULT_DESTINATION, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
             string overrideDir = Path.Combine(gamePath, "Override");
             string overrideResourcePath = Path.Combine(overrideDir, saveAs);
@@ -1302,7 +1359,6 @@ namespace KPatcher.Core.Patcher
             else if (overrideType == OverrideType.WARN)
             {
                 // self.log.add_warning(f"A resource located at '{override_resource_path}' is shadowing this mod's changes in {patch.destination}!")
-                string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
                 log.AddWarning(string.Format(CultureInfo.CurrentCulture, PatcherResources.ResourceShadowingModChanges, overrideResourcePath, destination));
             }
         }
