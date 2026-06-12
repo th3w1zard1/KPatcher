@@ -19,8 +19,8 @@ Optional: leading `-TimeoutSeconds N` (capped at **600**). Exit code **124** mea
 | `tests/KPatcher.Tests/VendorK2Game.runsettings` | Only `Category=VendorK2Game` (requires retail-style tree via env; see test comments). |
 | `tests/KPatcher.Tests/TslPatcherExeReference.runsettings` | Only `Category=TslPatcherExeReference` (optional `KPATCHER_TSLPATCHER_EXE`; smoke only until golden install diff lands). |
 | `tests/KPatcher.Tests/KorExhaustiveBinaryFixtures.runsettings` | Kor, namespace Main/Alt, `gff_git_module_texture_bundle`, and `heads_appearance_utc_row` install rows (`KorExhaustiveBinaryFixtures` \| `NamespaceMainAltBinaryFixtures` \| `GffGitModuleTextureBinaryFixtures` \| `HeadsAppearanceBinaryFixtures`). |
-| `tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings` | Only `Category=GeneratedGenericModInstallerSmoke` (20 inline characterization scenarios + golden manifest oracle). Also runs in Default tier unless excluded. |
-| `tests/KPatcher.Tests/GeneratedGenericModExhaustive.runsettings` | Reserved for future `Category=GeneratedGenericModExhaustive` rows. |
+| `tests/KPatcher.Tests/GeneratedGenericModSmoke.runsettings` | Only `Category=GeneratedGenericModInstallerSmoke` (23 inline characterization scenarios + golden manifest oracle). Also runs in Default tier unless excluded. |
+| `tests/KPatcher.Tests/GeneratedGenericModExhaustive.runsettings` | Only `Category=GeneratedGenericModExhaustive` (`scenario_patterns/manifest.json` structural validation). Run via `scripts/validate-manifest-inventory.sh`. |
 
 Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 
@@ -43,7 +43,7 @@ Override for a single run: `dotnet test --settings path/to/file.runsettings`.
 | **Contract** | INI serializer ↔ `ConfigReader` round-trip | `Mods/KPatcherINISerializer*Tests.cs` |
 | **Oracle** | Game-tree manifest fingerprints, CLI vs direct install diff, optional exe/baseline tiers | `ModInstallerOracleReferenceTests`, `ModInstallerCliOracleTests`, `TslPatcherExeReferenceTests`, `TslPatcherOracleHarness` |
 
-Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `ModInstallerIntegrationTestBase`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`, `TslPatcherOracleHarness`. Twenty inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export a single-scenario baseline for manual TSLPatcher comparison via `scripts/export-kpatcher-oracle-baseline.sh`. `ModInstaller` resolves INI paths with `SystemHelpers.CombineUnderRoot` so Windows-style `Modules\file.mod` entries work on Linux CI.
+Shared harness: `Patcher/Support/ModInstallerIntegrationEnvironment`, `ModInstallerIntegrationTestBase`, `InstallAssertionLadder`, `InstallManifestSnapshot`, `PipelineOrderFixtures`, `ScenarioGoldenManifests`, `TslPatcherOracleHarness`. Twenty-three inline scenarios in `EmbeddedScenarioDefinitions` (`Category=GeneratedGenericModInstallerSmoke`) assert golden SHA-256 manifests; refresh via `KP_CAPTURE_SCENARIO_GOLDENS=1` and `scripts/compute-inline-scenario-fingerprints.sh`. Export a single-scenario baseline for manual TSLPatcher comparison via `scripts/export-kpatcher-oracle-baseline.sh`. Validate `manifest.json` inventory via `scripts/validate-manifest-inventory.sh`. `ModInstaller` resolves INI paths with `SystemHelpers.CombineUnderRoot` so Windows-style `Modules\file.mod` entries work on Linux CI. CLI oracle covers all install scenarios including namespace subfolders (`namespaces.ini` + optional `CliNamespaceOptionIndex` on scenarios).
 
 Optional oracle env vars (opt-in tiers, not default CI):
 

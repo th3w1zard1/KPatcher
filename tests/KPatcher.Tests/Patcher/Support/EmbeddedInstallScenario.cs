@@ -9,18 +9,21 @@ namespace KPatcher.Core.Tests.Patcher.Support
             string changesIniBody,
             Action<ModInstallerIntegrationEnvironment> seed,
             Action<ModInstallerIntegrationEnvironment> assert = null,
-            string changesIniRelative = "changes.ini")
+            string changesIniRelative = "changes.ini",
+            int? cliNamespaceOptionIndex = null)
         {
             Id = id;
             ChangesIniBody = changesIniBody;
             Seed = seed ?? (_ => { });
             Assert = assert;
             ChangesIniRelative = changesIniRelative ?? "changes.ini";
+            CliNamespaceOptionIndex = cliNamespaceOptionIndex;
         }
 
         public string Id { get; }
         public string ChangesIniBody { get; }
         public string ChangesIniRelative { get; }
+        public int? CliNamespaceOptionIndex { get; }
         public Action<ModInstallerIntegrationEnvironment> Seed { get; }
         public Action<ModInstallerIntegrationEnvironment> Assert { get; }
 

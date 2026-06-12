@@ -19,11 +19,11 @@ namespace KPatcher.Core.Tests.Patcher.Support
             new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Settings", new[] { "inline_settings_only", "inline_installer_mode_false_hack" } },
-                { "InstallList", new[] { "inline_install_marker", "inline_install_replace", "inline_namespace_subfolder", "inline_backup_files_replace" } },
+                { "InstallList", new[] { "inline_install_marker", "inline_install_replace", "inline_namespace_subfolder", "inline_backup_files_replace", "inline_install_source_subfolder" } },
                 { "2DAList", new[] { "inline_2da_change_row", "inline_2da_add_column", "inline_2da_exclusive_fallback", "inline_2da_ssf_memory" } },
-                { "GFFList", new[] { "inline_gff_uint8", "inline_tlk_gff_strref" } },
+                { "GFFList", new[] { "inline_gff_uint8", "inline_tlk_gff_strref", "inline_gff_add_field" } },
                 { "TLKList", new[] { "inline_tlk_gff_strref", "inline_capsule_dialog_tlk", "inline_protected_dialog_skip" } },
-                { "HACKList", new[] { "inline_hack_byte", "inline_installer_mode_false_hack" } },
+                { "HACKList", new[] { "inline_hack_byte", "inline_installer_mode_false_hack", "inline_hack_rename_source" } },
                 { "CompileList", new[] { "inline_compile_void_main", "inline_compile_module_capsule", "inline_custom_nwscript_compile" } },
                 { "SSFList", new[] { "inline_ssf_battlecry", "inline_2da_ssf_memory" } },
                 { "OverrideType", new[] { "inline_override_type_ignore_module" } },

@@ -56,6 +56,21 @@ namespace KPatcher.Core.Tests.Patcher
             ids.Should().Contain("inline_custom_nwscript_compile");
             ids.Should().Contain("inline_override_type_ignore_module");
             ids.Should().Contain("inline_namespace_subfolder");
+            ids.Should().Contain("inline_gff_add_field");
+            ids.Should().Contain("inline_install_source_subfolder");
+            ids.Should().Contain("inline_hack_rename_source");
+        }
+
+        [Fact]
+        public void InlineCharacterization_EveryRunnableScenarioHasGoldenFingerprint()
+        {
+            foreach (EmbeddedInstallScenario scenario in EmbeddedScenarioDefinitions.RunnableScenarios)
+            {
+                ScenarioGoldenManifests.TryGetFingerprint(scenario.Id, out string golden).Should().BeTrue(
+                    "scenario {0} must have ScenarioGoldenManifests entry",
+                    scenario.Id);
+                golden.Should().NotBeNullOrWhiteSpace();
+            }
         }
 
         [Fact]

@@ -32,17 +32,24 @@ namespace KPatcher.Core.Tests.Patcher
                 scenario.Seed(cliEnv);
                 cliEnv.WriteChangesIni(scenario.ChangesIniBody, scenario.ChangesIniRelative);
 
+                var cliArgs = new List<string>
+                {
+                    "--install",
+                    "--tslpatchdata",
+                    cliEnv.ModRoot,
+                    "--game-dir",
+                    cliEnv.GameRoot
+                };
+                if (scenario.CliNamespaceOptionIndex.HasValue)
+                {
+                    cliArgs.Add("--namespace-option-index");
+                    cliArgs.Add(scenario.CliNamespaceOptionIndex.Value.ToString());
+                }
+
                 var stdout = new StringWriter();
                 var stderr = new StringWriter();
                 int exitCode = Program.RunCli(
-                    KPatcherCLI.ParseArgs(new[]
-                    {
-                        "--install",
-                        "--tslpatchdata",
-                        cliEnv.ModRoot,
-                        "--game-dir",
-                        cliEnv.GameRoot
-                    }),
+                    KPatcherCLI.ParseArgs(cliArgs.ToArray()),
                     stdout,
                     stderr);
 
@@ -58,8 +65,7 @@ namespace KPatcher.Core.Tests.Patcher
         {
             foreach (EmbeddedInstallScenario scenario in EmbeddedScenarioDefinitions.RunnableScenarios)
             {
-                if (scenario.Id == "inline_settings_only"
-                    || scenario.Id == "inline_namespace_subfolder")
+                if (scenario.Id == "inline_settings_only")
                 {
                     continue;
                 }

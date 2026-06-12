@@ -94,6 +94,18 @@ namespace KPatcher.Core.Tests.Patcher.Support
                 "Modules/test.mod|195|7b33cee343efdd59a69da0bd1e33e0aa243bcd6aeda86ad57149d26722bc7e54\n"
                 + "Override/shadow.ncs|3|039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81\n"
                 + EmptyExe
+            },
+            {
+                "inline_gff_add_field",
+                "Override/nested.gff|96|5721a5efda7c8c02b0ea52ee92d7fdc7942cd4dc4c0a0b95361c72ae0198f9a1\n" + EmptyExe
+            },
+            {
+                "inline_install_source_subfolder",
+                "Override/subfile.txt|11|41d88240a85f2f4d5276c5d7d0aa5a55fe872feb8ac62e10cad1dba4fe565a7d\n" + EmptyExe
+            },
+            {
+                "inline_hack_rename_source",
+                "Override/patched.ncs|4|9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a\n" + EmptyExe
             }
         };
 

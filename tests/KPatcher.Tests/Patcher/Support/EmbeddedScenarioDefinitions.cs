@@ -36,6 +36,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
         NamespaceSubfolderIni()
       };
       scenarios.AddRange(ParityPatternScenarios());
+      scenarios.AddRange(CorpusPatternScenarios());
       return scenarios;
     }
 
@@ -339,11 +340,25 @@ File0=ns_marker.txt
           string nsDir = Path.Combine(env.TslPatchDataPath, "alt_ns");
           Directory.CreateDirectory(nsDir);
           File.WriteAllText(Path.Combine(nsDir, "ns_marker.txt"), "ns_installed");
+          File.WriteAllText(Path.Combine(nsDir, "info.rtf"), "{\\rtf1\\ansi Alt}");
+          File.WriteAllText(
+            Path.Combine(env.TslPatchDataPath, "namespaces.ini"),
+            @"
+[Namespaces]
+AltNs=alt_ns
+
+[alt_ns]
+IniName=changes.ini
+InfoName=info.rtf
+DataPath=alt_ns
+Name=AltNs
+");
         },
         env => InstallAssertionLadder.AssertTextEqualL1(
           Path.Combine(env.OverridePath, "ns_marker.txt"),
           "ns_installed"),
-        "alt_ns/changes.ini");
+        "alt_ns/changes.ini",
+        cliNamespaceOptionIndex: 0);
     }
   }
 }
