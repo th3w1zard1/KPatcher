@@ -22,6 +22,7 @@ namespace KEditChanges.UI
         private string _watchedPath;
         private bool _suppressExternalReload;
         private DispatcherTimer _suppressTimer;
+        private bool _bindingUi;
 
         public MainWindow()
         {
@@ -29,6 +30,46 @@ namespace KEditChanges.UI
             OpenIniButton.Click += OnOpenIniClick;
             SaveIniButton.Click += OnSaveIniClick;
             Closed += OnWindowClosed;
+            WireSettingsDirtyTracking();
+        }
+
+        private void WireSettingsDirtyTracking()
+        {
+            WindowCaptionBox.TextChanged += OnSettingsFieldChanged;
+            ConfirmMessageBox.TextChanged += OnSettingsFieldChanged;
+            LogLevelCombo.SelectionChanged += OnSettingsFieldChanged;
+            InstallerModeCheck.IsCheckedChanged += OnSettingsFieldChanged;
+            BackupFilesCheck.IsCheckedChanged += OnSettingsFieldChanged;
+            PlaintextLogCheck.IsCheckedChanged += OnSettingsFieldChanged;
+        }
+
+        private void OnSettingsFieldChanged(object sender, EventArgs e)
+        {
+            if (_bindingUi || _document == null)
+            {
+                return;
+            }
+
+            _document.MarkDirty();
+            UpdateDirtyIndicator();
+        }
+
+        private void UpdateDirtyIndicator()
+        {
+            if (_document == null)
+            {
+                return;
+            }
+
+            string path = !string.IsNullOrEmpty(_document.SourcePath)
+                ? _document.SourcePath
+                : IniPathText.Text?.TrimEnd(' ', '*') ?? string.Empty;
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            IniPathText.Text = _document.IsDirty ? path + " *" : path;
         }
 
         private void OnWindowClosed(object sender, EventArgs e)
@@ -76,8 +117,10 @@ namespace KEditChanges.UI
             {
                 _document = _service.Load(path);
                 BindDocumentToUi();
+                _document.MarkClean();
                 IniPathText.Text = path;
                 StartWatching(path);
+                UpdateDirtyIndicator();
                 SetStatus("Loaded " + path + " (" + _document.Config.PatchCount().ToString(CultureInfo.InvariantCulture) + " patches).");
             }
             catch (Exception ex)
@@ -132,6 +175,7 @@ namespace KEditChanges.UI
                 _service.Save(_document, path, includeHeader: true);
                 IniPathText.Text = path;
                 StartWatching(path);
+                UpdateDirtyIndicator();
                 SetStatus("Saved " + path);
             }
             catch (Exception ex)
@@ -160,32 +204,40 @@ namespace KEditChanges.UI
 
         private void BindDocumentToUi()
         {
-            PatcherConfig config = _document.Config;
-            WindowCaptionBox.Text = config.WindowTitle ?? string.Empty;
-            ConfirmMessageBox.Text = config.ConfirmMessage ?? string.Empty;
-            LogLevelCombo.SelectedIndex = ClampLogLevelIndex((int)config.LogLevel);
-            InstallerModeCheck.IsChecked = config.InstallerMode;
-            BackupFilesCheck.IsChecked = config.BackupFiles;
-            PlaintextLogCheck.IsChecked = config.PlaintextLog;
-
-            _sectionNodes = ChangesIniSectionCatalog.BuildTree(_document);
-            SectionTree.Items.Clear();
-            foreach (ChangesIniSectionNode node in _sectionNodes)
+            _bindingUi = true;
+            try
             {
-                var treeItem = new TreeViewItem
+                PatcherConfig config = _document.Config;
+                WindowCaptionBox.Text = config.WindowTitle ?? string.Empty;
+                ConfirmMessageBox.Text = config.ConfirmMessage ?? string.Empty;
+                LogLevelCombo.SelectedIndex = ClampLogLevelIndex((int)config.LogLevel);
+                InstallerModeCheck.IsChecked = config.InstallerMode;
+                BackupFilesCheck.IsChecked = config.BackupFiles;
+                PlaintextLogCheck.IsChecked = config.PlaintextLog;
+
+                _sectionNodes = ChangesIniSectionCatalog.BuildTree(_document);
+                SectionTree.Items.Clear();
+                foreach (ChangesIniSectionNode node in _sectionNodes)
                 {
-                    Header = node.DisplayName + " (" + node.ItemCount.ToString(CultureInfo.InvariantCulture) + ")",
-                    Tag = node.Kind
-                };
-                SectionTree.Items.Add(treeItem);
-            }
+                    var treeItem = new TreeViewItem
+                    {
+                        Header = node.DisplayName + " (" + node.ItemCount.ToString(CultureInfo.InvariantCulture) + ")",
+                        Tag = node.Kind
+                    };
+                    SectionTree.Items.Add(treeItem);
+                }
 
-            if (SectionTree.Items.Count > 0)
+                if (SectionTree.Items.Count > 0)
+                {
+                    SectionTree.SelectedItem = SectionTree.Items[0];
+                }
+
+                ShowSection(ChangesIniSectionKind.Settings);
+            }
+            finally
             {
-                SectionTree.SelectedItem = SectionTree.Items[0];
+                _bindingUi = false;
             }
-
-            ShowSection(ChangesIniSectionKind.Settings);
         }
 
         private void ShowSection(ChangesIniSectionKind kind)
@@ -303,7 +355,8 @@ namespace KEditChanges.UI
             {
                 _document = _service.Load(_watchedPath);
                 BindDocumentToUi();
-                IniPathText.Text = _watchedPath;
+                _document.MarkClean();
+                UpdateDirtyIndicator();
                 SetStatus("Reloaded external changes from " + _watchedPath);
             }
             catch (Exception ex)
