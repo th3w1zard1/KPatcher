@@ -508,7 +508,7 @@ namespace KPatcher.Core.Patcher
                     {
                         string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
                         string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
-                        string outputContainerPath = Path.Combine(gamePath, destination);
+                        string outputContainerPath = SystemHelpers.CombineUnderRoot(gamePath, destination);
                         log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                             "Install: outputContainerPath={0}, saveAs={1}", outputContainerPath, saveAs));
 
@@ -1258,7 +1258,7 @@ namespace KPatcher.Core.Patcher
                 return false;
             }
 
-            string sourceConflictPath = Path.Combine(gamePath, destination, patch.SourceFile);
+            string sourceConflictPath = SystemHelpers.CombineUnderRoot(gamePath, destination, patch.SourceFile);
             if (!File.Exists(sourceConflictPath))
             {
                 return false;
@@ -1373,7 +1373,7 @@ namespace KPatcher.Core.Patcher
             // erfrim_path: CaseAwarePath = self.game_path / patch.destination / patch.saveas
             string destination = patch.Destination ?? PatcherModifications.DEFAULT_DESTINATION;
             string saveAs = patch.SaveAs ?? patch.SourceFile ?? "";
-            string erfrimPath = Path.Combine(gamePath, destination, saveAs);
+            string erfrimPath = SystemHelpers.CombineUnderRoot(gamePath, destination, saveAs);
 
             // mod_path: CaseAwarePath = erfrim_path.with_name(f"{Installation.get_module_root(erfrim_path.name)}.mod")
             string moduleRoot = GetModuleRoot(Path.GetFileName(erfrimPath));

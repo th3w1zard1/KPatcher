@@ -5,7 +5,10 @@ using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using KPatcher.Core.Common;
+using KPatcher.Core.Common.LZMA;
 using KPatcher.Core.Resources;
+using KPatcher.Core.Tools;
+using FileHelpers = KPatcher.Core.Tools.FileHelpers;
 
 namespace KPatcher.Core.Formats.Chitin
 {
@@ -54,6 +57,7 @@ namespace KPatcher.Core.Formats.Chitin
         {
             _resources.Clear();
             _resourceDict.Clear();
+            BzfResourceCache.Clear();
 
             (Dictionary<uint, string> keys, List<string> bifs) = GetChitinData();
 
@@ -84,42 +88,160 @@ namespace KPatcher.Core.Formats.Chitin
                 return;
             }
 
-            using (var reader = RawBinaryReader.FromFile(bifPath))
+            byte[] fileBytes = File.ReadAllBytes(bifPath);
+            if (FileHelpers.IsBzfFile(bifPath) && BzfHelper.IsWholeFileWrapper(fileBytes))
             {
-                string bifFileType = reader.ReadString(4);     // 0x0
-                string bifFileVersion = reader.ReadString(4);  // 0x4
-                uint resourceCount = reader.ReadUInt32();      // 0x8
-                uint fixedResourceCount = reader.ReadUInt32(); // 0xC - always 0x00000000?
-                uint resourceOffset = reader.ReadUInt32();     // 0x10 - always 0x14 (dec 20)
-
-                reader.Seek((int)resourceOffset); // Skip to 0x14
-
-                // vendor/reone/src/libs/resource/format/bifreader.cpp:50-63
-                for (uint i = 0; i < resourceCount; i++)
+                byte[] decompressedBif = BzfHelper.DecompressWholeFile(fileBytes);
+                BzfResourceCache.RegisterWholeFileDecompressed(bifPath, decompressedBif);
+                using (var stream = new MemoryStream(decompressedBif, writable: false))
+                using (var reader = RawBinaryReader.FromStream(stream))
                 {
-                    uint resId = reader.ReadUInt32();
-                    uint offset = reader.ReadUInt32();
-                    uint size = reader.ReadUInt32();
-                    uint restypeId = reader.ReadUInt32();
-
-                    if (!keys.TryGetValue(resId, out string resname))
-                    {
-                        // Resource ID not found in keys, skip it
-                        continue;
-                    }
-
-                    var restype = ResourceType.FromId((int)restypeId);
-                    var resource = new FileResource(
-                        resname,
-                        restype,
-                        (int)size,
-                        (int)offset,
-                        bifPath
-                    );
-
-                    _resources.Add(resource);
-                    _resourceDict[bifFilename].Add(resource);
+                    ReadBifResourceTable(reader, keys, bifFilename, bifPath);
                 }
+
+                return;
+            }
+
+            if (FileHelpers.IsBzfFile(bifPath))
+            {
+                using (var stream = new MemoryStream(fileBytes, writable: false))
+                using (var reader = RawBinaryReader.FromStream(stream))
+                {
+                    ReadBzfPackedResourceTable(reader, keys, bifFilename, bifPath, fileBytes.Length);
+                }
+
+                return;
+            }
+
+            using (var stream = new MemoryStream(fileBytes, writable: false))
+            using (var reader = RawBinaryReader.FromStream(stream))
+            {
+                ReadBifResourceTable(reader, keys, bifFilename, bifPath);
+            }
+        }
+
+        private void ReadBifResourceTable(
+            RawBinaryReader reader,
+            Dictionary<uint, string> keys,
+            string bifFilename,
+            string bifPath)
+        {
+            string bifFileType = reader.ReadString(4);     // 0x0
+            if (!string.Equals(bifFileType, "BIFF", StringComparison.Ordinal))
+            {
+                throw new InvalidDataException(string.Format("Not a BIF file (type '{0}').", bifFileType));
+            }
+
+            reader.ReadString(4); // version
+            uint resourceCount = reader.ReadUInt32();      // 0x8
+            uint fixedResourceCount = reader.ReadUInt32(); // 0xC - always 0x00000000?
+            uint resourceOffset = reader.ReadUInt32();     // 0x10 - always 0x14 (dec 20)
+
+            if (fixedResourceCount != 0)
+            {
+                throw new InvalidDataException("Fixed BIF resources are not supported.");
+            }
+
+            reader.Seek((int)resourceOffset); // Skip to 0x14
+
+            // vendor/reone/src/libs/resource/format/bifreader.cpp:50-63
+            for (uint i = 0; i < resourceCount; i++)
+            {
+                uint resId = reader.ReadUInt32();
+                uint offset = reader.ReadUInt32();
+                uint size = reader.ReadUInt32();
+                uint restypeId = reader.ReadUInt32();
+
+                if (!keys.TryGetValue(resId, out string resname))
+                {
+                    // Resource ID not found in keys, skip it
+                    continue;
+                }
+
+                var restype = ResourceType.FromId((int)restypeId);
+                var resource = new FileResource(
+                    resname,
+                    restype,
+                    (int)size,
+                    (int)offset,
+                    bifPath
+                );
+
+                _resources.Add(resource);
+                _resourceDict[bifFilename].Add(resource);
+            }
+        }
+
+        private void ReadBzfPackedResourceTable(
+            RawBinaryReader reader,
+            Dictionary<uint, string> keys,
+            string bifFilename,
+            string bifPath,
+            int fileLength)
+        {
+            string bifFileType = reader.ReadString(4);
+            if (!string.Equals(bifFileType, "BIFF", StringComparison.Ordinal))
+            {
+                throw new InvalidDataException(string.Format("Not a packed BZF file (type '{0}').", bifFileType));
+            }
+
+            reader.ReadString(4); // version
+            uint resourceCount = reader.ReadUInt32();
+            uint fixedResourceCount = reader.ReadUInt32();
+            uint resourceOffset = reader.ReadUInt32();
+
+            if (fixedResourceCount != 0)
+            {
+                throw new InvalidDataException("Fixed BZF resources are not supported.");
+            }
+
+            reader.Seek((int)resourceOffset);
+
+            var offsets = new List<uint>((int)resourceCount);
+            var sizes = new List<uint>((int)resourceCount);
+            var resIds = new List<uint>((int)resourceCount);
+            var restypeIds = new List<uint>((int)resourceCount);
+
+            for (uint i = 0; i < resourceCount; i++)
+            {
+                resIds.Add(reader.ReadUInt32());
+                offsets.Add(reader.ReadUInt32());
+                sizes.Add(reader.ReadUInt32());
+                restypeIds.Add(reader.ReadUInt32());
+            }
+
+            for (int i = 0; i < offsets.Count; i++)
+            {
+                uint packedOffset = offsets[i];
+                int packedSize = i + 1 < offsets.Count
+                    ? (int)(offsets[i + 1] - packedOffset)
+                    : fileLength - (int)packedOffset;
+
+                BzfResourceCache.RegisterPackedSegment(
+                    bifPath,
+                    (int)packedOffset,
+                    packedSize,
+                    (int)sizes[i]);
+            }
+
+            for (int i = 0; i < resIds.Count; i++)
+            {
+                if (!keys.TryGetValue(resIds[i], out string resname))
+                {
+                    continue;
+                }
+
+                var restype = ResourceType.FromId((int)restypeIds[i]);
+                var resource = new FileResource(
+                    resname,
+                    restype,
+                    (int)sizes[i],
+                    (int)offsets[i],
+                    bifPath
+                );
+
+                _resources.Add(resource);
+                _resourceDict[bifFilename].Add(resource);
             }
         }
 

@@ -13,6 +13,40 @@ namespace KPatcher.Core.Common
         private const int UnixModeDirectory = 0x1ED; // 0o755
 
         /// <summary>
+        /// Joins one or more INI-style relative paths under a root directory.
+        /// Splits on both slash types so <c>Modules\capsule.mod</c> resolves on Unix hosts.
+        /// </summary>
+        public static string CombineUnderRoot(string rootDirectory, params string[] relativeParts)
+        {
+            if (string.IsNullOrWhiteSpace(rootDirectory))
+            {
+                throw new ArgumentException("root directory required", nameof(rootDirectory));
+            }
+
+            string combined = rootDirectory;
+            if (relativeParts == null)
+            {
+                return combined;
+            }
+
+            foreach (string part in relativeParts)
+            {
+                if (string.IsNullOrWhiteSpace(part))
+                {
+                    continue;
+                }
+
+                string[] segments = part.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string segment in segments)
+                {
+                    combined = Path.Combine(combined, segment);
+                }
+            }
+
+            return combined;
+        }
+
+        /// <summary>
         /// Clears read-only attributes on a single file before overwrite (TSLPatcher <c>MakeFileWritable</c> parity).
         /// No-op when the file does not exist.
         /// </summary>

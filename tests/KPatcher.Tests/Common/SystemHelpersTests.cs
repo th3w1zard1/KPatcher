@@ -161,5 +161,14 @@ namespace KPatcher.Core.Tests.Common
 
             File.ReadAllText(lowerPath).Should().Be("same");
         }
+
+        [Fact]
+        public void CombineUnderRoot_SplitsIniStyleBackslashes()
+        {
+            string root = Path.Combine(_tempDir, "game");
+            Directory.CreateDirectory(root);
+            string resolved = SystemHelpers.CombineUnderRoot(root, "Modules\\capsule.mod");
+            resolved.Should().Be(Path.Combine(root, "Modules", "capsule.mod"));
+        }
     }
 }

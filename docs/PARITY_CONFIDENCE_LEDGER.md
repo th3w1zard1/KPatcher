@@ -27,7 +27,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 **Risk Profile:** Low-to-medium for typical mod installs
 
 - Pipeline matches binary-verified TSLPatcher order
-- Generic HACKList behavior is narrowed to NCS-only patching (intentional)
+- `[HACKList]` byte-offset writes on arbitrary extensions are implemented via `ModificationsNCS` (`inline_hack_byte`, `ModInstallerParityIntegrationTests`); token surface is narrower than full Delphi HACK (e.g. `!FieldPath` in HACK rejected) — intentional
 - Compile backend uses managed `KCompiler`, not `nwnnsscomp.exe` (intentional, repo policy)
 - Backup/uninstall uses timestamped mod-tree backups (intentional KPatcher extension)
 - Namespace selection by display `Name` remains an extension vs section id
@@ -53,7 +53,7 @@ KPatcher implements the major TSLPatcher feature families. The 2026-06-10 parity
 - **NCSDecomp.Tests:** 1 file, 1 test case (NCS→NSS decompiler smoke)
 - **KEditChanges.Tests:** 1 file, test count TBD (CLI tool smoke)
 
-**Total: 859 test cases** (851 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
+**Total: 955 test cases** (943 KPatcher.Tests Default + 1 opt-in + 6 KCompiler + 1 NCSDecomp + 1 KEditChanges)
 
 ### 1.2 Test Tier Structure
 
@@ -64,10 +64,10 @@ Seven distinct runsettings tiers enable graduated execution and specialized vali
 | **Default** | PR/commit baseline | ✅ Yes | Verified executable |
 | **Exhaustive** | DeNCSRoundTrip (23k+ NCS scripts) | ❌ Opt-in | Documented as long-running |
 | **VendorK2Game** | Retail K2 tree validation | ❌ Opt-in | Requires `KPATCHER_K2_VENDOR_ROOT` |
-| **TslPatcherExeReference** | TSLPatcher.exe availability smoke | ❌ Opt-in | Requires `KPATCHER_TSLPATCHER_EXE`; golden install diff not yet implemented |
+| **TslPatcherExeReference** | KPatcher manifest oracle + optional TSLPatcher.exe/baseline | ❌ Opt-in | Determinism + CLI vs direct oracle; `KPATCHER_TSLPATCHER_EXE` layout smoke; `KPATCHER_ORACLE_MANIFEST_BASELINE` for manual TSLPatcher diff |
 | **KorExhaustiveBinaryFixtures** | Mod corpus validation | ❌ Opt-in | Requires synthetic payloads |
-| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Reserved | No `Category=GeneratedGenericModInstallerSmoke` tests yet |
-| **GeneratedGenericModExhaustive** | Future exhaustive rows | ❌ Reserved | Not yet populated |
+| **GeneratedGenericModSmoke** | In-memory mod harness | ❌ Opt-in (also Default) | 25 inline scenarios with golden manifest fingerprints (`EmbeddedScenarioPatternInstallTests`) |
+| **GeneratedGenericModExhaustive** | `scenario_patterns/manifest.json` structural validation (116 legacy inventory rows) | ❌ Opt-in | `ManifestScenarioInventoryValidationTests`; `scripts/validate-manifest-inventory.sh` |
 
 ### 1.3 Skip and XFact Status
 
@@ -308,11 +308,11 @@ _logger.LogAdded += _logAddedHandler;
 3. GFF modifications ✅
 4. 2DA modifications ✅
 5. InstallList ✅
-6. NCS-only HACKList ✅
+6. HACKList byte-offset patching ✅ (NCS-oriented token surface; not full Delphi HACK token parity)
 7. NSS compilation (managed `KCompiler`) ✅
 8. SSF modifications ✅
 
-**Assessment:** Pipeline **stage order matches binary-verified TSLPatcher**. HACK and Compile stages are intentional semantic subsets (NCS-only HACK, managed compile).
+**Assessment:** Pipeline **stage order matches binary-verified TSLPatcher**. HACK uses a narrowed token surface via `ModificationsNCS`; arbitrary-file byte-offset HACK is tested. Compile uses managed `KCompiler` by design.
 
 ### 4.3 Format Handler Parity
 
@@ -337,7 +337,7 @@ _logger.LogAdded += _logAddedHandler;
 | **2DA `inc()` / exclusive fallback / GFF field-key memory** | Resolved (gap-close) | `RowValueInc`, `UnpackExclusiveFallback`, `PatcherMemory.ResolveMemoryToken` | Low |
 | **!OverrideType destination guard** | Resolved (gap-close) | `HandleOverrideType` skips when destination is `Override`; `ModInstallerOverrideTypeTests` | Low |
 | **Install pipeline order** | Resolved + tested | Binary-verified queue in `ModInstaller`; `ModInstallerPipelineOrderIntegrationTests` | Low |
-| **Generic HACKList scope** | Intentional | NCS-only `[HACKList]`; TSLPatcher generic binary offset writes not implemented | Medium (edge mods) |
+| **HACKList token surface** | Intentional | Byte-offset HACK on arbitrary files works (`inline_hack_byte`); routed through `ModificationsNCS` with narrower tokens than Delphi (e.g. `!FieldPath` in HACK rejected) | Low–medium (edge mods) |
 | **Compile backend** | Intentional | Managed `KCompiler`; `ScriptCompilerFlags` loaded; no `nwnnsscomp.exe` in product | Low |
 | **K1 2DA hardcaps** | Resolved (removed) | Former KPatcher-only limits removed; no Delphi equivalent | Low |
 | **Backup / uninstall semantics** | Intentional extension | Timestamped mod-tree backups + uninstall vs app-root single-copy backups | Low |
@@ -345,7 +345,7 @@ _logger.LogAdded += _logAddedHandler;
 | **HACKList serialization** | Resolved | `KPatcherINISerializer.SerializeHackList` + round-trip test | INI export for NCS mods supported |
 | **CompileList serialization** | Resolved | `SerializeCompileList` + `KPatcherINISerializerCompileListTests` | INI export for NSS compile mods |
 | **GFF `2DAMEMORY#` field keys** | Resolved (unit); pipeline caveat | `PatcherMemory.ResolveMemoryToken` at apply time; **2DA memory cannot drive GFF at install** because GFF runs before 2DA in binary-verified order | Cross-stage 2DA->GFF not supported |
-| **LZMA compression** | TODO | Not implemented | Edge case |
+| **LZMA compression** | Implemented | `LzmaHelper` + `BzfHelper`; `Chitin` reads whole-file and packed-segment `.bzf`; `LzmaHelperTests` + `ChitinBzfTests` | iOS `.bzf` chitin edge case |
 | **Script validation** | TODO | Confidence checks disabled pending validation | Deferred |
 
 **Assessment:** Core install parity gaps from the 2026-06-10 iteration are closed. Remaining deviations are intentional product choices or low-priority TODOs.
@@ -387,12 +387,12 @@ _logger.LogAdded += _logAddedHandler;
 
 **Known intentional non-parity:**
 
-- ⚠ Generic HACKList narrowed to NCS-only patching
+- ✓ HACKList byte-offset patching (`inline_hack_byte`); narrowed token surface vs full Delphi HACK is intentional
 - ⚠ Managed CompileList (`KCompiler`) instead of shelling `nwnnsscomp.exe`
 - ⚠ Timestamped backup/uninstall vs TSLPatcher app-local backups
 - ⚠ Namespace selection by display name
 - ✅ HACKList serialization (`KPatcherINISerializer` write path)
-- ⚠ LZMA compression (TODO)
+- ✓ LZMA compression (iOS `.bzf` chitin; `LzmaHelperTests`, `ChitinBzfTests`)
 
 **Assessment:** Core install behavior is aligned with binary-verified TSLPatcher after PR #18. Remaining gaps are documented product choices or low-priority TODOs.
 
@@ -457,12 +457,12 @@ _logger.LogAdded += _logAddedHandler;
 - ✅ Format builder APIs for in-memory test data
 - ✅ Comprehensive test categories (unit, integration, characterization, roundtrip)
 - ✅ Parity ledger framework (ParityLedgerTests.cs, this document)
-- ✅ 851 KPatcher.Tests Default-tier cases (852 including opt-in `TslPatcherExeReference`)
+- ✅ 943 KPatcher.Tests Default-tier cases (including inline smoke + oracle helpers + `InstallPathHarnessClosureTests`)
 
 **In Progress:**
 
-- ⚠ Expand `EmbeddedIntegrationMods/scenario_patterns` and optional golden install diff (`TslPatcherExeReference` tier)
-- ⚠ Populate `GeneratedGenericModSmoke` category when corpus rows are ready (inline/API construction only)
+- ✅ Twenty-five inline characterization scenarios with golden manifest fingerprints (`EmbeddedScenarioDefinitions`, `ScenarioGoldenManifests`); `ManifestIniPathPatternRegistry` covers all four manifest INI-path classes; CLI oracle covers CLI-eligible install scenarios
+- ✅ All four manifest `ChangesIniRelative` path-shape classes characterized (`ManifestIniPathPatternRegistry`); 116 per-mod inventory ids remain metadata-only (zero-fixture policy — not default CI byte regression)
 
 **Assessment:** Legacy Integration byte[] corpus is **removed** (see §1.3). Harness foundation is solid; remaining work is targeted parity expansion, not fixture migration.
 
@@ -493,10 +493,10 @@ _logger.LogAdded += _logAddedHandler;
 
 | Item | Component | Effort | Impact | Owner |
 |------|-----------|--------|--------|-------|
-| **Harness Migration** | Regression/Test Infrastructure | Large | Capacity reduction; enables full integration coverage | Engineering lead |
-| **LZMA Compression** | KPatcher.Core / Common | Medium | Cannot compress MOD/RIM archives if required | Compression module owner |
+| **Per-mod manifest byte regression** | Optional / maintainer | Large | 116 inventory ids pattern-covered; full `tslpatchdata` replay requires policy exception or local bootstrap | Parity / test owner |
+| **LZMA Compression** | KPatcher.Core / Common | Low (implemented) | iOS `.bzf` chitin via SharpCompress LZMA1; round-trip + chitin tests | Compression module owner |
 
-**Recommendation:** Harness migration is highest priority. LZMA is deferred pending user demand or release blocking events.
+**Recommendation:** Expand inline characterization from `manifest.json` rows as mods require coverage. Monitor SharpCompress advisory GHSA-6c8g-7p36-r338 for LZMA dependency updates.
 
 ---
 
@@ -508,7 +508,7 @@ _logger.LogAdded += _logAddedHandler;
 | **Desktop Packaging** | KPatcher.UI | Large | Installer distribution, auto-update via NetSparkle | Release/delivery owner |
 | **Continuous Parity Monitoring** | CI/Testing | Medium | Automated parity regression detection | DevOps / Test owner |
 
-**Recommendation:** Defer until after harness migration. Script validation is lowest-cost value-add.
+**Recommendation:** Script validation is the lowest-cost optional value-add; inline manifest migration is the largest remaining parity-test expansion.
 
 ---
 
@@ -553,7 +553,7 @@ _logger.LogAdded += _logAddedHandler;
 
 1. **Harness Migration** (P2) — Extract integration tests from legacy fixture patterns.
 
-2. **Optional product decisions** — Generic HACKList binary patching; restore `docs/TSLPatcher_RE.md` for full Ghidra tables.
+2. **Optional product decisions** — Full Delphi HACKList token parity (`!FieldPath` etc.); restore `docs/TSLPatcher_RE.md` for full Ghidra tables.
 
 3. **Continuous Parity Monitoring** (P3) — Implement KPatcher vs TSLPatcher.exe install golden diff behind `TslPatcherExeReference` tier.
 

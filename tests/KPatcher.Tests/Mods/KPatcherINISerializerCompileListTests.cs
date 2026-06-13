@@ -73,5 +73,38 @@ namespace KPatcher.Core.Tests.Mods
             roundTrip.ReplaceFile.Should().BeFalse();
             roundTrip.OverrideTypeValue.Should().Be(OverrideType.WARN);
         }
+
+        [Fact]
+        public void SerializeCompileList_ModuleDestination_RoundTripsThroughConfigReader()
+        {
+            var modifications = new ModificationsByType
+            {
+                Nss = new List<ModificationsNSS>
+                {
+                    new ModificationsNSS("main.nss", replaceFile: false)
+                    {
+                        Destination = "Modules\\capsule.mod"
+                    }
+                }
+            };
+
+            string iniText = new KPatcherINISerializer().Serialize(
+                modifications,
+                includeHeader: false,
+                includeSettings: false);
+
+            iniText.Should().Contain("[CompileList]");
+            iniText.Should().Contain("File0=main.nss");
+            iniText.Should().Contain("!Destination=Modules\\capsule.mod");
+
+            string iniPath = Path.Combine(_modPath, "changes.ini");
+            File.WriteAllText(iniPath, iniText);
+
+            var reader = ConfigReader.FromFilePath(iniPath, tslPatchDataPath: _modPath);
+            PatcherConfig config = reader.Load(new PatcherConfig());
+
+            config.PatchesNSS.Should().ContainSingle();
+            config.PatchesNSS[0].Destination.Should().Be("Modules\\capsule.mod");
+        }
     }
 }
