@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="KEditChanges.UI.MainWindow"
+        Title="KEditChanges — TSLPatcher changes.ini editor"
+        Width="960" Height="640"
+        MinWidth="720" MinHeight="480">
+  <DockPanel Margin="0">
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Name="MenuOpenIni" Header="Open changes.ini…" InputGesture="Ctrl+O" Click="OnOpenIniClick" />
+        <MenuItem Name="MenuSaveIni" Header="Save changes.ini…" InputGesture="Ctrl+S" Click="OnSaveIniClick" />
+        <Separator />
+        <MenuItem Header="E_xit" InputGesture="Alt+F4" Click="OnExitClick" />
+      </MenuItem>
+      <MenuItem Header="_Help">
+        <MenuItem Header="About KEditChanges" Click="OnAboutClick" />
+      </MenuItem>
+    </Menu>
+
+    <Border DockPanel.Dock="Top" Padding="12,8" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Name="OpenIniButton" Content="Open…" MinWidth="88" Click="OnOpenIniClick" />
+        <Button Name="SaveIniButton" Content="Save…" MinWidth="88" Click="OnSaveIniClick" />
+        <TextBlock Name="IniPathText" VerticalAlignment="Center" Text="No changes.ini loaded"
+                   TextTrimming="CharacterEllipsis" MaxWidth="520" Opacity="0.85" />
+      </StackPanel>
+    </Border>
+
+    <Border DockPanel.Dock="Bottom" Padding="12,8" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
+      <TextBlock Name="StatusText" TextWrapping="Wrap" Text="Ready — open a changes.ini file." />
+    </Border>
+
+    <Grid ColumnDefinitions="220,*" Margin="12,0,12,12">
+      <Border Grid.Column="0" BorderBrush="#E0E0E0" BorderThickness="1" Padding="8">
+        <StackPanel>
+          <TextBlock Text="Sections" FontWeight="SemiBold" Margin="0,0,0,8" />
+          <TreeView Name="SectionTree" SelectionChanged="OnSectionTreeSelectionChanged" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="1" Padding="12" Margin="8,0,0,0">
+        <ScrollViewer>
+          <StackPanel Name="EditorPanel" Spacing="10">
+            <TextBlock Name="SectionTitleText" Text="Settings" FontSize="16" FontWeight="SemiBold" />
+            <StackPanel Name="SettingsPanel" Spacing="8">
+              <TextBlock Text="Window caption" />
+              <TextBox Name="WindowCaptionBox" AcceptsReturn="True" MinHeight="48" />
+              <TextBlock Text="Confirm message" />
+              <TextBox Name="ConfirmMessageBox" AcceptsReturn="True" MinHeight="72" />
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="Log level" VerticalAlignment="Center" />
+                <ComboBox Name="LogLevelCombo" Width="120" SelectedIndex="3">
+                  <ComboBoxItem Content="0 — Errors" />
+                  <ComboBoxItem Content="1 — Warnings" />
+                  <ComboBoxItem Content="2 — Notes" />
+                  <ComboBoxItem Content="3 — Verbose" />
+                </ComboBox>
+              </StackPanel>
+              <CheckBox Name="InstallerModeCheck" Content="Installer mode" />
+              <CheckBox Name="BackupFilesCheck" Content="Backup files" IsChecked="True" />
+              <CheckBox Name="PlaintextLogCheck" Content="Plaintext install log" />
+            </StackPanel>
+            <TextBlock Name="SectionPlaceholderText" TextWrapping="Wrap" Opacity="0.75"
+                       IsVisible="False"
+                       Text="Section editors for TLK, Install, 2DA, GFF, Compile, HACK, and SSF are loaded from KPatcher.Core. Use the CLI (validate, summary, serialize) for full document round-trip until dedicated panels land." />
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>

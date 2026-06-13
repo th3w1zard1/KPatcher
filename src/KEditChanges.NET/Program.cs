@@ -5,6 +5,7 @@ using System.Text;
 using KCompiler;
 using KCompiler.Cli;
 using KCompiler.Diagnostics;
+using KEditChanges;
 using Microsoft.Extensions.Logging;
 using NCSDecomp.Core;
 
@@ -68,12 +69,17 @@ namespace KEditChanges.Net
                                 ToolCorrelation.ReadOptional() ?? "(unset)");
                             log.LogDebug(
                                 "Tool=keditchanges-cli Operation=info Message={Message}",
-                                KEditChanges.ChangeEditPlaceholder.Info);
-                            Console.WriteLine(KEditChanges.ChangeEditPlaceholder.Info);
+                                ChangeEditReMapping.Info);
+                            Console.WriteLine(ChangeEditReMapping.Info);
                         }
 
                         return 0;
                     }
+                case "validate":
+                case "summary":
+                case "serialize":
+                case "changes":
+                    return RunWithCorrelation(() => KEditChanges.Cli.ChangesIniCli.Run(rest));
                 default:
                     {
                         using (ILoggerFactory lf = CreateLoggerFactory())
@@ -141,6 +147,7 @@ namespace KEditChanges.Net
             Console.WriteLine("Commands:");
             Console.WriteLine("  compile | kcompiler   NSS->NCS (same flags as standalone kcompiler / nwnnsscomp).");
             Console.WriteLine("  ncsdecomp | decomp    NCS->NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
+            Console.WriteLine("  validate | summary | serialize | changes  changes.ini load/validate/serialize (KEditChanges).");
             Console.WriteLine("  info                  Show KEditChanges library status.");
             Console.WriteLine("  -h, --help            Show this help.");
             Console.WriteLine("  -V, --version         Print tool version.");
