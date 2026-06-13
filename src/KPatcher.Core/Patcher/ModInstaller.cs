@@ -712,6 +712,7 @@ namespace KPatcher.Core.Patcher
             }
 
             string dataRoot = string.IsNullOrWhiteSpace(TslPatchDataPath) ? modPath : TslPatchDataPath;
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             log.AddDiagnostic(string.Format(CultureInfo.InvariantCulture,
                 "PrepareCompileList: NSS patch count={0}, dataRoot={1}", config.PatchesNSS.Count, dataRoot));
 
