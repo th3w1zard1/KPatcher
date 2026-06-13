@@ -80,7 +80,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-06-13 — `master` @ pending commit (fifty-sixth `/lfg` — criteria still **Met**). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only; `PrepareCompileList` registers `CodePagesEncodingProvider` on Linux so NSS token preprocessing and managed compile succeed; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op. Golden manifests refreshed for three compile/capsule scenarios after Linux compile-path fix.
+**Last /lfg verification:** 2026-06-13 — `chore/dencs-lfg-reverification-2026-06-13` @ `da5c16e1` (fifty-sixth `/lfg` — criteria still **Met**). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only; `PrepareCompileList` registers `CodePagesEncodingProvider` on Linux so NSS token preprocessing and managed compile succeed; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op. Golden manifests refreshed for three compile/capsule scenarios after Linux compile-path fix.
 
 **NCS/NSS test gate (managed tooling):** **228** `KPatcher.Tests` + **6** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~NSS|FullyQualifiedName~KCompiler|FullyQualifiedName~NCSDecomp|FullyQualifiedName~Decomp` (2026-06-13, fifty-sixth `/lfg` on `master`).
 
