@@ -30,6 +30,8 @@ namespace KEditChanges.Cli
                 case "info":
                     Console.WriteLine(ChangeEditReMapping.Info);
                     return 0;
+                case "capabilities":
+                    return RunCapabilities(rest);
                 default:
                     Console.Error.WriteLine("Unknown changes.ini command: " + verb);
                     PrintHelp();
@@ -216,6 +218,46 @@ namespace KEditChanges.Cli
             return rest;
         }
 
+        private static int RunCapabilities(string[] args)
+        {
+            bool json = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "--json")
+                {
+                    json = true;
+                }
+                else if (args[i] == "-h" || args[i] == "--help")
+                {
+                    Console.WriteLine("capabilities [--json]  List changes.ini CLI verbs for agent discovery");
+                    return 0;
+                }
+                else
+                {
+                    Console.Error.WriteLine("Unknown option: " + args[i]);
+                    return 1;
+                }
+            }
+
+            if (json)
+            {
+                Console.WriteLine(
+                    "{\"domain\":\"changes.ini\",\"verbs\":[" +
+                    "{\"name\":\"validate\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
+                    "{\"name\":\"summary\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
+                    "{\"name\":\"serialize\",\"args\":\"-i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]\"}," +
+                    "{\"name\":\"info\",\"args\":\"\"}," +
+                    "{\"name\":\"capabilities\",\"args\":\"[--json]\"}" +
+                    "]}");
+            }
+            else
+            {
+                Console.WriteLine("changes.ini verbs: validate, summary, serialize, info, capabilities (--json)");
+            }
+
+            return 0;
+        }
+
         private static void PrintHelp()
         {
             Console.WriteLine("keditchanges-cli changes.ini commands (KEditChanges)");
@@ -224,6 +266,7 @@ namespace KEditChanges.Cli
             Console.WriteLine("  summary  -i <changes.ini> [--tslpatchdata <dir>]");
             Console.WriteLine("  serialize -i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]");
             Console.WriteLine("  info     Library status");
+            Console.WriteLine("  capabilities [--json]  Agent capability discovery");
         }
     }
 }

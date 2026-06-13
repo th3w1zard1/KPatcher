@@ -75,6 +75,8 @@ namespace KEditChanges.Net
 
                         return 0;
                     }
+                case "capabilities":
+                    return RunWithCorrelation(() => RunCapabilities(rest));
                 case "validate":
                 case "summary":
                 case "serialize":
@@ -148,9 +150,50 @@ namespace KEditChanges.Net
             Console.WriteLine("  compile | kcompiler   NSS->NCS (same flags as standalone kcompiler / nwnnsscomp).");
             Console.WriteLine("  ncsdecomp | decomp    NCS->NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
             Console.WriteLine("  validate | summary | serialize | changes  changes.ini load/validate/serialize (KEditChanges).");
+            Console.WriteLine("  capabilities [--json] Agent discovery of umbrella CLI verbs.");
             Console.WriteLine("  info                  Show KEditChanges library status.");
             Console.WriteLine("  -h, --help            Show this help.");
             Console.WriteLine("  -V, --version         Print tool version.");
+        }
+
+        private static int RunCapabilities(string[] args)
+        {
+            bool json = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "--json")
+                {
+                    json = true;
+                }
+                else if (args[i] != "-h" && args[i] != "--help")
+                {
+                    Console.Error.WriteLine("Unknown option: " + args[i]);
+                    return 1;
+                }
+            }
+
+            if (json)
+            {
+                Console.WriteLine(
+                    "{\"tool\":\"keditchanges-cli\",\"verbs\":[" +
+                    "{\"name\":\"compile\",\"aliases\":[\"kcompiler\"],\"description\":\"NSS to NCS (managed KCompiler)\"}," +
+                    "{\"name\":\"ncsdecomp\",\"aliases\":[\"decomp\"],\"description\":\"NCS to NSS (managed NCSDecomp)\"}," +
+                    "{\"name\":\"validate\",\"description\":\"Validate changes.ini\"}," +
+                    "{\"name\":\"summary\",\"description\":\"Summarize changes.ini patch counts\"}," +
+                    "{\"name\":\"serialize\",\"description\":\"Round-trip serialize changes.ini\"}," +
+                    "{\"name\":\"changes\",\"description\":\"changes.ini subcommands (validate, summary, serialize, capabilities)\"}," +
+                    "{\"name\":\"capabilities\",\"description\":\"This discovery output\"}," +
+                    "{\"name\":\"info\",\"description\":\"KEditChanges library status\"}" +
+                    "]}");
+            }
+            else
+            {
+                Console.WriteLine(
+                    "keditchanges-cli verbs: compile, ncsdecomp, validate, summary, serialize, changes, capabilities, info");
+                Console.WriteLine("Use: keditchanges-cli capabilities --json");
+            }
+
+            return 0;
         }
 
         private static void PrintVersion()
