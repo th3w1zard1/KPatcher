@@ -80,6 +80,8 @@ namespace KEditChanges.Net
                 case "validate":
                 case "summary":
                 case "serialize":
+                case "reload":
+                    return RunWithCorrelation(() => RunChangesIniVerb(verb, rest));
                 case "changes":
                     return RunWithCorrelation(() => KEditChanges.Cli.ChangesIniCli.Run(rest));
                 default:
@@ -95,6 +97,18 @@ namespace KEditChanges.Net
                         return 1;
                     }
             }
+        }
+
+        private static int RunChangesIniVerb(string verb, string[] rest)
+        {
+            var cliArgs = new string[rest.Length + 1];
+            cliArgs[0] = verb;
+            if (rest.Length > 0)
+            {
+                Array.Copy(rest, 0, cliArgs, 1, rest.Length);
+            }
+
+            return KEditChanges.Cli.ChangesIniCli.Run(cliArgs);
         }
 
         private static int RunWithCorrelation(Func<int> inner)
@@ -149,7 +163,7 @@ namespace KEditChanges.Net
             Console.WriteLine("Commands:");
             Console.WriteLine("  compile | kcompiler   NSS->NCS (same flags as standalone kcompiler / nwnnsscomp).");
             Console.WriteLine("  ncsdecomp | decomp    NCS->NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
-            Console.WriteLine("  validate | summary | serialize | changes  changes.ini load/validate/serialize (KEditChanges).");
+            Console.WriteLine("  validate | summary | serialize | reload | changes  changes.ini CLI (KEditChanges).");
             Console.WriteLine("  capabilities [--json] Agent discovery of umbrella CLI verbs.");
             Console.WriteLine("  info                  Show KEditChanges library status.");
             Console.WriteLine("  -h, --help            Show this help.");
@@ -181,6 +195,7 @@ namespace KEditChanges.Net
                     "{\"name\":\"validate\",\"description\":\"Validate changes.ini\"}," +
                     "{\"name\":\"summary\",\"description\":\"Summarize changes.ini patch counts\"}," +
                     "{\"name\":\"serialize\",\"description\":\"Round-trip serialize changes.ini\"}," +
+                    "{\"name\":\"reload\",\"description\":\"Re-read changes.ini from disk\"}," +
                     "{\"name\":\"changes\",\"description\":\"changes.ini subcommands (validate, summary, serialize, capabilities)\"}," +
                     "{\"name\":\"capabilities\",\"description\":\"This discovery output\"}," +
                     "{\"name\":\"info\",\"description\":\"KEditChanges library status\"}" +
@@ -189,7 +204,7 @@ namespace KEditChanges.Net
             else
             {
                 Console.WriteLine(
-                    "keditchanges-cli verbs: compile, ncsdecomp, validate, summary, serialize, changes, capabilities, info");
+                    "keditchanges-cli verbs: compile, ncsdecomp, validate, summary, serialize, reload, changes, capabilities, info");
                 Console.WriteLine("Use: keditchanges-cli capabilities --json");
             }
 
