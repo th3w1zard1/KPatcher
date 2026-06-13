@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using KEditChanges;
 using KPatcher.Core.Config;
 
@@ -16,12 +18,27 @@ namespace KEditChanges.UI
         private ChangesIniDocument _document;
         private readonly ChangesIniService _service = new ChangesIniService();
         private List<ChangesIniSectionNode> _sectionNodes = new List<ChangesIniSectionNode>();
+        private FileSystemWatcher _fileWatcher;
+        private string _watchedPath;
+        private bool _suppressExternalReload;
+        private DispatcherTimer _suppressTimer;
 
         public MainWindow()
         {
             InitializeComponent();
             OpenIniButton.Click += OnOpenIniClick;
             SaveIniButton.Click += OnSaveIniClick;
+            Closed += OnWindowClosed;
+        }
+
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            StopWatching();
+            if (_suppressTimer != null)
+            {
+                _suppressTimer.Stop();
+                _suppressTimer = null;
+            }
         }
 
         private void OnOpenIniClick(object sender, RoutedEventArgs e)
@@ -60,6 +77,7 @@ namespace KEditChanges.UI
                 _document = _service.Load(path);
                 BindDocumentToUi();
                 IniPathText.Text = path;
+                StartWatching(path);
                 SetStatus("Loaded " + path + " (" + _document.Config.PatchCount().ToString(CultureInfo.InvariantCulture) + " patches).");
             }
             catch (Exception ex)
@@ -110,8 +128,10 @@ namespace KEditChanges.UI
 
             try
             {
+                SuppressExternalReloadBriefly();
                 _service.Save(_document, path, includeHeader: true);
                 IniPathText.Text = path;
+                StartWatching(path);
                 SetStatus("Saved " + path);
             }
             catch (Exception ex)
@@ -211,6 +231,107 @@ namespace KEditChanges.UI
         private void SetStatus(string message)
         {
             StatusText.Text = message ?? string.Empty;
+        }
+
+        private void StartWatching(string path)
+        {
+            StopWatching();
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return;
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            string directory = Path.GetDirectoryName(fullPath);
+            string fileName = Path.GetFileName(fullPath);
+            if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            _watchedPath = fullPath;
+            _fileWatcher = new FileSystemWatcher(directory, fileName)
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
+            };
+            _fileWatcher.Changed += OnWatchedFileChanged;
+            _fileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void StopWatching()
+        {
+            if (_fileWatcher != null)
+            {
+                _fileWatcher.EnableRaisingEvents = false;
+                _fileWatcher.Changed -= OnWatchedFileChanged;
+                _fileWatcher.Dispose();
+                _fileWatcher = null;
+            }
+
+            _watchedPath = null;
+        }
+
+        private void OnWatchedFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if (_suppressExternalReload)
+            {
+                return;
+            }
+
+            Dispatcher.UIThread.Post(TryReloadFromExternalChange);
+        }
+
+        private void TryReloadFromExternalChange()
+        {
+            if (_suppressExternalReload || string.IsNullOrEmpty(_watchedPath))
+            {
+                return;
+            }
+
+            if (_document == null)
+            {
+                return;
+            }
+
+            if (_document.IsDirty)
+            {
+                SetStatus("External change to " + _watchedPath + " (reload skipped — unsaved edits).");
+                return;
+            }
+
+            try
+            {
+                _document = _service.Load(_watchedPath);
+                BindDocumentToUi();
+                IniPathText.Text = _watchedPath;
+                SetStatus("Reloaded external changes from " + _watchedPath);
+            }
+            catch (Exception ex)
+            {
+                SetStatus("External reload failed: " + ex.Message);
+            }
+        }
+
+        private void SuppressExternalReloadBriefly()
+        {
+            _suppressExternalReload = true;
+            if (_suppressTimer == null)
+            {
+                _suppressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(750) };
+                _suppressTimer.Tick += OnSuppressTimerTick;
+            }
+
+            _suppressTimer.Stop();
+            _suppressTimer.Start();
+        }
+
+        private void OnSuppressTimerTick(object sender, EventArgs e)
+        {
+            _suppressExternalReload = false;
+            if (_suppressTimer != null)
+            {
+                _suppressTimer.Stop();
+            }
         }
     }
 }
