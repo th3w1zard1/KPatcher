@@ -9,6 +9,7 @@
       <MenuItem Header="_File">
         <MenuItem Name="MenuOpenIni" Header="Open changes.ini…" InputGesture="Ctrl+O" Click="OnOpenIniClick" />
         <MenuItem Name="MenuSaveIni" Header="Save changes.ini…" InputGesture="Ctrl+S" Click="OnSaveIniClick" />
+        <MenuItem Name="MenuReloadIni" Header="Reload from disk" InputGesture="Ctrl+R" Click="OnReloadIniClick" />
         <Separator />
         <MenuItem Header="E_xit" InputGesture="Alt+F4" Click="OnExitClick" />
       </MenuItem>
@@ -62,7 +63,8 @@
             </StackPanel>
             <TextBlock Name="SectionPlaceholderText" TextWrapping="Wrap" Opacity="0.75"
                        IsVisible="False"
-                       Text="Section editors for TLK, Install, 2DA, GFF, Compile, HACK, and SSF are loaded from KPatcher.Core. Use the CLI (validate, summary, serialize) for full document round-trip until dedicated panels land." />
+                       Text="No entries in this section." />
+            <ListBox Name="SectionEntriesList" MinHeight="200" IsVisible="False" />
           </StackPanel>
         </ScrollViewer>
       </Border>

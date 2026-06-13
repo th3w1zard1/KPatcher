@@ -245,7 +245,50 @@ namespace KEditChanges.UI
             SectionTitleText.Text = kind.ToString();
             bool isSettings = kind == ChangesIniSectionKind.Settings;
             SettingsPanel.IsVisible = isSettings;
-            SectionPlaceholderText.IsVisible = !isSettings;
+            SectionEntriesList.IsVisible = !isSettings;
+            if (_document == null || isSettings)
+            {
+                SectionPlaceholderText.IsVisible = false;
+                SectionEntriesList.Items.Clear();
+                return;
+            }
+
+            List<string> entries = ChangesIniSectionFormatter.FormatEntries(kind, _document.Config);
+            SectionEntriesList.Items.Clear();
+            foreach (string line in entries)
+            {
+                SectionEntriesList.Items.Add(line);
+            }
+
+            SectionPlaceholderText.IsVisible = entries.Count == 0;
+        }
+
+        private void OnReloadIniClick(object sender, RoutedEventArgs e)
+        {
+            if (_document == null || string.IsNullOrEmpty(_watchedPath))
+            {
+                SetStatus("Nothing to reload — open changes.ini first.");
+                return;
+            }
+
+            if (_document.IsDirty)
+            {
+                SetStatus("Reload skipped — save or discard unsaved edits first.");
+                return;
+            }
+
+            try
+            {
+                _document = _service.Load(_watchedPath);
+                BindDocumentToUi();
+                _document.MarkClean();
+                UpdateDirtyIndicator();
+                SetStatus("Reloaded " + _watchedPath);
+            }
+            catch (Exception ex)
+            {
+                SetStatus("Reload failed: " + ex.Message);
+            }
         }
 
         private void ApplySettingsFromUi()

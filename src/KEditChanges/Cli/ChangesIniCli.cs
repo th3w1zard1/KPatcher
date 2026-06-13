@@ -27,6 +27,8 @@ namespace KEditChanges.Cli
                     return RunSummary(rest);
                 case "serialize":
                     return RunSerialize(rest);
+                case "reload":
+                    return RunReload(rest);
                 case "info":
                     Console.WriteLine(ChangeEditReMapping.Info);
                     return 0;
@@ -36,6 +38,31 @@ namespace KEditChanges.Cli
                     Console.Error.WriteLine("Unknown changes.ini command: " + verb);
                     PrintHelp();
                     return 1;
+            }
+        }
+
+        private static int RunReload(string[] args)
+        {
+            string inputPath;
+            string tslPatchDataPath;
+            if (!TryParseInput(args, out inputPath, out tslPatchDataPath))
+            {
+                return 1;
+            }
+
+            try
+            {
+                var service = new ChangesIniService();
+                ChangesIniDocument document = service.Load(inputPath, tslPatchDataPath);
+                ChangesIniSummary summary = service.BuildSummary(document);
+                Console.WriteLine("RELOADED " + document.SourcePath);
+                Console.WriteLine("TotalPatches=" + summary.TotalPatches.ToString(CultureInfo.InvariantCulture));
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Error: " + ex.Message);
+                return 1;
             }
         }
 
@@ -246,6 +273,7 @@ namespace KEditChanges.Cli
                     "{\"name\":\"validate\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
                     "{\"name\":\"summary\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
                     "{\"name\":\"serialize\",\"args\":\"-i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]\"}," +
+                    "{\"name\":\"reload\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
                     "{\"name\":\"info\",\"args\":\"\"}," +
                     "{\"name\":\"capabilities\",\"args\":\"[--json]\"}" +
                     "]}");
@@ -265,6 +293,7 @@ namespace KEditChanges.Cli
             Console.WriteLine("  validate -i <changes.ini> [--tslpatchdata <dir>]");
             Console.WriteLine("  summary  -i <changes.ini> [--tslpatchdata <dir>]");
             Console.WriteLine("  serialize -i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]");
+            Console.WriteLine("  reload    -i <changes.ini> [--tslpatchdata <dir>]  Re-read file from disk");
             Console.WriteLine("  info     Library status");
             Console.WriteLine("  capabilities [--json]  Agent capability discovery");
         }
