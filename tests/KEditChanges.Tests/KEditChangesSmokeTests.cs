@@ -1,13 +1,14 @@
 using Xunit;
+using KEditChanges;
 
 namespace KEditChanges.Tests
 {
     public sealed class KEditChangesSmokeTests
     {
         [Fact]
-        public void Placeholder_string_is_present()
+        public void Library_info_is_present()
         {
-            Assert.Contains("KEditChanges", global::KEditChanges.ChangeEditPlaceholder.Info);
+            Assert.Contains("KEditChanges", ChangeEditReMapping.Info);
         }
     }
 }

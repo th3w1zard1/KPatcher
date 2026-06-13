@@ -9,4 +9,8 @@
     <Description>ChangeEdit.exe reverse-engineering mapping and parity. Logic for changes.ini / editor behavior lives here; open ChangeEdit.exe.gzf in agdec for RE.</Description>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KPatcher.Core\KPatcher.Core.csproj" />
+    <PackageReference Include="ini-parser-netstandard" Version="2.5.3" />
+  </ItemGroup>
 </Project>
