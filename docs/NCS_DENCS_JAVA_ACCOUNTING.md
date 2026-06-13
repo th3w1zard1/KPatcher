@@ -7,7 +7,7 @@ This document satisfies **“every relevant `.java` file accounted for”** by m
 | Area | Count | Notes |
 |------|------:|--------|
 | `vendor/DeNCS/src/main/java/com/kotor/resource/formats/ncs/**/*.java` | **271** | All NCS DeNCS library + CLI-adjacent Java in-tree |
-| `src/NCSDecomp.Core/**/*.cs` (excl. `obj/`) | **281** | Library port + SableCC-style AST, analysis, utils |
+| `src/NCSDecomp.Core/**/*.cs` (excl. `obj/`) | **277** | Library port + SableCC-style AST, analysis, utils |
 | `vendor/DeNCS/src/test/java/**/*.java` | (separate) | Exhaustive round-trip harness; see below |
 
 ## Folder-level mapping (271 files -> C#)
@@ -72,7 +72,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 | No product registry spoofer | **Met** | `CompilerExecutionWrapper.CreateRegistrySpoofer()` → `NoOpRegistrySpoofer` only. |
 | ≥8 NCS/NSS test classes | **Met** | **14** classes listed under **NCS/NSS test fixtures** (includes opt-in harness). |
 | Roundtrip tests exist and pass (default tier) | **Met** | `NCSRoundtripTests`, `VanillaNssManagedDecompileRoundTripTests`, `NcsDecompNetStyleRoundTripTests`, `RoundTripUtilManagedCompareTests`, etc. |
-| Full solution tests pass | **Met** | Wrapper command below; **851/851** `KPatcher.Tests` (Default.runsettings) on Linux at `e1e5eb34` (2026-06-11). |
+| Full solution tests pass | **Met** | Wrapper command below; **946/946** `KPatcher.Tests` (Default.runsettings) on Linux at `0cfc888f` master + encoding fix (2026-06-13). |
 | Default CI fails on test regressions | **Met** | Primary `ci.yml` test step no longer uses `continue-on-error`. |
 | Vendor tier not vacuous in default CI | **Met** | `Category=Vendor` excluded from `Default.runsettings`; vendor tests use `RequireVanillaSubmodule()` and run via `Vendor.runsettings` when the tree is present. |
 
@@ -80,9 +80,9 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 
 ## Verification
 
-**Last /lfg verification:** 2026-06-11 — `feat/parity-integration-tests-and-compile-serialize` @ `e1e5eb34` (fifty-fifth `/lfg` — criteria still **Met**). Re-confirmed: all **271** Java sources accounted; **281** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only (`ModificationsNSS` and `NCSCompiler` use `NCSAuto.CompileNss` only; `ConfigReader` does not resolve `nwnnsscomp.exe`; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op). Default tier excludes `Category=Vendor` so empty `vendor/Vanilla_KOTOR_Script_Source` cannot yield vacuous passes.
+**Last /lfg verification:** 2026-06-13 — `chore/dencs-lfg-reverification-2026-06-13` @ `da5c16e1` (fifty-sixth `/lfg` — criteria still **Met**). Re-confirmed: all **271** Java sources accounted; **277** C# files in `NCSDecomp.Core`; product compile/decompile paths are managed-only; `PrepareCompileList` registers `CodePagesEncodingProvider` on Linux so NSS token preprocessing and managed compile succeed; `CompilerExecutionWrapper.CreateRegistrySpoofer` is always no-op. Golden manifests refreshed for three compile/capsule scenarios after Linux compile-path fix.
 
-**NCS/NSS test gate (managed tooling):** **226** `KPatcher.Tests` + **6** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~NSS|FullyQualifiedName~KCompiler|FullyQualifiedName~NCSDecomp|FullyQualifiedName~Decomp` (2026-06-11, fifty-fifth `/lfg` on parity branch). Default CI uses `Default.runsettings` (excludes `DeNCSRoundTrip`, `Vendor`, `WindowsOnly`, etc.).
+**NCS/NSS test gate (managed tooling):** **228** `KPatcher.Tests` + **6** `KCompiler.Tests` + **1** `NCSDecomp.Tests` passed with filter `FullyQualifiedName~NCS|FullyQualifiedName~NSS|FullyQualifiedName~KCompiler|FullyQualifiedName~NCSDecomp|FullyQualifiedName~Decomp` (2026-06-13, fifty-sixth `/lfg` on `master`).
 
 **Full default-tier suite** (repo wrapper, Linux):
 
@@ -90,7 +90,7 @@ Compiler / format / interpreter / optimizer / round-trip / lexer / decomp / synt
 bash ./scripts/dotnet-test.sh tests/KPatcher.Tests/KPatcher.Tests.csproj -c Debug --settings tests/KPatcher.Tests/Default.runsettings
 ```
 
-**851/851 passed** in `KPatcher.Tests` Default tier (2026-06-11, fifty-fifth `/lfg`). Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
+**946/946 passed** in `KPatcher.Tests` Default tier (2026-06-13, fifty-sixth `/lfg`). Opt-in exhaustive harness (`NCSDecompCliRoundTripTest`) may still use `nwnnsscomp.exe` when tools are present — not required for product or default CI.
 
 ## Maintenance
 

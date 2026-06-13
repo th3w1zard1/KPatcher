@@ -71,7 +71,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
             },
             {
                 "inline_capsule_dialog_tlk",
-                "Modules/capsule.mod|263|5694cc0cd0625fdc5087a394894c3869c7bef7e81ce92c9e452f9275fe5423fa\n" + EmptyExe
+                "Modules/capsule.mod|263|37f1265dc6123e570cff31bd73b9096d6c25c790cc0f61e43431cae8c048c6da\n" + EmptyExe
             },
             {
                 "inline_protected_dialog_skip",
@@ -83,7 +83,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
             },
             {
                 "inline_compile_module_capsule",
-                "Modules/capsule.mod|215|e395945fdba1dbe9c95bae8a0f15fa873efce3b98ab0e3dde8452075837bb3b1\n" + EmptyExe
+                "Modules/capsule.mod|215|0a78e93783e98ed7daa76c2e170e357d92ba8d23af56862736bd93f14294776d\n" + EmptyExe
             },
             {
                 "inline_custom_nwscript_compile",
@@ -91,7 +91,7 @@ namespace KPatcher.Core.Tests.Patcher.Support
             },
             {
                 "inline_override_type_ignore_module",
-                "Modules/test.mod|195|7b33cee343efdd59a69da0bd1e33e0aa243bcd6aeda86ad57149d26722bc7e54\n"
+                "Modules/test.mod|195|040d27ebaaf70e753e24e241a734a279d56342d31f482d7f8b923f49ea221962\n"
                 + "Override/shadow.ncs|3|039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81\n"
                 + EmptyExe
             },
