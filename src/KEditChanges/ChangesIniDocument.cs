@@ -81,6 +81,71 @@ namespace KEditChanges
 
     public static class ChangesIniSectionCatalog
     {
+        public static bool TryParseIniSectionName(string sectionName, out ChangesIniSectionKind kind)
+        {
+            if (string.IsNullOrWhiteSpace(sectionName))
+            {
+                kind = ChangesIniSectionKind.Settings;
+                return false;
+            }
+
+            switch (sectionName.Trim().ToLowerInvariant())
+            {
+                case "settings":
+                    kind = ChangesIniSectionKind.Settings;
+                    return true;
+                case "tlklist":
+                    kind = ChangesIniSectionKind.TlkList;
+                    return true;
+                case "installlist":
+                    kind = ChangesIniSectionKind.InstallList;
+                    return true;
+                case "2dalist":
+                    kind = ChangesIniSectionKind.TwoDaList;
+                    return true;
+                case "gfflist":
+                    kind = ChangesIniSectionKind.GffList;
+                    return true;
+                case "compilelist":
+                    kind = ChangesIniSectionKind.CompileList;
+                    return true;
+                case "hacklist":
+                    kind = ChangesIniSectionKind.HackList;
+                    return true;
+                case "ssflist":
+                    kind = ChangesIniSectionKind.SsfList;
+                    return true;
+                default:
+                    kind = ChangesIniSectionKind.Settings;
+                    return false;
+            }
+        }
+
+        public static string ToIniSectionName(ChangesIniSectionKind kind)
+        {
+            switch (kind)
+            {
+                case ChangesIniSectionKind.Settings:
+                    return "Settings";
+                case ChangesIniSectionKind.TlkList:
+                    return "TLKList";
+                case ChangesIniSectionKind.InstallList:
+                    return "InstallList";
+                case ChangesIniSectionKind.TwoDaList:
+                    return "2DAList";
+                case ChangesIniSectionKind.GffList:
+                    return "GFFList";
+                case ChangesIniSectionKind.CompileList:
+                    return "CompileList";
+                case ChangesIniSectionKind.HackList:
+                    return "HACKList";
+                case ChangesIniSectionKind.SsfList:
+                    return "SSFList";
+                default:
+                    return kind.ToString();
+            }
+        }
+
         public static List<ChangesIniSectionNode> BuildTree(ChangesIniDocument document)
         {
             if (document == null)

@@ -81,6 +81,7 @@ namespace KEditChanges.Net
                 case "summary":
                 case "serialize":
                 case "reload":
+                case "list":
                     return RunWithCorrelation(() => RunChangesIniVerb(verb, rest));
                 case "changes":
                     return RunWithCorrelation(() => KEditChanges.Cli.ChangesIniCli.Run(rest));
@@ -163,7 +164,7 @@ namespace KEditChanges.Net
             Console.WriteLine("Commands:");
             Console.WriteLine("  compile | kcompiler   NSS->NCS (same flags as standalone kcompiler / nwnnsscomp).");
             Console.WriteLine("  ncsdecomp | decomp    NCS->NSS (same flags as NCSDecompCLI: -i -o [-g] ...).");
-            Console.WriteLine("  validate | summary | serialize | reload | changes  changes.ini CLI (KEditChanges).");
+            Console.WriteLine("  validate | summary | serialize | reload | list | changes  changes.ini CLI (KEditChanges).");
             Console.WriteLine("  capabilities [--json] Agent discovery of umbrella CLI verbs.");
             Console.WriteLine("  info                  Show KEditChanges library status.");
             Console.WriteLine("  -h, --help            Show this help.");
@@ -196,6 +197,7 @@ namespace KEditChanges.Net
                     "{\"name\":\"summary\",\"description\":\"Summarize changes.ini patch counts\"}," +
                     "{\"name\":\"serialize\",\"description\":\"Round-trip serialize changes.ini\"}," +
                     "{\"name\":\"reload\",\"description\":\"Re-read changes.ini from disk\"}," +
+                    "{\"name\":\"list\",\"description\":\"List section counts or entry lines (--json)\"}," +
                     "{\"name\":\"changes\",\"description\":\"changes.ini subcommands (validate, summary, serialize, capabilities)\"}," +
                     "{\"name\":\"capabilities\",\"description\":\"This discovery output\"}," +
                     "{\"name\":\"info\",\"description\":\"KEditChanges library status\"}" +
@@ -204,7 +206,7 @@ namespace KEditChanges.Net
             else
             {
                 Console.WriteLine(
-                    "keditchanges-cli verbs: compile, ncsdecomp, validate, summary, serialize, reload, changes, capabilities, info");
+                    "keditchanges-cli verbs: compile, ncsdecomp, validate, summary, serialize, reload, list, changes, capabilities, info");
                 Console.WriteLine("Use: keditchanges-cli capabilities --json");
             }
 

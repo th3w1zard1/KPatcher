@@ -265,15 +265,25 @@ namespace KEditChanges.UI
 
         private void OnReloadIniClick(object sender, RoutedEventArgs e)
         {
+            ReloadFromDisk(false);
+        }
+
+        private void OnReloadDiscardIniClick(object sender, RoutedEventArgs e)
+        {
+            ReloadFromDisk(true);
+        }
+
+        private void ReloadFromDisk(bool discardLocalEdits)
+        {
             if (_document == null || string.IsNullOrEmpty(_watchedPath))
             {
                 SetStatus("Nothing to reload — open changes.ini first.");
                 return;
             }
 
-            if (_document.IsDirty)
+            if (_document.IsDirty && !discardLocalEdits)
             {
-                SetStatus("Reload skipped — save or discard unsaved edits first.");
+                SetStatus("Reload skipped — save or use Reload (discard unsaved edits).");
                 return;
             }
 
@@ -283,7 +293,9 @@ namespace KEditChanges.UI
                 BindDocumentToUi();
                 _document.MarkClean();
                 UpdateDirtyIndicator();
-                SetStatus("Reloaded " + _watchedPath);
+                SetStatus(discardLocalEdits
+                    ? "Reloaded (discarded local edits) " + _watchedPath
+                    : "Reloaded " + _watchedPath);
             }
             catch (Exception ex)
             {

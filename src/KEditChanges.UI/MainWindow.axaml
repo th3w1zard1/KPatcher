@@ -10,6 +10,7 @@
         <MenuItem Name="MenuOpenIni" Header="Open changes.ini…" InputGesture="Ctrl+O" Click="OnOpenIniClick" />
         <MenuItem Name="MenuSaveIni" Header="Save changes.ini…" InputGesture="Ctrl+S" Click="OnSaveIniClick" />
         <MenuItem Name="MenuReloadIni" Header="Reload from disk" InputGesture="Ctrl+R" Click="OnReloadIniClick" />
+        <MenuItem Name="MenuReloadDiscardIni" Header="Reload (discard unsaved edits)" Click="OnReloadDiscardIniClick" />
         <Separator />
         <MenuItem Header="E_xit" InputGesture="Alt+F4" Click="OnExitClick" />
       </MenuItem>

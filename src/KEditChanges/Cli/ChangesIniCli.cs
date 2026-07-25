@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace KEditChanges.Cli
 {
@@ -29,6 +31,8 @@ namespace KEditChanges.Cli
                     return RunSerialize(rest);
                 case "reload":
                     return RunReload(rest);
+                case "list":
+                    return RunList(rest);
                 case "info":
                     Console.WriteLine(ChangeEditReMapping.Info);
                     return 0;
@@ -39,6 +43,160 @@ namespace KEditChanges.Cli
                     PrintHelp();
                     return 1;
             }
+        }
+
+        private static int RunList(string[] args)
+        {
+            string inputPath = null;
+            string tslPatchDataPath = null;
+            string sectionName = null;
+            bool json = false;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i];
+                if (arg == "-i" || arg == "--input")
+                {
+                    inputPath = ReadNextArg(args, ref i, "input path");
+                }
+                else if (arg == "--tslpatchdata")
+                {
+                    tslPatchDataPath = ReadNextArg(args, ref i, "tslpatchdata path");
+                }
+                else if (arg == "--section")
+                {
+                    sectionName = ReadNextArg(args, ref i, "section name");
+                }
+                else if (arg == "--json")
+                {
+                    json = true;
+                }
+                else
+                {
+                    Console.Error.WriteLine("Unknown option: " + arg);
+                    return 1;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(inputPath))
+            {
+                Console.Error.WriteLine("list requires -i <changes.ini>");
+                return 1;
+            }
+
+            try
+            {
+                var service = new ChangesIniService();
+                ChangesIniDocument document = service.Load(inputPath, tslPatchDataPath);
+                if (string.IsNullOrWhiteSpace(sectionName))
+                {
+                    WriteAllSections(document, json);
+                }
+                else
+                {
+                    ChangesIniSectionKind kind;
+                    if (!ChangesIniSectionCatalog.TryParseIniSectionName(sectionName, out kind))
+                    {
+                        Console.Error.WriteLine("Unknown section: " + sectionName);
+                        return 1;
+                    }
+
+                    WriteSectionEntries(document, kind, json);
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Error: " + ex.Message);
+                return 1;
+            }
+        }
+
+        private static void WriteAllSections(ChangesIniDocument document, bool json)
+        {
+            List<ChangesIniSectionNode> nodes = ChangesIniSectionCatalog.BuildTree(document);
+            if (json)
+            {
+                var builder = new StringBuilder();
+                builder.Append("{\"sections\":[");
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    ChangesIniSectionNode node = nodes[i];
+                    if (i > 0)
+                    {
+                        builder.Append(',');
+                    }
+
+                    builder.Append("{\"name\":\"");
+                    builder.Append(JsonEscape(ChangesIniSectionCatalog.ToIniSectionName(node.Kind)));
+                    builder.Append("\",\"count\":");
+                    builder.Append(node.ItemCount.ToString(CultureInfo.InvariantCulture));
+                    builder.Append('}');
+                }
+
+                builder.Append("]}");
+                Console.WriteLine(builder.ToString());
+            }
+            else
+            {
+                foreach (ChangesIniSectionNode node in nodes)
+                {
+                    Console.WriteLine(
+                        ChangesIniSectionCatalog.ToIniSectionName(node.Kind) +
+                        "=" +
+                        node.ItemCount.ToString(CultureInfo.InvariantCulture));
+                }
+            }
+        }
+
+        private static void WriteSectionEntries(ChangesIniDocument document, ChangesIniSectionKind kind, bool json)
+        {
+            List<string> entries = ChangesIniSectionFormatter.FormatEntries(kind, document.Config);
+            string sectionIniName = ChangesIniSectionCatalog.ToIniSectionName(kind);
+            if (json)
+            {
+                var builder = new StringBuilder();
+                builder.Append("{\"section\":\"");
+                builder.Append(JsonEscape(sectionIniName));
+                builder.Append("\",\"entries\":[");
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        builder.Append(',');
+                    }
+
+                    builder.Append('"');
+                    builder.Append(JsonEscape(entries[i]));
+                    builder.Append('"');
+                }
+
+                builder.Append("]}");
+                Console.WriteLine(builder.ToString());
+            }
+            else
+            {
+                Console.WriteLine("[" + sectionIniName + "]");
+                foreach (string line in entries)
+                {
+                    Console.WriteLine(line);
+                }
+            }
+        }
+
+        private static string JsonEscape(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n");
         }
 
         private static int RunReload(string[] args)
@@ -274,6 +432,7 @@ namespace KEditChanges.Cli
                     "{\"name\":\"summary\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
                     "{\"name\":\"serialize\",\"args\":\"-i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]\"}," +
                     "{\"name\":\"reload\",\"args\":\"-i <changes.ini> [--tslpatchdata <dir>]\"}," +
+                    "{\"name\":\"list\",\"args\":\"-i <changes.ini> [--section <name>] [--json]\"}," +
                     "{\"name\":\"info\",\"args\":\"\"}," +
                     "{\"name\":\"capabilities\",\"args\":\"[--json]\"}" +
                     "]}");
@@ -294,6 +453,7 @@ namespace KEditChanges.Cli
             Console.WriteLine("  summary  -i <changes.ini> [--tslpatchdata <dir>]");
             Console.WriteLine("  serialize -i <changes.ini> [-o <out.ini>] [--header] [--tslpatchdata <dir>]");
             Console.WriteLine("  reload    -i <changes.ini> [--tslpatchdata <dir>]  Re-read file from disk");
+            Console.WriteLine("  list      -i <changes.ini> [--section CompileList] [--json]");
             Console.WriteLine("  info     Library status");
             Console.WriteLine("  capabilities [--json]  Agent capability discovery");
         }
